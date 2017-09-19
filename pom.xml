@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>cn.bidlink.job</groupId>
+    <artifactId>bidlink-job</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>bidlink-job-business</module>
+        <module>bidlink-job-product</module>
+        <module>bidlink-job-common</module>
+    </modules>
+
+    <properties>
+        <maven-plugin.version>2.6</maven-plugin.version>
+        <jdk.version>1.7</jdk.version>
+        <slf4j.version>1.7.21</slf4j.version>
+        <junit.version>4.12</junit.version>
+        <dubbo.version>2.8.4</dubbo.version>
+        <springframework.version>4.3.8.RELEASE</springframework.version>
+        <project.encoding>UTF-8</project.encoding>
+        <mysql-connector-java.version>5.1.38</mysql-connector-java.version>
+        <druid.version>1.0.16</druid.version>
+        <kafka.version>0.10.0.0</kafka.version>
+        <jackson-databind.version>2.7.5</jackson-databind.version>
+        <fastjson.version>1.2.28</fastjson.version>
+        <xxl-job.version>1.8.0-SNAPSHOT</xxl-job.version>
+        <jetty-server.version>8.2.0.v20160908</jetty-server.version>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <encoding>${project.encoding}</encoding>
+                    <source>${jdk.version}</source>
+                    <target>${jdk.version}</target>
+                </configuration>
+                <version>3.6.0</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <encoding>${project.encoding}</encoding>
+                </configuration>
+                <version>3.0.2</version>
+            </plugin>
+        </plugins>
+    </build>
+
+
+</project>

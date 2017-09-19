@@ -1,0 +1,59 @@
+// 方式1：直接在head界面操作，yz_product/product_report/_mapping POST
+// 方式2：curl -XPOST http://dcsearch.api.yuecai.com/yz_product/product_report/_mapping -d'
+{
+  "product_report": {
+    "properties": {
+      "publishDate": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "syncTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "id": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "name": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "price": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "productTypeCode": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "isSales": {
+        "type": "integer"
+      },
+      "keyword": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "industry": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "industryCode": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "monitorProduct": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "docAbstract": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "productCode": {
+        "type": "string",
+        "index": "not_analyzed"
+      }
+    }
+  }
+}

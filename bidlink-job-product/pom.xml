@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>bidlink-job</artifactId>
+        <groupId>cn.bidlink.job</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>bidlink-job-product</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>cn.bidlink.job</groupId>
+            <artifactId>bidlink-job-common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${pom.application.name}</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources/es</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>*.jks</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>*.xml</include>
+                    <include>*.properties</include>
+                </includes>
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <excludes>
+                        <exclude>*.xml</exclude>
+                        <exclude>*.properties</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <descriptor>${project.basedir}/src/main/assembly/assembly.xml</descriptor>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!-- 开发环境的通用配置 -->
+        <profile>
+            <id>dev</id>
+            <properties>
+                <pom.application.name>bidlink-job-product</pom.application.name>
+                <pom.xxl.job.admin.addresses>http://10.4.0.98:8080/xxl-job</pom.xxl.job.admin.addresses>
+                <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
+                <pom.log.rootLogger>CONSOLE</pom.log.rootLogger>
+                <pom.log.level>debug</pom.log.level>
+                <pom.log.dir>logs</pom.log.dir>
+
+                <!--es配置-->
+                <pom.cluster.host>10.4.0.69:9300</pom.cluster.host>
+                <pom.cluster.name>dc-test</pom.cluster.name>
+                <pom.cluster.index>yz_product</pom.cluster.index>
+                <pom.cluster.type.product_report>product_report</pom.cluster.type.product_report>
+                <pom.path.conf>F:/es/config/</pom.path.conf>
+                <pom.searchguard.enable>true</pom.searchguard.enable>
+                <pom.searchguard.ssl.transport.keystore_filepath>admin-keystore.jks
+                </pom.searchguard.ssl.transport.keystore_filepath>
+                <pom.searchguard.ssl.transport.truststore_filepath>truststore.jks
+                </pom.searchguard.ssl.transport.truststore_filepath>
+                <pom.searchguard.ssl.transport.keystore_password>49e68ad53ae7483da17e
+                </pom.searchguard.ssl.transport.keystore_password>
+                <pom.searchguard.ssl.transport.truststore_password>49e68ad53ae7483da17e
+                </pom.searchguard.ssl.transport.truststore_password>
+
+                <!--产品类型-->
+                <pom.productCodeType>test</pom.productCodeType>
+
+                <!--oms数据源-->
+                <pom.oms.datasource.url>jdbc:mysql://10.4.0.20:3306/product?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.oms.datasource.url>
+                <pom.oms.datasource.username>tianyuan</pom.oms.datasource.username>
+                <pom.oms.datasource.password>s7GaCUG5</pom.oms.datasource.password>
+            </properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <!--正式环境的通用配置-->
+        <profile>
+            <id>product</id>
+            <properties>
+                <pom.application.name>bidlink-job-product</pom.application.name>
+                <pom.xxl.job.admin.addresses>http://10.4.0.98:8080/xxl-job</pom.xxl.job.admin.addresses>
+                <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
+                <pom.log.rootLogger>FILE</pom.log.rootLogger>
+                <pom.log.level>INFO</pom.log.level>
+                <pom.log.dir>logs</pom.log.dir>
+
+                <!--es配置-->
+                <pom.cluster.host>10.4.0.69:9300</pom.cluster.host>
+                <pom.cluster.name>dc-test</pom.cluster.name>
+                <pom.cluster.index>yz_product</pom.cluster.index>
+                <pom.cluster.type.product_report>product_report</pom.cluster.type.product_report>
+                <pom.searchguard.enable>false</pom.searchguard.enable>
+
+                <!--产品类型-->
+                <pom.productCodeType>test</pom.productCodeType>
+
+                <!--oms数据源-->
+                <pom.oms.datasource.url>jdbc:mysql://10.4.0.20:3306/product?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.oms.datasource.url>
+                <pom.oms.datasource.username>tianyuan</pom.oms.datasource.username>
+                <pom.oms.datasource.password>s7GaCUG5</pom.oms.datasource.password>
+            </properties>
+        </profile>
+        <!-- 测试环境的通用配置 -->
+        <profile>
+            <id>test</id>
+            <properties>
+                <pom.application.name>bidlink-job-product</pom.application.name>
+                <pom.xxl.job.admin.addresses>http://10.4.0.98:8080/xxl-job</pom.xxl.job.admin.addresses>
+                <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
+                <pom.log.rootLogger>FILE</pom.log.rootLogger>
+                <pom.log.level>info</pom.log.level>
+                <pom.log.dir>logs</pom.log.dir>
+
+                <!--es配置-->
+                <pom.cluster.host>10.4.0.69:9300</pom.cluster.host>
+                <pom.cluster.name>dc-test</pom.cluster.name>
+                <pom.cluster.index>yz_product</pom.cluster.index>
+                <pom.cluster.type.product_report>product_report</pom.cluster.type.product_report>
+                <pom.path.conf>/app/programs/${pom.application.name}/conf/es/</pom.path.conf>
+                <pom.searchguard.enable>true</pom.searchguard.enable>
+                <pom.searchguard.ssl.transport.keystore_filepath>admin-keystore.jks
+                </pom.searchguard.ssl.transport.keystore_filepath>
+                <pom.searchguard.ssl.transport.truststore_filepath>truststore.jks
+                </pom.searchguard.ssl.transport.truststore_filepath>
+                <pom.searchguard.ssl.transport.keystore_password>49e68ad53ae7483da17e
+                </pom.searchguard.ssl.transport.keystore_password>
+                <pom.searchguard.ssl.transport.truststore_password>49e68ad53ae7483da17e
+                </pom.searchguard.ssl.transport.truststore_password>
+
+                <!--产品类型-->
+                <pom.productCodeType>test</pom.productCodeType>
+
+                <!--oms数据源-->
+                <pom.oms.datasource.url>jdbc:mysql://10.4.0.20:3306/product?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.oms.datasource.url>
+                <pom.oms.datasource.username>tianyuan</pom.oms.datasource.username>
+                <pom.oms.datasource.password>s7GaCUG5</pom.oms.datasource.password>
+            </properties>
+        </profile>
+    </profiles>
+</project>

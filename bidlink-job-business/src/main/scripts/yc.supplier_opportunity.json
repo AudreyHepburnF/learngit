@@ -1,0 +1,84 @@
+// 方式1：直接在head界面操作，yc_v1/supplier_opportunity/_mapping POST
+// 方式2：curl -XPOST http://dcsearch.api.yuecai.com/yc_v1/supplier_opportunity/_mapping -d'
+{
+  "supplier_opportunity": {
+    "properties": {
+      "id": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "createTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "updateTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "syncTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "purchaseId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "purchaseName": {
+        "type": "string"
+      },
+      "projectId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "projectCode": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "projectName": {
+        "type": "string"
+      },
+      "tenantKey": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "projectType": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "openRangeType": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "directoryName": {
+        "type": "multi_field",
+        "fields" : {
+          "zh" : {
+            "type" : "string",
+            "analyzer": "ik",
+            "boost" : 2
+          },
+          "en" : {
+            "type" : "string",
+            "analyzer": "standard"
+          }
+        }
+      },
+      "firstDirectoryName" : {
+        "type" : "string",
+        "index": "not_analyzed"
+      },
+      "directoryNameCount" : {
+        "type" : "integer"
+      },
+      "areaStr": {
+        "type": "string"
+      },
+      "linkMan": {
+        "type": "string"
+      },
+      "linkPhone": {
+        "type": "string"
+      }
+    }
+  }
+}

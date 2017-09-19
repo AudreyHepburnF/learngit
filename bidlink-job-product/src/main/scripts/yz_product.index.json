@@ -1,0 +1,10 @@
+// 方式1：创建索引http://localhost:9200/yz_product/  POST
+// 方式2：curl -XPOST 'http://localhost:9200/yz_product/' -d
+{
+  "settings": {
+    "index": {
+      "number_of_shards": 5,
+      "number_of_replicas": 1
+    }
+  }
+}
