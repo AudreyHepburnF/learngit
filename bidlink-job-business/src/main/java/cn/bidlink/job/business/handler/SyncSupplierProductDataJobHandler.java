@@ -105,7 +105,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler /*implements 
 
 
     /**
-     * 同步交易过的采购品
+     * 同步交易过的采购品，部分标价，全部报价，中标，未中标
      * 注意：采购品中标状态只能更新为中标状态，所以只通过updateTime来查询数据
      *
      * @param lastSyncTime
@@ -119,8 +119,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler /*implements 
                                  + "JOIN bmpfjz_supplier_project_item_bid bspib ON bspb.id = bspib.supplier_project_bid_id\n"
                                  + "JOIN corp_directorys cd ON bspib.directory_id = cd.ID\n"
                                  + "WHERE\n"
-                                 + "   (bspb.supplier_bid_status = 2\n"
-                                 + "OR bspb.supplier_bid_status = 3)\n"
+                                 + "   bspb.supplier_bid_status IN (2, 3, 6, 7)\n"
                                  + "   AND bspb.update_time > ?";
         String queryUpdatedSql = "SELECT\n"
                                  + "   bspb.SUPPLIER_ID AS supplierId,\n"
@@ -133,8 +132,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler /*implements 
                                  + "JOIN bmpfjz_supplier_project_item_bid bspib ON bspb.id = bspib.supplier_project_bid_id\n"
                                  + "JOIN corp_directorys cd ON bspib.directory_id = cd.ID\n"
                                  + "WHERE\n"
-                                 + "   (bspb.supplier_bid_status = 2\n"
-                                 + "OR bspb.supplier_bid_status = 3)\n"
+                                 + "   bspb.supplier_bid_status IN (2, 3, 6, 7)\n"
                                  + "   AND bspb.update_time > ?\n"
                                  + "LIMIT ?, ?";
         doSyncUpdatedData(ycDataSource, countUpdatedSql, queryUpdatedSql, lastSyncTime);
@@ -203,7 +201,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler /*implements 
      */
     private void syncCenterDataService(Timestamp lastSyncTime) {
         logger.info("同步中心库供应商主营产品开始");
-        String countInsertedSql = "SELECT count(1) FROM t_reg_company WHERE CREATE_DATE > ?";
+        String countInsertedSql = "SELECT count(1) FROM t_reg_company WHERE MAIN_PRODUCT IS NOT NULL AND CREATE_DATE > ?";
         String queryInsertedSql = "SELECT\n"
                                   + "   trc.ID AS supplierId,\n"
                                   + "   trc.NAME AS supplierName,\n"
@@ -219,7 +217,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler /*implements 
                                   + "   trc.MAIN_PRODUCT IS NOT NULL AND trc.CREATE_DATE > ? LIMIT ?, ?";
         doSyncInsertedData(centerDataSource, countInsertedSql, queryInsertedSql, lastSyncTime);
 
-        String countUpdatedSql = "SELECT count(1) FROM t_reg_company WHERE UPDATE_TIME > ?";
+        String countUpdatedSql = "SELECT count(1) FROM t_reg_company WHERE MAIN_PRODUCT IS NOT NULL AND UPDATE_TIME > ?";
         String queryUpdatedSql = "SELECT\n"
                                  + "   trc.ID AS supplierId,\n"
                                  + "   trc.NAME AS supplierName,\n"
@@ -293,12 +291,10 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler /*implements 
                         Integer oldSupplierDirectoryRelation = getOldSupplierDirectoryRelation(directoryNameMap, name);
                         // 如果不存在，则直接插入
                         if (oldSupplierDirectoryRelation == null) {
-                            result.put(ID, generateSupplierProductId(result));
                             resultsToExecute.add(refresh(result, name));
                         } else {
                             // 如果优先级高，则更新
                             if (supplierDirectoryRelation < oldSupplierDirectoryRelation) {
-                                result.put(ID, directoryNameMap.get(name).get(ID));
                                 resultsToExecute.add(refresh(result, name));
                             }
                         }
@@ -337,6 +333,8 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler /*implements 
         // 将多个拼接在一起的采购品分割为单个采购品
         resultToUse.remove(DIRECTORY_NAME);
         resultToUse.put(DIRECTORY_NAME, directoryName.trim());
+        // 生成Id
+        resultToUse.put(ID, generateSupplierProductId(resultToUse));
         // 将supplierId转为string
         resultToUse.put(SUPPLIER_ID, String.valueOf(resultToUse.get(SUPPLIER_ID)));
         resultToUse.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
