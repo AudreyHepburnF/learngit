@@ -18,6 +18,7 @@ import org.elasticsearch.search.SearchHits;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,7 +49,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @JobHander(value = "syncProductDataJobHandler")
 @Service
-public class SyncSupplierProductDataJobHandler extends IJobHandler /*implements InitializingBean*/ {
+public class SyncSupplierProductDataJobHandler extends IJobHandler implements InitializingBean {
     private Logger logger = LoggerFactory.getLogger(SyncSupplierProductDataJobHandler.class);
 
     @Autowired
@@ -69,22 +70,31 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler /*implements 
     @Value("${pageSize:200}")
     private int pageSize;
 
+    @Value("${supplierProduct.threadNum:10}")
+    private int threadNum;
+
     private String ID                     = "id";
     private String DIRECTORY_NAME         = "directoryNameAlias";
     private String SUPPLIER_ID            = "supplierId";
     private String SUPPLIER_DIRECTORY_REL = "supplierDirectoryRel";
 
-    private int             threadNum       = 10;
-    private Semaphore       semaphore       = new Semaphore(threadNum);
-    private AtomicLong      atomicLong      = new AtomicLong(0);
-    private ExecutorService executorService = Executors.newFixedThreadPool(threadNum, new ThreadFactory() {
-        @Override
-        public Thread newThread(Runnable r) {
-            Thread t = new Thread(r, "syncSupplierProduct-thread-" + atomicLong.getAndIncrement());
-            t.setDaemon(true);
-            return t;
-        }
-    });
+    private Semaphore       semaphore;
+    private AtomicLong      atomicLong;
+    private ExecutorService executorService;
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        semaphore = new Semaphore(threadNum);
+        atomicLong = new AtomicLong(0);
+        executorService = Executors.newFixedThreadPool(threadNum, new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread t = new Thread(r, "syncSupplierProduct-thread-" + atomicLong.getAndIncrement());
+                t.setDaemon(true);
+                return t;
+            }
+        });
+    }
 
     public ReturnT<String> execute(String... strings) throws Exception {
         SyncTimeUtil.setCurrentDate();
@@ -114,27 +124,36 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler /*implements 
         logger.info("同步交易过的采购品开始");
         String countUpdatedSql = "SELECT\n"
                                  + "   count(1)\n"
-                                 + "FROM\n"
-                                 + "   bmpfjz_supplier_project_bid bspb\n"
-                                 + "JOIN bmpfjz_supplier_project_item_bid bspib ON bspb.id = bspib.supplier_project_bid_id\n"
-                                 + "JOIN corp_directorys cd ON bspib.directory_id = cd.ID\n"
-                                 + "WHERE\n"
-                                 + "   bspb.supplier_bid_status IN (2, 3, 6, 7)\n"
-                                 + "   AND bspb.update_time > ?";
+                                 + " from\n"
+                                 + "   bmpfjz_supplier_project_bid\n"
+                                 + " where\n"
+                                 + "   update_time > ?\n"
+                                 + " AND supplier_bid_status IN (2, 3, 6, 7)";
         String queryUpdatedSql = "SELECT\n"
-                                 + "   bspb.SUPPLIER_ID AS supplierId,\n"
-                                 + "   bspb.SUPPLIER_NAME AS supplierName,\n"
-                                 + "   cd.`NAME` AS directoryNameAlias,\n"
-                                 + "   1 AS supplierDirectoryRel,\n"
-                                 + "   bspb.CREATE_TIME AS createTime\n"
+                                 + " bspb.SUPPLIER_ID AS supplierId,\n"
+                                 + " bspb.SUPPLIER_NAME AS supplierName,\n"
+                                 + " cd.`NAME` AS directoryNameAlias,\n"
+                                 + " 1 AS supplierDirectoryRel,\n"
+                                 + " bspb.CREATE_TIME AS createTime\n"
                                  + "FROM\n"
-                                 + "   bmpfjz_supplier_project_bid bspb\n"
+                                 + " (\n"
+                                 + "  SELECT\n"
+                                 + "   id,\n"
+                                 + "   comp_id,\n"
+                                 + "   supplier_id,\n"
+                                 + "   supplier_name,\n"
+                                 + "   create_time\n"
+                                 + "  FROM\n"
+                                 + "   bmpfjz_supplier_project_bid\n"
+                                 + "  WHERE\n"
+                                 + "   update_time > ?\n"
+                                 + "  AND supplier_bid_status IN (2, 3, 6, 7)\n"
+                                 + "  LIMIT ?, ?\n"
+                                 + " ) bspb\n"
                                  + "JOIN bmpfjz_supplier_project_item_bid bspib ON bspb.id = bspib.supplier_project_bid_id\n"
+                                 + "AND bspb.comp_id = bspib.comp_id\n"
                                  + "JOIN corp_directorys cd ON bspib.directory_id = cd.ID\n"
-                                 + "WHERE\n"
-                                 + "   bspb.supplier_bid_status IN (2, 3, 6, 7)\n"
-                                 + "   AND bspb.update_time > ?\n"
-                                 + "LIMIT ?, ?";
+                                 + "AND cd.company_id = bspib.comp_id\n";
         doSyncUpdatedData(ycDataSource, countUpdatedSql, queryUpdatedSql, lastSyncTime);
         logger.info("同步交易过的采购品结束");
     }
@@ -201,36 +220,36 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler /*implements 
      */
     private void syncCenterDataService(Timestamp lastSyncTime) {
         logger.info("同步中心库供应商主营产品开始");
-        String countInsertedSql = "SELECT count(1) FROM t_reg_company WHERE MAIN_PRODUCT IS NOT NULL AND CREATE_DATE > ?";
+        String countInsertedSql = "SELECT count(1) FROM t_reg_company WHERE TYPE = 13 AND MAIN_PRODUCT IS NOT NULL AND CREATE_DATE > ?";
         String queryInsertedSql = "SELECT\n"
                                   + "   trc.ID AS supplierId,\n"
                                   + "   trc.NAME AS supplierName,\n"
                                   + "   trc.MAIN_PRODUCT AS directoryNameAlias,\n"
                                   + "   4 AS supplierDirectoryRel,\n"
-                                  + "   tucs.CORE_SUPPLIER_STATUS AS core,\n"
+//                                  + "   tucs.CORE_SUPPLIER_STATUS AS core,\n"
                                   + "   trc.CREATE_DATE AS createTime,\n"
                                   + "   trc.UPDATE_TIME AS updateTime\n"
                                   + "FROM\n"
                                   + "   t_reg_company trc\n"
-                                  + "LEFT JOIN t_uic_company_status tucs ON trc.ID = tucs.COMP_ID\n"
+//                                  + "LEFT JOIN t_uic_company_status tucs ON trc.ID = tucs.COMP_ID\n"
                                   + "WHERE\n"
-                                  + "   trc.MAIN_PRODUCT IS NOT NULL AND trc.CREATE_DATE > ? LIMIT ?, ?";
+                                  + "   trc.TYPE = 13 AND trc.MAIN_PRODUCT IS NOT NULL AND trc.CREATE_DATE > ? LIMIT ?, ?";
         doSyncInsertedData(centerDataSource, countInsertedSql, queryInsertedSql, lastSyncTime);
 
-        String countUpdatedSql = "SELECT count(1) FROM t_reg_company WHERE MAIN_PRODUCT IS NOT NULL AND UPDATE_TIME > ?";
+        String countUpdatedSql = "SELECT count(1) FROM t_reg_company WHERE TYPE = 13 AND MAIN_PRODUCT IS NOT NULL AND UPDATE_TIME > ?";
         String queryUpdatedSql = "SELECT\n"
                                  + "   trc.ID AS supplierId,\n"
                                  + "   trc.NAME AS supplierName,\n"
                                  + "   trc.MAIN_PRODUCT AS directoryNameAlias,\n"
                                  + "   4 AS supplierDirectoryRel,\n"
-                                 + "   tucs.CORE_SUPPLIER_STATUS AS core,\n"
+//                                 + "   tucs.CORE_SUPPLIER_STATUS AS core,\n"
                                  + "   trc.CREATE_DATE AS createTime,\n"
                                  + "   trc.UPDATE_TIME AS updateTime\n"
                                  + "FROM\n"
                                  + "   t_reg_company trc\n"
-                                 + "LEFT JOIN t_uic_company_status tucs ON trc.ID = tucs.COMP_ID\n"
+//                                 + "LEFT JOIN t_uic_company_status tucs ON trc.ID = tucs.COMP_ID\n"
                                  + "WHERE\n"
-                                 + "   trc.MAIN_PRODUCT IS NOT NULL AND trc.UPDATE_TIME > ? LIMIT ?, ?";
+                                 + "   trc.TYPE = 13 AND trc.MAIN_PRODUCT IS NOT NULL AND trc.UPDATE_TIME > ? LIMIT ?, ?";
         doSyncUpdatedData(centerDataSource, countUpdatedSql, queryUpdatedSql, lastSyncTime);
         logger.info("同步中心库供应商主营产品结束");
     }

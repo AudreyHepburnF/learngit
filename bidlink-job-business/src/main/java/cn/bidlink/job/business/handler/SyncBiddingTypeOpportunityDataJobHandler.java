@@ -70,7 +70,8 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                  + "WHERE\n"
                                  + "   pip.TENDER_MODE = 1\n"
                                  + "AND pip.IS_PREQUALIFY = 2\n"
-                                 + "AND pip.IS_TWO_STAGE = 2\n";
+                                 + "AND pip.IS_TWO_STAGE = 2\n"
+                                 + "AND nb.BID_ENDTIME IS NOT NULL";
         // 什么都不需要
         String queryNothingSql = "SELECT\n"
                                  + "    project.ID AS projectId,\n"
@@ -100,6 +101,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                  + "         pip.TENDER_MODE = 1\n"
                                  + "      AND pip.IS_PREQUALIFY = 2\n"
                                  + "      AND pip.IS_TWO_STAGE = 2\n"
+                                 + "      AND nb.BID_ENDTIME IS NOT NULL"
                                  + "      LIMIT ?,?\n"
                                  + "   ) project\n"
                                  + "JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
