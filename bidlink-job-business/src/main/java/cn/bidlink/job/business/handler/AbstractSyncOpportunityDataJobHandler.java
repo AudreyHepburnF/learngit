@@ -101,12 +101,12 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends IJobHandler 
                 logger.debug("执行querySql : {}, params : {}，共{}条", querySql, paramsToUse, results.size());
                 List<Map<String, Object>> resultToExecute = new ArrayList<>();
                 // 保存项目的采购品
-                Map<Long, List<String>> projectDirectoryMap = new HashMap<>();
+                Map<Long, Set<String>> projectDirectoryMap = new HashMap<>();
                 for (Map<String, Object> result : results) {
                     Long projectId = (Long) result.get(PROJECT_ID);
                     String directoryName = (String) result.get(DIRECTORY_NAME);
                     if (projectDirectoryMap.get(projectId) == null) {
-                        projectDirectoryMap.put(projectId, new ArrayList<String>());
+                        projectDirectoryMap.put(projectId, new HashSet<String>());
                         parseOpportunity(currentDate, resultToExecute, result);
                     }
                     projectDirectoryMap.get(projectId).add(directoryName);
@@ -142,11 +142,11 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends IJobHandler 
      * @param result
      * @param projectDirectoryMap
      */
-    protected void refresh(Map<String, Object> result, Map<Long, List<String>> projectDirectoryMap) {
-        List<String> directoryNames = projectDirectoryMap.get(result.get(PROJECT_ID));
+    protected void refresh(Map<String, Object> result, Map<Long, Set<String>> projectDirectoryMap) {
+        Set<String> directoryNames = projectDirectoryMap.get(result.get(PROJECT_ID));
         // 采购品
         result.put(DIRECTORY_NAME, StringUtils.collectionToCommaDelimitedString(directoryNames));
-        result.put(FIRST_DIRECTORY_NAME, directoryNames.get(0));
+        result.put(FIRST_DIRECTORY_NAME, directoryNames.iterator().next());
         result.put(DIRECTORY_NAME_COUNT, directoryNames.size());
         // 同步时间
         result.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());

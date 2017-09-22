@@ -287,7 +287,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
     }
 
 
-    protected void refresh(Map<String, Object> result, Map<Long, List<String>> projectDirectoryMap) {
+    protected void refresh(Map<String, Object> result, Map<Long, Set<String>> projectDirectoryMap) {
         super.refresh(result, projectDirectoryMap);
         // 移除不需要的属性
         result.remove(PROJECT_STATUS);

@@ -132,7 +132,7 @@
                 <pom.pro.db.username>fengzikai</pom.pro.db.username>
                 <pom.pro.db.password>bid6link!@#$</pom.pro.db.password>
                 <!--中心库数据源-->
-                <pom.center.db.url>jdbc:mysql://192.168.1.213:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.center.db.url>
+                <pom.center.db.url>jdbc:mysql://192.168.1.82:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.center.db.url>
                 <pom.center.db.username>fengzikai</pom.center.db.username>
                 <pom.center.db.password>bid6link!@#$</pom.center.db.password>
                 <!--es配置-->
