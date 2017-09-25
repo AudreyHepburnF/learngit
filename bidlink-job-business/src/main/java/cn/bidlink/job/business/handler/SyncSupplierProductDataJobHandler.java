@@ -197,7 +197,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
      */
     private void syncProDataService(Timestamp lastSyncTime) {
         logger.info("同步标王关键字开始");
-        String countInsertedSql = "SELECT count(1) FROM user_wfirst_use WHERE CREATE_TIME > ? AND ENABLE_DISABLE = 1";
+        String countInsertedSql = "SELECT count(1) FROM user_wfirst_use WHERE CREATE_TIME > ? AND ENABLE_DISABLE = 1 AND STATE=1";
         String queryInsertedSql = "SELECT\n"
                                   + "   ufu.COMPANY_ID AS supplierId,\n"
                                   + "   w.KEY_WORD AS directoryNameAlias,\n"
@@ -207,7 +207,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
                                   + "FROM\n"
                                   + "   user_wfirst_use ufu\n"
                                   + "LEFT JOIN wfirst w ON ufu.WFIRST_ID = w.ID\n"
-                                  + "WHERE ufu.CREATE_TIME > ? AND ufu.ENABLE_DISABLE = 1\n"
+                                  + "WHERE ufu.CREATE_TIME > ? AND ufu.ENABLE_DISABLE = 1 AND ufu.STATE=1\n"
                                   + "LIMIT ?, ?";
         doSyncInsertedData(proDataSource, countInsertedSql, queryInsertedSql, lastSyncTime);
         logger.info("同步标王关键字结束");

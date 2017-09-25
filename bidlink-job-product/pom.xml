@@ -166,7 +166,7 @@
                 </pom.searchguard.ssl.transport.truststore_password>
 
                 <!--产品类型-->
-                <pom.productCodeType>test</pom.productCodeType>
+                <pom.productCodeType>monitorReport</pom.productCodeType>
 
                 <!--oms数据源-->
                 <pom.oms.datasource.url>jdbc:mysql://10.4.0.20:3306/product?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.oms.datasource.url>
