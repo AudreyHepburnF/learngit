@@ -55,20 +55,22 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends IJobHandler 
     protected int PURCHASE_PROJECT_TYPE      = 2;
 
 
-    protected String ID             = "id";
-    protected String PURCHASE_ID    = "purchaseId";
-    protected String PROJECT_ID     = "projectId";
-    protected String PROJECT_TYPE   = "projectType";
-    protected String DIRECTORY_NAME = "directoryName";
-    protected String PURCHASE_NAME  = "purchaseName";
-    protected String PROJECT_CODE   = "projectCode";
-    protected String PROJECT_NAME   = "projectName";
-    protected String PROJECT_STATUS = "projectStatus";
-    protected String TENANT_KEY     = "tenantKey";
-    protected String AREA_STR       = "areaStr";
-    protected String STATUS         = "status";
+    protected String ID                   = "id";
+    protected String PURCHASE_ID          = "purchaseId";
+    protected String PROJECT_ID           = "projectId";
+    protected String PROJECT_TYPE         = "projectType";
+    protected String DIRECTORY_NAME       = "directoryName";
+    protected String PURCHASE_NAME        = "purchaseName";
+    protected String PROJECT_CODE         = "projectCode";
+    protected String PROJECT_NAME         = "projectName";
+    protected String PROJECT_STATUS       = "projectStatus";
+    protected String TENANT_KEY           = "tenantKey";
+    protected String AREA_STR             = "areaStr";
+    protected String STATUS               = "status";
     protected String FIRST_DIRECTORY_NAME = "firstDirectoryName";
     protected String DIRECTORY_NAME_COUNT = "directoryNameCount";
+    protected String QUOTE_STOP_TIME      = "quoteStopTime";
+
 
     protected Map<String, Object> appendIdToResult(Map<String, Object> result) {
         // 生成id
@@ -154,7 +156,9 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends IJobHandler 
         // for fuck js
         result.put(PROJECT_ID, String.valueOf(result.get(PROJECT_ID)));
         result.put(PURCHASE_ID, String.valueOf(result.get(PURCHASE_ID)));
-    };
+    }
+
+    ;
 
     /**
      * 解析商机数据

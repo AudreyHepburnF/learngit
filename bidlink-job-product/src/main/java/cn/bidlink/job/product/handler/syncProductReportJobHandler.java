@@ -117,6 +117,11 @@ public class syncProductReportJobHandler extends IJobHandler /*implements Initia
         doSyncProjectDataService(countCreatedProductSql, queryCreatedProductSql, params);
     }
 
+    /**
+     * 产品报告重新发布会导致已上架的产品变为未上架，并更新时间字段
+     *
+     * @param lastSyncTime
+     */
     private void syncUpdatedProductReport(Timestamp lastSyncTime) {
         String countUpdatedProductSql = "SELECT\n"
                                         + "   count(1)\n"
@@ -124,7 +129,7 @@ public class syncProductReportJobHandler extends IJobHandler /*implements Initia
                                         + "   product p\n"
                                         + "WHERE\n"
                                         + "   p.product_type_code = ?\n"
-                                        + "AND p.is_sales > 0\n"
+                                        + "AND p.is_sales >= 0\n"
                                         + "AND p.update_time >= ?";
         String queryUpdatedProductSql = "SELECT\n"
                                         + "   p.id,\n"
@@ -137,7 +142,7 @@ public class syncProductReportJobHandler extends IJobHandler /*implements Initia
                                         + "   product p\n"
                                         + "WHERE\n"
                                         + "   p.product_type_code = ?\n"
-                                        + "AND p.is_sales > 0\n"
+                                        + "AND p.is_sales >= 0\n"
                                         + "AND p.update_time >= ?\n"
                                         + "LIMIT ?, ?";
 

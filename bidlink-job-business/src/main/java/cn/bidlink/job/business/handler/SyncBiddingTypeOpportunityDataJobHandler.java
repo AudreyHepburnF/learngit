@@ -224,6 +224,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
     protected void refresh(Map<String, Object> result, Map<Long, Set<String>> projectDirectoryMap) {
         super.refresh(result, projectDirectoryMap);
         // 移除不需要的属性
+        result.put(QUOTE_STOP_TIME, SyncTimeUtil.toDateString(result.get(END_TIME)));
         result.remove(END_TIME);
         // 项目类型
         result.put(PROJECT_TYPE, BIDDING_PROJECT_TYPE);

@@ -34,4 +34,12 @@ public class SyncTimeUtil {
     public static Timestamp getCurrentDate() {
         return currentDate.get();
     }
+
+    public static String toDateString(Object propertyValue) {
+        if (propertyValue instanceof java.util.Date) {
+            return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
+        } else {
+            return null;
+        }
+    }
 }
