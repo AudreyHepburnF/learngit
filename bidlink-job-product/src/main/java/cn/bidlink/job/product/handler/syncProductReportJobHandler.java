@@ -22,9 +22,11 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -51,6 +53,11 @@ public class syncProductReportJobHandler extends IJobHandler /*implements Initia
     @Value("${productCodeType}")
     private String productCodeType;
 
+    // 两位有效数字，四舍五入
+    private DecimalFormat format = new DecimalFormat("0.00");
+    // 折扣除数
+    private BigDecimal TEN = new BigDecimal(10);
+
     // 已上架
     private int ON_SALES  = 1;
     // 下架
@@ -58,6 +65,8 @@ public class syncProductReportJobHandler extends IJobHandler /*implements Initia
 
     private String ID              = "id";
     private String PRICE           = "price";
+    private String DISCOUNT        = "discount";
+    private String DISCOUNTED_PRICE  = "discountedPrice";
     private String PRODUCT_ID      = "productId";
     private String IS_SALES        = "isSales";
     private String DOC_ABSTRACT    = "docAbstract";
@@ -100,6 +109,7 @@ public class syncProductReportJobHandler extends IJobHandler /*implements Initia
                                         + "   p.id,\n"
                                         + "   p.`name`,\n"
                                         + "   p.`price`,\n"
+                                        + "   p.`discount`,\n"
                                         + "   p.product_code AS productCode,\n"
                                         + "   p.product_type_code AS productTypeCode,\n"
                                         + "   p.is_sales AS isSales\n"
@@ -135,6 +145,7 @@ public class syncProductReportJobHandler extends IJobHandler /*implements Initia
                                         + "   p.id,\n"
                                         + "   p.`name`,\n"
                                         + "   p.`price`,\n"
+                                        + "   p.`discount`,\n"
                                         + "   p.product_code AS productCode,\n"
                                         + "   p.product_type_code AS productTypeCode,\n"
                                         + "   p.is_sales AS isSales\n"
@@ -243,8 +254,16 @@ public class syncProductReportJobHandler extends IJobHandler /*implements Initia
 
     private void refresh(Map<String, Object> result) {
         result.put(ID, String.valueOf(result.get(ID)));
-        result.put(PRICE, String.valueOf(result.get(PRICE)));
-        result.put(SyncTimeUtil.SYNC_TIME, new Date());
+        result.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
+        // 添加折扣价
+        BigDecimal price = (BigDecimal) result.get(PRICE);
+        BigDecimal discount = (BigDecimal) result.get(DISCOUNT);
+        String discountedPrice = null;
+        if (discount != null) {
+            discountedPrice = this.format.format(price.multiply(discount.divide(TEN)));
+        }
+        result.put(PRICE, String.valueOf(price));
+        result.put(DISCOUNTED_PRICE, discountedPrice);
     }
 
     protected void batchInsert(List<Map<String, Object>> reports) {

@@ -33,7 +33,7 @@ public class clearProductReportJobHandler extends IJobHandler /*implements Initi
     // 下架
     private int OFF_SALES = 2;
 
-    private String IS_SALES        = "isSales";
+    private String IS_SALES = "isSales";
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
