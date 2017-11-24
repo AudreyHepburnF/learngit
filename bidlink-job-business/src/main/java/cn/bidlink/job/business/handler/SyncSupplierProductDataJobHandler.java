@@ -107,6 +107,8 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     // 供应商产品关系（1、报价产品；2、中标产品；3、标王关键词；4、主营产品：）
     private void syncProductData() {
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.supplier_product", null);
+        logger.info("供应商产品数据同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss") + "\n"
+            + ", syncTime : " + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
         syncTradeProductDataService(lastSyncTime);
         syncTradeBidProductDataService(lastSyncTime);
         syncProDataService(lastSyncTime);
@@ -300,23 +302,10 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
             for (Map<String, Object> result : results) {
                 // note:将供应商的产品转换为小写处理es查询时大小写敏感问题
                 String directoryName = String.valueOf(result.get(DIRECTORY_NAME)).toLowerCase();
-                Long supplierId = Long.valueOf(result.get(SUPPLIER_ID).toString());
-                Integer supplierDirectoryRelation = Integer.valueOf(result.get(SUPPLIER_DIRECTORY_REL).toString());
-
-                Map<String, Map<String, Object>> directoryNameMap = queryDirectoryNamesBySupplierId(supplierId);
                 String[] changedDirectoryNames = splitDirectoryName(directoryName);
                 for (String name : changedDirectoryNames) {
                     if (!StringUtils.isEmpty(name)) {
-                        Integer oldSupplierDirectoryRelation = getOldSupplierDirectoryRelation(directoryNameMap, name);
-                        // 如果不存在，则直接插入
-                        if (oldSupplierDirectoryRelation == null) {
-                            resultsToExecute.add(refresh(result, name));
-                        } else {
-                            // 如果优先级高，则更新
-                            if (supplierDirectoryRelation < oldSupplierDirectoryRelation) {
-                                resultsToExecute.add(refresh(result, name));
-                            }
-                        }
+                        resultsToExecute.add(refresh(result, name));
                     }
                 }
             }

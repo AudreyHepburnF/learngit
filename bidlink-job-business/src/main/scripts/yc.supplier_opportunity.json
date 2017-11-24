@@ -43,6 +43,10 @@
         "analyzer": "ik",
         "type": "string"
       },
+      "isCore": {
+        "type": "integer",
+        "index": "not_analyzed"
+      },
       "tenantKey": {
         "type": "string",
         "index": "not_analyzed"
