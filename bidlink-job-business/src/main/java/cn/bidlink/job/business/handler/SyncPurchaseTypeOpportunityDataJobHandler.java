@@ -1,17 +1,16 @@
 package cn.bidlink.job.business.handler;
 
+import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
-import com.xxl.job.core.util.DBUtil;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -61,9 +60,9 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
                                                                    "cluster.type.supplier_opportunity",
                                                                    QueryBuilders.boolQuery().must(QueryBuilders.termQuery("projectType", PURCHASE_PROJECT_TYPE)));
         logger.info("采购项目商机同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
-//        syncPurchaseProjectDataService(lastSyncTime);
-        long millis = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").parseDateTime("2017-09-07 14:30:00").getMillis();
-        syncPurchaseProjectDataService(new Timestamp(millis));
+        syncPurchaseProjectDataService(lastSyncTime);
+//        long millis = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").parseDateTime("2017-09-07 14:30:00").getMillis();
+//        syncPurchaseProjectDataService(new Timestamp(millis));
 //        fixExpiredAutoStopTypePurchaseProjectDataService(lastSyncTime);
     }
 
@@ -165,7 +164,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
                                  + "   bp.`code` AS projectCode,\n"
                                  + "   bp.`name` AS projectName,\n"
                                  + "   bpe.purchase_open_range_type AS openRangeType,\n"
-//                                 + "   bp.is_core AS isCore,\n"
+                                 + "   bp.is_core AS isCore,\n"
                                  + "   bp.project_status AS projectStatus,\n"
                                  + "   bpe.bid_stop_type AS bidStopType,\n"
                                  + "   bpe.bid_stop_time AS bidStopTime,\n"
@@ -265,7 +264,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
         Timestamp bidTrueStopTime = (Timestamp) result.get(BID_TRUE_STOP_TIME);
         if (bidStopType == AUTO_STOP_TYPE) {
             // 判断时间未过期就是商机
-            if (bidStopTime.after(currentDate) && projectStatus == 5) {
+            if (bidStopTime != null && bidStopTime.after(currentDate) && projectStatus == 5) {
                 result.put(STATUS, VALID_OPPORTUNITY_STATUS);
                 resultToExecute.add(appendIdToResult(result));
             } else {
@@ -287,11 +286,12 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
     }
 
 
-    protected void refresh(Map<String, Object> result, Map<Long, List<String>> projectDirectoryMap) {
+    protected void refresh(Map<String, Object> result, Map<Long, Set<String>> projectDirectoryMap) {
         super.refresh(result, projectDirectoryMap);
         // 移除不需要的属性
         result.remove(PROJECT_STATUS);
         result.remove(BID_STOP_TYPE);
+        result.put(QUOTE_STOP_TIME, SyncTimeUtil.toDateString(result.get(BID_STOP_TIME)));
         result.remove(BID_STOP_TIME);
         result.remove(BID_TRUE_STOP_TIME);
         // 项目类型

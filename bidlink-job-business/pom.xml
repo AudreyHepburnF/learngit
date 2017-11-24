@@ -95,10 +95,6 @@
                 <pom.center.db.url>jdbc:mysql://10.1.1.209:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.center.db.url>
                 <pom.center.db.username>cancal</pom.center.db.username>
                 <pom.center.db.password>unireg!@#</pom.center.db.password>
-                <!--数据数据源-->
-                <pom.output.db.url></pom.output.db.url>
-                <pom.output.db.username></pom.output.db.username>
-                <pom.output.db.password></pom.output.db.password>
                 <!--es配置-->
                 <pom.cluster.host>10.4.0.69:9300</pom.cluster.host>
                 <pom.cluster.name>dc-test</pom.cluster.name>
@@ -122,18 +118,37 @@
             <id>product</id>
             <properties>
                 <pom.application.name>bidlink-job-business</pom.application.name>
-                <pom.xxl.job.admin.addresses>http://10.4.0.98:8080/xxl-job</pom.xxl.job.admin.addresses>
+                <pom.xxl.job.admin.addresses>http://10.0.0.199:8080/xxl-job</pom.xxl.job.admin.addresses>
                 <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
                 <pom.log.rootLogger>FILE</pom.log.rootLogger>
                 <pom.log.level>INFO</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
+                <!--悦彩数据源-->
+                <pom.yc.db.url>jdbc:mysql://192.168.1.86:3306/nyc?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yc.db.url>
+                <pom.yc.db.username>shujuzhx</pom.yc.db.username>
+                <pom.yc.db.password>BzUS3GsL1l</pom.yc.db.password>
+                <!--pro数据源-->
+                <pom.pro.db.url>jdbc:mysql://192.168.1.168:3306/yc_pro?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
+                <pom.pro.db.username>fengzikai</pom.pro.db.username>
+                <pom.pro.db.password>bid6link!@#$</pom.pro.db.password>
+                <!--中心库数据源-->
+                <pom.center.db.url>jdbc:mysql://192.168.1.82:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.center.db.url>
+                <pom.center.db.username>fengzikai</pom.center.db.username>
+                <pom.center.db.password>bid6link!@#$</pom.center.db.password>
                 <!--es配置-->
-                <pom.cluster.host>10.4.0.69:9300</pom.cluster.host>
-                <pom.cluster.name>dc-test</pom.cluster.name>
-                <pom.cluster.index>yc_express</pom.cluster.index>
-                <pom.cluster.type.supplier_opportunity>yc_supplier_opportunities</pom.cluster.type.supplier_opportunity>
-                <pom.cluster.type.supplier_product>yc_supplier_product</pom.cluster.type.supplier_product>
+                <pom.cluster.host>192.168.2.249:9300,192.168.2.250:9300,192.168.2.251:9300</pom.cluster.host>
+                <pom.cluster.name>dc</pom.cluster.name>
+                <pom.cluster.index>yc_opportunity</pom.cluster.index>
+                <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
+                <pom.cluster.type.supplier_product>supplier_product</pom.cluster.type.supplier_product>
+                <pom.cluster.type.supplier_visited_opportunity>supplier_visited_opportunity
+                </pom.cluster.type.supplier_visited_opportunity>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
+                <pom.path.conf></pom.path.conf>
+                <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
+                <pom.searchguard.ssl.transport.truststore_filepath></pom.searchguard.ssl.transport.truststore_filepath>
+                <pom.searchguard.ssl.transport.keystore_password></pom.searchguard.ssl.transport.keystore_password>
+                <pom.searchguard.ssl.transport.truststore_password></pom.searchguard.ssl.transport.truststore_password>
             </properties>
         </profile>
         <profile>

@@ -19,11 +19,16 @@
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
+      "quoteStopTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
       "purchaseId": {
         "type": "string",
         "index": "not_analyzed"
       },
       "purchaseName": {
+        "analyzer": "ik",
         "type": "string"
       },
       "projectId": {
@@ -35,7 +40,12 @@
         "index": "not_analyzed"
       },
       "projectName": {
+        "analyzer": "ik",
         "type": "string"
+      },
+      "isCore": {
+        "type": "integer",
+        "index": "not_analyzed"
       },
       "tenantKey": {
         "type": "string",
@@ -50,18 +60,8 @@
         "index": "not_analyzed"
       },
       "directoryName": {
-        "type": "multi_field",
-        "fields" : {
-          "zh" : {
-            "type" : "string",
-            "analyzer": "ik",
-            "boost" : 2
-          },
-          "en" : {
-            "type" : "string",
-            "analyzer": "standard"
-          }
-        }
+        "analyzer": "ik",
+        "type": "string"
       },
       "firstDirectoryName" : {
         "type" : "string",

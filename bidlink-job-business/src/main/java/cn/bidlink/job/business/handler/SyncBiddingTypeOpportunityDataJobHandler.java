@@ -28,6 +28,9 @@ import java.util.Set;
 public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpportunityDataJobHandler /*implements InitializingBean*/ {
     private String END_TIME        = "endTime";
     private String OPEN_RANGE_TYPE = "openRangeType";
+    private String PROJECT_STATUS = "projectStatus";
+    // 撤项
+    private int WITH_DRAWED = 12;
 
     public ReturnT<String> execute(String... strings) throws Exception {
         SyncTimeUtil.setCurrentDate();
@@ -70,7 +73,8 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                  + "WHERE\n"
                                  + "   pip.TENDER_MODE = 1\n"
                                  + "AND pip.IS_PREQUALIFY = 2\n"
-                                 + "AND pip.IS_TWO_STAGE = 2\n";
+                                 + "AND pip.IS_TWO_STAGE = 2\n"
+                                 + "AND nb.BID_ENDTIME IS NOT NULL";
         // 什么都不需要
         String queryNothingSql = "SELECT\n"
                                  + "    project.ID AS projectId,\n"
@@ -78,6 +82,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                  + "    project.PROJECT_NAME AS projectName,\n"
                                  + "    project.REGION AS areaStr,\n"
                                  + "    project.COMPANY_ID AS purchaseId,\n"
+                                 + "    project.PROJECT_STATUS AS projectStatus,\n"
                                  + "    project.TENDER_NAMES AS purchaseName,\n"
                                  + "    project.CREATE_TIME AS createTime,\n"
                                  + "    project.BID_ENDTIME AS endTime,\n"
@@ -90,6 +95,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                  + "         pip.PROJECT_NAME,\n"
                                  + "         pip.REGION,\n"
                                  + "         pip.COMPANY_ID,\n"
+                                 + "         pip.PROJECT_STATUS,\n"
                                  + "         pip.TENDER_NAMES,\n"
                                  + "         nb.BID_ENDTIME,\n"
                                  + "         nb.CREATE_TIME\n"
@@ -100,6 +106,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                  + "         pip.TENDER_MODE = 1\n"
                                  + "      AND pip.IS_PREQUALIFY = 2\n"
                                  + "      AND pip.IS_TWO_STAGE = 2\n"
+                                 + "      AND nb.BID_ENDTIME IS NOT NULL"
                                  + "      LIMIT ?,?\n"
                                  + "   ) project\n"
                                  + "JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
@@ -125,6 +132,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                     + "    project.PROJECT_NAME AS projectName,\n"
                                     + "    project.REGION AS areaStr,\n"
                                     + "    project.COMPANY_ID AS purchaseId,\n"
+                                    + "    project.PROJECT_STATUS AS projectStatus,\n"
                                     + "    project.TENDER_NAMES AS purchaseName,\n"
                                     + "    project.CREATE_TIME AS createTime,\n"
                                     + "    project.END_TIME AS endTime,\n"
@@ -137,6 +145,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                     + "         pip.PROJECT_NAME,\n"
                                     + "         pip.REGION,\n"
                                     + "         pip.COMPANY_ID,\n"
+                                    + "         pip.PROJECT_STATUS,\n"
                                     + "         pip.TENDER_NAMES,\n"
                                     + "         pp.CREATE_TIME,\n"
                                     + "         pp.END_TIME\n"
@@ -212,9 +221,10 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
         }
     }
 
-    protected void refresh(Map<String, Object> result, Map<Long, List<String>> projectDirectoryMap) {
+    protected void refresh(Map<String, Object> result, Map<Long, Set<String>> projectDirectoryMap) {
         super.refresh(result, projectDirectoryMap);
         // 移除不需要的属性
+        result.put(QUOTE_STOP_TIME, SyncTimeUtil.toDateString(result.get(END_TIME)));
         result.remove(END_TIME);
         // 项目类型
         result.put(PROJECT_TYPE, BIDDING_PROJECT_TYPE);
@@ -224,9 +234,10 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
 
     @Override
     protected void parseOpportunity(Timestamp currentDate, List<Map<String, Object>> resultToExecute, Map<String, Object> result) {
+        Integer projectStatus = (Integer) result.get(PROJECT_STATUS);
         Timestamp endTime = (Timestamp) result.get(END_TIME);
-        // 作为商机
-        if (currentDate.after(endTime)) {
+        // 撤销，或者大于招标截止时间，判断为无效商机
+        if (projectStatus == WITH_DRAWED || currentDate.after(endTime)) {
             result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
             resultToExecute.add(appendIdToResult(result));
         } else {

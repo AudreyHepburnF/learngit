@@ -55,20 +55,22 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends IJobHandler 
     protected int PURCHASE_PROJECT_TYPE      = 2;
 
 
-    protected String ID             = "id";
-    protected String PURCHASE_ID    = "purchaseId";
-    protected String PROJECT_ID     = "projectId";
-    protected String PROJECT_TYPE   = "projectType";
-    protected String DIRECTORY_NAME = "directoryName";
-    protected String PURCHASE_NAME  = "purchaseName";
-    protected String PROJECT_CODE   = "projectCode";
-    protected String PROJECT_NAME   = "projectName";
-    protected String PROJECT_STATUS = "projectStatus";
-    protected String TENANT_KEY     = "tenantKey";
-    protected String AREA_STR       = "areaStr";
-    protected String STATUS         = "status";
+    protected String ID                   = "id";
+    protected String PURCHASE_ID          = "purchaseId";
+    protected String PROJECT_ID           = "projectId";
+    protected String PROJECT_TYPE         = "projectType";
+    protected String DIRECTORY_NAME       = "directoryName";
+    protected String PURCHASE_NAME        = "purchaseName";
+    protected String PROJECT_CODE         = "projectCode";
+    protected String PROJECT_NAME         = "projectName";
+    protected String PROJECT_STATUS       = "projectStatus";
+    protected String TENANT_KEY           = "tenantKey";
+    protected String AREA_STR             = "areaStr";
+    protected String STATUS               = "status";
     protected String FIRST_DIRECTORY_NAME = "firstDirectoryName";
     protected String DIRECTORY_NAME_COUNT = "directoryNameCount";
+    protected String QUOTE_STOP_TIME      = "quoteStopTime";
+
 
     protected Map<String, Object> appendIdToResult(Map<String, Object> result) {
         // 生成id
@@ -101,12 +103,12 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends IJobHandler 
                 logger.debug("执行querySql : {}, params : {}，共{}条", querySql, paramsToUse, results.size());
                 List<Map<String, Object>> resultToExecute = new ArrayList<>();
                 // 保存项目的采购品
-                Map<Long, List<String>> projectDirectoryMap = new HashMap<>();
+                Map<Long, Set<String>> projectDirectoryMap = new HashMap<>();
                 for (Map<String, Object> result : results) {
                     Long projectId = (Long) result.get(PROJECT_ID);
                     String directoryName = (String) result.get(DIRECTORY_NAME);
                     if (projectDirectoryMap.get(projectId) == null) {
-                        projectDirectoryMap.put(projectId, new ArrayList<String>());
+                        projectDirectoryMap.put(projectId, new HashSet<String>());
                         parseOpportunity(currentDate, resultToExecute, result);
                     }
                     projectDirectoryMap.get(projectId).add(directoryName);
@@ -142,11 +144,11 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends IJobHandler 
      * @param result
      * @param projectDirectoryMap
      */
-    protected void refresh(Map<String, Object> result, Map<Long, List<String>> projectDirectoryMap) {
-        List<String> directoryNames = projectDirectoryMap.get(result.get(PROJECT_ID));
+    protected void refresh(Map<String, Object> result, Map<Long, Set<String>> projectDirectoryMap) {
+        Set<String> directoryNames = projectDirectoryMap.get(result.get(PROJECT_ID));
         // 采购品
         result.put(DIRECTORY_NAME, StringUtils.collectionToCommaDelimitedString(directoryNames));
-        result.put(FIRST_DIRECTORY_NAME, directoryNames.get(0));
+        result.put(FIRST_DIRECTORY_NAME, directoryNames.iterator().next());
         result.put(DIRECTORY_NAME_COUNT, directoryNames.size());
         // 同步时间
         result.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
@@ -154,7 +156,9 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends IJobHandler 
         // for fuck js
         result.put(PROJECT_ID, String.valueOf(result.get(PROJECT_ID)));
         result.put(PURCHASE_ID, String.valueOf(result.get(PURCHASE_ID)));
-    };
+    }
+
+    ;
 
     /**
      * 解析商机数据
