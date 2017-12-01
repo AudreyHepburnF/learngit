@@ -5,51 +5,63 @@ import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Random;
 
 @Service
 @JobHander
 public class PurchaseQuantityJobHandler extends IJobHandler{
+    // 总交易量
+    private String TOTAL_TRANSACTION_NUM = "total_transaction_num";
+    // 今日交易量
+    private String TODAY_TRANSACTION_NUM = "today_transaction_num";
 
+    //每日交易额随机数
+    @Value("${randomNum:500}")
+    private  Integer randomNum;
+
+    @Value("${totalTransactionNum:300000}")
+    private Long totalTransactionNum;
+
+    @Value("${todayTransactionNum:1500}")
+    private Integer todayTransactionNum;
+
+    private Random random = new Random();
     @Autowired
     private BidRedis bidRedis;
     @Override
+    /**
+     *  每天采购交易量范围：1500 - 2000
+     *  采购交易总额基数： 2310301230
+     */
     public ReturnT<String> execute(String... strings) throws Exception {
-        // 计算过程
-        // 1500 - 2000
-        // 基数 2310301230
-        //今日交易量
-        int today_transaction_num=0;
-        //总的交易量
-        int total_transaction_num=300000;
-        //产生0-99随机数
-        int x=(int)(Math.random()*10);
-        //今日交易量
-        if(bidRedis.exists("today_transaction_num")){
-            SimpleDateFormat sdf =new SimpleDateFormat("HH:mm:ss");
-            String time=sdf.format(new Date());
-            String[] s=time.split(":");
-            String hh=s[0];
-            String min=s[1];
-            //当小时和分钟大于23:50的时候 重新计算
-            if(Integer.valueOf(hh)==23&&Integer.valueOf(min)>50){
-                bidRedis.del("today_transaction_num");
-            }else{
-                bidRedis.setObject("today_transaction_num",(Integer.valueOf(bidRedis.getObject("today_transaction_num").toString())+x));
-            }
-        }else{
-            bidRedis.setObject("today_transaction_num",(today_transaction_num+x));
-        }
-
-        //总的交易量
-        if(bidRedis.exists("total_transaction_num")){
-            bidRedis.setObject("total_transaction_num",(Integer.valueOf(bidRedis.getObject("total_transaction_num").toString())+x));
-        }else{
-            bidRedis.setObject("total_transaction_num",(total_transaction_num+x));
-        }
+        int todayTransactionNumToUse = calculateTodayTransactionNum();
+        // 更新每日交易额
+        updateTodayTransactionNum(todayTransactionNumToUse);
+        // 更新总交易额
+        updateTotalTransactionNum(todayTransactionNumToUse);
         return ReturnT.SUCCESS;
+    }
+
+
+    private void updateTotalTransactionNum(int todayTransactionNumToUse) {
+        if (bidRedis.exists(TOTAL_TRANSACTION_NUM)) {
+            Long totalTransactionNum = (Long) bidRedis.getObject(TOTAL_TRANSACTION_NUM);
+            bidRedis.setObject(TOTAL_TRANSACTION_NUM, totalTransactionNum + todayTransactionNumToUse);
+        } else {
+            bidRedis.setObject(TOTAL_TRANSACTION_NUM, totalTransactionNum);
+        }
+    }
+
+    private void updateTodayTransactionNum(int todayTransactionNumToUse) {
+        bidRedis.setObject(TODAY_TRANSACTION_NUM, todayTransactionNumToUse);
+    }
+
+    private int calculateTodayTransactionNum() {
+        return todayTransactionNum + random.nextInt(randomNum);
     }
 }
