@@ -4,6 +4,7 @@ import cn.bidlink.framework.redis.BidRedis;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.handler.annotation.JobHander;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,7 @@ import java.util.Random;
 
 @Service
 @JobHander
-public class PurchaseQuantityJobHandler extends IJobHandler{
+public class PurchaseQuantityJobHandler extends IJobHandler /*implements InitializingBean*/{
     // 总交易量
     private String TOTAL_TRANSACTION_NUM = "total_transaction_num";
     // 今日交易量
@@ -64,4 +65,11 @@ public class PurchaseQuantityJobHandler extends IJobHandler{
     private int calculateTodayTransactionNum() {
         return todayTransactionNum + random.nextInt(randomNum);
     }
+
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+//        execute();
+//        System.out.println(bidRedis.getObject(TOTAL_TRANSACTION_NUM));
+//        System.out.println(bidRedis.getObject(TODAY_TRANSACTION_NUM));
+//    }
 }
