@@ -13,6 +13,7 @@
         <module>bidlink-job-business</module>
         <module>bidlink-job-product</module>
         <module>bidlink-job-common</module>
+        <module>bidlink-job-purchase</module>
     </modules>
 
     <properties>
