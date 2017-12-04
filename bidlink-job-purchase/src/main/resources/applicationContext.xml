@@ -16,6 +16,8 @@
         </property>
     </bean>
 
+    <import resource="classpath:applicationContext-redis.xml" />
+
     <!-- ********************************* 基础配置 ********************************* -->
 
     <!-- 配置01、JobHandler 扫描路径 -->
