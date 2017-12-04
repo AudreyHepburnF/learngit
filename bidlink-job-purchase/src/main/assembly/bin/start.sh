@@ -5,7 +5,7 @@ cd ..
 DEPLOY_DIR=`pwd`
 CONF_DIR=$DEPLOY_DIR/conf
 
-SERVER_NAME=cn.bidlink.job.business.BusinessJobLauncher
+SERVER_NAME=cn.bidlink.job.purchase.PurchaseJobLauncher
 if [ -z "$SERVER_NAME" ]; then
     SERVER_NAME=`hostname`
 fi
