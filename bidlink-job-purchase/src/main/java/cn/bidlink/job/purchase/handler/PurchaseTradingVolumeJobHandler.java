@@ -13,7 +13,6 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,10 +35,10 @@ import java.util.Map;
  * @Date 2017/11/29
  */
 @Service
-@JobHander(value = "purchaseTradingVolumeJobHander")
-public class PurchaseTradingVolumeJobHander extends IJobHandler implements InitializingBean {
+@JobHander(value = "purchaseTradingVolumeJobHandler")
+public class PurchaseTradingVolumeJobHandler extends IJobHandler /*implements InitializingBean*/ {
 
-    private Logger logger = LoggerFactory.getLogger(PurchaseTradingVolumeJobHander.class);
+    private Logger logger = LoggerFactory.getLogger(PurchaseTradingVolumeJobHandler.class);
 
     @Autowired
     private ElasticClient elasticClient;
@@ -294,7 +293,7 @@ public class PurchaseTradingVolumeJobHander extends IJobHandler implements Initi
      * @param purchaseIds
      */
     private void appendPurchaseTradingVolume(List<Map<String, Object>> purchases, ArrayList<Long> purchaseIds) {
-        String queryPurchaerSqlTemplate = "SELECT\n"
+        String queryPurchaserSqlTemplate = "SELECT\n"
                 + "   sum(bpe.deal_total_price) AS purchaseTradingVolume ,\n"
                 + "   bp.comp_id AS id\n"
                 + "FROM\n"
@@ -307,7 +306,7 @@ public class PurchaseTradingVolumeJobHander extends IJobHandler implements Initi
                 + "   bp.comp_id";
 
         if (!CollectionUtils.isEmpty(purchaseIds)) {
-            String queryPurchaseSql = String.format(queryPurchaerSqlTemplate, StringUtils.collectionToCommaDelimitedString(purchaseIds));
+            String queryPurchaseSql = String.format(queryPurchaserSqlTemplate, StringUtils.collectionToCommaDelimitedString(purchaseIds));
             //根据采购商id查询交易额
             List<Map<String, Object>> purchaseTradingVolumeList = DBUtil.query(ycDataSource, queryPurchaseSql, null);
             HashMap<String, BigDecimal> purchaseAttributeMap = new HashMap<>();
@@ -352,8 +351,8 @@ public class PurchaseTradingVolumeJobHander extends IJobHandler implements Initi
         return paramsToUse;
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        execute();
-    }
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+//        execute();
+//    }
 }
