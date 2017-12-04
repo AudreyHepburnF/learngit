@@ -4,17 +4,14 @@ import cn.bidlink.framework.redis.BidRedis;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.handler.annotation.JobHander;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Random;
 
 @Service
-@JobHander
+@JobHander("purchaseQuantityJobHandler")
 public class PurchaseQuantityJobHandler extends IJobHandler /*implements InitializingBean*/{
     // 总交易量
     private String TOTAL_TRANSACTION_NUM = "total_transaction_num";
