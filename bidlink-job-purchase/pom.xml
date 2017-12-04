@@ -8,6 +8,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+    <packaging>jar</packaging>
 
     <artifactId>bidlink-job-purchase</artifactId>
 
@@ -82,6 +83,27 @@
                 <pom.log.rootLogger>CONSOLE</pom.log.rootLogger>
                 <pom.log.level>debug</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
+                <!--悦彩数据源-->
+                <pom.yc.db.url>jdbc:mysql://10.4.0.45:3306/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yc.db.url>
+                <pom.yc.db.username>develop</pom.yc.db.username>
+                <pom.yc.db.password>123123</pom.yc.db.password>
+
+                <!--中心库数据源-->
+                <pom.center.db.url>jdbc:mysql://10.1.1.209:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.center.db.url>
+                <pom.center.db.username>cancal</pom.center.db.username>
+                <pom.center.db.password>unireg!@#</pom.center.db.password>
+
+                <!--es配置-->
+                <pom.cluster.host>10.4.0.69:9300</pom.cluster.host>
+                <pom.cluster.name>dc-test</pom.cluster.name>
+                <pom.cluster.index>yc_test</pom.cluster.index>
+                <pom.cluster.type.purchase>purchase</pom.cluster.type.purchase>
+                <pom.path.conf>D:/es/config/</pom.path.conf>
+                <pom.searchguard.enable>true</pom.searchguard.enable>
+                <pom.searchguard.ssl.transport.keystore_filepath>admin-keystore.jks</pom.searchguard.ssl.transport.keystore_filepath>
+                <pom.searchguard.ssl.transport.truststore_filepath>truststore.jks</pom.searchguard.ssl.transport.truststore_filepath>
+                <pom.searchguard.ssl.transport.keystore_password>49e68ad53ae7483da17e</pom.searchguard.ssl.transport.keystore_password>
+                <pom.searchguard.ssl.transport.truststore_password>49e68ad53ae7483da17e</pom.searchguard.ssl.transport.truststore_password>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -96,17 +118,64 @@
                 <pom.log.rootLogger>FILE</pom.log.rootLogger>
                 <pom.log.level>INFO</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
+
+                <!--悦彩数据源-->
+                <pom.yc.db.url>jdbc:mysql://192.168.1.86:3306/nyc?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yc.db.url>
+                <pom.yc.db.username>shujuzhx</pom.yc.db.username>
+                <pom.yc.db.password>BzUS3GsL1l</pom.yc.db.password>
+
+                <!--中心库数据源-->
+                <pom.center.db.url>jdbc:mysql://192.168.1.82:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.center.db.url>
+                <pom.center.db.username>fengzikai</pom.center.db.username>
+                <pom.center.db.password>bid6link!@#$</pom.center.db.password>
+
+                <!--es配置-->
+                <pom.cluster.host>192.168.2.249:9300,192.168.2.250:9300,192.168.2.251:9300</pom.cluster.host>
+                <pom.cluster.name>dc</pom.cluster.name>
+                <pom.cluster.index>yc_opportunity</pom.cluster.index>
+                <pom.cluster.type.purchase>purchase</pom.cluster.type.purchase>
+                <pom.searchguard.enable>false</pom.searchguard.enable>
+                <pom.path.conf></pom.path.conf>
+                <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
+                <pom.searchguard.ssl.transport.truststore_filepath></pom.searchguard.ssl.transport.truststore_filepath>
+                <pom.searchguard.ssl.transport.keystore_password></pom.searchguard.ssl.transport.keystore_password>
+                <pom.searchguard.ssl.transport.truststore_password></pom.searchguard.ssl.transport.truststore_password>
+
+
             </properties>
         </profile>
         <profile>
             <id>test</id>
             <properties>
-                <pom.application.name>bidlink-job-purhcase</pom.application.name>
+                <pom.application.name>bidlink-job-purchase</pom.application.name>
                 <pom.xxl.job.admin.addresses>http://10.4.0.98:8080/xxl-job</pom.xxl.job.admin.addresses>
                 <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
                 <pom.log.rootLogger>FILE</pom.log.rootLogger>
                 <pom.log.level>info</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
+
+                <!--悦彩数据源-->
+                <pom.yc.db.url>jdbc:mysql://10.4.0.45:3306/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yc.db.url>
+                <pom.yc.db.username>develop</pom.yc.db.username>
+                <pom.yc.db.password>123123</pom.yc.db.password>
+
+                <!--中心库数据源-->
+                <pom.center.db.url>jdbc:mysql://10.1.1.209:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.center.db.url>
+                <pom.center.db.username>cancal</pom.center.db.username>
+                <pom.center.db.password>unireg!@#</pom.center.db.password>
+
+                <!--es配置-->
+                <pom.cluster.host>10.4.0.69:9300</pom.cluster.host>
+                <pom.cluster.name>dc-test</pom.cluster.name>
+                <pom.cluster.index>yc_test</pom.cluster.index>
+                <pom.cluster.type.purchase>purchase</pom.cluster.type.purchase>
+                <pom.path.conf>/app/programs/${pom.application.name}/conf/es/</pom.path.conf>
+                <pom.searchguard.enable>true</pom.searchguard.enable>
+                <pom.searchguard.ssl.transport.keystore_filepath>admin-keystore.jks</pom.searchguard.ssl.transport.keystore_filepath>
+                <pom.searchguard.ssl.transport.truststore_filepath>truststore.jks</pom.searchguard.ssl.transport.truststore_filepath>
+                <pom.searchguard.ssl.transport.keystore_password>49e68ad53ae7483da17e</pom.searchguard.ssl.transport.keystore_password>
+                <pom.searchguard.ssl.transport.truststore_password>49e68ad53ae7483da17e</pom.searchguard.ssl.transport.truststore_password>
+
             </properties>
         </profile>
     </profiles>
