@@ -18,6 +18,22 @@
             <artifactId>bidlink-job-common</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <!--redis-->
+        <dependency>
+            <groupId>cn.bidlink.framework</groupId>
+            <artifactId>framework-redis</artifactId>
+            <version>1.0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>1.7.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.7.4</version>
+        </dependency>
     </dependencies>
 
     <build>
