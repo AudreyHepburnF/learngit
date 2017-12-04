@@ -29,10 +29,7 @@ import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
@@ -97,8 +94,8 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     }
 
     public ReturnT<String> execute(String... strings) throws Exception {
-        SyncTimeUtil.setCurrentDate();
         logger.info("供应商产品数据同步开始");
+        SyncTimeUtil.setCurrentDate();
         syncProductData();
         logger.info("供应商产品数据同步结束");
         return ReturnT.SUCCESS;
@@ -274,6 +271,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
         long count = DBUtil.count(inputDataSource, countSql, params);
         logger.debug("执行countSql : {}, params : {}，共{}条", countSql, params, count);
         if (count > 0) {
+            final Timestamp currentDate = SyncTimeUtil.getCurrentDate();
             for (long i = 0; i < count; ) {
                 final long finalI = i;
                 try {
@@ -281,7 +279,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
                     executorService.execute(new Runnable() {
                         @Override
                         public void run() {
-                            doBatchSyncData(inputDataSource, querySql, params, finalI);
+                            doBatchSyncData(inputDataSource, querySql, params, finalI, currentDate);
                         }
                     });
                     i += pageSize;
@@ -292,7 +290,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
         }
     }
 
-    private void doBatchSyncData(DataSource inputDataSource, String querySql, List<Object> params, long i) {
+    private void doBatchSyncData(DataSource inputDataSource, String querySql, List<Object> params, long i, Timestamp currentDate) {
         try {
             List<Object> paramsToUse = appendToParams(params, i);
             List<Map<String, Object>> results = DBUtil.query(inputDataSource, querySql, paramsToUse);
@@ -305,6 +303,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
                 String[] changedDirectoryNames = splitDirectoryName(directoryName);
                 for (String name : changedDirectoryNames) {
                     if (!StringUtils.isEmpty(name)) {
+                        result.put(SyncTimeUtil.SYNC_TIME, currentDate);
                         resultsToExecute.add(refresh(result, name));
                     }
                 }
@@ -345,7 +344,6 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
         resultToUse.put(ID, generateSupplierProductId(resultToUse));
         // 将supplierId转为string
         resultToUse.put(SUPPLIER_ID, String.valueOf(resultToUse.get(SUPPLIER_ID)));
-        resultToUse.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
         return resultToUse;
     }
 

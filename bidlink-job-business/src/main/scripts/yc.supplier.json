@@ -1,0 +1,173 @@
+// 方式1：直接在head界面操作，yc_v1/supplier/_mapping POST
+// 方式2：curl -XPOST http://dcsearch.api.yuecai.com/yc_v1/supplier/_mapping -d'
+{
+  "supplier": {
+    "properties": {
+      "address": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "addressEn": {
+        "type": "string",
+        "analyzer": "standard"
+      },
+      "authCodeId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "authStatus": {
+        "type": "integer"
+      },
+      "authStatus2": {
+        "type": "integer"
+      },
+      "authTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "authType": {
+        "type": "integer"
+      },
+      "authenNumber": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "bidAuthExpires": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "bidAuthFtime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "bidAuthStatus": {
+        "type": "integer"
+      },
+      "bidAuthTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "code": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "companyName": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "companyNameEn": {
+        "type": "string",
+        "analyzer": "standard"
+      },
+      "companySite": {
+        "type": "string",
+        "analyzer": "standard"
+      },
+      "companyType": {
+        "type": "integer"
+      },
+      "companyTypeStr": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "contact": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "contactEn": {
+        "type": "string",
+        "analyzer": "standard"
+      },
+      "core": {
+        "type": "integer"
+      },
+      "createTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "creditRating": {
+        "type": "integer"
+      },
+      "enterpriseSpace": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "foundedDate": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "fund": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "fundUnit": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "id": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "industryCode": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "industryStr": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "loginName": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "mainProduct": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "mobile": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "supplierName": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "syncTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "tel": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "tenantId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "updateTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "webType": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "workPattern": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "wwwStation": {
+        "type": "string",
+        "analyzer": "standard"
+      },
+      "zoneCode": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "zoneStr": {
+        "type": "string",
+        "analyzer": "ik"
+      }
+    }
+  }
+}
