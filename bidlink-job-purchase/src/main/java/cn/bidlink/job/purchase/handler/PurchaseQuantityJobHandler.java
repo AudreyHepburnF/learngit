@@ -12,7 +12,7 @@ import java.util.Random;
 
 @Service
 @JobHander("purchaseQuantityJobHandler")
-public class PurchaseQuantityJobHandler extends IJobHandler /*implements InitializingBean*/{
+public class PurchaseQuantityJobHandler extends IJobHandler /*implements InitializingBean*/ {
     // 总交易量
     private String TOTAL_TRANSACTION_NUM = "total_transaction_num";
     // 今日交易量
@@ -20,7 +20,7 @@ public class PurchaseQuantityJobHandler extends IJobHandler /*implements Initial
 
     //每日交易额随机数
     @Value("${randomNum:500}")
-    private  Integer randomNum;
+    private Integer randomNum;
 
     @Value("${totalTransactionNum:300000}")
     private Long totalTransactionNum;
@@ -31,6 +31,7 @@ public class PurchaseQuantityJobHandler extends IJobHandler /*implements Initial
     private Random random = new Random();
     @Autowired
     private BidRedis bidRedis;
+
     @Override
     /**
      *  每天采购交易量范围：1500 - 2000
