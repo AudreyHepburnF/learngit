@@ -5,7 +5,6 @@ import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.ValueFilter;
-import com.xxl.job.core.handler.IJobHandler;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.joda.time.DateTime;
@@ -13,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
@@ -28,7 +26,7 @@ import java.util.*;
  * @description :
  * @date : 2017/8/25
  */
-public abstract class AbstractSyncOpportunityDataJobHandler extends IJobHandler {
+public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
@@ -41,9 +39,6 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends IJobHandler 
     @Autowired
     @Qualifier("centerDataSource")
     protected DataSource centerDataSource;
-
-    @Value("${pageSize:200}")
-    protected int pageSize;
 
     // 有效的商机
     protected int VALID_OPPORTUNITY_STATUS   = 1;
@@ -168,15 +163,6 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends IJobHandler 
      * @param result
      */
     protected abstract void parseOpportunity(Timestamp currentDate, List<Map<String, Object>> resultToExecute, Map<String, Object> result);
-
-    protected List<Object> appendToParams(List<Object> params, long i) {
-        List<Object> paramsToUse = new ArrayList<>(params);
-        paramsToUse.add(i);
-        paramsToUse.add(pageSize);
-        return paramsToUse;
-    }
-
-    ;
 
     /**
      * 查询采购商的tenantKey
