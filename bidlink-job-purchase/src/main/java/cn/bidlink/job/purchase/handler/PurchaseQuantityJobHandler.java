@@ -4,6 +4,8 @@ import cn.bidlink.framework.redis.BidRedis;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.handler.annotation.JobHander;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,8 @@ import java.util.Random;
 @Service
 @JobHander("purchaseQuantityJobHandler")
 public class PurchaseQuantityJobHandler extends IJobHandler /*implements InitializingBean*/ {
+    private Logger logger                = LoggerFactory.getLogger(PurchaseQuantityJobHandler.class);
+
     // 总交易量
     private String TOTAL_TRANSACTION_NUM = "total_transaction_num";
     // 今日交易量
@@ -51,13 +55,16 @@ public class PurchaseQuantityJobHandler extends IJobHandler /*implements Initial
         if (bidRedis.exists(TOTAL_TRANSACTION_NUM)) {
             Long totalTransactionNum = (Long) bidRedis.getObject(TOTAL_TRANSACTION_NUM);
             bidRedis.setObject(TOTAL_TRANSACTION_NUM, totalTransactionNum + todayTransactionNumToUse);
+            logger.info("采购商项目总交易量：" + (totalTransactionNum + todayTransactionNumToUse));
         } else {
             bidRedis.setObject(TOTAL_TRANSACTION_NUM, totalTransactionNum);
+            logger.info("采购商项目总交易量：" + (totalTransactionNum));
         }
     }
 
     private void updateTodayTransactionNum(int todayTransactionNumToUse) {
         bidRedis.setObject(TODAY_TRANSACTION_NUM, todayTransactionNumToUse);
+        logger.info("采购商项目今日交易量：" + todayTransactionNumToUse);
     }
 
     private int calculateTodayTransactionNum() {
@@ -66,8 +73,12 @@ public class PurchaseQuantityJobHandler extends IJobHandler /*implements Initial
 
 //    @Override
 //    public void afterPropertiesSet() throws Exception {
-//        execute();
-//        System.out.println(bidRedis.getObject(TOTAL_TRANSACTION_NUM));
-//        System.out.println(bidRedis.getObject(TODAY_TRANSACTION_NUM));
+////        execute();
+////        System.out.println(bidRedis.getObject(TOTAL_TRANSACTION_NUM));
+////        System.out.println(bidRedis.getObject(TODAY_TRANSACTION_NUM));
+//        Long totalTransactionNum = (Long) bidRedis.getObject(TOTAL_TRANSACTION_NUM);
+//        System.out.println(totalTransactionNum);
+//        Integer todayTransactionNum = (Integer) bidRedis.getObject(TODAY_TRANSACTION_NUM);
+//        System.out.println(todayTransactionNum);
 //    }
 }
