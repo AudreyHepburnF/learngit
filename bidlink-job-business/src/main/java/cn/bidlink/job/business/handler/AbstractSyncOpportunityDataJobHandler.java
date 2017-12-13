@@ -50,21 +50,23 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected int PURCHASE_PROJECT_TYPE      = 2;
 
 
-    protected String ID                   = "id";
-    protected String PURCHASE_ID          = "purchaseId";
-    protected String PROJECT_ID           = "projectId";
-    protected String PROJECT_TYPE         = "projectType";
-    protected String DIRECTORY_NAME       = "directoryName";
-    protected String PURCHASE_NAME        = "purchaseName";
-    protected String PROJECT_CODE         = "projectCode";
-    protected String PROJECT_NAME         = "projectName";
-    protected String PROJECT_STATUS       = "projectStatus";
-    protected String TENANT_KEY           = "tenantKey";
-    protected String AREA_STR             = "areaStr";
-    protected String STATUS               = "status";
-    protected String FIRST_DIRECTORY_NAME = "firstDirectoryName";
-    protected String DIRECTORY_NAME_COUNT = "directoryNameCount";
-    protected String QUOTE_STOP_TIME      = "quoteStopTime";
+    protected String ID                          = "id";
+    protected String PURCHASE_ID                 = "purchaseId";
+    protected String PROJECT_ID                  = "projectId";
+    protected String PROJECT_TYPE                = "projectType";
+    protected String DIRECTORY_NAME              = "directoryName";
+    protected String DIRECTORY_NAME_NOT_ANALYZED = "directoryNameNotAnalyzed";
+    protected String PURCHASE_NAME               = "purchaseName";
+    protected String PROJECT_CODE                = "projectCode";
+    protected String PROJECT_NAME                = "projectName";
+    protected String PROJECT_NAME_NOT_ANALYZED   = "projectNameNotAnalyzed";
+    protected String PROJECT_STATUS              = "projectStatus";
+    protected String TENANT_KEY                  = "tenantKey";
+    protected String AREA_STR                    = "areaStr";
+    protected String STATUS                      = "status";
+    protected String FIRST_DIRECTORY_NAME        = "firstDirectoryName";
+    protected String DIRECTORY_NAME_COUNT        = "directoryNameCount";
+    protected String QUOTE_STOP_TIME             = "quoteStopTime";
 
 
     protected Map<String, Object> appendIdToResult(Map<String, Object> result) {
@@ -142,9 +144,12 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected void refresh(Map<String, Object> result, Map<Long, Set<String>> projectDirectoryMap) {
         Set<String> directoryNames = projectDirectoryMap.get(result.get(PROJECT_ID));
         // 采购品
-        result.put(DIRECTORY_NAME, StringUtils.collectionToCommaDelimitedString(directoryNames));
+        String directoryNameList = StringUtils.collectionToCommaDelimitedString(directoryNames);
+        result.put(DIRECTORY_NAME, directoryNameList);
+        result.put(DIRECTORY_NAME_NOT_ANALYZED, directoryNameList);
         result.put(FIRST_DIRECTORY_NAME, directoryNames.iterator().next());
         result.put(DIRECTORY_NAME_COUNT, directoryNames.size());
+        result.put(PROJECT_NAME_NOT_ANALYZED, result.get(PROJECT_NAME));
         // 同步时间
         result.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
         // 转换long字段类型，防止前端js精度溢出

@@ -92,6 +92,13 @@
         "type": "string",
         "index": "not_analyzed"
       },
+      "enterpriseSpaceDetail": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "enterpriseSpaceActive": {
+        "type": "integer"
+      },
       "foundedDate": {
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"

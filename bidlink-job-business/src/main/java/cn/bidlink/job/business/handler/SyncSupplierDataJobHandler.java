@@ -52,29 +52,38 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     private DataSource creditDataSource;
 
     @Autowired
+    @Qualifier("enterpriseSpaceDataSource")
+    private DataSource enterpriseSpaceDataSource;
+
+    @Autowired
     @Qualifier("centerDataSource")
     private DataSource centerDataSource;
 
     @Value("${enterpriseSpaceFormat}")
     private String enterpriseSpaceFormat;
 
-    private String ID               = "id";
-    private String CORE             = "core";
-    private String AREA_STR         = "areaStr";
-    private String ZONE_STR         = "zoneStr";
-    private String AREA             = "area";
-    private String CITY             = "city";
-    private String COUNTY           = "county";
-    private String CREDIT_RATING    = "creditRating";
-    private String AUTH_CODE_ID     = "authCodeId";
-    private String AUTHEN_NUMBER    = "authenNumber";
-    private String CODE             = "code";
-    private String FUND             = "fund";
-    private String TENANT_ID        = "tenantId";
-    private String MOBILE           = "mobile";
-    private String TEL              = "tel";
-    private String LOGIN_NAME       = "loginName";
-    private String ENTERPRISE_SPACE = "enterpriseSpace";
+    @Value("${enterpriseSpaceDetailFormat}")
+    private String enterpriseSpaceDetailFormat;
+
+    private String ID                      = "id";
+    private String CORE                    = "core";
+    private String AREA_STR                = "areaStr";
+    private String ZONE_STR                = "zoneStr";
+    private String AREA                    = "area";
+    private String CITY                    = "city";
+    private String COUNTY                  = "county";
+    private String CREDIT_RATING           = "creditRating";
+    private String AUTH_CODE_ID            = "authCodeId";
+    private String AUTHEN_NUMBER           = "authenNumber";
+    private String CODE                    = "code";
+    private String FUND                    = "fund";
+    private String TENANT_ID               = "tenantId";
+    private String MOBILE                  = "mobile";
+    private String TEL                     = "tel";
+    private String LOGIN_NAME              = "loginName";
+    private String ENTERPRISE_SPACE        = "enterpriseSpace";
+    private String ENTERPRISE_SPACE_DETAIL = "enterpriseSpaceDetail";
+    private String ENTERPRISE_SPACE_ACTIVE = "enterpriseSpaceActive";
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -96,9 +105,108 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
                     + ", syncTime : " + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
         syncSupplierDataService(lastSyncTime);
         syncSupplierCompanyStatusService(lastSyncTime);
+        syncEnterpriseSpaceDataService(lastSyncTime);
 
     }
 
+    /**
+     * 同步企业空间
+     *
+     * @param lastSyncTime
+     */
+    private void syncEnterpriseSpaceDataService(Timestamp lastSyncTime) {
+        if (SyncTimeUtil.GMT_TIME.equals(lastSyncTime)) {
+            logger.info("首次同步，忽略同步企业空间");
+            return;
+        }
+
+        logger.info("同步企业空间开始");
+        String countInsertedSql = "SELECT count(1) FROM space_info WHERE CREATE_DATE > ?";
+        String queryInsertedSql = "SELECT COMPANY_ID AS id, STATE AS enterpriseSpaceActive FROM space_info WHERE CREATE_DATE > ? LIMIT ?, ?";
+        doSyncEnterpriseSpaceService(countInsertedSql, queryInsertedSql, lastSyncTime);
+
+        String countUpdatedSql = "SELECT count(1) FROM space_info WHERE MODIFY_DATE > ?";
+        String queryUpdatedSql = "SELECT COMPANY_ID AS id, STATE AS enterpriseSpaceActive FROM space_info WHERE MODIFY_DATE > ? LIMIT ?, ?";
+        doSyncEnterpriseSpaceService(countUpdatedSql, queryUpdatedSql, lastSyncTime);
+        logger.info("同步企业空间结束");
+    }
+
+    private void doSyncEnterpriseSpaceService(String countSql, String querySql, Timestamp lastSyncTime) {
+        List<Object> params = new ArrayList<>();
+        params.add(lastSyncTime);
+        long count = DBUtil.count(enterpriseSpaceDataSource, countSql, params);
+        logger.debug("执行countSql : {}, params : {}，共{}条", countSql, params, count);
+        if (count > 0) {
+            for (long i = 0; i < count; i += pageSize) {
+                List<Object> paramsToUse = appendToParams(params, i);
+                // 查出符合条件的供应商
+                Map<String, Object> enterpriseSpaceInfoMap = DBUtil.query(enterpriseSpaceDataSource, querySql, paramsToUse, new DBUtil.ResultSetCallback<Map<String, Object>>() {
+                    @Override
+                    public Map<String, Object> execute(ResultSet resultSet) throws SQLException {
+                        Map<String, Object> map = new HashMap<>();
+                        while (resultSet.next()) {
+                            map.put(String.valueOf(resultSet.getLong(ID)), resultSet.getInt(ENTERPRISE_SPACE_ACTIVE));
+                        }
+                        return map;
+                    }
+                });
+                logger.debug("执行querySql : {}, params : {}，共{}条", querySql, paramsToUse, enterpriseSpaceInfoMap.size());
+                List<Map<String, Object>> resultFromEs = updateEnterpriseSpaceActive(enterpriseSpaceInfoMap);
+                // 保存到es
+                batchExecute(resultFromEs);
+            }
+        }
+    }
+
+    private List<Map<String, Object>> updateEnterpriseSpaceActive(Map<String, Object> enterpriseSpaceInfoMap) {
+        Properties properties = elasticClient.getProperties();
+        SearchResponse searchResponse = elasticClient.getTransportClient()
+                .prepareSearch(properties.getProperty("cluster.index"))
+                .setTypes(properties.getProperty("cluster.type.supplier"))
+                .setQuery(QueryBuilders.termsQuery(ID, enterpriseSpaceInfoMap.keySet()))
+                .setFrom(0)
+                .setSize(enterpriseSpaceInfoMap.size())
+                .execute()
+                .actionGet();
+
+        SearchHits hits = searchResponse.getHits();
+        List<Map<String, Object>> suppliers = new ArrayList<>();
+        long totalHits = hits.getTotalHits();
+        if (totalHits > 0) {
+            for (SearchHit searchHit : hits.hits()) {
+                Map<String, Object> source = searchHit.getSource();
+                Object enterpriseSpaceActive = enterpriseSpaceInfoMap.get(source.get(ID));
+                doUpdateEnterpriseSpace(source, enterpriseSpaceActive);
+                refresh(source);
+                suppliers.add(source);
+            }
+        }
+        return suppliers;
+    }
+
+    private void doUpdateEnterpriseSpace(Map<String, Object> source, Object enterpriseSpaceActive) {
+        if (enterpriseSpaceActive == null) {
+            // 如果没有企业空间，就置为0
+            source.put(ENTERPRISE_SPACE_ACTIVE, 0);
+        } else {
+            source.put(ENTERPRISE_SPACE_ACTIVE, enterpriseSpaceActive);
+            String loginName = convertToString(source.get(LOGIN_NAME));
+            if (loginName != null) {
+                // 企业空间页面
+                String enterpriseSpace = MessageFormat.format(enterpriseSpaceFormat, loginName.toLowerCase(), loginName);
+                source.put(ENTERPRISE_SPACE, enterpriseSpace);
+                // 企业诚信等级页面
+                String enterpriseSpaceDetail = MessageFormat.format(enterpriseSpaceDetailFormat, loginName.toLowerCase(), loginName);
+                source.put(ENTERPRISE_SPACE_DETAIL, enterpriseSpaceDetail);
+            }
+        }
+    }
+
+    /**
+     * 同步核心供状态
+     *
+     * @param lastSyncTime
+     */
     private void syncSupplierCompanyStatusService(Timestamp lastSyncTime) {
         if (SyncTimeUtil.GMT_TIME.equals(lastSyncTime)) {
             logger.info("首次同步，忽略同步供应商状态");
@@ -168,6 +276,11 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
         return suppliers;
     }
 
+    /**
+     * 同步供应商的基本信息
+     *
+     * @param lastSyncTime
+     */
     private void syncSupplierDataService(Timestamp lastSyncTime) {
         logger.info("同步供应商开始");
         doInsertedSupplierData(lastSyncTime);
@@ -310,6 +423,8 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
                 appendAreaStrToResult(resultToExecute, supplierIds);
                 // 添加诚信等级
                 appendCreditToResult(resultToExecute, supplierIds);
+                // 添加企业空间
+                appendEnterpriseSpaceToResult(resultToExecute, supplierIds);
                 // 保存到es
                 batchExecute(resultToExecute);
             }
@@ -327,20 +442,37 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
         resultToUse.put(TEL, convertToString(resultToUse.get(TEL)));
         resultToUse.put(ID, convertToString(resultToUse.get(ID)));
         resultToUse.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
-        // 企业空间
-        String loginName = convertToString(resultToUse.get(LOGIN_NAME));
-        if (loginName != null) {
-            String enterpriseSpace = MessageFormat.format(enterpriseSpaceFormat, loginName.toLowerCase(), loginName);
-            resultToUse.put(ENTERPRISE_SPACE, enterpriseSpace);
-        }
     }
 
-    public String convertToString(Object value) {
+    private String convertToString(Object value) {
         if (value == null) {
             return null;
         } else {
             return String.valueOf(value);
         }
+    }
+
+
+    private void appendEnterpriseSpaceToResult(List<Map<String, Object>> resultToExecute, Set<Long> supplierIds) {
+        if (supplierIds.size() > 0) {
+            Map<Long, Object> enterpriseSpaceInfoMap = queryEnterpriseSpaceInfo(supplierIds);
+            for (Map<String, Object> result : resultToExecute) {
+                Long supplierId = Long.valueOf(String.valueOf(result.get(ID)));
+                Object enterpriseSpaceActive = enterpriseSpaceInfoMap.get(supplierId);
+                doUpdateEnterpriseSpace(result, enterpriseSpaceActive);
+            }
+        }
+    }
+
+    private Map<Long, Object> queryEnterpriseSpaceInfo(Set<Long> supplierIds) {
+        String queryEnterpriseSpaceInfoTemplate = "SELECT COMPANY_ID AS id,STATE as enterpriseSpaceActive FROM space_info WHERE STATE = 1 AND COMPANY_ID in (%s)";
+        String queryEnterpriseSpaceInfoSql = String.format(queryEnterpriseSpaceInfoTemplate, StringUtils.collectionToCommaDelimitedString(supplierIds));
+        List<Map<String, Object>> query = DBUtil.query(enterpriseSpaceDataSource, queryEnterpriseSpaceInfoSql, null);
+        Map<Long, Object> enterpriseSpaceInfoMap = new HashMap<>();
+        for (Map<String, Object> map : query) {
+            enterpriseSpaceInfoMap.put((Long) map.get(ID), map.get(ENTERPRISE_SPACE_ACTIVE));
+        }
+        return enterpriseSpaceInfoMap;
     }
 
     private void appendCreditToResult(List<Map<String, Object>> resultToExecute, Set<Long> supplierIds) {
@@ -356,7 +488,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     }
 
     private Map<Long, Object> queryCredit(Set<Long> supplierIds) {
-        String queryCreditTemplate = "SELECT COMPANY_ID as id, RATING as creditRating FROM credit_score WHERE id in (%s)";
+        String queryCreditTemplate = "SELECT COMPANY_ID as id, RATING as creditRating FROM credit_score WHERE COMPANY_ID in (%s)";
         String queryCreditSql = String.format(queryCreditTemplate, StringUtils.collectionToCommaDelimitedString(supplierIds));
         List<Map<String, Object>> query = DBUtil.query(creditDataSource, queryCreditSql, null);
         Map<Long, Object> creditMap = new HashMap<>();

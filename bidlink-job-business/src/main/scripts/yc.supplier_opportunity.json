@@ -43,6 +43,10 @@
         "analyzer": "ik",
         "type": "string"
       },
+      "projectNameNotAnalyzed": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
       "isCore": {
         "type": "integer",
         "index": "not_analyzed"
@@ -61,6 +65,10 @@
       },
       "directoryName": {
         "analyzer": "ik",
+        "type": "string"
+      },
+      "directoryNameNotAnalyzed": {
+        "index": "not_analyzed",
         "type": "string"
       },
       "firstDirectoryName" : {
