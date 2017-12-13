@@ -80,10 +80,6 @@
 					<artifactId>commons-logging</artifactId>
 					<groupId>commons-logging</groupId>
 				</exclusion>
-				<exclusion>
-					<artifactId>commons-lang</artifactId>
-					<groupId>commons-lang</groupId>
-				</exclusion>
 			</exclusions>
 		</dependency>
 	</dependencies>
@@ -144,6 +140,12 @@
 				<pom.log.rootLogger>CONSOLE</pom.log.rootLogger>
 				<pom.log.level>debug</pom.log.level>
 				<pom.log.dir>logs</pom.log.dir>
+
+				<!--同步配置-->
+				<pom.purchase.synergy.old.ip>http://10.4.1.23</pom.purchase.synergy.old.ip>
+				<pom.purchase.synergy.old.port>8047</pom.purchase.synergy.old.port>
+				<pom.purchase.synergy.new.ip>http://10.4.1.23</pom.purchase.synergy.new.ip>
+				<pom.purchase.synergy.new.port>8048</pom.purchase.synergy.new.port>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -158,6 +160,12 @@
 				<pom.log.rootLogger>FILE</pom.log.rootLogger>
 				<pom.log.level>INFO</pom.log.level>
 				<pom.log.dir>logs</pom.log.dir>
+
+				<!--同步配置-->
+				<pom.purchase.synergy.old.ip>http://127.0.0.1</pom.purchase.synergy.old.ip>
+				<pom.purchase.synergy.old.port>8047</pom.purchase.synergy.old.port>
+				<pom.purchase.synergy.new.ip>http://127.0.0.1</pom.purchase.synergy.new.ip>
+				<pom.purchase.synergy.new.port>8048</pom.purchase.synergy.new.port>
 			</properties>
 		</profile>
 		<profile>
@@ -169,6 +177,12 @@
 				<pom.log.rootLogger>FILE</pom.log.rootLogger>
 				<pom.log.level>info</pom.log.level>
 				<pom.log.dir>logs</pom.log.dir>
+
+				<!--同步配置-->
+				<pom.purchase.synergy.old.ip>http://10.4.1.23</pom.purchase.synergy.old.ip>
+				<pom.purchase.synergy.old.port>8047</pom.purchase.synergy.old.port>
+				<pom.purchase.synergy.new.ip>http://10.4.1.23</pom.purchase.synergy.new.ip>
+				<pom.purchase.synergy.new.port>8048</pom.purchase.synergy.new.port>
 			</properties>
 		</profile>
 	</profiles>
