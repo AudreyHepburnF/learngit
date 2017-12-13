@@ -11,6 +11,7 @@
     <packaging>jar</packaging>
 
     <artifactId>bidlink-job-business</artifactId>
+    <description>同步商机数据</description>
 
     <dependencies>
         <dependency>

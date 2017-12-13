@@ -11,6 +11,7 @@
     <packaging>jar</packaging>
 
     <artifactId>bidlink-job-purchase</artifactId>
+    <description>同步采购商的交易数据</description>
 
     <dependencies>
         <dependency>
