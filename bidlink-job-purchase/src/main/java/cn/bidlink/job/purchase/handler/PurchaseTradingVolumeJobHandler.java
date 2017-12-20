@@ -336,7 +336,7 @@ public class PurchaseTradingVolumeJobHandler extends IJobHandler /*implements In
         if (companySiteObject != null) {
             String companySite = String.valueOf(companySiteObject).trim();
             if (!companySite.startsWith("http")) {
-                companySite += "http://";
+                companySite = "http://" + companySite;
             }
             result.put(COMPANY_SITE_ALIAS, companySite);
         }
