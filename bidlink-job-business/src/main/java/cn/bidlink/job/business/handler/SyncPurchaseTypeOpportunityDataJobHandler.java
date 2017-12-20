@@ -5,14 +5,12 @@ import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.action.deletebyquery.DeleteByQueryAction;
+import org.elasticsearch.action.deletebyquery.DeleteByQueryRequestBuilder;
+import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
@@ -61,9 +59,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
                                                                    QueryBuilders.boolQuery().must(QueryBuilders.termQuery("projectType", PURCHASE_PROJECT_TYPE)));
         logger.info("采购项目商机同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
         syncPurchaseProjectDataService(lastSyncTime);
-//        long millis = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").parseDateTime("2017-09-07 14:30:00").getMillis();
-//        syncPurchaseProjectDataService(new Timestamp(millis));
-//        fixExpiredAutoStopTypePurchaseProjectDataService(lastSyncTime);
+        fixExpiredAutoStopTypePurchaseProjectDataService(lastSyncTime);
     }
 
     /**
@@ -72,77 +68,28 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
      * @param lastSyncTime
      */
     private void fixExpiredAutoStopTypePurchaseProjectDataService(Timestamp lastSyncTime) {
-        logger.info("修复的自动截标商机开始");
-        Properties properties = elasticClient.getProperties();
+        logger.info("修复自动截标商机开始");
         String currentTime = new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-        // 查询小于当前时间的自动截标
-        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-                .must(QueryBuilders.termQuery("status", 1))
-                .must(QueryBuilders.termQuery("projectType", PURCHASE_PROJECT_TYPE))
-                .must(QueryBuilders.rangeQuery("syncTime").lt(currentTime));
-
-        int batchSize = 100;
-        SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
-                .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
-                .setQuery(queryBuilder)
-                .setScroll(new TimeValue(60000))
-                .setSize(batchSize)
-                .get();
-        int i = 0;
-        do {
-            SearchHit[] searchHits = scrollResp.getHits().hits();
-            List<Long> projectIds = new ArrayList<>();
-            for (SearchHit searchHit : searchHits) {
-                projectIds.add(Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID))));
-            }
-            doFixExpiredAutoStopTypePurchaseProjectDataService(projectIds, lastSyncTime);
-            scrollResp = elasticClient.getTransportClient().prepareSearchScroll(scrollResp.getScrollId())
-                    .setScroll(new TimeValue(60000))
-                    .execute().actionGet();
-        } while (scrollResp.getHits().getHits().length != 0);
-        logger.info("修复的自动截标商机结束");
-    }
-
-    private void doFixExpiredAutoStopTypePurchaseProjectDataService(List<Long> projectIds, Timestamp lastSyncTime) {
-        if (!CollectionUtils.isEmpty(projectIds)) {
-            String countTemplateSql = "SELECT\n"
-                                      + "   count(1)\n"
-                                      + "FROM\n"
-                                      + "   bmpfjz_project bp\n"
-                                      + "JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id\n"
-                                      + "WHERE\n"
-                                      + "   bpe.bid_stop_type = 2 AND bpe.bid_stop_time < ? AND bpe.id IN (%s)";
-            String queryTemplateSql = "SELECT\n"
-                                      + "   b.*, bpi.`name` AS directoryName\n"
-                                      + "FROM\n"
-                                      + "   (\n"
-                                      + "      SELECT\n"
-                                      + "         bp.comp_id AS purchaseId,\n"
-                                      + "         bp.comp_name AS purchaseName,\n"
-                                      + "         bp.id AS projectId,\n"
-                                      + "         bp.`code` AS projectCode,\n"
-                                      + "         bp.`name` AS projectName,\n"
-                                      + "         bpe.purchase_open_range_type AS openRangeType,\n"
-                                      + "         bp.project_status AS projectStatus,\n"
-                                      + "         bpe.bid_stop_type AS bidStopType,\n"
-                                      + "         bpe.bid_stop_time AS bidStopTime,\n"
-                                      + "         bpe.bid_true_stop_time AS bidTrueStopTime\n"
-                                      + "      FROM\n"
-                                      + "         bmpfjz_project bp\n"
-                                      + "      JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id\n"
-                                      + "      WHERE\n"
-                                      + "         bpe.bid_stop_type = 2\n"
-                                      + "      AND bpe.bid_stop_time < ?\n"
-                                      + "      AND bpe.id IN (%s)\n"
-                                      + "      LIMIT ?,?\n"
-                                      + "   ) b\n"
-                                      + "JOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id";
-
-            String countSql = String.format(countTemplateSql, StringUtils.collectionToCommaDelimitedString(projectIds));
-            String querySql = String.format(queryTemplateSql, StringUtils.collectionToCommaDelimitedString(projectIds));
-            doSyncProjectDataService(countSql, querySql, Collections.singletonList((Object) lastSyncTime));
+        DeleteByQueryResponse response = new DeleteByQueryRequestBuilder(elasticClient.getTransportClient(), DeleteByQueryAction.INSTANCE)
+                .setIndices(elasticClient.getProperties().getProperty("cluster.index"))
+                .setTypes(elasticClient.getProperties().getProperty("cluster.type.supplier_opportunity"))
+                .setQuery(QueryBuilders.boolQuery()
+                                  .must(QueryBuilders.boolQuery()
+                                                .must(QueryBuilders.termQuery("status", 1))
+                                                .must(QueryBuilders.termQuery("bidStopType", AUTO_STOP_TYPE))
+                                                .must(QueryBuilders.termQuery("projectType", PURCHASE_PROJECT_TYPE))
+                                                .must(QueryBuilders.rangeQuery("quoteStopTime").lte(currentTime)
+                                                )
+                                  )
+                )
+                .execute()
+                .actionGet();
+        if (response.getTotalFailed() > 0) {
+            logger.error("修复自动截标商机数据失败！");
         }
+        logger.info("修复自动截标商机结束");
     }
+
 
     /**
      * 同步采购项目
@@ -290,7 +237,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
         super.refresh(result, projectDirectoryMap);
         // 移除不需要的属性
         result.remove(PROJECT_STATUS);
-        result.remove(BID_STOP_TYPE);
+//        result.remove(BID_STOP_TYPE);
         result.put(QUOTE_STOP_TIME, SyncTimeUtil.toDateString(result.get(BID_STOP_TIME)));
         result.remove(BID_STOP_TIME);
         result.remove(BID_TRUE_STOP_TIME);
