@@ -100,7 +100,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
                 logger.debug("执行querySql : {}, params : {}，共{}条", querySql, paramsToUse, results.size());
                 List<Map<String, Object>> resultToExecute = new ArrayList<>();
                 // 保存项目的采购品
-                Map<Long, Set<String>> projectDirectoryMap = new HashMap<>();
+                Map<Long, Set<String>> projectDirectoryMap = new LinkedHashMap<>();
                 for (Map<String, Object> result : results) {
                     Long projectId = (Long) result.get(PROJECT_ID);
                     String directoryName = (String) result.get(DIRECTORY_NAME);

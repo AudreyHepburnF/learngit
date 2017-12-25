@@ -4,9 +4,13 @@ import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.handler.annotation.JobHander;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.deletebyquery.DeleteByQueryAction;
 import org.elasticsearch.action.deletebyquery.DeleteByQueryRequestBuilder;
 import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
@@ -22,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
@@ -95,8 +100,6 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
                 return t;
             }
         });
-
-        execute();
     }
 
     public ReturnT<String> execute(String... strings) throws Exception {
@@ -418,30 +421,30 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     }
 
     private void batchExecute(List<Map<String, Object>> resultsToUpdate) {
-        System.out.println(resultsToUpdate);
-//        if (!CollectionUtils.isEmpty(resultsToUpdate)) {
-//            BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
-//            for (Map<String, Object> result : resultsToUpdate) {
-//                bulkRequest.add(elasticClient.getTransportClient()
-//                                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
-//                                                      elasticClient.getProperties().getProperty("cluster.type.supplier_product"),
-//                                                      String.valueOf(result.get(ID)))
-//                                        .setSource(JSON.toJSONString(result, new ValueFilter() {
-//                                            @Override
-//                                            public Object process(Object object, String propertyName, Object propertyValue) {
-//                                                if (propertyValue instanceof java.util.Date) {
-//                                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-//                                                } else {
-//                                                    return propertyValue;
-//                                                }
-//                                            }
-//                                        })));
-//            }
-//            BulkResponse response = bulkRequest.execute().actionGet();
-//            if (response.hasFailures()) {
-//                logger.error(response.buildFailureMessage());
-//            }
-//        }
+//        System.out.println(resultsToUpdate);
+        if (!CollectionUtils.isEmpty(resultsToUpdate)) {
+            BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
+            for (Map<String, Object> result : resultsToUpdate) {
+                bulkRequest.add(elasticClient.getTransportClient()
+                                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
+                                                      elasticClient.getProperties().getProperty("cluster.type.supplier_product"),
+                                                      String.valueOf(result.get(ID)))
+                                        .setSource(JSON.toJSONString(result, new ValueFilter() {
+                                            @Override
+                                            public Object process(Object object, String propertyName, Object propertyValue) {
+                                                if (propertyValue instanceof java.util.Date) {
+                                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
+                                                } else {
+                                                    return propertyValue;
+                                                }
+                                            }
+                                        })));
+            }
+            BulkResponse response = bulkRequest.execute().actionGet();
+            if (response.hasFailures()) {
+                logger.error(response.buildFailureMessage());
+            }
+        }
     }
 
 
