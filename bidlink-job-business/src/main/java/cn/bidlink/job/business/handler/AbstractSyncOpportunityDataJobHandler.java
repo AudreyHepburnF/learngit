@@ -67,6 +67,9 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected String FIRST_DIRECTORY_NAME        = "firstDirectoryName";
     protected String DIRECTORY_NAME_COUNT        = "directoryNameCount";
     protected String QUOTE_STOP_TIME             = "quoteStopTime";
+    protected String AREA                        = "area";
+    protected String CITY                        = "city";
+    protected String COUNTY                      = "county";
 
 
     protected Map<String, Object> appendIdToResult(Map<String, Object> result) {
@@ -184,6 +187,54 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
             tenantKeyMap.put((Long) map.get(PURCHASE_ID), map.get(TENANT_KEY));
         }
         return tenantKeyMap;
+    }
+
+    /**
+     * 查询采购商的区域
+     *
+     * @param purchaseIds
+     * @return
+     */
+    protected Map<Long, Object> queryArea(Set<Long> purchaseIds) {
+        String queryAreaTemplate = "SELECT\n"
+                                   + "   t3.ID AS purchaseId,\n"
+                                   + "   t3.AREA AS area,\n"
+                                   + "   t3.CITY AS city,\n"
+                                   + "   tcrd.`VALUE` AS county\n"
+                                   + "FROM\n"
+                                   + "   (\n"
+                                   + "      SELECT\n"
+                                   + "         t2.ID, t2.AREA, t2.COUNTY, tcrd.`VALUE` AS CITY\n"
+                                   + "      FROM\n"
+                                   + "         (\n"
+                                   + "            SELECT\n"
+                                   + "               t1.ID, t1.CITY, t1.COUNTY, tcrd.`VALUE` AS AREA\n"
+                                   + "            FROM\n"
+                                   + "               (SELECT ID, COUNTRY, AREA, CITY, COUNTY FROM t_reg_company WHERE ID IN (%s) AND TYPE = 12 AND COUNTRY IS NOT NULL) t1\n"
+                                   + "            JOIN t_reg_center_dict tcrd ON t1.AREA = tcrd.`KEY`\n"
+                                   + "            WHERE\n"
+                                   + "               tcrd.TYPE = 'country'\n"
+                                   + "         ) t2\n"
+                                   + "      JOIN t_reg_center_dict tcrd ON t2.CITY = tcrd.`KEY`\n"
+                                   + "      WHERE\n"
+                                   + "         tcrd.TYPE = 'country'\n"
+                                   + "   ) t3\n"
+                                   + "JOIN t_reg_center_dict tcrd ON t3.COUNTY = tcrd.`KEY`\n"
+                                   + "WHERE\n"
+                                   + "   tcrd.TYPE = 'country'";
+
+        String queryAreaSql = String.format(queryAreaTemplate, StringUtils.collectionToCommaDelimitedString(purchaseIds));
+        List<Map<String, Object>> query = DBUtil.query(centerDataSource, queryAreaSql, null);
+        Map<Long, Object> areaMap = new HashMap<>();
+        for (Map<String, Object> map : query) {
+            String areaStr = String.valueOf(map.get(AREA)) + String.valueOf(map.get(CITY)) + String.valueOf(map.get(COUNTY));
+            // 特殊处理
+            if (areaStr != null && areaStr.indexOf("市辖区") > -1) {
+                areaStr = areaStr.replace("市辖区", "");
+            }
+            areaMap.put((Long) map.get(PURCHASE_ID), areaStr);
+        }
+        return areaMap;
     }
 
     protected void batchExecute(List<Map<String, Object>> resultsToUpdate) {
