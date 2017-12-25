@@ -42,11 +42,13 @@ public class PurchaseQuantityJobHandler extends IJobHandler /*implements Initial
      *  采购交易总额基数： 2310301230
      */
     public ReturnT<String> execute(String... strings) throws Exception {
+        logger.info("同步采购商项目交易开始");
         int todayTransactionNumToUse = calculateTodayTransactionNum();
         // 更新每日交易额
         updateTodayTransactionNum(todayTransactionNumToUse);
         // 更新总交易额
         updateTotalTransactionNum(todayTransactionNumToUse);
+        logger.info("同步采购商项目交易结束");
         return ReturnT.SUCCESS;
     }
 
