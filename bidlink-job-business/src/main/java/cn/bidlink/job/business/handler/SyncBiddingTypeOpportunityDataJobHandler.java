@@ -109,7 +109,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                  + "      AND nb.BID_ENDTIME IS NOT NULL"
                                  + "      LIMIT ?,?\n"
                                  + "   ) project\n"
-                                 + "JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
+                                 + "LEFT JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
         doSyncProjectDataService(countNothingSql, queryNothingSql, Collections.emptyList());
         logger.info("同步什么都不需要招标项目的商机结束");
     }
@@ -158,7 +158,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                     + "AND pip.IS_TWO_STAGE = 2\n"
                                     + "LIMIT ?,?\n"
                                     + ") project\n"
-                                    + "JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
+                                    + "LEFT JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
         doSyncProjectDataService(countPreQualifySql, queryPreQualifySql, Collections.emptyList());
         logger.info("同步资格预审招标项目的商机结束");
     }
