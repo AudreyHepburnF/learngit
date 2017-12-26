@@ -37,8 +37,8 @@ import java.util.*;
  */
 @JobHander(value = "syncProductReportJobHandler")
 @Service
-public class syncProductReportJobHandler extends IJobHandler /*implements InitializingBean*/ {
-    private Logger logger = LoggerFactory.getLogger(syncProductReportJobHandler.class);
+public class SyncProductReportJobHandler extends IJobHandler /*implements InitializingBean*/ {
+    private Logger logger = LoggerFactory.getLogger(SyncProductReportJobHandler.class);
 
     @Autowired
     private ElasticClient elasticClient;
