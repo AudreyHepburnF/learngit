@@ -7,6 +7,9 @@
         "type": "string",
         "index": "not_analyzed"
       },
+      "bidStopType": {
+        "type": "integer"
+      },
       "createTime": {
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
@@ -43,6 +46,10 @@
         "analyzer": "ik",
         "type": "string"
       },
+      "projectNameNotAnalyzed": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
       "isCore": {
         "type": "integer",
         "index": "not_analyzed"
@@ -61,6 +68,10 @@
       },
       "directoryName": {
         "analyzer": "ik",
+        "type": "string"
+      },
+      "directoryNameNotAnalyzed": {
+        "index": "not_analyzed",
         "type": "string"
       },
       "firstDirectoryName" : {

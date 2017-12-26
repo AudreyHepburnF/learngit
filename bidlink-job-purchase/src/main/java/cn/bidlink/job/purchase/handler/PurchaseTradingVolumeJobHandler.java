@@ -55,14 +55,11 @@ public class PurchaseTradingVolumeJobHandler extends IJobHandler /*implements In
     private int pageSize;
 
     private String ID = "id";
-
     private String PURCHASE_TRADING_VOLUME = "purchaseTradingVolume";
-
     private String BID_TRADING_VOLUME = "bidTradingVolume";
-
     private String TRADING_VOLUME = "tradingVolume";
-
     private String LONG_TRADING_VOLUME = "longTradingVolume";
+    private String COMPANY_SITE_ALIAS = "companySiteAlias";
 
 
 
@@ -334,6 +331,15 @@ public class PurchaseTradingVolumeJobHandler extends IJobHandler /*implements In
 
     private void refresh(Map<String, Object> result) {
         result.put(ID, String.valueOf(result.get(ID)));
+        // 处理companySiteAlias
+        Object companySiteObject = result.get(COMPANY_SITE_ALIAS);
+        if (companySiteObject != null) {
+            String companySite = String.valueOf(companySiteObject).trim();
+            if (!companySite.startsWith("http")) {
+                companySite = "http://" + companySite;
+            }
+            result.put(COMPANY_SITE_ALIAS, companySite);
+        }
         result.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
     }
 

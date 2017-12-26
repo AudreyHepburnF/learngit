@@ -80,7 +80,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                  + "    project.ID AS projectId,\n"
                                  + "    project.PROJECT_NUMBER AS projectCode,\n"
                                  + "    project.PROJECT_NAME AS projectName,\n"
-                                 + "    project.REGION AS areaStr,\n"
+//                                 + "    project.REGION AS areaStr,\n"
                                  + "    project.COMPANY_ID AS purchaseId,\n"
                                  + "    project.PROJECT_STATUS AS projectStatus,\n"
                                  + "    project.TENDER_NAMES AS purchaseName,\n"
@@ -109,7 +109,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                  + "      AND nb.BID_ENDTIME IS NOT NULL"
                                  + "      LIMIT ?,?\n"
                                  + "   ) project\n"
-                                 + "JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
+                                 + "LEFT JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
         doSyncProjectDataService(countNothingSql, queryNothingSql, Collections.emptyList());
         logger.info("同步什么都不需要招标项目的商机结束");
     }
@@ -130,7 +130,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                     + "    project.ID AS projectId,\n"
                                     + "    project.PROJECT_NUMBER AS projectCode,\n"
                                     + "    project.PROJECT_NAME AS projectName,\n"
-                                    + "    project.REGION AS areaStr,\n"
+//                                    + "    project.REGION AS areaStr,\n"
                                     + "    project.COMPANY_ID AS purchaseId,\n"
                                     + "    project.PROJECT_STATUS AS projectStatus,\n"
                                     + "    project.TENDER_NAMES AS purchaseName,\n"
@@ -158,7 +158,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                     + "AND pip.IS_TWO_STAGE = 2\n"
                                     + "LIMIT ?,?\n"
                                     + ") project\n"
-                                    + "JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
+                                    + "LEFT JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
         doSyncProjectDataService(countPreQualifySql, queryPreQualifySql, Collections.emptyList());
         logger.info("同步资格预审招标项目的商机结束");
     }
@@ -179,7 +179,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                   + "    project.ID AS projectId,\n"
                                   + "    project.PROJECT_NUMBER AS projectCode,\n"
                                   + "    project.PROJECT_NAME AS projectName,\n"
-                                  + "    project.REGION AS areaStr,\n"
+//                                  + "    project.REGION AS areaStr,\n"
                                   + "    project.COMPANY_ID AS purchaseId,\n"
                                   + "    project.TENDER_NAMES AS purchaseName,\n"
                                   + "    project.CREATE_TIME AS createTime,\n"
@@ -214,9 +214,11 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
     protected void appendTenantKeyAndAreaStrToResult(List<Map<String, Object>> resultToExecute, Set<Long> purchaseIds) {
         if (purchaseIds.size() > 0) {
             Map<Long, Object> tenantKeyMap = queryTenantKey(purchaseIds);
+            Map<Long, Object> areaMap = queryArea(purchaseIds);
             for (Map<String, Object> result : resultToExecute) {
                 Long purchaseId = Long.valueOf(String.valueOf(result.get(PURCHASE_ID)));
                 result.put(TENANT_KEY, tenantKeyMap.get(purchaseId));
+                result.put(AREA_STR, areaMap.get(purchaseId));
             }
         }
     }

@@ -11,6 +11,9 @@ import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.deletebyquery.DeleteByQueryAction;
+import org.elasticsearch.action.deletebyquery.DeleteByQueryRequestBuilder;
+import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -78,6 +81,9 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     private String SUPPLIER_ID            = "supplierId";
     private String SUPPLIER_DIRECTORY_REL = "supplierDirectoryRel";
 
+    // 主营产品类型
+    private static final int MAIN_PRODUCT_DIRECTORY_REL = 4;
+
     private Semaphore       semaphore;
     private AtomicLong      atomicLong;
     private ExecutorService executorService;
@@ -97,8 +103,8 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     }
 
     public ReturnT<String> execute(String... strings) throws Exception {
-        SyncTimeUtil.setCurrentDate();
         logger.info("供应商产品数据同步开始");
+        SyncTimeUtil.setCurrentDate();
         syncProductData();
         logger.info("供应商产品数据同步结束");
         return ReturnT.SUCCESS;
@@ -108,7 +114,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     private void syncProductData() {
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.supplier_product", null);
         logger.info("供应商产品数据同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss") + "\n"
-            + ", syncTime : " + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
+                    + ", syncTime : " + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
         syncTradeProductDataService(lastSyncTime);
         syncTradeBidProductDataService(lastSyncTime);
         syncProDataService(lastSyncTime);
@@ -274,6 +280,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
         long count = DBUtil.count(inputDataSource, countSql, params);
         logger.debug("执行countSql : {}, params : {}，共{}条", countSql, params, count);
         if (count > 0) {
+            final Timestamp currentDate = SyncTimeUtil.getCurrentDate();
             for (long i = 0; i < count; ) {
                 final long finalI = i;
                 try {
@@ -281,7 +288,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
                     executorService.execute(new Runnable() {
                         @Override
                         public void run() {
-                            doBatchSyncData(inputDataSource, querySql, params, finalI);
+                            doBatchSyncData(inputDataSource, querySql, params, finalI, currentDate);
                         }
                     });
                     i += pageSize;
@@ -292,7 +299,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
         }
     }
 
-    private void doBatchSyncData(DataSource inputDataSource, String querySql, List<Object> params, long i) {
+    private void doBatchSyncData(DataSource inputDataSource, String querySql, List<Object> params, long i, Timestamp currentDate) {
         try {
             List<Object> paramsToUse = appendToParams(params, i);
             List<Map<String, Object>> results = DBUtil.query(inputDataSource, querySql, paramsToUse);
@@ -300,11 +307,16 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
             List<Map<String, Object>> resultsToExecute = new ArrayList<>();
 
             for (Map<String, Object> result : results) {
-                // note:将供应商的产品转换为小写处理es查询时大小写敏感问题
-                String directoryName = String.valueOf(result.get(DIRECTORY_NAME)).toLowerCase();
-                String[] changedDirectoryNames = splitDirectoryName(directoryName);
+                // 如果是主营产品，则删除以前的老数据
+                Integer supplierDirectoryRel = ((Long) result.get(SUPPLIER_DIRECTORY_REL)).intValue();
+                if (supplierDirectoryRel != null && supplierDirectoryRel == MAIN_PRODUCT_DIRECTORY_REL) {
+                    deleteOldMainProduct(String.valueOf(result.get(SUPPLIER_ID)));
+                }
+
+                String[] changedDirectoryNames = splitDirectoryName(String.valueOf(result.get(DIRECTORY_NAME)));
                 for (String name : changedDirectoryNames) {
                     if (!StringUtils.isEmpty(name)) {
+                        result.put(SyncTimeUtil.SYNC_TIME, currentDate);
                         resultsToExecute.add(refresh(result, name));
                     }
                 }
@@ -313,6 +325,26 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
             batchExecute(resultsToExecute);
         } finally {
             semaphore.release();
+        }
+    }
+
+    /**
+     * 删除主营产品老数据
+     *
+     * @param supplierId
+     */
+    private void deleteOldMainProduct(String supplierId) {
+        DeleteByQueryResponse deleteByQueryResponse = new DeleteByQueryRequestBuilder(elasticClient.getTransportClient(), DeleteByQueryAction.INSTANCE)
+                .setIndices(elasticClient.getProperties().getProperty("cluster.index"))
+                .setTypes(elasticClient.getProperties().getProperty("cluster.type.supplier_product"))
+                .setQuery(QueryBuilders.boolQuery()
+                                  .must(QueryBuilders.termQuery(SUPPLIER_DIRECTORY_REL, MAIN_PRODUCT_DIRECTORY_REL))
+                                  .must(QueryBuilders.termQuery(SUPPLIER_ID, supplierId))
+                )
+                .execute()
+                .actionGet();
+        if (deleteByQueryResponse.getTotalFailed() > 0) {
+            logger.error("清理主营产品历史数据失败！");
         }
     }
 
@@ -345,7 +377,6 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
         resultToUse.put(ID, generateSupplierProductId(resultToUse));
         // 将supplierId转为string
         resultToUse.put(SUPPLIER_ID, String.valueOf(resultToUse.get(SUPPLIER_ID)));
-        resultToUse.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
         return resultToUse;
     }
 
@@ -378,7 +409,8 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     }
 
     private String[] splitDirectoryName(String directoryName) {
-        return directoryName.replaceAll("[,;.，。、\\s\\t]", ",").split(",");
+        // note:将供应商的产品转换为小写处理es查询时大小写敏感问题
+        return directoryName.toLowerCase().replaceAll("[,;.，。、\\s\\t]", ",").split(",");
     }
 
     private List<Object> appendToParams(List<Object> params, long i) {
@@ -389,6 +421,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     }
 
     private void batchExecute(List<Map<String, Object>> resultsToUpdate) {
+//        System.out.println(resultsToUpdate);
         if (!CollectionUtils.isEmpty(resultsToUpdate)) {
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> result : resultsToUpdate) {
@@ -415,8 +448,4 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     }
 
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
 }

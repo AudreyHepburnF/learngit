@@ -1,6 +1,5 @@
 package cn.bidlink.job.business.handler;
 
-import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
@@ -39,9 +38,6 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
     private String BID_STOP_TYPE      = "bidStopType";
     private String BID_STOP_TIME      = "bidStopTime";
     private String BID_TRUE_STOP_TIME = "bidTrueStopTime";
-    private String AREA               = "area";
-    private String CITY               = "city";
-    private String COUNTY             = "county";
 
     public ReturnT<String> execute(String... strings) throws Exception {
         SyncTimeUtil.setCurrentDate();
@@ -61,9 +57,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
                                                                    QueryBuilders.boolQuery().must(QueryBuilders.termQuery("projectType", PURCHASE_PROJECT_TYPE)));
         logger.info("采购项目商机同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
         syncPurchaseProjectDataService(lastSyncTime);
-//        long millis = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").parseDateTime("2017-09-07 14:30:00").getMillis();
-//        syncPurchaseProjectDataService(new Timestamp(millis));
-//        fixExpiredAutoStopTypePurchaseProjectDataService(lastSyncTime);
+        fixExpiredAutoStopTypePurchaseProjectDataService(lastSyncTime);
     }
 
     /**
@@ -72,7 +66,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
      * @param lastSyncTime
      */
     private void fixExpiredAutoStopTypePurchaseProjectDataService(Timestamp lastSyncTime) {
-        logger.info("修复的自动截标商机开始");
+        logger.info("修复自动截标商机开始");
         Properties properties = elasticClient.getProperties();
         String currentTime = new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN);
         // 查询小于当前时间的自动截标
@@ -100,7 +94,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
                     .setScroll(new TimeValue(60000))
                     .execute().actionGet();
         } while (scrollResp.getHits().getHits().length != 0);
-        logger.info("修复的自动截标商机结束");
+        logger.info("修复自动截标商机结束");
     }
 
     private void doFixExpiredAutoStopTypePurchaseProjectDataService(List<Long> projectIds, Timestamp lastSyncTime) {
@@ -136,7 +130,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
                                       + "      AND bpe.id IN (%s)\n"
                                       + "      LIMIT ?,?\n"
                                       + "   ) b\n"
-                                      + "JOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id";
+                                      + "JOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id order by bpi.create_time";
 
             String countSql = String.format(countTemplateSql, StringUtils.collectionToCommaDelimitedString(projectIds));
             String querySql = String.format(queryTemplateSql, StringUtils.collectionToCommaDelimitedString(projectIds));
@@ -189,7 +183,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
                                  + "AND bp.update_time > ?\n"
                                  + "AND bp.project_status IN (5, 6, 10)\n"
                                  + "LIMIT ?,\n"
-                                 + " ?) b JOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id";
+                                 + " ?) b JOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id order by bpi.create_time";
         doSyncProjectDataService(countUpdatedSql, queryUpdatedSql, Collections.singletonList((Object) lastSyncTime));
     }
 
@@ -203,50 +197,6 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
                 result.put(AREA_STR, areaMap.get(purchaseId));
             }
         }
-    }
-
-    /**
-     * 查询采购商的区域
-     *
-     * @param purchaseIds
-     * @return
-     */
-    private Map<Long, Object> queryArea(Set<Long> purchaseIds) {
-        String queryAreaTemplate = "SELECT\n"
-                                   + "   t3.ID AS purchaseId,\n"
-                                   + "   t3.AREA AS area,\n"
-                                   + "   t3.CITY AS city,\n"
-                                   + "   tcrd.`VALUE` AS county\n"
-                                   + "FROM\n"
-                                   + "   (\n"
-                                   + "      SELECT\n"
-                                   + "         t2.ID, t2.AREA, t2.COUNTY, tcrd.`VALUE` AS CITY\n"
-                                   + "      FROM\n"
-                                   + "         (\n"
-                                   + "            SELECT\n"
-                                   + "               t1.ID, t1.CITY, t1.COUNTY, tcrd.`VALUE` AS AREA\n"
-                                   + "            FROM\n"
-                                   + "               (SELECT ID, COUNTRY, AREA, CITY, COUNTY FROM t_reg_company WHERE ID IN (%s) AND TYPE = 12 AND COUNTRY IS NOT NULL) t1\n"
-                                   + "            JOIN t_reg_center_dict tcrd ON t1.AREA = tcrd.`KEY`\n"
-                                   + "            WHERE\n"
-                                   + "               tcrd.TYPE = 'country'\n"
-                                   + "         ) t2\n"
-                                   + "      JOIN t_reg_center_dict tcrd ON t2.CITY = tcrd.`KEY`\n"
-                                   + "      WHERE\n"
-                                   + "         tcrd.TYPE = 'country'\n"
-                                   + "   ) t3\n"
-                                   + "JOIN t_reg_center_dict tcrd ON t3.COUNTY = tcrd.`KEY`\n"
-                                   + "WHERE\n"
-                                   + "   tcrd.TYPE = 'country'";
-
-        String queryAreaSql = String.format(queryAreaTemplate, StringUtils.collectionToCommaDelimitedString(purchaseIds));
-        List<Map<String, Object>> query = DBUtil.query(centerDataSource, queryAreaSql, null);
-        Map<Long, Object> areaMap = new HashMap<>();
-        for (Map<String, Object> map : query) {
-            String areaStr = String.valueOf(map.get(AREA)) + String.valueOf(map.get(CITY)) + String.valueOf(map.get(COUNTY));
-            areaMap.put((Long) map.get(PURCHASE_ID), areaStr);
-        }
-        return areaMap;
     }
 
     /**
