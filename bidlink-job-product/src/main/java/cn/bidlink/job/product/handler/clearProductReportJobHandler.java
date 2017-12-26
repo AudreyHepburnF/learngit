@@ -22,8 +22,8 @@ import org.springframework.stereotype.Service;
  */
 @JobHander(value = "clearProductReportJobHandler")
 @Service
-public class clearProductReportJobHandler extends IJobHandler /*implements InitializingBean*/ {
-    private Logger logger = LoggerFactory.getLogger(clearProductReportJobHandler.class);
+public class ClearProductReportJobHandler extends IJobHandler /*implements InitializingBean*/ {
+    private Logger logger = LoggerFactory.getLogger(ClearProductReportJobHandler.class);
 
     @Autowired
     private ElasticClient elasticClient;

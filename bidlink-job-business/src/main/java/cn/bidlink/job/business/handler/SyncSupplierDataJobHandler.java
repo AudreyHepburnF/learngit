@@ -29,6 +29,7 @@ import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.*;
 
@@ -84,6 +85,9 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     private String ENTERPRISE_SPACE        = "enterpriseSpace";
     private String ENTERPRISE_SPACE_DETAIL = "enterpriseSpaceDetail";
     private String ENTERPRISE_SPACE_ACTIVE = "enterpriseSpaceActive";
+
+    // 两位有效数字，四舍五入
+    private DecimalFormat format = new DecimalFormat("0.00");
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -436,7 +440,11 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
         resultToUse.put(AUTH_CODE_ID, convertToString(resultToUse.get(AUTH_CODE_ID)));
         resultToUse.put(AUTHEN_NUMBER, convertToString(resultToUse.get(AUTHEN_NUMBER)));
         resultToUse.put(CODE, convertToString(resultToUse.get(CODE)));
-        resultToUse.put(FUND, convertToString(resultToUse.get(FUND)));
+        // 四舍五入，保留两位有效数字
+        Object value = resultToUse.get(FUND);
+        if (value != null) {
+            resultToUse.put(FUND, this.format.format(value));
+        }
         resultToUse.put(TENANT_ID, convertToString(resultToUse.get(TENANT_ID)));
         resultToUse.put(MOBILE, convertToString(resultToUse.get(MOBILE)));
         resultToUse.put(TEL, convertToString(resultToUse.get(TEL)));
