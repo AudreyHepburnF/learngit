@@ -7,6 +7,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static cn.bidlink.job.common.utils.Closer.closeQuietly;
+
 /**
  * @author : <a href="mailto:zikaifeng@ebnew.com">冯子恺</a>
  * @version : Ver 1.0
@@ -49,7 +51,7 @@ public class DBUtil {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            Closer.closeQuietly(resultSet, preparedStatement, connection);
+            closeQuietly(resultSet, preparedStatement, connection);
         }
     }
 
@@ -71,7 +73,7 @@ public class DBUtil {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            Closer.closeQuietly(resultSet, preparedStatement, connection);
+            closeQuietly(resultSet, preparedStatement, connection);
         }
     }
 
@@ -94,7 +96,28 @@ public class DBUtil {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            Closer.closeQuietly(resultSet, preparedStatement, connection);
+            closeQuietly(resultSet, preparedStatement, connection);
+        }
+    }
+
+    public static int execute(DataSource dataSource, String sql, List<Object> params) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = dataSource.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+            if (params != null && params.size() > 0) {
+                int size = params.size();
+                for (int i = 0; i < size; i++) {
+                    preparedStatement.setObject(i + 1, params.get(i));
+                }
+            }
+            return preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            closeQuietly(resultSet, preparedStatement, connection);
         }
     }
 
