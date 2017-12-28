@@ -183,7 +183,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
                                  + "AND bp.update_time > ?\n"
                                  + "AND bp.project_status IN (5, 6, 10)\n"
                                  + "LIMIT ?,\n"
-                                 + " ?) b JOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id order by bpi.create_time";
+                                 + " ?) b JOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id order by bpi.id";
         doSyncProjectDataService(countUpdatedSql, queryUpdatedSql, Collections.singletonList((Object) lastSyncTime));
     }
 
