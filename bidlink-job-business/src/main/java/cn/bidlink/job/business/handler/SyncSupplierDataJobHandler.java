@@ -32,6 +32,10 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static cn.bidlink.job.common.utils.DBUtil.query;
 
 
 /**
@@ -85,13 +89,43 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     private String ENTERPRISE_SPACE        = "enterpriseSpace";
     private String ENTERPRISE_SPACE_DETAIL = "enterpriseSpaceDetail";
     private String ENTERPRISE_SPACE_ACTIVE = "enterpriseSpaceActive";
+    private String INDUSTRY_CODE           = "industryCode";
+    private String INDUSTRY_STR            = "industryStr";
 
     // 两位有效数字，四舍五入
-    private DecimalFormat format = new DecimalFormat("0.00");
+    private final DecimalFormat format = new DecimalFormat("0.00");
+
+    // 行业编号正则
+    private final Pattern number = Pattern.compile("\\d+");
+
+    private Map<String, String> industryCodeMap = new HashMap<>();
 
     @Override
     public void afterPropertiesSet() throws Exception {
         pageSize = 1000;
+        industryCodeMap = initIndustryCodeMap();
+    }
+
+    private Map<String, String> initIndustryCodeMap() {
+        String queryIndustrySql = "SELECT code, name_cn, name_en, type from t_reg_code_trade_class";
+        return DBUtil.query(centerDataSource, queryIndustrySql, null, new DBUtil.ResultSetCallback<Map<String, String>>() {
+            @Override
+            public Map<String, String> execute(ResultSet resultSet) throws SQLException {
+                Map<String, String> map = new HashMap<String, String>();
+                while (resultSet.next()) {
+                    String code = resultSet.getString("code");
+                    String nameCn = resultSet.getString("name_cn");
+                    String nameEn = resultSet.getString("name_en");
+                    int type = resultSet.getInt("type");
+                    if (type == 1) {
+                        map.put(code, nameCn);
+                    } else {
+                        map.put(code, nameEn);
+                    }
+                }
+                return map;
+            }
+        });
     }
 
     @Override
@@ -144,7 +178,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
             for (long i = 0; i < count; i += pageSize) {
                 List<Object> paramsToUse = appendToParams(params, i);
                 // 查出符合条件的供应商
-                Map<String, Object> enterpriseSpaceInfoMap = DBUtil.query(enterpriseSpaceDataSource, querySql, paramsToUse, new DBUtil.ResultSetCallback<Map<String, Object>>() {
+                Map<String, Object> enterpriseSpaceInfoMap = query(enterpriseSpaceDataSource, querySql, paramsToUse, new DBUtil.ResultSetCallback<Map<String, Object>>() {
                     @Override
                     public Map<String, Object> execute(ResultSet resultSet) throws SQLException {
                         Map<String, Object> map = new HashMap<>();
@@ -237,7 +271,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
             for (long i = 0; i < count; i += pageSize) {
                 List<Object> paramsToUse = appendToParams(params, i);
                 // 查出符合条件的供应商
-                Map<String, Object> supplierCoreStatusMap = DBUtil.query(centerDataSource, querySql, paramsToUse, new DBUtil.ResultSetCallback<Map<String, Object>>() {
+                Map<String, Object> supplierCoreStatusMap = query(centerDataSource, querySql, paramsToUse, new DBUtil.ResultSetCallback<Map<String, Object>>() {
                     @Override
                     public Map<String, Object> execute(ResultSet resultSet) throws SQLException {
                         Map<String, Object> map = new HashMap<>();
@@ -321,7 +355,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
                                   + "   trc.FUND AS fund,\n"
                                   + "   trc.FUNDUNIT AS fundUnit,\n"
                                   + "   trc.INDUSTRY AS industryCode,\n"
-                                  + "   trc.INDUSTRY_STR AS industryStr,\n"
+//                                  + "   trc.INDUSTRY_STR AS industryStr,\n"
                                   + "   trc.MAIN_PRODUCT AS mainProduct,\n"
                                   + "   trc.WORKPATTERN AS workPattern,\n"
                                   + "   trc.TEL AS tel,\n"
@@ -375,7 +409,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
                                  + "   trc.FUND AS fund,\n"
                                  + "   trc.FUNDUNIT AS fundUnit,\n"
                                  + "   trc.INDUSTRY AS industryCode,\n"
-                                 + "   trc.INDUSTRY_STR AS industryStr,\n"
+//                                 + "   trc.INDUSTRY_STR AS industryStr,\n"
                                  + "   trc.MAIN_PRODUCT AS mainProduct,\n"
                                  + "   trc.WORKPATTERN AS workPattern,\n"
                                  + "   trc.TEL AS tel,\n"
@@ -409,7 +443,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
             for (long i = 0; i < count; i += pageSize) {
                 List<Object> paramsToUse = appendToParams(params, i);
                 // 查出符合条件的供应商
-                List<Map<String, Object>> resultToExecute = DBUtil.query(centerDataSource, querySql, paramsToUse);
+                List<Map<String, Object>> resultToExecute = query(centerDataSource, querySql, paramsToUse);
                 logger.debug("执行querySql : {}, params : {}，共{}条", querySql, paramsToUse, resultToExecute.size());
                 Set<Long> supplierIds = new HashSet<>();
                 for (Map<String, Object> result : resultToExecute) {
@@ -440,10 +474,19 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
         resultToUse.put(AUTH_CODE_ID, convertToString(resultToUse.get(AUTH_CODE_ID)));
         resultToUse.put(AUTHEN_NUMBER, convertToString(resultToUse.get(AUTHEN_NUMBER)));
         resultToUse.put(CODE, convertToString(resultToUse.get(CODE)));
-        // 四舍五入，保留两位有效数字
+        // 重置注册资金，四舍五入，保留两位有效数字
         Object value = resultToUse.get(FUND);
         if (value != null) {
             resultToUse.put(FUND, this.format.format(value));
+        }
+        // 重置行业
+        Object industryCodeObj = resultToUse.get(INDUSTRY_CODE);
+        if (industryCodeObj != null) {
+            Matcher matcher = number.matcher((String) industryCodeObj);
+            if (matcher.find()) {
+                String industryCode = matcher.group();
+                resultToUse.put(INDUSTRY_STR, industryCodeMap.get(industryCode));
+            }
         }
         resultToUse.put(TENANT_ID, convertToString(resultToUse.get(TENANT_ID)));
         resultToUse.put(MOBILE, convertToString(resultToUse.get(MOBILE)));
@@ -475,7 +518,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     private Map<Long, Object> queryEnterpriseSpaceInfo(Set<Long> supplierIds) {
         String queryEnterpriseSpaceInfoTemplate = "SELECT COMPANY_ID AS id,STATE as enterpriseSpaceActive FROM space_info WHERE STATE = 1 AND COMPANY_ID in (%s)";
         String queryEnterpriseSpaceInfoSql = String.format(queryEnterpriseSpaceInfoTemplate, StringUtils.collectionToCommaDelimitedString(supplierIds));
-        List<Map<String, Object>> query = DBUtil.query(enterpriseSpaceDataSource, queryEnterpriseSpaceInfoSql, null);
+        List<Map<String, Object>> query = query(enterpriseSpaceDataSource, queryEnterpriseSpaceInfoSql, null);
         Map<Long, Object> enterpriseSpaceInfoMap = new HashMap<>();
         for (Map<String, Object> map : query) {
             enterpriseSpaceInfoMap.put((Long) map.get(ID), map.get(ENTERPRISE_SPACE_ACTIVE));
@@ -498,7 +541,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     private Map<Long, Object> queryCredit(Set<Long> supplierIds) {
         String queryCreditTemplate = "SELECT COMPANY_ID as id, RATING as creditRating FROM credit_score WHERE COMPANY_ID in (%s)";
         String queryCreditSql = String.format(queryCreditTemplate, StringUtils.collectionToCommaDelimitedString(supplierIds));
-        List<Map<String, Object>> query = DBUtil.query(creditDataSource, queryCreditSql, null);
+        List<Map<String, Object>> query = query(creditDataSource, queryCreditSql, null);
         Map<Long, Object> creditMap = new HashMap<>();
         for (Map<String, Object> map : query) {
             creditMap.put((Long) map.get(ID), map.get(CREDIT_RATING));
@@ -549,7 +592,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
                                    + "   tcrd.TYPE = 'country' OR tcrd.TYPE IS NULL";
 
         String queryAreaSql = String.format(queryAreaTemplate, StringUtils.collectionToCommaDelimitedString(supplierIds));
-        List<Map<String, Object>> query = DBUtil.query(centerDataSource, queryAreaSql, null);
+        List<Map<String, Object>> query = query(centerDataSource, queryAreaSql, null);
         Map<Long, Object> areaMap = new HashMap<>();
         for (Map<String, Object> map : query) {
             Object area = map.get(AREA);
