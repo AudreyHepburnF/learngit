@@ -34,6 +34,10 @@ public class TestDataSource extends IJobHandler {
     private DataSource ycDataSource;
 
     @Autowired
+    @Qualifier("synergyDataSource")
+    private DataSource synergyDataSource;
+
+    @Autowired
     @Qualifier("centerDataSource")
     private DataSource centerDataSource;
 
@@ -58,7 +62,18 @@ public class TestDataSource extends IJobHandler {
         testCenterDataSource();
         testCreditDataSource();
         testEnterpriseSpaceDataSource();
+        testSynergyDataSource();
         logger.info("测试数据源结束");
+    }
+
+    private void testSynergyDataSource() {
+        logger.info("测试synergyDataSource开始");
+        String testYcSql = "SELECT\n"
+                           + "   count(1)\n"
+                           + " from\n"
+                           + "   purchase_supplier_project";
+        List<Map<String, Object>> query = DBUtil.query(synergyDataSource, testYcSql, null);
+        logger.info("测试synergyDataSourcee结束");
     }
 
     private void testEnterpriseSpaceDataSource() {
