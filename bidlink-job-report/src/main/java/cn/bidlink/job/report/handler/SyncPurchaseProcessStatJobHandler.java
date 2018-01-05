@@ -49,6 +49,8 @@ public class SyncPurchaseProcessStatJobHandler extends SyncJobHandler /*implemen
         SyncTimeUtil.setCurrentDate();
         logger.info("同步采购流程项目概况列表统计开始");
         syncPurchaseProcess();
+        // 记录上次同步时间
+        updateSyncLastTime();
         logger.info("同步采购流程项目概况列表统计结束");
         return ReturnT.SUCCESS;
     }
@@ -67,8 +69,7 @@ public class SyncPurchaseProcessStatJobHandler extends SyncJobHandler /*implemen
         // 同步更新数据
         syncUpdatePurchaseProcess(lastSyncTime);
 
-        // 记录上次同步时间
-        syncRecord();
+
     }
 
 

@@ -43,6 +43,8 @@ public class SyncPurchaseStatusProcessStatJobHandler extends SyncJobHandler/* im
         SyncTimeUtil.setCurrentDate();
         logger.info("同步采购进展情况报表统计开始");
         syncPurchaseStatusProcess();
+        // 记录同步信息
+        updateSyncLastTime();
         logger.info("同步采购进展情况报表统计结束");
         return ReturnT.SUCCESS;
     }
@@ -60,8 +62,7 @@ public class SyncPurchaseStatusProcessStatJobHandler extends SyncJobHandler/* im
 
         syncUpdatePurchaseProcess(lastSyncTime);
 
-        // 记录同步信息
-        syncRecord();
+
     }
 
     private void syncCreatePurchaseProcess(Date lastSyncTime) {

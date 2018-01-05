@@ -6,7 +6,6 @@ import com.xxl.job.core.handler.annotation.JobHander;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,7 +19,7 @@ import java.util.Date;
  */
 @Service
 @JobHander("syncPurchaseTradingVolumeStatJobHandler")
-public class SyncPurchaseTradingVolumeStatJobHandler extends SyncJobHandler implements InitializingBean{
+public class SyncPurchaseTradingVolumeStatJobHandler extends SyncJobHandler /*implements InitializingBean*/{
 
     private Logger logger = LoggerFactory.getLogger(SyncPurchaseTradingVolumeStatJobHandler.class);
 
@@ -36,6 +35,8 @@ public class SyncPurchaseTradingVolumeStatJobHandler extends SyncJobHandler impl
 
         logger.info("同步采购成交总金额报表统计开始");
         syncPurchaseTradingVolume();
+        // 记录同步时间
+        updateSyncLastTime();
         logger.info("同步采购成交总金额报表统计结束");
         return ReturnT.SUCCESS;
     }
@@ -72,12 +73,11 @@ public class SyncPurchaseTradingVolumeStatJobHandler extends SyncJobHandler impl
         params.add(lastSyncTime);
         sync(ycDataSource, countSql, querySql, params);
 
-        // 记录同步时间
-//        syncRecord();
+
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        execute();
-    }
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+//        execute();
+//    }
 }

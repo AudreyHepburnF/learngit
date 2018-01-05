@@ -71,7 +71,7 @@ public abstract class SyncJobHandler extends IJobHandler {
     }
 
 
-    protected void syncRecord() {
+    protected void updateSyncLastTime() {
         String sql = "";
         ArrayList<Object> params = new ArrayList<>();
         if (getLastSyncTime() == SyncTimeUtil.GMT_TIME) {
