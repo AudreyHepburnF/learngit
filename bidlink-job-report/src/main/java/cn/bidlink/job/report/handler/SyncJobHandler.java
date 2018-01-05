@@ -23,8 +23,12 @@ import java.util.Map;
  * @description :
  * @date : 2017/12/25
  */
-public abstract class SyncJobHandler extends IJobHandler{
+public abstract class SyncJobHandler extends IJobHandler {
     private Logger logger = LoggerFactory.getLogger(SyncJobHandler.class);
+
+    @Autowired
+    @Qualifier("ycDataSource")
+    protected DataSource ycDataSource;
 
     @Autowired
     @Qualifier("reportDataSource")
@@ -42,6 +46,7 @@ public abstract class SyncJobHandler extends IJobHandler{
 
     /**
      * 获取零点时间
+     *
      * @return
      */
     protected Date getZeroTime() {
@@ -54,7 +59,7 @@ public abstract class SyncJobHandler extends IJobHandler{
     }
 
     protected Date getLastSyncTime() {
-        String querySql = "SELECT sync_time FROM sync_report WHERE table_name = ?";
+        String querySql = "SELECT sync_time FROM sync_record WHERE table_name = ?";
         List<Object> params = new ArrayList<>();
         params.add(getTableName());
         List<Map<String, Object>> mapList = DBUtil.query(reportDataSource, querySql, params);
@@ -65,13 +70,30 @@ public abstract class SyncJobHandler extends IJobHandler{
         }
     }
 
+
+    protected void syncRecord() {
+        String sql = "";
+        ArrayList<Object> params = new ArrayList<>();
+        if (getLastSyncTime() == SyncTimeUtil.GMT_TIME) {
+            sql = "insert into sync_record(sync_time,table_name) value(?,?)";
+        } else {
+            sql = "update sync_record set sync_time = ? where table_name = ?";
+        }
+        params.add(SyncTimeUtil.getCurrentDate());
+        params.add(getTableName());
+        DBUtil.execute(reportDataSource, sql, params);
+    }
+
     protected void sync(DataSource dataSource, String countSql, String querySql, List<Object> params) {
         long count = DBUtil.count(dataSource, countSql, params);
         logger.debug("执行countSql : {}, params : {}，共{}条", countSql, params, count);
         if (count > 0) {
             for (long i = 0; i < count; i += pageSize) {
-                List<Map<String, Object>> mapList = DBUtil.query(dataSource, querySql, params);
-                logger.debug("执行querySql : {}, params : {}，共{}条", querySql, params, mapList.size());
+                // 添加分页查询参数
+                List<Object> paramsToUse = appendToParams(params, i);
+                List<Map<String, Object>> mapList = DBUtil.query(dataSource, querySql, paramsToUse);
+
+                logger.debug("执行querySql : {}, paramsToUse : {}，共{}条", querySql, paramsToUse, mapList.size());
                 // 生成insert sql, 参数
                 if (!CollectionUtils.isEmpty(mapList)) {
                     StringBuilder sqlBuilder = sqlBuilder(mapList);
@@ -82,7 +104,20 @@ public abstract class SyncJobHandler extends IJobHandler{
         }
     }
 
-    private List<Object> buildParams(List<Map<String, Object>> mapList, StringBuilder sqlBuilder) {
+    /**
+     * 添加分页查询参数
+     *
+     * @param params
+     * @param i
+     */
+    protected List<Object> appendToParams(List<Object> params, long i) {
+        ArrayList<Object> paramsToUse = new ArrayList<>(params);
+        paramsToUse.add(i);
+        paramsToUse.add(pageSize);
+        return paramsToUse;
+    }
+
+    protected List<Object> buildParams(List<Map<String, Object>> mapList, StringBuilder sqlBuilder) {
         List<Object> insertParams = new ArrayList<>();
         int listIndex = 0;
         for (Map<String, Object> map : mapList) {
@@ -108,13 +143,13 @@ public abstract class SyncJobHandler extends IJobHandler{
         return insertParams;
     }
 
-    private StringBuilder sqlBuilder(List<Map<String, Object>> mapList) {
+    protected StringBuilder sqlBuilder(List<Map<String, Object>> mapList) {
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("INSERT INTO ").append(getTableName()).append(" (");
         int columnIndex = 0;
         for (String columnName : mapList.get(0).keySet()) {
             if (columnIndex > 0) {
-                sqlBuilder.append(columnName).append(", ");
+                sqlBuilder.append(",").append(columnName);
             } else {
                 sqlBuilder.append(columnName);
             }
@@ -123,4 +158,6 @@ public abstract class SyncJobHandler extends IJobHandler{
         sqlBuilder.append(", sync_time ) VALUES ");
         return sqlBuilder;
     }
+
+
 }
