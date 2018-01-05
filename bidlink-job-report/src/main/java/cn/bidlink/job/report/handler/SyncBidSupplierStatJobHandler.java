@@ -37,6 +37,8 @@ public class SyncBidSupplierStatJobHandler extends SyncJobHandler /*implements I
         SyncTimeUtil.setCurrentDate();
         logger.info("同步报价供应商列表统计开始");
         syncBidSupplierStat();
+        //记录同步时间
+        updateSyncLastTime();
         logger.info("同步报价供应商列表统计结束");
         return ReturnT.SUCCESS;
     }
@@ -100,8 +102,7 @@ public class SyncBidSupplierStatJobHandler extends SyncJobHandler /*implements I
         params.add(lastSyncTime);
         sync(ycDataSource, countSql, querySql, params);
 
-        //记录同步时间
-        syncRecord();
+
     }
 
     @Override
