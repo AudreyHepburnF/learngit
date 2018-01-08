@@ -53,16 +53,11 @@ public class SyncPurchaseStatusProcessStatJobHandler extends SyncJobHandler/* im
      * 同步采购进展情况
      */
     private void syncPurchaseStatusProcess() {
-
         // 获取上次同步时间
         Date lastSyncTime = getLastSyncTime();
         logger.info("同步采购进展情况报表lastSyncTime: " + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
-
         syncCreatePurchaseProcess(lastSyncTime);
-
         syncUpdatePurchaseProcess(lastSyncTime);
-
-
     }
 
     private void syncCreatePurchaseProcess(Date lastSyncTime) {

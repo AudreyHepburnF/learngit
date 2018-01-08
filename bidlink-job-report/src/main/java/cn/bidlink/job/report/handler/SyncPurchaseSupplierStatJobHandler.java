@@ -22,10 +22,10 @@ import java.util.*;
  * @date : 2017/12/25
  */
 @Service
-@JobHander("syncBidSupplierStatJobHandler")
-public class SyncBidSupplierStatJobHandler extends SyncJobHandler /*implements InitializingBean*/ {
+@JobHander("syncPurchaseSupplierStatJobHandler")
+public class SyncPurchaseSupplierStatJobHandler extends SyncJobHandler /*implements InitializingBean*/ {
 
-    private Logger logger = LoggerFactory.getLogger(SyncBidSupplierStatJobHandler.class);
+    private Logger logger = LoggerFactory.getLogger(SyncPurchaseSupplierStatJobHandler.class);
 
 
     private String SUPPLIER_ID = "supplier_id";
@@ -45,7 +45,7 @@ public class SyncBidSupplierStatJobHandler extends SyncJobHandler /*implements I
 
     @Override
     protected String getTableName() {
-        return "bid_supplier_stat";
+        return "purchase_supplier_stat";
     }
 
     private void syncBidSupplierStat() {
