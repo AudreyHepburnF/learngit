@@ -108,7 +108,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
                     Long projectId = (Long) result.get(PROJECT_ID);
                     String directoryName = (String) result.get(DIRECTORY_NAME);
                     if (projectDirectoryMap.get(projectId) == null) {
-                        projectDirectoryMap.put(projectId, new HashSet<String>());
+                        projectDirectoryMap.put(projectId, new LinkedHashSet<String>());
                         parseOpportunity(currentDate, resultToExecute, result);
                     }
                     projectDirectoryMap.get(projectId).add(directoryName);

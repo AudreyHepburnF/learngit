@@ -88,6 +88,10 @@
                 <pom.yc.db.url>jdbc:mysql://10.4.0.45:3306/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yc.db.url>
                 <pom.yc.db.username>develop</pom.yc.db.username>
                 <pom.yc.db.password>123123</pom.yc.db.password>
+                <!--协同平台数据源-->
+                <pom.synergy.db.url>jdbc:mysql://10.4.0.45:3306/synergy?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.synergy.db.url>
+                <pom.synergy.db.username>develop</pom.synergy.db.username>
+                <pom.synergy.db.password>123123</pom.synergy.db.password>
                 <!--pro数据源-->
                 <pom.pro.db.url>jdbc:mysql://10.4.0.20:3306/pro_test?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
                 <pom.pro.db.username>tianyuan</pom.pro.db.username>
@@ -141,6 +145,10 @@
                 <pom.yc.db.url>jdbc:mysql://192.168.1.86:3306/nyc?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yc.db.url>
                 <pom.yc.db.username>shujuzhx</pom.yc.db.username>
                 <pom.yc.db.password>BzUS3GsL1l</pom.yc.db.password>
+                <!--协同平台数据源-->
+                <pom.synergy.db.url>jdbc:mysql://10.4.0.45:3306/synergy?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.synergy.db.url>
+                <pom.synergy.db.username>develop</pom.synergy.db.username>
+                <pom.synergy.db.password>123123</pom.synergy.db.password>
                 <!--pro数据源-->
                 <pom.pro.db.url>jdbc:mysql://192.168.1.168:3306/yc_pro?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
                 <pom.pro.db.username>fengzikai</pom.pro.db.username>
@@ -191,6 +199,10 @@
                 <pom.yc.db.url>jdbc:mysql://10.4.0.45:3306/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yc.db.url>
                 <pom.yc.db.username>develop</pom.yc.db.username>
                 <pom.yc.db.password>123123</pom.yc.db.password>
+                <!--协同平台数据源-->
+                <pom.synergy.db.url>jdbc:mysql://10.4.0.45:3306/synergy?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.synergy.db.url>
+                <pom.synergy.db.username>develop</pom.synergy.db.username>
+                <pom.synergy.db.password>123123</pom.synergy.db.password>
                 <!--pro数据源-->
                 <pom.pro.db.url>jdbc:mysql://10.4.0.20:3306/pro_test?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
                 <pom.pro.db.username>tianyuan</pom.pro.db.username>
