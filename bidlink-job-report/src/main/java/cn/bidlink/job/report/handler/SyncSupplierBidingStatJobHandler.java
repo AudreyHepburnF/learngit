@@ -25,7 +25,7 @@ import java.util.Map;
  */
 @Service
 @JobHander("syncSupplierBidingStatJobHandler")
-public class SyncSupplierBidingStatJobHandler extends SyncJobHandler implements InitializingBean {
+public class SyncSupplierBidingStatJobHandler extends SyncJobHandler/* implements InitializingBean*/ {
 
     private Logger logger = LoggerFactory.getLogger(SyncSupplierBidingStatJobHandler.class);
 
@@ -33,7 +33,6 @@ public class SyncSupplierBidingStatJobHandler extends SyncJobHandler implements 
     protected String getTableName() {
         return "supplier_biding_stat";
     }
-
 
 
     @Override
@@ -134,7 +133,7 @@ public class SyncSupplierBidingStatJobHandler extends SyncJobHandler implements 
         sync(ycDataSource, countSql, querySql, params);
     }
 
-    private void   syncSupplierOuter(){
+    private void syncSupplierOuter() {
         Date lastSyncTime = getLastSyncTime();
         logger.info("同步盘外供应商招标中标统计开始lastSyncTime: " + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
 
@@ -220,10 +219,12 @@ public class SyncSupplierBidingStatJobHandler extends SyncJobHandler implements 
 
 
 
+/*
     @Override
     public void afterPropertiesSet() throws Exception {
         execute();
     }
+*/
 
     /*protected void sync(DataSource dataSource, String countSql, String querySql, List<Object> params) {
         long count = DBUtil.count(dataSource, countSql, params);

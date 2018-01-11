@@ -25,7 +25,7 @@ import java.util.Map;
  */
 @Service
 @JobHander("syncPurchaseOverallTrackStatJobHandler")
-public class SyncPurchaseOverallTrackStatJobHandler extends SyncJobHandler /*implements InitializingBean */{
+public class SyncPurchaseOverallTrackStatJobHandler extends SyncJobHandler /*implements InitializingBean */ {
 
     private Logger logger = LoggerFactory.getLogger(SyncPurchaseOverallTrackStatJobHandler.class);
 
@@ -33,7 +33,6 @@ public class SyncPurchaseOverallTrackStatJobHandler extends SyncJobHandler /*imp
     protected String getTableName() {
         return "purchase_overall_tracking_stat";
     }
-
 
 
     @Override
@@ -79,7 +78,7 @@ public class SyncPurchaseOverallTrackStatJobHandler extends SyncJobHandler /*imp
                 "\tP.TENDER_MODE AS TENDER_MODE,\n" +
                 "\tP.KIND AS KIND,\n" +
                 "\tp.COMPANY_ID,\n" +
-                "\t1 as STAT_STATUS,\n"+
+                "\t1 as STAT_STATUS,\n" +
                 "\tP.CREATER_NAME,\n" +
                 "\tP.TENDER_NAMES,\n" +
                 "\tP.TENDER_FORM,\n" +
@@ -99,7 +98,7 @@ public class SyncPurchaseOverallTrackStatJobHandler extends SyncJobHandler /*imp
         sync(ycDataSource, countSql, querySql, params);
     }
 
-    private void   syncPurchaseOverallTrackEnd(){
+    private void syncPurchaseOverallTrackEnd() {
 
         Date lastSyncTime = getLastSyncTime();
         logger.info("同步招标整体跟踪已完成统计开始lastSyncTime: " + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
