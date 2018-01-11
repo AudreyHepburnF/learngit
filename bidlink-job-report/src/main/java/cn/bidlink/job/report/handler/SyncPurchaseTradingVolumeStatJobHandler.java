@@ -20,7 +20,6 @@ import java.util.Date;
 @Service
 @JobHander("syncPurchaseTradingVolumeStatJobHandler")
 public class SyncPurchaseTradingVolumeStatJobHandler extends SyncJobHandler /*implements InitializingBean*/{
-
     private Logger logger = LoggerFactory.getLogger(SyncPurchaseTradingVolumeStatJobHandler.class);
 
     @Override
@@ -32,7 +31,6 @@ public class SyncPurchaseTradingVolumeStatJobHandler extends SyncJobHandler /*im
     public ReturnT<String> execute(String... strings) throws Exception {
         // 当前时间和线程绑定
         SyncTimeUtil.setCurrentDate();
-
         logger.info("同步采购成交总金额报表统计开始");
         syncPurchaseTradingVolume();
         // 记录同步时间
@@ -42,10 +40,8 @@ public class SyncPurchaseTradingVolumeStatJobHandler extends SyncJobHandler /*im
     }
 
     private void syncPurchaseTradingVolume() {
-
         Date lastSyncTime = getLastSyncTime();
         logger.info("同步采购成交总金额报表统计lastSyncTime: " + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
-
         String countSql = "SELECT\n" +
                 "\tCOUNT(1)\n" +
                 "FROM\n" +
@@ -55,8 +51,6 @@ public class SyncPurchaseTradingVolumeStatJobHandler extends SyncJobHandler /*im
                 "WHERE\n" +
                 "\tbp.project_status IN (8, 9) \n" +
                 " AND bpe.publish_bid_result_time > ?\n";
-
-
         String querySql = "SELECT\n" +
                 "\tbpe.publish_bid_result_time,\n" +
                 "\tbpe.deal_total_price,\n" +
@@ -72,8 +66,6 @@ public class SyncPurchaseTradingVolumeStatJobHandler extends SyncJobHandler /*im
         ArrayList<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
         sync(ycDataSource, countSql, querySql, params);
-
-
     }
 
 //    @Override
