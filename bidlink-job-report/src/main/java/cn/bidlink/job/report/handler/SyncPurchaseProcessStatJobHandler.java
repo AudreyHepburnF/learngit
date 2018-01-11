@@ -26,10 +26,7 @@ import java.util.Map;
 @Service
 @JobHander("syncPurchaseProcessStatJobHandler")
 public class SyncPurchaseProcessStatJobHandler extends SyncJobHandler/* implements InitializingBean*/ {
-
     private Logger logger = LoggerFactory.getLogger(SyncPurchaseProcessStatJobHandler.class);
-
-
     private String PROJECT_ID = "project_id";
 
     @Override
@@ -61,7 +58,6 @@ public class SyncPurchaseProcessStatJobHandler extends SyncJobHandler/* implemen
     }
 
     private void syncCreatePurchaseProcess(Date lastSyncTime) {
-
         String countSql = "SELECT\n" +
                 "\tCOUNT(1)\n" +
                 "FROM\n" +
@@ -73,7 +69,6 @@ public class SyncPurchaseProcessStatJobHandler extends SyncJobHandler/* implemen
                 "\t)\n" +
                 "AND project_status != 10\n" +
                 "AND create_time > ?\n";
-
         String querySql = "SELECT\n" +
                 "\tproject_status,\n" +
                 "\tcomp_id AS company_id,\n" +
@@ -167,7 +162,6 @@ public class SyncPurchaseProcessStatJobHandler extends SyncJobHandler/* implemen
             }
             columnIndex++;
         }
-
         //添加同步时间字段
         sqlBuilder.append(",sync_time=? WHERE " + PROJECT_ID + " = ?");
         return sqlBuilder;
