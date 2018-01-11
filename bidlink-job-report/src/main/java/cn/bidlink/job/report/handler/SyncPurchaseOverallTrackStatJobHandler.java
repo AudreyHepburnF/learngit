@@ -25,7 +25,7 @@ import java.util.Map;
  */
 @Service
 @JobHander("syncPurchaseOverallTrackStatJobHandler")
-public class SyncPurchaseOverallTrackStatJobHandler extends SyncJobHandler /*implements InitializingBean */ {
+public class SyncPurchaseOverallTrackStatJobHandler extends SyncJobHandler  implements InitializingBean  {
 
     private Logger logger = LoggerFactory.getLogger(SyncPurchaseOverallTrackStatJobHandler.class);
 
@@ -39,8 +39,8 @@ public class SyncPurchaseOverallTrackStatJobHandler extends SyncJobHandler /*imp
     public ReturnT<String> execute(String... strings) throws Exception {
         // 当前时间和线程绑定
         SyncTimeUtil.setCurrentDate();
-
         logger.info("同步招标整体跟踪统计开始");
+        clearBidProcessStat();
         //进行中
         syncPurchaseOverallTracking();
         //已结束
@@ -49,6 +49,12 @@ public class SyncPurchaseOverallTrackStatJobHandler extends SyncJobHandler /*imp
         updateSyncLastTime();
         logger.info("同步招标整体跟踪统计结束");
         return ReturnT.SUCCESS;
+    }
+
+    private void clearBidProcessStat() {
+        logger.info("清理招标整体跟踪统计开始");
+        clearTableData();
+        logger.info("清理招标整体跟踪统计开始");
     }
 
     private void syncPurchaseOverallTracking() {
@@ -158,11 +164,11 @@ public class SyncPurchaseOverallTrackStatJobHandler extends SyncJobHandler /*imp
 
 
 
-  /*  @Override
+    @Override
     public void afterPropertiesSet() throws Exception {
         execute();
     }
-
+  /*
     protected void sync(DataSource dataSource, String countSql, String querySql, List<Object> params) {
         long count = DBUtil.count(dataSource, countSql, params);
         logger.debug("执行countSql : {}, params : {}，共{}条", countSql, params, count);

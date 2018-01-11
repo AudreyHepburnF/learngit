@@ -7,7 +7,6 @@ import com.xxl.job.core.handler.annotation.JobHander;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -24,7 +23,7 @@ import java.util.*;
  */
 @Service
 @JobHander("syncContractOverviewStatJobHandler")
-public class SyncContractOverviewStatJobHandler extends SyncJobHandler implements InitializingBean {
+public class SyncContractOverviewStatJobHandler extends SyncJobHandler/* implements InitializingBean */{
 
     private Logger logger = LoggerFactory.getLogger(SyncContractOverviewStatJobHandler.class);
     private final String SUPPLIER_ID = "supplier_id";
@@ -41,14 +40,19 @@ public class SyncContractOverviewStatJobHandler extends SyncJobHandler implement
     public ReturnT<String> execute(String... strings) throws Exception {
         // 当前时间和线程绑定
         SyncTimeUtil.setCurrentDate();
-
         logger.info("同步合同概况统计开始");
+        clearBidProcessStat();
         //合同概况统计报表
         syncContractOverview();
         // 记录同步时间
         updateSyncLastTime();
         logger.info("同步合同概况统计结束");
         return ReturnT.SUCCESS;
+    }
+    private void clearBidProcessStat() {
+        logger.info("清理合同概况统计开始");
+        clearTableData();
+        logger.info("清理合同概况统计开始");
     }
 
     private void syncContractOverview() {
@@ -65,14 +69,14 @@ public class SyncContractOverviewStatJobHandler extends SyncJobHandler implement
 
 
         String querySql = "SELECT\n" +
-                "\tc. STATUS,\n" +
+                "\tc. status ,\n" +
                 "\tc.company_id,\n" +
-                "\tc.SUPPLIER_NAME as supplier_name,\n" +
+                "\tc.SUPPLIER_NAME ,\n" +
                 "\tc.supplier_id,\n" +
                 "\tcon.number,\n" +
-                "\tcon.UNIVALENCE,\n" +
+                "\tcon.UNIVALENCE  ,\n" +
                 "\tc.create_time,\n" +
-                "\tcon.CONTRACT_ID\n" +
+                "\tcon.CONTRACT_ID as contract_id \n" +
                 "FROM\n" +
                 "\tcon_contract c\n" +
                 "INNER JOIN con_corpore con ON c.id = con.CONTRACT_ID\n" +
@@ -85,10 +89,12 @@ public class SyncContractOverviewStatJobHandler extends SyncJobHandler implement
     }
 
 
+/*
     @Override
     public void afterPropertiesSet() throws Exception {
         execute();
     }
+*/
 
     protected void sync(DataSource dataSource, String countSql, String querySql, List<Object> params) {
         long count = DBUtil.count(dataSource, countSql, params);

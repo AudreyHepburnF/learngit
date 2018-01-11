@@ -1,21 +1,15 @@
 package cn.bidlink.job.report.handler;
 
-import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
-import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author <a href="mailto:jiacaisu@ebnew.com">jiacaisu</a>
@@ -25,7 +19,7 @@ import java.util.Map;
  */
 @Service
 @JobHander("syncSupplierBidingStatJobHandler")
-public class SyncSupplierBidingStatJobHandler extends SyncJobHandler/* implements InitializingBean*/ {
+public class SyncSupplierBidingStatJobHandler extends SyncJobHandler /*implements InitializingBean*/ {
 
     private Logger logger = LoggerFactory.getLogger(SyncSupplierBidingStatJobHandler.class);
 
@@ -39,7 +33,7 @@ public class SyncSupplierBidingStatJobHandler extends SyncJobHandler/* implement
     public ReturnT<String> execute(String... strings) throws Exception {
         // 当前时间和线程绑定
         SyncTimeUtil.setCurrentDate();
-
+        clearBidProcessStat();
         logger.info("同步供应商招标中标统计开始");
         //盘内供应商
         syncSupplierInner();
@@ -49,6 +43,12 @@ public class SyncSupplierBidingStatJobHandler extends SyncJobHandler/* implement
         updateSyncLastTime();
         logger.info("同步供应商招标中标统计结束");
         return ReturnT.SUCCESS;
+    }
+
+    private void clearBidProcessStat() {
+        logger.info("清理供应商招标中标统计开始");
+        clearTableData();
+        logger.info("清理供应商招标中标统计开始");
     }
 
     private void syncSupplierInner() {
@@ -219,12 +219,10 @@ public class SyncSupplierBidingStatJobHandler extends SyncJobHandler/* implement
 
 
 
-/*
-    @Override
+/*    @Override
     public void afterPropertiesSet() throws Exception {
         execute();
-    }
-*/
+    }*/
 
     /*protected void sync(DataSource dataSource, String countSql, String querySql, List<Object> params) {
         long count = DBUtil.count(dataSource, countSql, params);
