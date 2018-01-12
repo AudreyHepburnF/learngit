@@ -18,15 +18,13 @@ import java.util.*;
 /**
  * @author : <a href="mailto:zikaifeng@ebnew.com">冯子恺</a>
  * @version : Ver 1.0
- * @description :
+ * @description :同步报价供应商列表
  * @date : 2017/12/25
  */
 @Service
 @JobHander("syncPurchaseSupplierStatJobHandler")
 public class SyncPurchaseSupplierStatJobHandler extends SyncJobHandler /*implements InitializingBean*/ {
-
     private Logger logger = LoggerFactory.getLogger(SyncPurchaseSupplierStatJobHandler.class);
-
 
     private String SUPPLIER_ID = "supplier_id";
     private String COMPANY_ID = "company_id";
@@ -71,8 +69,6 @@ public class SyncPurchaseSupplierStatJobHandler extends SyncJobHandler /*impleme
                 "AND s.id = bspb.project_id\n" +
                 "WHERE\n" +
                 "\tbspb.supplier_bid_status = 6";
-
-
         String querySql = "SELECT\n" +
                 "\ts.company_id,\n" +
                 "\tbspb.supplier_id,\n" +
@@ -101,8 +97,6 @@ public class SyncPurchaseSupplierStatJobHandler extends SyncJobHandler /*impleme
         List<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
         sync(ycDataSource, countSql, querySql, params);
-
-
     }
 
     @Override
@@ -114,7 +108,6 @@ public class SyncPurchaseSupplierStatJobHandler extends SyncJobHandler /*impleme
                 // 添加分页查询参数
                 List<Object> paramsToUse = appendToParams(params, i);
                 List<Map<String, Object>> mapList = DBUtil.query(dataSource, querySql, paramsToUse);
-
                 logger.debug("执行querySql : {}, paramsToUse : {}，共{}条", querySql, paramsToUse, mapList.size());
 
                 // 添加是否是合作供应商
@@ -136,7 +129,6 @@ public class SyncPurchaseSupplierStatJobHandler extends SyncJobHandler /*impleme
      * @param mapList
      */
     private void appendSupplierStatus(List<Map<String, Object>> mapList) {
-
         HashMap<String, Object> map = new HashMap<>();
         for (Map<String, Object> mapAttr : mapList) {
             Object supplierId = mapAttr.get(SUPPLIER_ID);

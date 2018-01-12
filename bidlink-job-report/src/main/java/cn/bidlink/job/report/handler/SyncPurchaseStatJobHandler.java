@@ -24,8 +24,6 @@ import java.util.*;
 @Service
 @JobHander("syncPurchaseStatJobHandler")
 public class SyncPurchaseStatJobHandler extends SyncJobHandler /*implements InitializingBean*/ {
-
-
     private Logger logger = LoggerFactory.getLogger(SyncPurchaseStatJobHandler.class);
 
     private String PROJECT_ID = "project_id";
@@ -62,14 +60,10 @@ public class SyncPurchaseStatJobHandler extends SyncJobHandler /*implements Init
         // 获取上次同步时间
         Date lastSyncTime = getLastSyncTime();
         logger.info("同步采购流程项目概况列表统计lastSyncTime：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
-
         // 同步插入数据
         syncCreatePurchaseProcess(lastSyncTime);
-
         // 同步更新数据
         syncUpdatePurchaseProcess(lastSyncTime);
-
-
     }
 
 
@@ -97,7 +91,6 @@ public class SyncPurchaseStatJobHandler extends SyncJobHandler /*implements Init
                 "\t\t\tbpe.COMP_ID,\n" +
                 "\t\t\tbp.id\n" +
                 "\t) AS s";
-
         String querySql = "SELECT\n" +
                 "\tSUM(\n" +
                 "\t\tIFNULL(bpe.DEAL_TOTAL_PRICE, 0)\n" +
@@ -149,7 +142,6 @@ public class SyncPurchaseStatJobHandler extends SyncJobHandler /*implements Init
                 "\t\t\tbpe.COMP_ID,\n" +
                 "\t\t\tbp.id\n" +
                 "\t) AS s";
-
         String querySql = "SELECT\n" +
                 "\tSUM(\n" +
                 "\t\tIFNULL(bpe.DEAL_TOTAL_PRICE, 0)\n" +
@@ -175,8 +167,6 @@ public class SyncPurchaseStatJobHandler extends SyncJobHandler /*implements Init
         ArrayList<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
         syncCreate(ycDataSource, countSql, querySql, params);
-
-
     }
 
     /**
@@ -196,7 +186,6 @@ public class SyncPurchaseStatJobHandler extends SyncJobHandler /*implements Init
                 // 添加分页查询参数
                 List<Object> paramsToUse = appendToParams(params, i);
                 mapList = DBUtil.query(dataSource, querySql, paramsToUse);
-
                 logger.debug("执行更新querySql : {}, paramsToUse : {}，共{}条", querySql, paramsToUse, mapList.size());
 
                 // 添加采购品id
@@ -208,7 +197,6 @@ public class SyncPurchaseStatJobHandler extends SyncJobHandler /*implements Init
                     DBUtil.batchExecute(reportDataSource, sqlBuilder.toString(), mapList);
                 }
             }
-
         }
     }
 
@@ -230,7 +218,6 @@ public class SyncPurchaseStatJobHandler extends SyncJobHandler /*implements Init
                 // 添加分页查询参数
                 List<Object> paramsToUse = appendToParams(params, i);
                 mapList = DBUtil.query(dataSource, querySql, paramsToUse);
-
                 logger.debug("执行插入querySql : {}, paramsToUse : {}，共{}条", querySql, paramsToUse, mapList.size());
 
                 // 添加采购品id
@@ -247,7 +234,6 @@ public class SyncPurchaseStatJobHandler extends SyncJobHandler /*implements Init
         }
     }
 
-
     /**
      * 添加采购品id
      *
@@ -255,7 +241,6 @@ public class SyncPurchaseStatJobHandler extends SyncJobHandler /*implements Init
      */
     private void appendDirectoryIds(List<Map<String, Object>> mapList) {
         Map<Object, Object> map = new HashMap<>();
-
         for (Map<String, Object> mapAttr : mapList) {
             map.put(mapAttr.get(PROJECT_ID), mapAttr.get(COMPANY_ID));
         }
@@ -266,7 +251,6 @@ public class SyncPurchaseStatJobHandler extends SyncJobHandler /*implements Init
                 "FROM\n" +
                 "\tbmpfjz_project_item bpi\n" +
                 "WHERE (\n");
-
         int conditionIndex = 0;
         for (Map.Entry<Object, Object> attr : map.entrySet()) {
             if (conditionIndex > 0) {

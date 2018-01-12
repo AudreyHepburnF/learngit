@@ -62,10 +62,8 @@ public abstract class SyncJobHandler extends IJobHandler {
      * 清空表数据
      */
     protected void clearTableData() {
-        String clearSql = "DELETE FROM ?";
-        List<Object> params = new ArrayList<>();
-        params.add(getTableName());
-        DBUtil.execute(ycDataSource, clearSql, params);
+        String clearSql = "DELETE FROM %s";
+        DBUtil.execute(reportDataSource, String.format(clearSql, getTableName()), null);
     }
 
     protected Date getLastSyncTime() {
