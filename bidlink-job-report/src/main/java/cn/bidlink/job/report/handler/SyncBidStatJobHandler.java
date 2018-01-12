@@ -144,15 +144,17 @@ public class SyncBidStatJobHandler extends SyncJobHandler /*implements Initializ
             pairs.add(new Pair(((long) map.get(COMPANY_ID)), ((long) map.get(SUPPLIER_ID))));
         }
 
-        StringBuffer querySupplierStatusSql = new StringBuffer("SELECT company_id,supplier_id,IF (bcs.supplier_status = 1, '是', '否') AS supplier_type FROM bsm_company_supplier WHERE ");
+        StringBuffer querySupplierStatusSql = new StringBuffer("SELECT company_id,supplier_id,IF (supplier_status = 1, '是', '否') AS supplier_type FROM bsm_company_supplier WHERE ");
         int count = 0;
         for (Pair pair : pairs) {
-            if (count > 1) {
+            if (count > 0) {
                 querySupplierStatusSql.append(" OR ");
             }
             querySupplierStatusSql.append(" (company_id=")
-                    .append(pair.companyId).append(" AND supplier_id=")
-                    .append(pair.supplierId).append(") ");
+                    .append(pair.companyId)
+                    .append(" AND supplier_id=")
+                    .append(pair.supplierId)
+                    .append(") ");
             count++;
         }
 
@@ -176,16 +178,6 @@ public class SyncBidStatJobHandler extends SyncJobHandler /*implements Initializ
             String key = map.get(COMPANY_ID) + "_" + map.get(SUPPLIER_ID);
             String supplierType = supplierTypeMap.get(key);
             map.put(SUPPLIER_TYPE, supplierType);
-        }
-    }
-
-    class Pair {
-        private long companyId;
-        private long supplierId;
-
-        public Pair(long companyId, long supplierId) {
-            this.companyId = companyId;
-            this.supplierId = supplierId;
         }
     }
 
