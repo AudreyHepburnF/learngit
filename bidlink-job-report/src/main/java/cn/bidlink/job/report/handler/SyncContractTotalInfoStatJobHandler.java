@@ -140,8 +140,9 @@ public class SyncContractTotalInfoStatJobHandler extends SyncJobHandler  /*imple
                 List<Object> paramsToUse = appendToParams(params, i);
                 List<Map<String, Object>> mapList = DBUtil.query(dataSource, querySql, paramsToUse);
 
-                // 添加catalog_id
+                // 添加createUserName
                 appendCreateUserName(mapList);
+                //添加purchaseCompanySignName和supplierCompanySignName
                 appendPurchaserAndSupplierCompanySignName(mapList);
                 logger.debug("执行querySql : {}, paramsToUse : {}，共{}条", querySql, paramsToUse, mapList.size());
                 // 生成insert sql, 参数
@@ -166,7 +167,7 @@ public class SyncContractTotalInfoStatJobHandler extends SyncJobHandler  /*imple
             map.put(mapAttr.get(USER_ID), mapAttr.get(COMPANY_ID));
         }
 
-        // 从corp_directorys找catalog_id
+        // 从reg_user中找name
         StringBuilder selectCreateUserNameSqlBuilder = new StringBuilder();
         selectCreateUserNameSqlBuilder.append("SELECT\n" +
                 "\tid,\n" +
