@@ -28,7 +28,7 @@ import java.util.*;
 @Service
 @JobHander("syncContractTotalInfoStatJobHandler")
 public class SyncContractTotalInfoStatJobHandler extends SyncJobHandler  /*implements InitializingBean*/ {
-    private Logger logger = LoggerFactory.getLogger(SyncPurchaseTradingVolumeStatJobHandler.class);
+    private Logger logger = LoggerFactory.getLogger(SyncContractTotalInfoStatJobHandler.class);
 
     private String CREATE_USER_NAME = "create_user_name";
     private String NAME = "name";
