@@ -167,5 +167,34 @@ public abstract class SyncJobHandler extends IJobHandler {
         return sqlBuilder;
     }
 
+    protected class Pair {
+        long companyId;
+        long supplierId;
+
+        public Pair(long companyId, long supplierId) {
+            this.companyId = companyId;
+            this.supplierId = supplierId;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Pair pair = (Pair) o;
+
+            if (companyId != pair.companyId) return false;
+            return supplierId == pair.supplierId;
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = (int) (companyId ^ (companyId >>> 32));
+            result = 31 * result + (int) (supplierId ^ (supplierId >>> 32));
+            return result;
+        }
+    }
+
 
 }

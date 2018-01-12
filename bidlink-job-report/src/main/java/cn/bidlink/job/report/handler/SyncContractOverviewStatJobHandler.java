@@ -162,15 +162,4 @@ public class SyncContractOverviewStatJobHandler extends SyncJobHandler/* impleme
             map.put(SUPPLIER_TYPE, supplierType);
         }
     }
-
-    class Pair {
-        private long companyId;
-        private long supplierId;
-
-        public Pair(long companyId, long supplierId) {
-            this.companyId = companyId;
-            this.supplierId = supplierId;
-        }
-    }
-
 }
