@@ -25,7 +25,7 @@ public class SyncPurchaseOverallTrackStatJobHandler extends SyncJobHandler /* im
 
     @Override
     protected String getTableName() {
-        return "purchase_overall_tracking_stat";
+        return "purchase_overall_track_stat";
     }
 
 
