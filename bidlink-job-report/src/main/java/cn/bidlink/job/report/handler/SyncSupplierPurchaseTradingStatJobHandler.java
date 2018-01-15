@@ -23,9 +23,9 @@ import java.util.Map;
  * @Date 2018/1/9
  */
 @Service
-@JobHander("syncSupplierPurchaseTradingStatJobHander")
-public class SyncSupplierPurchaseTradingStatJobHander extends SyncJobHandler /*implements InitializingBean*/ {
-    private Logger logger = LoggerFactory.getLogger(SyncSupplierPurchaseTradingStatJobHander.class);
+@JobHander("syncSupplierPurchaseTradingStatJobHandler")
+public class SyncSupplierPurchaseTradingStatJobHandler extends SyncJobHandler /*implements InitializingBean*/ {
+    private Logger logger = LoggerFactory.getLogger(SyncSupplierPurchaseTradingStatJobHandler.class);
 
     @Override
     protected String getTableName() {
@@ -36,17 +36,63 @@ public class SyncSupplierPurchaseTradingStatJobHander extends SyncJobHandler /*i
     public ReturnT<String> execute(String... strings) throws Exception {
         SyncTimeUtil.setCurrentDate();
         logger.info("同步供应商采购成交统计开始");
-        syncSupplierPurchaseDeal();
+        syncSupplierPurchaseTrading();
         updateSyncLastTime();
         logger.info("同步供应商采购成交统计结束");
         return ReturnT.SUCCESS;
     }
 
-    private void syncSupplierPurchaseDeal() {
+    private void syncSupplierPurchaseTrading() {
         Date lastSyncTime = getLastSyncTime();
         logger.info("同步供应商采购成交统计 lastSyncTime: " + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
-        syncTraySupplierPurchaseDeal(lastSyncTime);
-        syncOutSideSupplierPurchaseDeal(lastSyncTime);
+        syncTraySupplierPurchaseTrading(lastSyncTime);
+        syncOutSideSupplierPurchaseTrading(lastSyncTime);
+    }
+
+    /**
+     * 同步盘内供应商
+     *
+     * @param lastSyncTime
+     */
+    private void syncTraySupplierPurchaseTrading(Date lastSyncTime) {
+        String countSql = "SELECT\n" +
+                "\tcount(1)\n" +
+                "FROM\n" +
+                "\tbmpfjz_supplier_project_bid";
+        String querySql = "SELECT\n" +
+                "\tspb.comp_id AS company_id,\n" +
+                "\tspb.project_id,\n" +
+                "\tspb.supplier_id,\n" +
+                "\tspb.supplier_name,\n" +
+                "\tdeal_total_price,\n" +
+                "\tbcs.supplier_code,\n" +
+                "\tbcs.supplier_industry,\n" +
+                "\tbcs.supplier_region,\n" +
+                "\tspb.supplier_bid_status,\n" +
+                "\tp.create_time\n" +
+                "FROM\n" +
+                "\tbsm_company_supplier bcs\n" +
+                "LEFT JOIN bmpfjz_project p ON bcs.company_id = p.comp_id\n" +
+                "JOIN (\n" +
+                "\tSELECT\n" +
+                "\t\tsupplier_id,\n" +
+                "\t\tproject_id,\n" +
+                "\t\tcomp_id,\n" +
+                "\t\tsupplier_bid_status,\n" +
+                "\t\tsupplier_name,\n" +
+                "\t\tdeal_total_price\n" +
+                "\tFROM\n" +
+                "\t\tbmpfjz_supplier_project_bid\n" +
+                "\tLIMIT ?,?\n" +
+                ") spb ON bcs.supplier_id = spb.supplier_id\n" +
+                "AND spb.project_id = p.id\n" +
+                "AND spb.comp_id = p.comp_id\n" +
+                "WHERE\n" +
+                "\tspb.supplier_bid_status IN (2, 3, 6, 7) \n" +
+                "AND p.create_time > ?\n";
+        ArrayList<Object> params = new ArrayList<>();
+        params.add(lastSyncTime);
+        syncTray(ycDataSource, countSql, querySql, params);
     }
 
     /**
@@ -54,19 +100,11 @@ public class SyncSupplierPurchaseTradingStatJobHander extends SyncJobHandler /*i
      *
      * @param lastSyncTime
      */
-    private void syncOutSideSupplierPurchaseDeal(Date lastSyncTime) {
+    private void syncOutSideSupplierPurchaseTrading(Date lastSyncTime) {
         String countSql = "SELECT\n" +
                 "\tCOUNT(1)\n" +
                 "FROM\n" +
-                "\tbsm_company_supplier_apply bcs\n" +
-                "LEFT JOIN bmpfjz_supplier_project_bid spb ON bcs.supplier_id = spb.supplier_id\n" +
-                "AND bcs.company_id = spb.comp_id\n" +
-                "JOIN bmpfjz_project p ON spb.project_id = p.id\n" +
-                "AND spb.comp_id = p.comp_id\n" +
-                "WHERE\n" +
-                "\tspb.supplier_bid_status IN (2, 3, 6, 7)\n" +
-                "AND bcs.supplier_status != 4\n" +
-                "AND p.create_time > ?";
+                "\tbmpfjz_supplier_project_bid";
         String querySql = "SELECT\n" +
                 "\tp.comp_id AS company_id,\n" +
                 "\tp.id AS project_id,\n" +
@@ -81,65 +119,33 @@ public class SyncSupplierPurchaseTradingStatJobHander extends SyncJobHandler /*i
                 "\tp.create_time\n" +
                 "FROM\n" +
                 "\tbsm_company_supplier_apply bcs\n" +
-                "LEFT JOIN bmpfjz_supplier_project_bid spb ON bcs.supplier_id = spb.supplier_id\n" +
-                "AND bcs.company_id = spb.comp_id\n" +
-                "JOIN bmpfjz_project p ON spb.project_id = p.id\n" +
+                "LEFT JOIN bmpfjz_project p ON bcs.company_id = p.comp_id\n" +
+                "JOIN (\n" +
+                "\tSELECT\n" +
+                "\t\tsupplier_id,\n" +
+                "\t\tproject_id,\n" +
+                "\t\tcomp_id,\n" +
+                "\t\tsupplier_bid_status,\n" +
+                "\t\tsupplier_name,\n" +
+                "\t\tdeal_total_price\n" +
+                "\tFROM\n" +
+                "\t\tbmpfjz_supplier_project_bid\n" +
+                "\tLIMIT ?,?\n" +
+                ") spb ON bcs.supplier_id = spb.supplier_id\n" +
+                "AND spb.project_id = p.id\n" +
                 "AND spb.comp_id = p.comp_id\n" +
                 "WHERE\n" +
                 "\tspb.supplier_bid_status IN (2, 3, 6, 7)\n" +
                 "AND bcs.supplier_status != 4\n" +
-                "AND p.create_time > ?\n" +
-                "LIMIT ?,?";
+                "AND p.create_time > ?";
         ArrayList<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
         syncOutside(ycDataSource, countSql, querySql, params);
     }
 
-    /**
-     * 同步盘内供应商
-     *
-     * @param lastSyncTime
-     */
-    private void syncTraySupplierPurchaseDeal(Date lastSyncTime) {
-        String countSql = "SELECT\n" +
-                "\tCOUNT(1)\n" +
-                "FROM\n" +
-                "\tbsm_company_supplier bcs\n" +
-                "LEFT JOIN bmpfjz_supplier_project_bid spb ON bcs.supplier_id = spb.supplier_id\n" +
-                "AND bcs.company_id = spb.comp_id\n" +
-                "JOIN bmpfjz_project p ON spb.project_id = p.id\n" +
-                "AND spb.comp_id = p.comp_id\n" +
-                "WHERE\n" +
-                "\tspb.supplier_bid_status IN (2, 3, 6, 7) AND p.create_time > ?";
-        String querySql = "SELECT\n" +
-                "\tspb.comp_id AS company_id,\n" +
-                "\tspb.project_id,\n" +
-                "\tspb.supplier_id,\n" +
-                "\tspb.supplier_name,\n" +
-                "\tdeal_total_price,\n" +
-                "\tbcs.supplier_code,\n" +
-                "\tbcs.supplier_industry,\n" +
-                "\tbcs.supplier_region,\n" +
-                "\tspb.supplier_bid_status,\n" +
-                "\tp.create_time\n" +
-                "FROM\n" +
-                "\tbsm_company_supplier bcs\n" +
-                "LEFT JOIN bmpfjz_supplier_project_bid spb ON bcs.supplier_id = spb.supplier_id\n" +
-                "AND bcs.company_id = spb.comp_id\n" +
-                "JOIN bmpfjz_project p ON spb.project_id = p.id\n" +
-                "AND spb.comp_id = p.comp_id\n" +
-                "WHERE\n" +
-                "\tspb.supplier_bid_status IN (2, 3, 6, 7)" +
-                "\tAND p.create_time > ?" +
-                "\tLIMIT ?,?";
-        ArrayList<Object> params = new ArrayList<>();
-        params.add(lastSyncTime);
-        syncTray(ycDataSource, countSql, querySql, params);
-    }
-
     private void syncTray(DataSource dataSource, String countSql, String querySql, ArrayList<Object> params) {
-        long count = DBUtil.count(dataSource, countSql, params);
-        logger.debug("执行countSql : {}, params : {}，共{}条", countSql, params, count);
+        long count = DBUtil.count(dataSource, countSql, null);
+        logger.debug("执行countSql : {}, params : {}，共{}条", countSql, null, count);
         if (count > 0) {
             for (long i = 0; i < count; i += pageSize) {
                 // 添加分页查询参数
@@ -159,8 +165,8 @@ public class SyncSupplierPurchaseTradingStatJobHander extends SyncJobHandler /*i
     }
 
     private void syncOutside(DataSource dataSource, String countSql, String querySql, ArrayList<Object> params) {
-        long count = DBUtil.count(dataSource, countSql, params);
-        logger.debug("执行countSql : {} , params : {} , 共{}条", countSql, params, count);
+        long count = DBUtil.count(dataSource, countSql, null);
+        logger.debug("执行countSql : {} , params : {} , 共{}条", countSql, null, count);
         if (count > 0) {
             for (long i = 0; i < count; i += pageSize) {
                 // 添加分页参数
@@ -222,6 +228,22 @@ public class SyncSupplierPurchaseTradingStatJobHander extends SyncJobHandler /*i
             listIndex++;
         }
         return insertParams;
+    }
+
+    /**
+     * 修改分页查询方法  分页在前条件在后
+     *
+     * @param params
+     * @param i
+     * @return
+     */
+    @Override
+    protected List<Object> appendToParams(List<Object> params, long i) {
+        ArrayList<Object> paramsToUse = new ArrayList<>();
+        paramsToUse.add(i);
+        paramsToUse.add(pageSize);
+        paramsToUse.add(params.get(0));
+        return paramsToUse;
     }
 
 //    @Override
