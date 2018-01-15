@@ -30,13 +30,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SyncPurchaseTradingDetailStatJobHandler extends SyncJobHandler implements InitializingBean {
     private Logger logger = LoggerFactory.getLogger(SyncPurchaseTradingDetailStatJobHandler.class);
 
-    private String PROJECT_ID   = "project_id";
-    private String ITEM_ID      = "item_id";
-    private String USER_ID      = "user_id";
-    private String DEPT         = "dept";
-    private String COMPANY_ID   = "company_id";
-    private String DIRECTORY_ID = "directory_id";
-    private String SYNC_TIME    = "sync_time";
+    private String PROJECT_ID      = "project_id";
+    private String ITEM_ID         = "item_id";
+    private String PROJECT_USER_ID = "project_user_id";
+    private String DEPT            = "dept";
+    private String COMPANY_ID      = "company_id";
+    private String DIRECTORY_ID    = "directory_id";
+    private String SYNC_TIME       = "sync_time";
 
     private Map<String, Object> emptyDirectoryItem = new LinkedHashMap<>();
 
@@ -92,10 +92,9 @@ public class SyncPurchaseTradingDetailStatJobHandler extends SyncJobHandler impl
                           + "         bp.id AS project_id,\n"
                           + "         bp.`name` AS project_name,\n"
                           + "         bp.comp_id AS company_id,\n"
-                          + "         bp.user_id,\n"
-                          + "         bp.user_name,\n"
+                          + "         bp.user_id AS project_user_id,\n"
+                          + "         bp.user_name AS project_user_name,\n"
                           + "         bp.department_code,\n"
-                          + "         bp.user_name,\n"
                           + "         bp.create_time ,\n"
                           + "         bpe.archive_time\n"
                           + "      FROM\n"
@@ -116,7 +115,9 @@ public class SyncPurchaseTradingDetailStatJobHandler extends SyncJobHandler impl
     }
 
     /**
-     * 同步插入数据
+     * 分页查询项目表bmpfjz_project数据，
+     * 每一页数据单独查询reg_user，1:1
+     * 每一页数据单独查询bmpfjz_supplier_project_item_bid，1:N
      *
      * @param dataSource
      * @param countSql
@@ -160,7 +161,7 @@ public class SyncPurchaseTradingDetailStatJobHandler extends SyncJobHandler impl
     private void appendUserDept(Map<String, Map<String, Object>> projectList) {
         Set<Pair> pairs = new HashSet<>();
         for (Map<String, Object> map : projectList.values()) {
-            pairs.add(new Pair(((long) map.get(COMPANY_ID)), ((long) map.get(USER_ID))));
+            pairs.add(new Pair(((long) map.get(COMPANY_ID)), ((long) map.get(PROJECT_USER_ID))));
         }
 
         StringBuffer sb = new StringBuffer("SELECT id, company_id, dept FROM reg_user WHERE ");
@@ -193,11 +194,17 @@ public class SyncPurchaseTradingDetailStatJobHandler extends SyncJobHandler impl
         });
 
         for (Map<String, Object> map : projectList.values()) {
-            String dept = map.get(COMPANY_ID) + "_" + map.get(USER_ID);
+            String dept = map.get(COMPANY_ID) + "_" + map.get(PROJECT_USER_ID);
             map.put(DEPT, userMap.get(dept));
         }
     }
 
+    /**
+     * 分页查询采购品报价表bmpfjz_supplier_project_item_bid，
+     * 每一页数据单独查询bmpfjz_project_item，1:1
+     *
+     * @param projectList
+     */
     private void appendSupplierProjectItemBid(Map<String, Map<String, Object>> projectList) {
         Set<Pair> pairs = new HashSet<>();
         for (Map<String, Object> map : projectList.values()) {
@@ -277,7 +284,7 @@ public class SyncPurchaseTradingDetailStatJobHandler extends SyncJobHandler impl
                     }
                 });
                 logger.debug("执行querySql : {}, params : {}，共{}条", querySql, params, atomicInteger.get());
-                // 添加供应商报价信息
+                // 添加采购品信息
                 appendProjectItem(projectItemBidMap, projectItemPair);
 
                 // 合并项目与采购品
@@ -302,6 +309,13 @@ public class SyncPurchaseTradingDetailStatJobHandler extends SyncJobHandler impl
         }
     }
 
+    /**
+     * 查询采购品信息表，
+     * 单独查询采购品目录表，N:1
+     *
+     * @param projectItemBidMap
+     * @param projectItemPair
+     */
     private void appendProjectItem(Map<String, List<Map<String, Object>>> projectItemBidMap, List<Pair> projectItemPair) {
         StringBuffer querySupplierBidSql = new StringBuffer("SELECT id AS item_id, `code` AS item_code,\n"
                                                             + " `name` AS item_name,\n"
@@ -435,6 +449,6 @@ public class SyncPurchaseTradingDetailStatJobHandler extends SyncJobHandler impl
         emptyDirectoryItem.put("catalog_id", null);
         emptyDirectoryItem.put("catalog_name", null);
 
-        execute();
+//        execute();
     }
 }
