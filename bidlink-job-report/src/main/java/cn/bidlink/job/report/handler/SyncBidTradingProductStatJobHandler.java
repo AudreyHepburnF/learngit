@@ -7,7 +7,6 @@ import com.xxl.job.core.handler.annotation.JobHander;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -23,9 +22,9 @@ import java.util.*;
  * @Date 2018/01/08
  */
 @Service
-@JobHander("syncBiddingTradingProductStatJobHandler")
-public class SyncBiddingTradingProductStatJobHandler extends SyncJobHandler implements InitializingBean {
-    private Logger logger = LoggerFactory.getLogger(SyncBiddingTradingProductStatJobHandler.class);
+@JobHander("syncBidTradingProductStatJobHandler")
+public class SyncBidTradingProductStatJobHandler extends SyncJobHandler /*implements InitializingBean*/ {
+    private Logger logger = LoggerFactory.getLogger(SyncBidTradingProductStatJobHandler.class);
 
     private String PRODUCT_ID = "product_id";
     private String COMPANY_ID = "company_id";
@@ -188,8 +187,8 @@ public class SyncBiddingTradingProductStatJobHandler extends SyncJobHandler impl
 
     }
 
-    @Override
+    /*@Override
     public void afterPropertiesSet() throws Exception {
         execute();
-    }
+    }*/
 }
