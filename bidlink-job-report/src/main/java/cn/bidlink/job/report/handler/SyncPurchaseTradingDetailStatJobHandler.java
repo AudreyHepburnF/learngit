@@ -449,6 +449,6 @@ public class SyncPurchaseTradingDetailStatJobHandler extends SyncJobHandler impl
         emptyDirectoryItem.put("catalog_id", null);
         emptyDirectoryItem.put("catalog_name", null);
 
-        execute();
+//        execute();
     }
 }
