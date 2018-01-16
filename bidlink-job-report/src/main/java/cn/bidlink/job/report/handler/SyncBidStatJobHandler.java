@@ -63,24 +63,21 @@ public class SyncBidStatJobHandler extends SyncJobHandler /*implements Initializ
         // 获取上次同步时间
         Date lastSyncTime = getLastSyncTime();
         logger.info("同步报价供应商lastSyncTime：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
-        String countSql = "SELECT\n"
-                          + "   count(1)\n"
-                          + "FROM\n"
-                          + "   proj_inter_project t1,\n"
-                          + "   bid t2,\n"
-                          + "   bid_product t3,\n"
-                          + "   bid_decided t4\n"
-                          + "WHERE\n"
-                          + "   t1.company_id = t2.company_id\n"
-                          + "AND t1.company_id = t3.company_id\n"
-                          + "AND t1.company_id = t4.company_id\n"
-                          + "AND t1.id = t4.PROJECT_ID\n"
-                          + "AND t1.id = t2.project_id\n"
-                          + "AND t2.id = t3.bid_id";
+        String countSql = " SELECT\n"
+                          + "         count(1)\n"
+                          + "      FROM\n"
+                          + "         proj_inter_project t1\n"
+                          + "      LEFT JOIN bid_decided t4 ON t1.COMPANY_ID = t4.COMPANY_ID\n"
+                          + "      AND t1.id = t4.PROJECT_ID\n"
+                          + "      LEFT JOIN bid t2 ON t1.COMPANY_ID = t2.COMPANY_ID\n"
+                          + "      AND t1.id = t2.PROJECT_ID\n"
+                          + "      LEFT JOIN bid_product t3 ON t2.COMPANY_ID = t3.COMPANY_ID\n"
+                          + "      AND t2.id = t3.BID_ID\n"
+                          + "      WHERE t1.PROJECT_STATUS <> 12";
 //                          + "AND t1.CREATE_TIME > ?";
 
 
-        String querySql = "SELECT\n"
+        String querySql = " SELECT\n"
                           + "   t1.project_amount_rmb,\n"
                           + "   t1.company_id,\n"
                           + "   t1.id as project_id,\n"
@@ -90,21 +87,19 @@ public class SyncBidStatJobHandler extends SyncJobHandler /*implements Initializ
                           + "   t2.is_withdrawbid,\n"
                           + "   t2.BIDER_ID AS supplier_id,\n"
                           + "   t2.BIDER_NAME AS supplier_name,\n"
+                          + "   t2.bider_price_une,\n"
                           + "   t1.create_time,\n"
                           + "   t4.update_date,\n"
                           + "   t1.department_code\n"
-                          + "FROM\n"
-                          + "   proj_inter_project t1,\n"
-                          + "   bid t2,\n"
-                          + "   bid_product t3,\n"
-                          + "   bid_decided t4\n"
-                          + "WHERE\n"
-                          + "   t1.company_id = t2.company_id\n"
-                          + "AND t1.company_id = t3.company_id\n"
-                          + "AND t1.company_id = t4.company_id\n"
-                          + "AND t1.id = t4.PROJECT_ID\n"
-                          + "AND t1.id = t2.project_id\n"
-                          + "AND t2.id = t3.bid_id\n"
+                          + "      FROM\n"
+                          + "         proj_inter_project t1\n"
+                          + "      LEFT JOIN bid_decided t4 ON t1.COMPANY_ID = t4.COMPANY_ID\n"
+                          + "      AND t1.id = t4.PROJECT_ID\n"
+                          + "      LEFT JOIN bid t2 ON t1.COMPANY_ID = t2.COMPANY_ID\n"
+                          + "      AND t1.id = t2.PROJECT_ID\n"
+                          + "      LEFT JOIN bid_product t3 ON t2.COMPANY_ID = t3.COMPANY_ID\n"
+                          + "      AND t2.id = t3.BID_ID\n"
+                          + "      WHERE t1.PROJECT_STATUS <> 12\n"
 //                          + "AND t1.CREATE_TIME > ?\n"
                           + "LIMIT ?,?";
         List<Object> params = new ArrayList<>();
@@ -141,7 +136,9 @@ public class SyncBidStatJobHandler extends SyncJobHandler /*implements Initializ
     private void appendSupplierType(List<Map<String, Object>> mapList) {
         Set<Pair> pairs = new HashSet<>();
         for (Map<String, Object> map : mapList) {
-            pairs.add(new Pair(((long) map.get(COMPANY_ID)), ((long) map.get(SUPPLIER_ID))));
+            if (map.get(SUPPLIER_ID) != null) {
+                pairs.add(new Pair(((long) map.get(COMPANY_ID)), ((long) map.get(SUPPLIER_ID))));
+            }
         }
 
         StringBuffer querySupplierStatusSql = new StringBuffer("SELECT company_id,supplier_id,IF (supplier_status = 1, '是', '否') AS supplier_type FROM bsm_company_supplier WHERE ");
@@ -181,7 +178,7 @@ public class SyncBidStatJobHandler extends SyncJobHandler /*implements Initializ
         }
     }
 
-    //    @Override
+//    @Override
 //    public void afterPropertiesSet() throws Exception {
 //        execute();
 //    }
