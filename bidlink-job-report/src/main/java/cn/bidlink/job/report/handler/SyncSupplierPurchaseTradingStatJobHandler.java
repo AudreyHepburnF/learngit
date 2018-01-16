@@ -157,7 +157,7 @@ public class SyncSupplierPurchaseTradingStatJobHandler extends SyncJobHandler /*
                 if (!CollectionUtils.isEmpty(mapList)) {
                     StringBuilder sqlBuilder = sqlBuilder(mapList);
                     // supplierType 1:盘内  0:盘外
-                    List<Object> insertParams = buildParams(mapList, sqlBuilder,1);
+                    List<Object> insertParams = buildParams(mapList, sqlBuilder, 1);
                     DBUtil.execute(reportDataSource, sqlBuilder.toString(), insertParams);
                 }
             }
@@ -242,7 +242,7 @@ public class SyncSupplierPurchaseTradingStatJobHandler extends SyncJobHandler /*
         ArrayList<Object> paramsToUse = new ArrayList<>();
         paramsToUse.add(i);
         paramsToUse.add(pageSize);
-        paramsToUse.add(params.get(0));
+        paramsToUse.addAll(params);
         return paramsToUse;
     }
 
