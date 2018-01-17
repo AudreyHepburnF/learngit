@@ -7,6 +7,7 @@ import com.xxl.job.core.handler.annotation.JobHander;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -69,22 +70,22 @@ public class SyncBidTradingProductStatJobHandler extends SyncJobHandler /*implem
                 "AND BP.ID IS NOT NULL" ;
 
         String querySql = "SELECT\n" +
-                "  BP.COMPANY_ID,\n" +
-                "\tP.ID AS PROJECT_ID,\n" +
-                "\tP.PROJECT_NAME,\n" +
-                "\tB.BIDER_NAME,\n" +
-                "\tBP.PRODUCT_ID,\n" +
-                "\tBP.PRODUCT_NAME,\n" +
-                "\tBP.PRODUCT_CODE,\n" +
-                "\tBP.PRODUCT_MODEL,\n" +
-                "\tBP.PRODUCT_UNITNAME,\n" +
-                "\tBP.PRODUCT_NUMBER,\t\n" +
-                "\tBP.TOTAL_BID_PRICE,\n" +
-                "  B.IS_BID_SUCCESS,\n" +
-                "  B.IS_ABANDON,\n" +
-                "  B.IS_WITHDRAWBID,\n" +
-                "  BP.ID AS BID_PRODUCTID,\n" +
-                "  P.CREATE_TIME\n" +
+                "  BP.company_id,\n" +
+                "\tP.ID AS project_id,\n" +
+                "\tP.project_name,\n" +
+                "\tB.bider_name,\n" +
+                "\tBP.product_id,\n" +
+                "\tBP.product_name,\n" +
+                "\tBP.product_code,\n" +
+                "\tBP.product_model,\n" +
+                "\tBP.product_unitname,\n" +
+                "\tBP.product_number,\t\n" +
+                "\tBP.total_bid_price,\n" +
+                "  B.is_bid_success,\n" +
+                "  B.is_abandon,\n" +
+                "  B.is_withdrawbid,\n" +
+                "  BP.ID AS bid_productId,\n" +
+                "  P.create_time\n" +
                 "FROM\n" +
                 "\tPROJ_INTER_PROJECT P\n" +
                 "LEFT JOIN BID B ON B.PROJECT_ID = P.ID\n" +
@@ -134,9 +135,9 @@ public class SyncBidTradingProductStatJobHandler extends SyncJobHandler /*implem
      */
     private void appendCatalogId(List<Map<String, Object>> mapList) {
         // 查找所有的product_id,company_id
-        Map<Object, Object> map = new HashMap<>();
+        Set<Pair> productIdPairs = new HashSet<>();
         for (Map<String, Object> mapAttr : mapList) {
-            map.put(mapAttr.get(PRODUCT_ID), mapAttr.get(COMPANY_ID));
+            productIdPairs.add(new Pair((Long) mapAttr.get(COMPANY_ID), Long.valueOf((String) mapAttr.get(PRODUCT_ID))));
         }
 
         // 从corp_directorys找catalog_id
@@ -144,40 +145,42 @@ public class SyncBidTradingProductStatJobHandler extends SyncJobHandler /*implem
         selectCatalogIdSqlBuilder.append("SELECT\n" +
                 "\tid,\n" +
                 "\tcompany_id,\n" +
-                "\tCATALOG_ID \n" +
+                "\tcatalog_id \n" +
                 "FROM\n" +
                 "\tcorp_directorys \n" +
                 "WHERE \n" );
 
         int conditionIndex = 0;
-        for (Map.Entry<Object, Object> attr : map.entrySet()) {
+        for (Pair pair : productIdPairs) {
             if(conditionIndex > 0) {
-                selectCatalogIdSqlBuilder.append(" or").append("(id = ").append(attr.getKey())
-                        .append(" AND company_id = ").append(attr.getValue()+")");
+                selectCatalogIdSqlBuilder.append(" or").append("(id = ").append(pair.supplierId)
+                        .append(" AND company_id = ").append(pair.companyId+")");
             }else{
-                selectCatalogIdSqlBuilder.append("(id = ").append(attr.getKey())
-                        .append(" AND company_id = ").append(attr.getValue()+")");
+                selectCatalogIdSqlBuilder.append("(id = ").append(pair.supplierId)
+                        .append(" AND company_id = ").append(pair.companyId+")");
             }
             conditionIndex++;
         }
 
         // 将查出来的数据封装成map
-        final Map<Long, Long> catalogIdMap = DBUtil.query(ycDataSource, selectCatalogIdSqlBuilder.toString(), null, new DBUtil.ResultSetCallback<Map<Long, Long>>() {
+        final Map<String, Long> catalogIdMap = DBUtil.query(ycDataSource, selectCatalogIdSqlBuilder.toString(), null, new DBUtil.ResultSetCallback<Map<String, Long>>() {
             @Override
-            public Map<Long, Long> execute(ResultSet resultSet) throws SQLException {
-                HashMap<Long, Long> map = new HashMap<>();
+            public Map<String, Long> execute(ResultSet resultSet) throws SQLException {
+                HashMap<String, Long> map = new HashMap<>();
                 while (resultSet.next()) {
                     long productId = resultSet.getLong(ID);
+                    long companyId = resultSet.getLong(COMPANY_ID);
                     long catalogId = resultSet.getLong(CATALOG_ID);
-                    map.put(productId,catalogId);
+                    String key = companyId + "_" + productId;
+                    map.put(key,catalogId);
                 }
                 return map;
             }
         });
         // 遍历maplist, set
         for (Map<String, Object> mapAttr : mapList) {
-            String key = (String) mapAttr.get(PRODUCT_ID);
-            Long catalogId = catalogIdMap.get(Long.parseLong(key));
+            String key = mapAttr.get(COMPANY_ID) + "_" + mapAttr.get(PRODUCT_ID);
+            Long catalogId = catalogIdMap.get(key);
             if (catalogId != null) {
                 mapAttr.put(CATALOG_ID, catalogId);
             } else {
@@ -187,7 +190,7 @@ public class SyncBidTradingProductStatJobHandler extends SyncJobHandler /*implem
 
     }
 
-    /*@Override
+   /* @Override
     public void afterPropertiesSet() throws Exception {
         execute();
     }*/
