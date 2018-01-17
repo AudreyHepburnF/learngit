@@ -207,6 +207,9 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
      * @param result          从数据库获取的数据
      */
     protected void parseOpportunity(Timestamp currentDate, List<Map<String, Object>> resultToExecute, Map<String, Object> result) {
+        if (result.get(PROJECT_STATUS) == null || result.get(BID_STOP_TYPE) == null) {
+            return;
+        }
         // 判断商机
         int projectStatus = (int) result.get(PROJECT_STATUS);
         int bidStopType = (int) result.get(BID_STOP_TYPE);

@@ -20,9 +20,11 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * @author <a href="mailto:zhihuizhou@ebnew.com">zhouzhihui</a>
+ * 同步采购成交明细统计
+ *
+ * @author <a href="mailto:zikaifeng@ebnew.com">冯子恺</a>
  * @version Ver 1.0
- * @description:同步采购成交明细统计
+ * @description:
  * @Date 2017/12/26
  */
 @Service

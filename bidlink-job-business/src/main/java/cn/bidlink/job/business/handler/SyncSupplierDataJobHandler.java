@@ -7,7 +7,6 @@ import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
-import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.search.SearchResponse;
@@ -21,7 +20,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -45,8 +43,8 @@ import static cn.bidlink.job.common.utils.DBUtil.query;
  * @description :
  * @date : 2017/11/27
  */
-@JobHander(value = "syncSupplierDataJobHandler")
-@Service
+//@JobHander(value = "syncSupplierDataJobHandler")
+//@Service
 public class SyncSupplierDataJobHandler extends JobHandler implements InitializingBean {
     private Logger logger = LoggerFactory.getLogger(SyncSupplierDataJobHandler.class);
 

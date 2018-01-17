@@ -22,7 +22,7 @@ import java.util.List;
  */
 @Service
 @JobHander("syncBidProcessStatJobHandler")
-public class SyncBidProcessStatJobHandler extends SyncJobHandler/* implements InitializingBean*/ {
+public class SyncBidProcessStatJobHandler extends SyncJobHandler /*implements InitializingBean*/ {
     private Logger logger = LoggerFactory.getLogger(SyncBidProcessStatJobHandler.class);
 
     @Override
@@ -63,6 +63,7 @@ public class SyncBidProcessStatJobHandler extends SyncJobHandler/* implements In
         String querySql = "SELECT\n"
                           + "   project_status,\n"
                           + "   company_id,\n"
+                          + "   project_amount_rmb,\n"
                           + "   create_time\n"
                           + "FROM\n"
                           + "   proj_inter_project\n"
