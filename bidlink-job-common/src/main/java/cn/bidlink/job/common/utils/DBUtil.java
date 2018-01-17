@@ -41,7 +41,7 @@ public class DBUtil {
                 ResultSetMetaData metaData = resultSet.getMetaData();
                 int columnCount = metaData.getColumnCount();
                 for (int i = 0; i < columnCount; i++) {
-                    String columnLabel = metaData.getColumnLabel(i + 1).toLowerCase();
+                    String columnLabel = metaData.getColumnLabel(i + 1);
                     map.put(columnLabel, resultSet.getObject(columnLabel));
                 }
                 results.add(map);

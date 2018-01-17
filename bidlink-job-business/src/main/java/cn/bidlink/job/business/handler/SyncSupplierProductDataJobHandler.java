@@ -115,8 +115,8 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.supplier_product", null);
         logger.info("供应商产品数据同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss") + "\n"
                     + ", syncTime : " + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
-        syncTradeProductDataService(lastSyncTime);
-        syncTradeBidProductDataService(lastSyncTime);
+//        syncTradeProductDataService(lastSyncTime);
+//        syncTradeBidProductDataService(lastSyncTime);
         syncProDataService(lastSyncTime);
         syncCenterDataService(lastSyncTime);
     }
