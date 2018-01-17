@@ -41,10 +41,8 @@ public class SyncSupplierBidingStatJobHandler extends SyncJobHandler /*implement
         SyncTimeUtil.setCurrentDate();
         clearBidProcessStat();
         logger.info("同步供应商招标中标统计开始");
-        //盘内供应商
-        syncSupplierInner();
-        //盘外供应商
-      //  syncSupplierOuter();
+        //供应商
+        syncSupplierBiding();
         // 记录同步时间
         updateSyncLastTime();
         logger.info("同步供应商招标中标统计结束");
@@ -57,8 +55,7 @@ public class SyncSupplierBidingStatJobHandler extends SyncJobHandler /*implement
         logger.info("清理供应商招标中标统计开始");
     }
 
-    private void syncSupplierInner() {
-
+    private void syncSupplierBiding() {
         Date lastSyncTime = getLastSyncTime();
         logger.info("同步盘内供应商招标中标统计开始lastSyncTime: " + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
 
