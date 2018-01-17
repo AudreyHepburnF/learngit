@@ -36,10 +36,20 @@ public class SyncSupplierPurchaseTradingStatJobHandler extends SyncJobHandler /*
     public ReturnT<String> execute(String... strings) throws Exception {
         SyncTimeUtil.setCurrentDate();
         logger.info("同步供应商采购成交统计开始");
+        // 清空表数据
+        clearSupplierPurchaseTrading();
+        // 同步数据
         syncSupplierPurchaseTrading();
+        // 记录同步时间
         updateSyncLastTime();
         logger.info("同步供应商采购成交统计结束");
         return ReturnT.SUCCESS;
+    }
+
+    private void clearSupplierPurchaseTrading() {
+        logger.info("清空供应商采购成交统计开始");
+        clearTableData();
+        logger.info("清空供应商采购成交统计结束");
     }
 
     private void syncSupplierPurchaseTrading() {
@@ -88,10 +98,9 @@ public class SyncSupplierPurchaseTradingStatJobHandler extends SyncJobHandler /*
                 "AND spb.project_id = p.id\n" +
                 "AND spb.comp_id = p.comp_id\n" +
                 "WHERE\n" +
-                "\tspb.supplier_bid_status IN (2, 3, 6, 7) \n" +
-                "AND p.create_time > ?\n";
+                "\tspb.supplier_bid_status IN (2, 3, 6, 7) ";
         ArrayList<Object> params = new ArrayList<>();
-        params.add(lastSyncTime);
+//        params.add(lastSyncTime);
         syncTray(ycDataSource, countSql, querySql, params);
     }
 
@@ -136,10 +145,9 @@ public class SyncSupplierPurchaseTradingStatJobHandler extends SyncJobHandler /*
                 "AND spb.comp_id = p.comp_id\n" +
                 "WHERE\n" +
                 "\tspb.supplier_bid_status IN (2, 3, 6, 7)\n" +
-                "AND bcs.supplier_status != 4\n" +
-                "AND p.create_time > ?";
+                "AND bcs.supplier_status != 4\n";
         ArrayList<Object> params = new ArrayList<>();
-        params.add(lastSyncTime);
+//        params.add(lastSyncTime);
         syncOutside(ycDataSource, countSql, querySql, params);
     }
 
