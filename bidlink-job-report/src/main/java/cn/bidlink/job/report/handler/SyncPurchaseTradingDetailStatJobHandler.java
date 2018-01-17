@@ -59,7 +59,7 @@ public class SyncPurchaseTradingDetailStatJobHandler extends SyncJobHandler impl
         logger.info("同步采购成交明细统计开始");
         syncPurchaseTradingDetail();
         // 记录同步时间
-//        updateSyncLastTime();
+        updateSyncLastTime();
         logger.info("同步采购成交明细统计结束");
         return ReturnT.SUCCESS;
     }

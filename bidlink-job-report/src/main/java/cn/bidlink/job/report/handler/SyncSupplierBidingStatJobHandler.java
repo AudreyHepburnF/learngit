@@ -69,18 +69,18 @@ public class SyncSupplierBidingStatJobHandler extends SyncJobHandler /*implement
 
         String querySql = "\tSELECT\n" +
                 "\t\t\tP.ID AS pid,\n" +
-                "\t\t\tB.COMPANY_ID,\n" +
-                "\t\t\tP.PROJECT_NAME,\n" +
-                "\t\t\tB.BIDER_NAME AS SUPPLIER_NAME,\n" +
-                "\t\t\tB.BIDER_ID AS SUPPLIER_ID,\n" +
-                "\t\t\tB.BIDER_PRICE_UNE,\n" +
-                "\t\t\tb.ID as bidId,\n" +
-                "\t\t\tB.IS_BID_SUCCESS,\n" +
-                "\t\t\tB.IS_ABANDON ,\n" +
-                "\t\t\tB.IS_WITHDRAWBID ,\n" +
-                "\t\t\tP.PROJECT_STATUS ,\n" +
-                "\t\t\tP.CREATE_TIME,\n" +
-                "\t\t\tB.BIDER_ID\n" +
+                "\t\t\tb.company_id,\n" +
+                "\t\t\tp.project_name,\n" +
+                "\t\t\tb.bider_name as supplier_name,\n" +
+                "\t\t\tb.bider_id as supplier_id,\n" +
+                "\t\t\tb.bider_price_une,\n" +
+                "\t\t\tb.id as bidId,\n" +
+                "\t\t\tb.is_bid_success,\n" +
+                "\t\t\tb.is_abandon ,\n" +
+                "\t\t\tb.is_withdrawbid ,\n" +
+                "\t\t\tp.project_status ,\n" +
+                "\t\t\tp.create_time,\n" +
+                "\t\t\tb.bider_id\n" +
                 "\t\tFROM\n" +
                 "\t\t\tBID B\n" +
                 "\t\tLEFT JOIN PROJ_INTER_PROJECT P ON P.ID = B.PROJECT_ID\n" +
@@ -96,7 +96,7 @@ public class SyncSupplierBidingStatJobHandler extends SyncJobHandler /*implement
 
 
 
- /*   @Override
+/*   @Override
     public void afterPropertiesSet() throws Exception {
         execute();
     }*/
