@@ -48,7 +48,7 @@ public class SyncBidStatJobHandler extends SyncJobHandler /*implements Initializ
     private void clearBidProcessStat() {
         logger.info("清理招标流程项目概况统计开始");
         clearTableData();
-        logger.info("清理招标流程项目概况统计开始");
+        logger.info("清理招标流程项目概况统计结束");
     }
 
     @Override

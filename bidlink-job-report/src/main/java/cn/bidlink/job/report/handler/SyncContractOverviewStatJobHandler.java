@@ -52,7 +52,7 @@ public class SyncContractOverviewStatJobHandler extends SyncJobHandler/* impleme
     private void clearBidProcessStat() {
         logger.info("清理合同概况统计开始");
         clearTableData();
-        logger.info("清理合同概况统计开始");
+        logger.info("清理合同概况统计结束");
     }
 
     private void syncContractOverview() {
