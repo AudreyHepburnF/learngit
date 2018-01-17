@@ -115,14 +115,14 @@ public class SyncPurchaseTradingProductStatJobHandler extends SyncJobHandler /*i
 
         // 查询供应商报价信息总条数和结果集
         long count = DBUtil.count(ycDataSource, countSqlBuilder.toString(), null);
-        logger.info("查询供应商报价信息共{}条", count);
+        logger.debug("查询供应商报价信息共{}条", count);
         if (count > 0) {
             for (long i = 0; i <= count; i += pageSize) {
                 ArrayList<Object> params = new ArrayList<>();
                 params.add(i);
                 params.add(pageSize);
                 List<Map<String, Object>> supplierInfoListMap = DBUtil.query(ycDataSource, querySqlBuilder.toString(), params);
-                logger.info("执行供应商报价信息querySql, params :{} ,共{}条",params,supplierInfoListMap.size());
+                logger.debug("执行供应商报价信息querySql, params :{} ,共{}条",params,supplierInfoListMap.size());
 
                 // 封装采购品目录ID和公司ID
                 HashMap<String, Object> directoryIdAndCompIdMap = new HashMap<>();
