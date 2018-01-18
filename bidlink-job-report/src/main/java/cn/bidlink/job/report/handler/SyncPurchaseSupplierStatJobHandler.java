@@ -53,28 +53,19 @@ public class SyncPurchaseSupplierStatJobHandler extends SyncJobHandler /*impleme
         String countSql = "SELECT\n" +
                 "\tCOUNT(1)\n" +
                 "FROM\n" +
-                "\t(\n" +
-                "\t\tSELECT\n" +
-                "\t\t\tbpe.comp_id AS company_id,\n" +
-                "\t\t\tbp.id\n" +
-                "\t\tFROM\n" +
-                "\t\t\tbmpfjz_project_ext bpe\n" +
-                "\t\tINNER JOIN bmpfjz_project bp ON bpe.id = bp.id\n" +
-                "\t\tAND bpe.comp_id = bp.comp_id\n" +
-                "\t\tWHERE\n" +
-                "\t\t\tbp.PROJECT_STATUS IN (8, 9)\n" +
-                "\t\t\tAND bpe.publish_bid_result_time > ?\n" +
-                "\t) s\n" +
-                "INNER JOIN bmpfjz_supplier_project_bid bspb ON s.company_id = bspb.comp_id\n" +
-                "AND s.id = bspb.project_id\n" +
+                "\tbmpfjz_project_ext bpe\n" +
+                "INNER JOIN bmpfjz_project bp ON bpe.id = bp.id\n" +
+                "AND bpe.comp_id = bp.comp_id\n" +
                 "WHERE\n" +
-                "\tbspb.supplier_bid_status = 6";
+                "\tbp.PROJECT_STATUS IN (8, 9)\n" +
+                "AND bpe.publish_bid_result_time > ?\n";
         String querySql = "SELECT\n" +
                 "\ts.company_id,\n" +
                 "\tbspb.supplier_id,\n" +
                 "\tbspb.supplier_name,\n" +
                 "\tbspb.deal_total_price,\n" +
                 "\ts.department_code,\n" +
+                "\tbspb.supplier_bid_status,\n" +
                 "\ts.publish_bid_result_time\n" +
                 "FROM\n" +
                 "\t(\n" +
@@ -89,11 +80,11 @@ public class SyncPurchaseSupplierStatJobHandler extends SyncJobHandler /*impleme
                 "\t\tAND bpe.comp_id = bp.comp_id\n" +
                 "\t\tWHERE bp.PROJECT_STATUS IN (8, 9)\n" +
                 "\t\t\tAND bpe.publish_bid_result_time > ?\n" +
+                "\t\t\tORDER BY bp.id\n" +
                 "\t\tLIMIT ?,?\n" +
                 "\t) s\n" +
                 "INNER JOIN bmpfjz_supplier_project_bid bspb ON s.company_id = bspb.comp_id\n" +
-                "AND s.id = bspb.project_id\n" +
-                "WHERE bspb.supplier_bid_status = 6";
+                "AND s.id = bspb.project_id";
         List<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
         sync(ycDataSource, countSql, querySql, params);
