@@ -23,7 +23,7 @@ import java.util.*;
  */
 @Service
 @JobHander("syncSupplierBidingStatJobHandler")
-public class SyncSupplierBidingStatJobHandler extends SyncJobHandler /*implements InitializingBean*/ {
+public class SyncSupplierBidingStatJobHandler extends SyncJobHandler /*implements InitializingBean */{
 
     private Logger logger = LoggerFactory.getLogger(SyncSupplierBidingStatJobHandler.class);
     private final String SUPPLIER_ID = "supplier_id";
@@ -51,7 +51,7 @@ public class SyncSupplierBidingStatJobHandler extends SyncJobHandler /*implement
 
     private void clearBidProcessStat() {
         logger.info("清理供应商招标中标统计开始");
-        clearTableData();
+       clearTableData();
         logger.info("清理供应商招标中标统计开始");
     }
 
@@ -92,14 +92,13 @@ public class SyncSupplierBidingStatJobHandler extends SyncJobHandler /*implement
     }
 
 
+/*
 
-
-
-
-/*   @Override
+   @Override
     public void afterPropertiesSet() throws Exception {
         execute();
-    }*/
+    }
+*/
 
     @Override
     protected void sync(DataSource dataSource, String countSql, String querySql, List<Object> params) {
@@ -117,7 +116,7 @@ public class SyncSupplierBidingStatJobHandler extends SyncJobHandler /*implement
                 if (!CollectionUtils.isEmpty(mapList)) {
                     StringBuilder sqlBuilder = sqlBuilder(mapList);
                     List<Object> insertParams = buildParams(mapList, sqlBuilder);
-                    DBUtil.execute(reportDataSource, sqlBuilder.toString(), insertParams);
+                   DBUtil.execute(reportDataSource, sqlBuilder.toString(), insertParams);
                 }
             }
         }
@@ -129,22 +128,53 @@ public class SyncSupplierBidingStatJobHandler extends SyncJobHandler /*implement
             pairs.add(new Pair(((long) map.get(COMPANY_ID)), ((long) map.get(SUPPLIER_ID))));
         }
 
-        StringBuffer querySupplierStatusSql = new StringBuffer("SELECT company_id,supplier_id, supplier_status FROM bsm_company_supplier_apply WHERE ");
-        int count = 0;
+        //盘外供应商
+        StringBuffer querySupplierOuterSql = new StringBuffer("SELECT company_id,supplier_id, supplier_status FROM bsm_company_supplier_apply WHERE (supplier_status!=4) and (");
+        int countOuter = 0;
         for (Pair pair : pairs) {
-            if (count > 0) {
-                querySupplierStatusSql.append(" OR ");
+            if (countOuter > 0) {
+                querySupplierOuterSql.append(" OR ");
             }
-            querySupplierStatusSql.append(" (company_id=")
+            querySupplierOuterSql.append(" (company_id=")
                     .append(pair.companyId)
                     .append(" AND supplier_id=")
                     .append(pair.supplierId)
                     .append(") ");
-            count++;
+            countOuter++;
+        }
+        querySupplierOuterSql.append(")");
+        // 查询对应供应商的类型
+        Map<String, String> supplierOut= DBUtil.query(ycDataSource, querySupplierOuterSql.toString(), null, new DBUtil.ResultSetCallback<Map<String, String>>() {
+            @Override
+            public Map<String, String> execute(ResultSet resultSet) throws SQLException {
+                Map<String, String> map = new HashMap<>();
+                while (resultSet.next()) {
+                    long companyId = resultSet.getLong("company_id");
+                    long supplierId = resultSet.getLong("supplier_id");
+                    String supplierStatus = resultSet.getString("supplier_status");
+                    String key = companyId + "_" + supplierId;
+                    map.put(key, supplierStatus);
+                }
+                return map;
+            }
+        });
+        //盘内供应商
+        StringBuffer querySupplierInnerSql = new StringBuffer("SELECT company_id,supplier_id, supplier_status FROM bsm_company_supplier WHERE ");
+        int countInner = 0;
+        for (Pair pair : pairs) {
+            if (countInner > 0) {
+                querySupplierInnerSql.append(" OR ");
+            }
+            querySupplierInnerSql.append(" (company_id=")
+                    .append(pair.companyId)
+                    .append(" AND supplier_id=")
+                    .append(pair.supplierId)
+                    .append(") ");
+            countInner++;
         }
 
         // 查询对应供应商的类型
-        Map<String, String> supplierTypeMap = DBUtil.query(ycDataSource, querySupplierStatusSql.toString(), null, new DBUtil.ResultSetCallback<Map<String, String>>() {
+        Map<String, String> supplierInner = DBUtil.query(ycDataSource, querySupplierInnerSql.toString(), null, new DBUtil.ResultSetCallback<Map<String, String>>() {
             @Override
             public Map<String, String> execute(ResultSet resultSet) throws SQLException {
                 Map<String, String> map = new HashMap<>();
@@ -161,14 +191,18 @@ public class SyncSupplierBidingStatJobHandler extends SyncJobHandler /*implement
 
         for (Map<String, Object> map : mapList) {
             String key = map.get(COMPANY_ID) + "_" + map.get(SUPPLIER_ID);
-            String supplierStatus = supplierTypeMap.get(key);
-            //saas定义的主要状态不是4都是盘外供应商
-            if("4".equals(supplierStatus)){
+            String supplierOuter = supplierOut.get(key);
+            String supplierIn= supplierInner.get(key);
+            //盘内供应商
+            if(supplierIn!=null){
                 map.put(SUPPLIER_TYPE, 0);
             }else{
                 map.put(SUPPLIER_TYPE, 1);
             }
-
+            //既是盘内又是盘外供应商
+            if(supplierOuter!=null&&supplierIn!=null){
+                map.put(SUPPLIER_TYPE, 2);
+            }
         }
     }
 }
