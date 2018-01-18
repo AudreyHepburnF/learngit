@@ -24,9 +24,9 @@ import java.util.*;
  * @Date 2018/1/5
  */
 @Service
-@JobHander("syncPurchaseProjectStatJobHander")
-public class SyncPurchaseProjectStatJobHander extends SyncJobHandler /*implements InitializingBean*/ {
-    private Logger logger = LoggerFactory.getLogger(SyncPurchaseProjectStatJobHander.class);
+@JobHander("syncPurchaseProjectStatJobHandler")
+public class SyncPurchaseProjectStatJobHandler extends SyncJobHandler /*implements InitializingBean*/ {
+    private Logger logger = LoggerFactory.getLogger(SyncPurchaseProjectStatJobHandler.class);
 
     private String COMPANY_ID = "company_id";
     private String COMP_ID = "comp_id";
@@ -66,7 +66,7 @@ public class SyncPurchaseProjectStatJobHander extends SyncJobHandler /*implement
 
     private void syncPurchaseProject() {
         Date lastSyncTime = getLastSyncTime();
-        logger.info("同步进行中采购项目报表统计 lastSyncTime: " + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
+        logger.info("同步采购项目报表统计 lastSyncTime: " + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
         String countSql = "SELECT\n" +
                 "\tCOUNT(1)\n" +
                 "FROM\n" +

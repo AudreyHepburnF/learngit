@@ -48,7 +48,7 @@ public class SyncPurchaseOverallTrackStatJobHandler extends SyncJobHandler /* im
     private void clearBidProcessStat() {
         logger.info("清理招标整体跟踪统计开始");
         clearTableData();
-        logger.info("清理招标整体跟踪统计开始");
+        logger.info("清理招标整体跟踪统计结束");
     }
 
     private void syncPurchaseOverallTracking() {
