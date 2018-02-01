@@ -16,7 +16,7 @@ import java.util.Set;
 
 
 /**
- * 同步商机数据
+ * 同步招标商机数据
  *
  * @author : <a href="mailto:zikaifeng@ebnew.com">冯子恺</a>
  * @version : Ver 1.0
@@ -214,11 +214,13 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
     protected void appendTenantKeyAndAreaStrToResult(List<Map<String, Object>> resultToExecute, Set<Long> purchaseIds) {
         if (purchaseIds.size() > 0) {
             Map<Long, Object> tenantKeyMap = queryTenantKey(purchaseIds);
-            Map<Long, Object> areaMap = queryArea(purchaseIds);
+            Map<Long, AreaInfo> areaMap = queryArea(purchaseIds);
             for (Map<String, Object> result : resultToExecute) {
                 Long purchaseId = Long.valueOf(String.valueOf(result.get(PURCHASE_ID)));
                 result.put(TENANT_KEY, tenantKeyMap.get(purchaseId));
-                result.put(AREA_STR, areaMap.get(purchaseId));
+                AreaInfo areaInfo = areaMap.get(purchaseId);
+                result.put(AREA_STR, areaInfo.getAreaStr());
+                result.put(REGION, areaInfo.getRegion());
             }
         }
     }
@@ -248,8 +250,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
         }
     }
 
-
-//    @Override
+//        @Override
 //    public void afterPropertiesSet() throws Exception {
 //        execute();
 //    }
