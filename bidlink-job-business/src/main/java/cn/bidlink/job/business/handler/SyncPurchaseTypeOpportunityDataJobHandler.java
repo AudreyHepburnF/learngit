@@ -19,7 +19,7 @@ import java.util.*;
 
 
 /**
- * 同步商机数据
+ * 同步采购商机数据
  *
  * @author : <a href="mailto:zikaifeng@ebnew.com">冯子恺</a>
  * @version : Ver 1.0
@@ -190,11 +190,13 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
     protected void appendTenantKeyAndAreaStrToResult(List<Map<String, Object>> resultToExecute, Set<Long> purchaseIds) {
         if (purchaseIds.size() > 0) {
             Map<Long, Object> tenantKeyMap = queryTenantKey(purchaseIds);
-            Map<Long, Object> areaMap = queryArea(purchaseIds);
+            Map<Long, AreaInfo> areaMap = queryArea(purchaseIds);
             for (Map<String, Object> result : resultToExecute) {
                 Long purchaseId = Long.valueOf(String.valueOf(result.get(PURCHASE_ID)));
                 result.put(TENANT_KEY, tenantKeyMap.get(purchaseId));
-                result.put(AREA_STR, areaMap.get(purchaseId));
+                AreaInfo areaInfo = areaMap.get(purchaseId);
+                result.put(AREA_STR, areaInfo.getAreaStr());
+                result.put(REGION, areaInfo.getRegion());
             }
         }
     }
@@ -237,7 +239,6 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
             // no-op
         }
     }
-
 
     protected void refresh(Map<String, Object> result, Map<Long, Set<String>> projectDirectoryMap) {
         super.refresh(result, projectDirectoryMap);

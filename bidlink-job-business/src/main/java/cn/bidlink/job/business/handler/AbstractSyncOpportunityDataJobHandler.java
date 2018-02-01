@@ -29,6 +29,9 @@ import java.util.*;
 public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    // 每个省，直辖市对应的地区
+    protected static final Map<String, String> regionMap;
+
     @Autowired
     protected ElasticClient elasticClient;
 
@@ -63,11 +66,13 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected String PROJECT_STATUS              = "projectStatus";
     protected String TENANT_KEY                  = "tenantKey";
     protected String AREA_STR                    = "areaStr";
+    protected String REGION                      = "region";
     protected String STATUS                      = "status";
     protected String FIRST_DIRECTORY_NAME        = "firstDirectoryName";
     protected String DIRECTORY_NAME_COUNT        = "directoryNameCount";
     protected String QUOTE_STOP_TIME             = "quoteStopTime";
     protected String AREA                        = "area";
+    protected String CODE                        = "code";
     protected String CITY                        = "city";
     protected String COUNTY                      = "county";
 
@@ -195,20 +200,21 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
      * @param purchaseIds
      * @return
      */
-    protected Map<Long, Object> queryArea(Set<Long> purchaseIds) {
+    protected Map<Long, AreaInfo> queryArea(Set<Long> purchaseIds) {
         String queryAreaTemplate = "SELECT\n"
                                    + "   t3.ID AS purchaseId,\n"
                                    + "   t3.AREA AS area,\n"
+                                   + "   t3.CODE AS code,\n"
                                    + "   t3.CITY AS city,\n"
                                    + "   tcrd.`VALUE` AS county\n"
                                    + "FROM\n"
                                    + "   (\n"
                                    + "      SELECT\n"
-                                   + "         t2.ID, t2.AREA, t2.COUNTY, tcrd.`VALUE` AS CITY\n"
+                                   + "         t2.ID, t2.AREA, t2.CODE,t2.COUNTY, tcrd.`VALUE` AS CITY\n"
                                    + "      FROM\n"
                                    + "         (\n"
                                    + "            SELECT\n"
-                                   + "               t1.ID, t1.CITY, t1.COUNTY, tcrd.`VALUE` AS AREA\n"
+                                   + "               t1.ID, t1.CITY, t1.COUNTY, tcrd.`KEY` AS CODE, tcrd.`VALUE` AS AREA\n"
                                    + "            FROM\n"
                                    + "               (SELECT ID, COUNTRY, AREA, CITY, COUNTY FROM t_reg_company WHERE ID IN (%s) AND TYPE = 12 AND COUNTRY IS NOT NULL) t1\n"
                                    + "            JOIN t_reg_center_dict tcrd ON t1.AREA = tcrd.`KEY`\n"
@@ -225,16 +231,53 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
 
         String queryAreaSql = String.format(queryAreaTemplate, StringUtils.collectionToCommaDelimitedString(purchaseIds));
         List<Map<String, Object>> query = DBUtil.query(centerDataSource, queryAreaSql, null);
-        Map<Long, Object> areaMap = new HashMap<>();
+        Map<Long, AreaInfo> areaMap = new HashMap<>();
         for (Map<String, Object> map : query) {
             String areaStr = String.valueOf(map.get(AREA)) + String.valueOf(map.get(CITY)) + String.valueOf(map.get(COUNTY));
             // 特殊处理
             if (areaStr != null && areaStr.indexOf("市辖区") > -1) {
                 areaStr = areaStr.replace("市辖区", "");
             }
-            areaMap.put((Long) map.get(PURCHASE_ID), areaStr);
+
+            AreaInfo areaInfo = new AreaInfo(areaStr);
+            // 处理省、直辖市
+            String code = (String) map.get(CODE);
+            if (code != null && code.length() > 2) {
+                areaInfo.region = regionMap.get(code.substring(0, 2));
+            }
+            areaMap.put((Long) map.get(PURCHASE_ID), areaInfo);
         }
         return areaMap;
+    }
+
+    static class AreaInfo {
+        private String areaStr;
+        private String region;
+
+        public String getAreaStr() {
+            return areaStr;
+        }
+
+        public String getRegion() {
+            return region;
+        }
+
+        public AreaInfo(String areaStr) {
+            this.areaStr = areaStr;
+        }
+
+        public AreaInfo(String areaStr, String region) {
+            this.areaStr = areaStr;
+            this.region = region;
+        }
+
+        @Override
+        public String toString() {
+            return "RegionCla{" +
+                   "areaStr='" + areaStr + '\'' +
+                   ", region='" + region + '\'' +
+                   '}';
+        }
     }
 
     protected void batchExecute(List<Map<String, Object>> resultsToUpdate) {
@@ -266,6 +309,87 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
                 logger.error(response.buildFailureMessage());
             }
         }
+    }
+
+
+    static {
+        regionMap = new HashMap<>(64);
+        /* 东北地区 */
+        // 辽宁
+        regionMap.put("21", "东北地区");
+        // 吉林
+        regionMap.put("22", "东北地区");
+        // 黑龙江
+        regionMap.put("23", "东北地区");
+        /* 西北地区 */
+        // 陕西
+        regionMap.put("61", "西北地区");
+        // 甘肃
+        regionMap.put("62", "西北地区");
+        // 青海
+        regionMap.put("63", "西北地区");
+        // 宁夏
+        regionMap.put("64", "西北地区");
+        // 新疆
+        regionMap.put("65", "西北地区");
+        /* 华北 */
+        // 北京
+        regionMap.put("11", "华北地区");
+        // 天津
+        regionMap.put("12", "华北地区");
+        // 河北
+        regionMap.put("13", "华北地区");
+        // 山西
+        regionMap.put("14", "华北地区");
+        // 内蒙古
+        regionMap.put("15", "华北地区");
+        /* 华中 */
+        // 江西
+        regionMap.put("36", "华中地区");
+        // 河南
+        regionMap.put("41", "华中地区");
+        // 湖北
+        regionMap.put("42", "华中地区");
+        // 湖南
+        regionMap.put("43", "华中地区");
+        /* 华东 */
+        // 上海
+        regionMap.put("31", "华东地区");
+        // 江苏
+        regionMap.put("32", "华东地区");
+        // 浙江
+        regionMap.put("33", "华东地区");
+        // 安徽
+        regionMap.put("34", "华东地区");
+        // 福建
+        regionMap.put("35", "华东地区");
+        // 山东
+        regionMap.put("37", "华东地区");
+        /* 华南 */
+        // 广东
+        regionMap.put("44", "华南地区");
+        // 广西
+        regionMap.put("45", "华南地区");
+        // 海南
+        regionMap.put("46", "华南地区");
+        /* 西南 */
+        // 重庆
+        regionMap.put("50", "西南地区");
+        // 四川
+        regionMap.put("51", "西南地区");
+        // 贵州
+        regionMap.put("52", "西南地区");
+        // 云南
+        regionMap.put("53", "西南地区");
+        // 西藏
+        regionMap.put("54", "西南地区");
+        /* 特别行政区 */
+        // 台湾
+        regionMap.put("71", "特别行政区");
+        // 香港
+        regionMap.put("81", "特别行政区");
+        // 澳门
+        regionMap.put("82", "特别行政区");
     }
 }
 
