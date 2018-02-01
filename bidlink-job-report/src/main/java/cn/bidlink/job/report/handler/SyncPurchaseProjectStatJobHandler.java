@@ -24,9 +24,9 @@ import java.util.*;
  * @Date 2018/1/5
  */
 @Service
-@JobHander("syncPurchaseProjectStatJobHander")
-public class SyncPurchaseProjectStatJobHander extends SyncJobHandler /*implements InitializingBean*/ {
-    private Logger logger = LoggerFactory.getLogger(SyncPurchaseProjectStatJobHander.class);
+@JobHander("syncPurchaseProjectStatJobHandler")
+public class SyncPurchaseProjectStatJobHandler extends SyncJobHandler /*implements InitializingBean*/ {
+    private Logger logger = LoggerFactory.getLogger(SyncPurchaseProjectStatJobHandler.class);
 
     private String COMPANY_ID = "company_id";
     private String COMP_ID = "comp_id";
