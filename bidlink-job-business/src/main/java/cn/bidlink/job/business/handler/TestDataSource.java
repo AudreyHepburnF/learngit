@@ -41,13 +41,13 @@ public class TestDataSource extends IJobHandler {
     @Qualifier("centerDataSource")
     private DataSource centerDataSource;
 
-//    @Autowired
-//    @Qualifier("creditDataSource")
-//    private DataSource creditDataSource;
+    @Autowired
+    @Qualifier("creditDataSource")
+    private DataSource creditDataSource;
 
-//    @Autowired
-//    @Qualifier("enterpriseSpaceDataSource")
-//    private DataSource enterpriseSpaceDataSource;
+    @Autowired
+    @Qualifier("enterpriseSpaceDataSource")
+    private DataSource enterpriseSpaceDataSource;
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
@@ -60,13 +60,13 @@ public class TestDataSource extends IJobHandler {
         testYcDataSource();
         testProDataSource();
         testCenterDataSource();
-//        testCreditDataSource();
-//        testEnterpriseSpaceDataSource();
+        testCreditDataSource();
+        testEnterpriseSpaceDataSource();
 //        testSynergyDataSource();
         logger.info("测试数据源结束");
     }
 
-    private void testSynergyDataSource() {
+//    private void testSynergyDataSource() {
 //        logger.info("测试synergyDataSource开始");
 //        String testYcSql = "SELECT\n"
 //                           + "   count(1)\n"
@@ -74,26 +74,26 @@ public class TestDataSource extends IJobHandler {
 //                           + "   purchase_supplier_project";
 //        List<Map<String, Object>> query = DBUtil.query(synergyDataSource, testYcSql, null);
 //        logger.info("测试synergyDataSourcee结束");
-    }
-
-//    private void testEnterpriseSpaceDataSource() {
-//        logger.info("测试enterpriseSpaceDataSource开始");
-//        String testYcSql = "SELECT\n"
-//                           + "   count(1)\n"
-//                           + " from\n"
-//                           + "   space_info";
-//        List<Map<String, Object>> query = DBUtil.query(enterpriseSpaceDataSource, testYcSql, null);
-//        logger.info("测试enterpriseSpaceDataSource结束");
 //    }
 
+    private void testEnterpriseSpaceDataSource() {
+        logger.info("测试enterpriseSpaceDataSource开始");
+        String testYcSql = "SELECT\n"
+                           + "   count(1)\n"
+                           + " from\n"
+                           + "   space_info";
+        List<Map<String, Object>> query = DBUtil.query(enterpriseSpaceDataSource, testYcSql, null);
+        logger.info("测试enterpriseSpaceDataSource结束");
+    }
+
     private void testCreditDataSource() {
-//        logger.info("测试creditDataSource开始");
-//        String testYcSql = "SELECT\n"
-//                           + "   count(1)\n"
-//                           + " from\n"
-//                           + "   credit_score";
-//        List<Map<String, Object>> query = DBUtil.query(creditDataSource, testYcSql, null);
-//        logger.info("测试creditDataSource结束");
+        logger.info("测试creditDataSource开始");
+        String testYcSql = "SELECT\n"
+                           + "   count(1)\n"
+                           + " from\n"
+                           + "   credit_score";
+        List<Map<String, Object>> query = DBUtil.query(creditDataSource, testYcSql, null);
+        logger.info("测试creditDataSource结束");
     }
 
     private void testYcDataSource() {

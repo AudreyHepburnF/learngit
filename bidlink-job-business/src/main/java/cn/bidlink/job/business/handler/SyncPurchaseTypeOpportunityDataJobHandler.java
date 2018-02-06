@@ -82,7 +82,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
                 .setScroll(new TimeValue(60000))
                 .setSize(batchSize)
                 .get();
-        int i = 0;
+
         do {
             SearchHit[] searchHits = scrollResp.getHits().hits();
             List<Long> projectIds = new ArrayList<>();

@@ -104,38 +104,38 @@
                   value="com.alibaba.druid.pool.vendor.MySqlValidConnectionChecker"/>
     </bean>
 
-    <!--<bean id="creditDataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">-->
-        <!--<property name="driverClassName" value="com.mysql.jdbc.Driver"/>-->
-        <!--<property name="useUnfairLock" value="true"/>-->
-        <!--<property name="url" value="${credit.db.url}"/>-->
-        <!--<property name="username" value="${credit.db.username}"/>-->
-        <!--<property name="password" value="${credit.db.password}"/>-->
-        <!--<property name="notFullTimeoutRetryCount" value="2"/>-->
-        <!--<property name="initialSize" value="0"/>-->
-        <!--<property name="minIdle" value="0"/>-->
-        <!--<property name="maxActive" value="32"/>-->
-        <!--<property name="maxWait" value="5000"/>-->
-        <!--<property name="validationQuery" value="SELECT 1"/>-->
-        <!--<property name="exceptionSorterClassName" value="com.alibaba.druid.pool.vendor.MySqlExceptionSorter"/>-->
-        <!--<property name="validConnectionCheckerClassName"-->
-                  <!--value="com.alibaba.druid.pool.vendor.MySqlValidConnectionChecker"/>-->
-    <!--</bean>-->
+    <bean id="creditDataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="useUnfairLock" value="true"/>
+        <property name="url" value="${credit.db.url}"/>
+        <property name="username" value="${credit.db.username}"/>
+        <property name="password" value="${credit.db.password}"/>
+        <property name="notFullTimeoutRetryCount" value="2"/>
+        <property name="initialSize" value="0"/>
+        <property name="minIdle" value="0"/>
+        <property name="maxActive" value="32"/>
+        <property name="maxWait" value="5000"/>
+        <property name="validationQuery" value="SELECT 1"/>
+        <property name="exceptionSorterClassName" value="com.alibaba.druid.pool.vendor.MySqlExceptionSorter"/>
+        <property name="validConnectionCheckerClassName"
+                  value="com.alibaba.druid.pool.vendor.MySqlValidConnectionChecker"/>
+    </bean>
 
-    <!--<bean id="enterpriseSpaceDataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">-->
-        <!--<property name="driverClassName" value="com.mysql.jdbc.Driver"/>-->
-        <!--<property name="useUnfairLock" value="true"/>-->
-        <!--<property name="url" value="${enterpriseSpace.db.url}"/>-->
-        <!--<property name="username" value="${enterpriseSpace.db.username}"/>-->
-        <!--<property name="password" value="${enterpriseSpace.db.password}"/>-->
-        <!--<property name="notFullTimeoutRetryCount" value="2"/>-->
-        <!--<property name="initialSize" value="0"/>-->
-        <!--<property name="minIdle" value="0"/>-->
-        <!--<property name="maxActive" value="32"/>-->
-        <!--<property name="maxWait" value="5000"/>-->
-        <!--<property name="validationQuery" value="SELECT 1"/>-->
-        <!--<property name="exceptionSorterClassName" value="com.alibaba.druid.pool.vendor.MySqlExceptionSorter"/>-->
-        <!--<property name="validConnectionCheckerClassName"-->
-                  <!--value="com.alibaba.druid.pool.vendor.MySqlValidConnectionChecker"/>-->
-    <!--</bean>-->
+    <bean id="enterpriseSpaceDataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="useUnfairLock" value="true"/>
+        <property name="url" value="${enterpriseSpace.db.url}"/>
+        <property name="username" value="${enterpriseSpace.db.username}"/>
+        <property name="password" value="${enterpriseSpace.db.password}"/>
+        <property name="notFullTimeoutRetryCount" value="2"/>
+        <property name="initialSize" value="0"/>
+        <property name="minIdle" value="0"/>
+        <property name="maxActive" value="32"/>
+        <property name="maxWait" value="5000"/>
+        <property name="validationQuery" value="SELECT 1"/>
+        <property name="exceptionSorterClassName" value="com.alibaba.druid.pool.vendor.MySqlExceptionSorter"/>
+        <property name="validConnectionCheckerClassName"
+                  value="com.alibaba.druid.pool.vendor.MySqlValidConnectionChecker"/>
+    </bean>
 
 </beans>
