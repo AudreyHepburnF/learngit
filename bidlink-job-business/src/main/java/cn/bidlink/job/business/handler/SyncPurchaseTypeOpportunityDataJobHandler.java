@@ -34,7 +34,6 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
     // 手动截标
     private int MANUAL_STOP_TYPE = 1;
 
-    private String PROJECT_STATUS     = "projectStatus";
     private String BID_STOP_TYPE      = "bidStopType";
     private String BID_STOP_TIME      = "bidStopTime";
     private String BID_TRUE_STOP_TIME = "bidTrueStopTime";
@@ -134,7 +133,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
 
             String countSql = String.format(countTemplateSql, StringUtils.collectionToCommaDelimitedString(projectIds));
             String querySql = String.format(queryTemplateSql, StringUtils.collectionToCommaDelimitedString(projectIds));
-            doSyncProjectDataService(countSql, querySql, Collections.singletonList((Object) lastSyncTime));
+            doSyncProjectDataService(ycDataSource, countSql, querySql, Collections.singletonList((Object) lastSyncTime));
         }
     }
 
@@ -184,7 +183,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
                                  + "AND bp.project_status IN (5, 6, 10)\n"
                                  + "LIMIT ?,\n"
                                  + " ?) b JOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id order by bpi.id";
-        doSyncProjectDataService(countUpdatedSql, queryUpdatedSql, Collections.singletonList((Object) lastSyncTime));
+        doSyncProjectDataService(ycDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList((Object) lastSyncTime));
     }
 
     protected void appendTenantKeyAndAreaStrToResult(List<Map<String, Object>> resultToExecute, Set<Long> purchaseIds) {
@@ -243,7 +242,6 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
     protected void refresh(Map<String, Object> result, Map<Long, Set<String>> projectDirectoryMap) {
         super.refresh(result, projectDirectoryMap);
         // 移除不需要的属性
-        result.remove(PROJECT_STATUS);
         result.remove(BID_STOP_TYPE);
         result.put(QUOTE_STOP_TIME, SyncTimeUtil.toDateString(result.get(BID_STOP_TIME)));
         result.remove(BID_STOP_TIME);

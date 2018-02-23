@@ -701,7 +701,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
                                             + "    BIDER_ID AS supplierId\n"
                                             + " from\n"
                                             + "    bid\n"
-                                            + "    where bider_id in (%s)\n"
+                                            + "    where IS_WITHDRAWBID = 0 AND bider_id in (%s)\n"
                                             + " GROUP BY\n"
                                             + "    BIDER_ID";
         Map<String, Long> bidProjectStat = getSupplierStatMap(ycDataSource, queryBidProjectSqlTemplate, supplierIds);

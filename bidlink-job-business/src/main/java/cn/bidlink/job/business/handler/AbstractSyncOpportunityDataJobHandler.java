@@ -96,15 +96,15 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
         return DigestUtils.md5DigestAsHex((projectId + "_" + purchaseId).getBytes());
     }
 
-    protected void doSyncProjectDataService(String countSql, String querySql, List<Object> params) {
-        long count = DBUtil.count(ycDataSource, countSql, params);
+    protected void doSyncProjectDataService(DataSource dataSource, String countSql, String querySql, List<Object> params) {
+        long count = DBUtil.count(dataSource, countSql, params);
         logger.debug("执行countSql : {}, params : {}，共{}条", countSql, params, count);
         if (count > 0) {
             Timestamp currentDate = SyncTimeUtil.getCurrentDate();
             for (long i = 0; i < count; ) {
                 List<Object> paramsToUse = appendToParams(params, i);
                 // 查出符合条件的商机
-                List<Map<String, Object>> results = DBUtil.query(ycDataSource, querySql, paramsToUse);
+                List<Map<String, Object>> results = DBUtil.query(dataSource, querySql, paramsToUse);
                 logger.debug("执行querySql : {}, params : {}，共{}条", querySql, paramsToUse, results.size());
                 List<Map<String, Object>> resultToExecute = new ArrayList<>();
                 // 保存项目的采购品
@@ -116,7 +116,10 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
                         projectDirectoryMap.put(projectId, new LinkedHashSet<String>());
                         parseOpportunity(currentDate, resultToExecute, result);
                     }
-                    projectDirectoryMap.get(projectId).add(directoryName);
+                    // 招标项目的采购品可能为空
+                    if (!StringUtils.isEmpty(directoryName)) {
+                        projectDirectoryMap.get(projectId).add(directoryName);
+                    }
                 }
 
                 // 处理采购品
@@ -151,12 +154,22 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
      */
     protected void refresh(Map<String, Object> result, Map<Long, Set<String>> projectDirectoryMap) {
         Set<String> directoryNames = projectDirectoryMap.get(result.get(PROJECT_ID));
-        // 采购品
-        String directoryNameList = StringUtils.collectionToCommaDelimitedString(directoryNames);
-        result.put(DIRECTORY_NAME, directoryNameList);
-        result.put(DIRECTORY_NAME_NOT_ANALYZED, directoryNameList);
-        result.put(FIRST_DIRECTORY_NAME, directoryNames.iterator().next());
-        result.put(DIRECTORY_NAME_COUNT, directoryNames.size());
+        if (!CollectionUtils.isEmpty(directoryNames)) {
+            // 采购品
+            String directoryNameList = StringUtils.collectionToCommaDelimitedString(directoryNames);
+            result.put(DIRECTORY_NAME, directoryNameList);
+            result.put(DIRECTORY_NAME_NOT_ANALYZED, directoryNameList);
+            result.put(FIRST_DIRECTORY_NAME, directoryNames.iterator().next());
+            result.put(DIRECTORY_NAME_COUNT, directoryNames.size());
+        } else {
+            result.put(DIRECTORY_NAME, null);
+            result.put(DIRECTORY_NAME_NOT_ANALYZED, null);
+            result.put(FIRST_DIRECTORY_NAME, null);
+            result.put(DIRECTORY_NAME_COUNT, 0);
+        }
+
+        // 移除项目状态
+        result.remove(PROJECT_STATUS);
         result.put(PROJECT_NAME_NOT_ANALYZED, result.get(PROJECT_NAME));
         // 同步时间
         result.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());

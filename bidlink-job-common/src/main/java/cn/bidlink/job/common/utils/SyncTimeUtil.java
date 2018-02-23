@@ -41,7 +41,7 @@ public class SyncTimeUtil {
         if (propertyValue instanceof java.util.Date) {
             return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
         } else {
-            return null;
+            return String.valueOf(propertyValue);
         }
     }
 }
