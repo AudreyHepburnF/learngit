@@ -53,22 +53,22 @@
         <property name="validConnectionCheckerClassName"
                   value="com.alibaba.druid.pool.vendor.MySqlValidConnectionChecker"/>
     </bean>
-    <!--<bean id="synergyDataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">-->
-        <!--<property name="driverClassName" value="com.mysql.jdbc.Driver"/>-->
-        <!--<property name="useUnfairLock" value="true"/>-->
-        <!--<property name="url" value="${synergy.db.url}"/>-->
-        <!--<property name="username" value="${synergy.db.username}"/>-->
-        <!--<property name="password" value="${synergy.db.password}"/>-->
-        <!--<property name="notFullTimeoutRetryCount" value="2"/>-->
-        <!--<property name="initialSize" value="0"/>-->
-        <!--<property name="minIdle" value="0"/>-->
-        <!--<property name="maxActive" value="32"/>-->
-        <!--<property name="maxWait" value="5000"/>-->
-        <!--<property name="validationQuery" value="SELECT 1"/>-->
-        <!--<property name="exceptionSorterClassName" value="com.alibaba.druid.pool.vendor.MySqlExceptionSorter"/>-->
-        <!--<property name="validConnectionCheckerClassName"-->
-                  <!--value="com.alibaba.druid.pool.vendor.MySqlValidConnectionChecker"/>-->
-    <!--</bean>-->
+    <bean id="synergyDataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="useUnfairLock" value="true"/>
+        <property name="url" value="${synergy.db.url}"/>
+        <property name="username" value="${synergy.db.username}"/>
+        <property name="password" value="${synergy.db.password}"/>
+        <property name="notFullTimeoutRetryCount" value="2"/>
+        <property name="initialSize" value="0"/>
+        <property name="minIdle" value="0"/>
+        <property name="maxActive" value="32"/>
+        <property name="maxWait" value="5000"/>
+        <property name="validationQuery" value="SELECT 1"/>
+        <property name="exceptionSorterClassName" value="com.alibaba.druid.pool.vendor.MySqlExceptionSorter"/>
+        <property name="validConnectionCheckerClassName"
+                  value="com.alibaba.druid.pool.vendor.MySqlValidConnectionChecker"/>
+    </bean>
 
     <bean id="proDataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
         <property name="driverClassName" value="com.mysql.jdbc.Driver"/>

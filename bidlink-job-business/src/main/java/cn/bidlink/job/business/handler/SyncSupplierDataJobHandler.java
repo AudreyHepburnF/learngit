@@ -1,5 +1,6 @@
 package cn.bidlink.job.business.handler;
 
+import cn.bidlink.job.business.contants.Regions;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
@@ -107,6 +108,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     private String TOTAL_DEAL_BID_PROJECT      = "totalDealBidProject";
     private String TOTAL_PRODUCT               = "totalProduct";
     private String TOTAL_COOPERATED_PURCHASER  = "totalCooperatedPurchaser";
+    private String REGION                      = "region";
 
     // 两位有效数字，四舍五入
     private final DecimalFormat format = new DecimalFormat("0.00");
@@ -393,7 +395,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
                                   + "WHERE trc.CREATE_DATE > ?\n"
                                   + "GROUP BY trc.ID\n"
                                   + "LIMIT ?,?";
-        doSyncSupplierData(countInsertedSql, queryInsertedSql, lastSyncTime);
+        doSyncSupplierData(countInsertedSql, queryInsertedSql, lastSyncTime, true);
     }
 
     private void doUpdatedSupplierData(Timestamp lastSyncTime) {
@@ -447,10 +449,10 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
                                  + "WHERE trc.UPDATE_TIME > ?\n"
                                  + "GROUP BY trc.ID\n"
                                  + "LIMIT ?,?";
-        doSyncSupplierData(countUpdatedSql, queryUpdatedSql, lastSyncTime);
+        doSyncSupplierData(countUpdatedSql, queryUpdatedSql, lastSyncTime, false);
     }
 
-    private void doSyncSupplierData(String countSql, String querySql, Timestamp createTime) {
+    private void doSyncSupplierData(String countSql, String querySql, Timestamp createTime, boolean insert) {
         List<Object> params = new ArrayList<>();
         params.add(createTime);
         long count = DBUtil.count(centerDataSource, countSql, params);
@@ -463,18 +465,16 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
                 logger.debug("执行querySql : {}, params : {}，共{}条", querySql, paramsToUse, resultToExecute.size());
                 Set<Long> supplierIds = new HashSet<>();
                 for (Map<String, Object> result : resultToExecute) {
-                    if (StringUtils.isEmpty(result.get(ZONE_STR))) {
-                        if (!StringUtils.isEmpty(result.get(AREA))) {
-                            supplierIds.add((Long) result.get(ID));
-                        }
-                    } else {
-                        result.put(AREA_STR, result.get(ZONE_STR));
+                    if (!StringUtils.isEmpty(result.get(AREA))) {
+                        supplierIds.add((Long) result.get(ID));
                     }
                     refresh(result);
                 }
 
-                // 添加区域
-                appendAreaStrToResult(resultToExecute, supplierIds);
+                if (insert) {
+                    // 添加区域
+                    appendAreaStrToResult(resultToExecute, supplierIds);
+                }
                 // 添加诚信等级
                 appendCreditToResult(resultToExecute, supplierIds);
                 // 添加企业空间
@@ -486,10 +486,17 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     }
 
     private void refresh(Map<String, Object> resultToUse) {
+        // 处理所在地区
+        Object areaObj = resultToUse.get(AREA);
+        if (areaObj != null) {
+            String areaCode = String.valueOf(areaObj);
+            if (areaCode != null && areaCode.length() > 2) {
+                resultToUse.put(REGION, Regions.regionMap.get(areaCode.substring(0, 2)));
+            }
+        }
         resultToUse.remove(AREA);
-        resultToUse.put(AUTH_CODE_ID, convertToString(resultToUse.get(AUTH_CODE_ID)));
-        resultToUse.put(AUTHEN_NUMBER, convertToString(resultToUse.get(AUTHEN_NUMBER)));
-        resultToUse.put(CODE, convertToString(resultToUse.get(CODE)));
+        // 重置zoneStr，使得zoneStr和areaStr一致
+        resultToUse.put(ZONE_STR, resultToUse.get(AREA_STR));
         // 重置注册资金，四舍五入，保留两位有效数字
         Object value = resultToUse.get(FUND);
         if (value != null && value instanceof BigDecimal) {
@@ -504,6 +511,10 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
                 resultToUse.put(INDUSTRY_STR, industryCodeMap.get(industryCode));
             }
         }
+        // 将Long转为String，防止前端js精度溢出
+        resultToUse.put(AUTH_CODE_ID, convertToString(resultToUse.get(AUTH_CODE_ID)));
+        resultToUse.put(AUTHEN_NUMBER, convertToString(resultToUse.get(AUTHEN_NUMBER)));
+        resultToUse.put(CODE, convertToString(resultToUse.get(CODE)));
         resultToUse.put(TENANT_ID, convertToString(resultToUse.get(TENANT_ID)));
         resultToUse.put(MOBILE, convertToString(resultToUse.get(MOBILE)));
         resultToUse.put(TEL, convertToString(resultToUse.get(TEL)));
@@ -569,12 +580,11 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
         if (supplierIds.size() > 0) {
             Map<Long, Object> areaMap = queryArea(supplierIds);
             for (Map<String, Object> result : resultToExecute) {
-                if (StringUtils.isEmpty(result.get(ZONE_STR))) {
-                    Long supplierId = Long.valueOf(String.valueOf(result.get(ID)));
-                    result.put(AREA_STR, areaMap.get(supplierId));
-                } else {
-                    result.put(AREA_STR, result.get(ZONE_STR));
-                }
+                Long supplierId = Long.valueOf(String.valueOf(result.get(ID)));
+                Object value = areaMap.get(supplierId);
+                result.put(AREA_STR, value);
+                // 重置zoneStr，使得zoneStr和areaStr一致
+                result.put(ZONE_STR, value);
             }
         }
     }
@@ -614,13 +624,21 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
             Object area = map.get(AREA);
             Object city = map.get(CITY);
             Object county = map.get(COUNTY);
-            String areaStr = null;
-            if (city == null && county == null) {
-                areaStr = String.valueOf(area);
-            } else if (area.equals(city)) {
-                areaStr = String.valueOf(city) + String.valueOf(county);
-            } else {
-                areaStr = String.valueOf(area) + String.valueOf(city) + String.valueOf(county);
+            String areaStr = "";
+            if (area != null) {
+                areaStr += area;
+            }
+
+            if (city != null) {
+                areaStr += city;
+            }
+
+            if (county != null) {
+                areaStr += county;
+            }
+            // 特殊处理
+            if (areaStr != null && areaStr.indexOf("市辖区") > -1) {
+                areaStr = areaStr.replace("市辖区", "");
             }
             areaMap.put((Long) map.get(ID), areaStr);
         }

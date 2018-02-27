@@ -161,26 +161,24 @@ public class PurchaseTradingVolumeJobHandler extends IJobHandler /*implements In
         logger.debug("执行countSql: {}, params: {}, 共{}条", countSql, params, count);
         if (count > 0) {
             for (long i = 0; i < count; i += pageSize) {
-                //添加分页查询的参数
+                // 添加分页查询的参数
                 List<Object> paramsToUse = appendToParams(params, i);
-                //查询分页结果集
+                // 查询分页结果集
                 List<Map<String, Object>> purchasers = DBUtil.query(centerDataSource, querySql, paramsToUse);
                 logger.debug("执行querySql : {}, params: {},共{}条", querySql, paramsToUse, purchasers.size());
-                //采购商id
+                // 采购商id
                 ArrayList<Long> purchaseIds = new ArrayList<>();
                 for (Map<String, Object> purchaser : purchasers) {
                     purchaseIds.add((Long) purchaser.get(ID));
-                    //添加同步时间
+                    // 添加同步时间
                     refresh(purchaser);
                 }
 
-                //添加采购商交易额
+                // 添加采购商交易额
                 appendPurchaseTradingVolume(purchasers, purchaseIds);
-
                 // 添加招标交易额
                 appendBidTradingVolume(purchasers, purchaseIds);
-
-                //批量插入es中
+                // 批量插入es中
                 batchInsert(purchasers);
             }
         }
