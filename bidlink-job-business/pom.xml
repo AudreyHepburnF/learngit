@@ -19,6 +19,22 @@
             <artifactId>bidlink-job-common</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <!--redis-->
+        <dependency>
+            <groupId>cn.bidlink.framework</groupId>
+            <artifactId>framework-redis</artifactId>
+            <version>1.0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>1.7.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.7.4</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -84,6 +100,9 @@
                 <pom.log.rootLogger>CONSOLE</pom.log.rootLogger>
                 <pom.log.level>debug</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
+                <!--redis配置-->
+                <pom.framework.redis.conf>10.4.0.137:6379</pom.framework.redis.conf>
+                <pom.framework.redis.took>false</pom.framework.redis.took>
                 <!--悦彩数据源-->
                 <pom.yc.db.url>jdbc:mysql://10.4.0.45:3306/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yc.db.url>
                 <pom.yc.db.username>develop</pom.yc.db.username>
@@ -141,6 +160,9 @@
                 <pom.log.rootLogger>FILE</pom.log.rootLogger>
                 <pom.log.level>INFO</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
+                <!--redis配置-->
+                <pom.framework.redis.conf>192.168.2.192:6380:bid!@#$link,92.168.2.193:6380:bid!@#$link</pom.framework.redis.conf>
+                <pom.framework.redis.took>false</pom.framework.redis.took>
                 <!--悦彩数据源-->
                 <pom.yc.db.url>jdbc:mysql://192.168.1.86:3306/nyc?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yc.db.url>
                 <pom.yc.db.username>shujuzhx</pom.yc.db.username>
@@ -195,6 +217,9 @@
                 <pom.log.rootLogger>FILE</pom.log.rootLogger>
                 <pom.log.level>info</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
+                <!--redis配置-->
+                <pom.framework.redis.conf>10.4.0.137:6379</pom.framework.redis.conf>
+                <pom.framework.redis.took>false</pom.framework.redis.took>
                 <!--悦彩数据源-->
                 <pom.yc.db.url>jdbc:mysql://10.4.0.45:3306/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yc.db.url>
                 <pom.yc.db.username>develop</pom.yc.db.username>
