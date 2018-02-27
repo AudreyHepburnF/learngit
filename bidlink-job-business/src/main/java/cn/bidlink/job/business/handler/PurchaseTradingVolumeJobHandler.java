@@ -1,4 +1,4 @@
-package cn.bidlink.job.purchase.handler;
+package cn.bidlink.job.business.handler;
 
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;

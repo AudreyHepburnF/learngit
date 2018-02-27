@@ -68,7 +68,7 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
 
     private void syncBiddenSupplierCountData() {
         syncPurchaseBiddenSupplierCountData();
-        doSyncBidBiddenSupplierCountData();
+        syncBidBiddenSupplierCountData();
     }
 
     /**
@@ -112,7 +112,7 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
     /**
      * 同步招标项目的已报价供应商数目统计
      */
-    private void doSyncBidBiddenSupplierCountData() {
+    private void syncBidBiddenSupplierCountData() {
         logger.info("同步招标项目的已报价供应商数目统计开始");
         doSyncBiddenSupplierCountData(BIDDING_PROJECT_TYPE, new QuerySqlBuilder() {
             @Override
@@ -178,7 +178,7 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
             }
 
             if (projectPairs.size() > 0) {
-                doSyncBiddenSupplierCountData(sources, projectPairs, querySqlBuilder);
+                syncData(sources, projectPairs, querySqlBuilder);
             }
             scrollResp = elasticClient.getTransportClient().prepareSearchScroll(scrollResp.getScrollId())
                     .setScroll(new TimeValue(60000))
@@ -193,7 +193,7 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
      * @param projectPairs
      * @param querySqlBuilder
      */
-    private void doSyncBiddenSupplierCountData(List<Map<String, Object>> sources, Set<Pair> projectPairs, QuerySqlBuilder querySqlBuilder) {
+    private void syncData(List<Map<String, Object>> sources, Set<Pair> projectPairs, QuerySqlBuilder querySqlBuilder) {
         String querySql = querySqlBuilder.build(projectPairs);
         Map<Pair, Integer> biddenSupplierCountMap = DBUtil.query(ycDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Pair, Integer>>() {
             @Override

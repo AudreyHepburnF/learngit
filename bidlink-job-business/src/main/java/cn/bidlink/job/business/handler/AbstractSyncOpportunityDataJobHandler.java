@@ -1,5 +1,6 @@
 package cn.bidlink.job.business.handler;
 
+import cn.bidlink.job.business.contants.Regions;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
@@ -28,9 +29,6 @@ import java.util.*;
  */
 public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    // 每个省，直辖市对应的地区
-    protected static final Map<String, String> regionMap;
 
     @Autowired
     protected ElasticClient elasticClient;
@@ -66,6 +64,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected String PROJECT_STATUS              = "projectStatus";
     protected String TENANT_KEY                  = "tenantKey";
     protected String AREA_STR                    = "areaStr";
+    protected String AREA_STR_IK                 = "areaStrIk";
     protected String REGION                      = "region";
     protected String STATUS                      = "status";
     protected String FIRST_DIRECTORY_NAME        = "firstDirectoryName";
@@ -96,15 +95,15 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
         return DigestUtils.md5DigestAsHex((projectId + "_" + purchaseId).getBytes());
     }
 
-    protected void doSyncProjectDataService(String countSql, String querySql, List<Object> params) {
-        long count = DBUtil.count(ycDataSource, countSql, params);
+    protected void doSyncProjectDataService(DataSource dataSource, String countSql, String querySql, List<Object> params) {
+        long count = DBUtil.count(dataSource, countSql, params);
         logger.debug("执行countSql : {}, params : {}，共{}条", countSql, params, count);
         if (count > 0) {
             Timestamp currentDate = SyncTimeUtil.getCurrentDate();
             for (long i = 0; i < count; ) {
                 List<Object> paramsToUse = appendToParams(params, i);
                 // 查出符合条件的商机
-                List<Map<String, Object>> results = DBUtil.query(ycDataSource, querySql, paramsToUse);
+                List<Map<String, Object>> results = DBUtil.query(dataSource, querySql, paramsToUse);
                 logger.debug("执行querySql : {}, params : {}，共{}条", querySql, paramsToUse, results.size());
                 List<Map<String, Object>> resultToExecute = new ArrayList<>();
                 // 保存项目的采购品
@@ -116,7 +115,10 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
                         projectDirectoryMap.put(projectId, new LinkedHashSet<String>());
                         parseOpportunity(currentDate, resultToExecute, result);
                     }
-                    projectDirectoryMap.get(projectId).add(directoryName);
+                    // 招标项目的采购品可能为空
+                    if (!StringUtils.isEmpty(directoryName)) {
+                        projectDirectoryMap.get(projectId).add(directoryName);
+                    }
                 }
 
                 // 处理采购品
@@ -151,12 +153,22 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
      */
     protected void refresh(Map<String, Object> result, Map<Long, Set<String>> projectDirectoryMap) {
         Set<String> directoryNames = projectDirectoryMap.get(result.get(PROJECT_ID));
-        // 采购品
-        String directoryNameList = StringUtils.collectionToCommaDelimitedString(directoryNames);
-        result.put(DIRECTORY_NAME, directoryNameList);
-        result.put(DIRECTORY_NAME_NOT_ANALYZED, directoryNameList);
-        result.put(FIRST_DIRECTORY_NAME, directoryNames.iterator().next());
-        result.put(DIRECTORY_NAME_COUNT, directoryNames.size());
+        if (!CollectionUtils.isEmpty(directoryNames)) {
+            // 采购品
+            String directoryNameList = StringUtils.collectionToCommaDelimitedString(directoryNames);
+            result.put(DIRECTORY_NAME, directoryNameList);
+            result.put(DIRECTORY_NAME_NOT_ANALYZED, directoryNameList);
+            result.put(FIRST_DIRECTORY_NAME, directoryNames.iterator().next());
+            result.put(DIRECTORY_NAME_COUNT, directoryNames.size());
+        } else {
+            result.put(DIRECTORY_NAME, null);
+            result.put(DIRECTORY_NAME_NOT_ANALYZED, null);
+            result.put(FIRST_DIRECTORY_NAME, null);
+            result.put(DIRECTORY_NAME_COUNT, 0);
+        }
+
+        // 移除项目状态
+        result.remove(PROJECT_STATUS);
         result.put(PROJECT_NAME_NOT_ANALYZED, result.get(PROJECT_NAME));
         // 同步时间
         result.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
@@ -166,7 +178,6 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
         result.put(PURCHASE_ID, String.valueOf(result.get(PURCHASE_ID)));
     }
 
-    ;
 
     /**
      * 解析商机数据
@@ -233,7 +244,21 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
         List<Map<String, Object>> query = DBUtil.query(centerDataSource, queryAreaSql, null);
         Map<Long, AreaInfo> areaMap = new HashMap<>();
         for (Map<String, Object> map : query) {
-            String areaStr = String.valueOf(map.get(AREA)) + String.valueOf(map.get(CITY)) + String.valueOf(map.get(COUNTY));
+            Object area = map.get(AREA);
+            Object city = map.get(CITY);
+            Object county = map.get(COUNTY);
+            String areaStr = null;
+            if (area != null) {
+                areaStr += area;
+            }
+
+            if (city != null) {
+                areaStr += city;
+            }
+
+            if (county != null) {
+                areaStr += county;
+            }
             // 特殊处理
             if (areaStr != null && areaStr.indexOf("市辖区") > -1) {
                 areaStr = areaStr.replace("市辖区", "");
@@ -243,7 +268,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
             // 处理省、直辖市
             String code = (String) map.get(CODE);
             if (code != null && code.length() > 2) {
-                areaInfo.region = regionMap.get(code.substring(0, 2));
+                areaInfo.region = Regions.regionMap.get(code.substring(0, 2));
             }
             areaMap.put((Long) map.get(PURCHASE_ID), areaInfo);
         }
@@ -309,87 +334,6 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
                 logger.error(response.buildFailureMessage());
             }
         }
-    }
-
-
-    static {
-        regionMap = new HashMap<>(64);
-        /* 东北地区 */
-        // 辽宁
-        regionMap.put("21", "东北地区");
-        // 吉林
-        regionMap.put("22", "东北地区");
-        // 黑龙江
-        regionMap.put("23", "东北地区");
-        /* 西北地区 */
-        // 陕西
-        regionMap.put("61", "西北地区");
-        // 甘肃
-        regionMap.put("62", "西北地区");
-        // 青海
-        regionMap.put("63", "西北地区");
-        // 宁夏
-        regionMap.put("64", "西北地区");
-        // 新疆
-        regionMap.put("65", "西北地区");
-        /* 华北 */
-        // 北京
-        regionMap.put("11", "华北地区");
-        // 天津
-        regionMap.put("12", "华北地区");
-        // 河北
-        regionMap.put("13", "华北地区");
-        // 山西
-        regionMap.put("14", "华北地区");
-        // 内蒙古
-        regionMap.put("15", "华北地区");
-        /* 华中 */
-        // 江西
-        regionMap.put("36", "华中地区");
-        // 河南
-        regionMap.put("41", "华中地区");
-        // 湖北
-        regionMap.put("42", "华中地区");
-        // 湖南
-        regionMap.put("43", "华中地区");
-        /* 华东 */
-        // 上海
-        regionMap.put("31", "华东地区");
-        // 江苏
-        regionMap.put("32", "华东地区");
-        // 浙江
-        regionMap.put("33", "华东地区");
-        // 安徽
-        regionMap.put("34", "华东地区");
-        // 福建
-        regionMap.put("35", "华东地区");
-        // 山东
-        regionMap.put("37", "华东地区");
-        /* 华南 */
-        // 广东
-        regionMap.put("44", "华南地区");
-        // 广西
-        regionMap.put("45", "华南地区");
-        // 海南
-        regionMap.put("46", "华南地区");
-        /* 西南 */
-        // 重庆
-        regionMap.put("50", "西南地区");
-        // 四川
-        regionMap.put("51", "西南地区");
-        // 贵州
-        regionMap.put("52", "西南地区");
-        // 云南
-        regionMap.put("53", "西南地区");
-        // 西藏
-        regionMap.put("54", "西南地区");
-        /* 特别行政区 */
-        // 台湾
-        regionMap.put("71", "特别行政区");
-        // 香港
-        regionMap.put("81", "特别行政区");
-        // 澳门
-        regionMap.put("82", "特别行政区");
     }
 }
 

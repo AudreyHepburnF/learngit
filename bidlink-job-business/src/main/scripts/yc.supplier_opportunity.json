@@ -6,6 +6,10 @@
       "areaStr": {
         "type": "string"
       },
+      "areaStrIk": {
+        "type": "string",
+        "analyzer": "ik"
+      },
       "biddenSupplierCount": {
         "type": "integer"
       },

@@ -28,7 +28,6 @@ import java.util.Set;
 public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpportunityDataJobHandler /*implements InitializingBean*/ {
     private String END_TIME        = "endTime";
     private String OPEN_RANGE_TYPE = "openRangeType";
-    private String PROJECT_STATUS = "projectStatus";
     // 撤项
     private int WITH_DRAWED = 12;
 
@@ -110,7 +109,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                  + "      LIMIT ?,?\n"
                                  + "   ) project\n"
                                  + "LEFT JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
-        doSyncProjectDataService(countNothingSql, queryNothingSql, Collections.emptyList());
+        doSyncProjectDataService(ycDataSource, countNothingSql, queryNothingSql, Collections.emptyList());
         logger.info("同步什么都不需要招标项目的商机结束");
     }
 
@@ -159,7 +158,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                     + "LIMIT ?,?\n"
                                     + ") project\n"
                                     + "LEFT JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
-        doSyncProjectDataService(countPreQualifySql, queryPreQualifySql, Collections.emptyList());
+        doSyncProjectDataService(ycDataSource, countPreQualifySql, queryPreQualifySql, Collections.emptyList());
         logger.info("同步资格预审招标项目的商机结束");
     }
 
@@ -206,7 +205,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                   + "      LIMIT ?,?\n"
                                   + "   ) project\n"
                                   + "JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
-        doSyncProjectDataService(countTwoStageSql, queryTwoStageSql, Collections.emptyList());
+        doSyncProjectDataService(ycDataSource, countTwoStageSql, queryTwoStageSql, Collections.emptyList());
         logger.info("同步两阶段招标项目的商机结束");
     }
 
@@ -220,6 +219,8 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                 result.put(TENANT_KEY, tenantKeyMap.get(purchaseId));
                 AreaInfo areaInfo = areaMap.get(purchaseId);
                 result.put(AREA_STR, areaInfo.getAreaStr());
+                // 添加ik分词的areaStr
+                result.put(AREA_STR_IK, result.get(AREA_STR));
                 result.put(REGION, areaInfo.getRegion());
             }
         }
