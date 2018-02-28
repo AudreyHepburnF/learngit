@@ -9,6 +9,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * 清理采购商交易量统计
+ */
 @Service
 @JobHander("clearPurchaseQuantityJobHandler")
 public class ClearPurchaseQuantityJobHandler extends IJobHandler /*implements InitializingBean*/ {

@@ -12,6 +12,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Random;
 
+/**
+ * 统计采购商交易量统计
+ */
 @Service
 @JobHander("purchaseQuantityJobHandler")
 public class PurchaseQuantityJobHandler extends IJobHandler /*implements InitializingBean*/ {
