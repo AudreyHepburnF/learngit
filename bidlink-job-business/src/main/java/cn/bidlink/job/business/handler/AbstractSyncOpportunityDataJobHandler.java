@@ -248,7 +248,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
             Object area = map.get(AREA);
             Object city = map.get(CITY);
             Object county = map.get(COUNTY);
-            String areaStr = null;
+            String areaStr = "";
             if (area != null) {
                 areaStr += area;
             }
