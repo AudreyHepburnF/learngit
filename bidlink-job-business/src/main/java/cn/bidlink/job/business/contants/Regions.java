@@ -10,7 +10,7 @@ import java.util.Map;
  * @description :
  * @date : 2018/2/27
  */
-public class Regions {
+public abstract class Regions {
     // 每个省，直辖市对应的地区
     public static final Map<String, String> regionMap;
 

@@ -8,6 +8,8 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.util.DigestUtils;
+import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
 import java.sql.Timestamp;
@@ -114,6 +116,20 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
         doSyncProjectDataService(synergyDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList((Object) lastSyncTime));
     }
 
+    @Override
+    protected String generateOpportunityId(Map<String, Object> result) {
+        Long projectId = (Long) result.get(PROJECT_ID);
+        Long purchaseId = (Long) result.get(PURCHASE_ID);
+        if (projectId == null) {
+            throw new RuntimeException("商机ID生成失败，原因：项目ID为空!");
+        }
+        if (StringUtils.isEmpty(purchaseId)) {
+            throw new RuntimeException("商机ID生成失败，原因：采购商ID为空!");
+        }
+
+        return DigestUtils.md5DigestAsHex((projectId + "_" + purchaseId + "_" + SOURCE_NEW).getBytes());
+    }
+
     protected void appendTenantKeyAndAreaStrToResult(List<Map<String, Object>> resultToExecute, Set<Long> purchaseIds) {
         if (purchaseIds.size() > 0) {
             for (Map<String, Object> result : resultToExecute) {
@@ -163,6 +179,8 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
         result.put(AREA_STR_IK, result.get(AREA_STR));
         // 项目类型
         result.put(PROJECT_TYPE, PURCHASE_PROJECT_TYPE);
+        // 新平台
+        result.put(SOURCE, SOURCE_NEW);
     }
 
 
