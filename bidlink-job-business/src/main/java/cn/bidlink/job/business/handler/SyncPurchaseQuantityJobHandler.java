@@ -16,9 +16,9 @@ import java.util.Random;
  * 统计采购商交易量统计
  */
 @Service
-@JobHander("purchaseQuantityJobHandler")
-public class PurchaseQuantityJobHandler extends IJobHandler /*implements InitializingBean*/ {
-    private Logger logger                = LoggerFactory.getLogger(PurchaseQuantityJobHandler.class);
+@JobHander("syncPurchaseQuantityJobHandler")
+public class SyncPurchaseQuantityJobHandler extends IJobHandler /*implements InitializingBean*/ {
+    private Logger logger                = LoggerFactory.getLogger(SyncPurchaseQuantityJobHandler.class);
 
     // 总交易量
     private String TOTAL_TRANSACTION_NUM = "total_transaction_num";
