@@ -12,6 +12,7 @@ import org.elasticsearch.search.SearchHit;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
@@ -241,6 +242,20 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
         }
     }
 
+    @Override
+    protected String generateOpportunityId(Map<String, Object> result) {
+        Long projectId = (Long) result.get(PROJECT_ID);
+        Long purchaseId = (Long) result.get(PURCHASE_ID);
+        if (projectId == null) {
+            throw new RuntimeException("商机ID生成失败，原因：项目ID为空!");
+        }
+        if (StringUtils.isEmpty(purchaseId)) {
+            throw new RuntimeException("商机ID生成失败，原因：采购商ID为空!");
+        }
+
+        return DigestUtils.md5DigestAsHex((projectId + "_" + purchaseId + "_" + SOURCE_OLD).getBytes());
+    }
+
     protected void refresh(Map<String, Object> result, Map<Long, Set<String>> projectDirectoryMap) {
         super.refresh(result, projectDirectoryMap);
         // 移除不需要的属性
@@ -250,6 +265,8 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
         result.remove(BID_TRUE_STOP_TIME);
         // 项目类型
         result.put(PROJECT_TYPE, PURCHASE_PROJECT_TYPE);
+        // 老平台
+        result.put(SOURCE, SOURCE_OLD);
     }
 
 

@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
@@ -42,13 +41,17 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected DataSource centerDataSource;
 
     // 有效的商机
-    protected int VALID_OPPORTUNITY_STATUS   = 1;
+    protected int    VALID_OPPORTUNITY_STATUS   = 1;
     // 无效的商机
-    protected int INVALID_OPPORTUNITY_STATUS = -1;
+    protected int    INVALID_OPPORTUNITY_STATUS = -1;
     // 招标项目类型
-    protected int BIDDING_PROJECT_TYPE       = 1;
+    protected int    BIDDING_PROJECT_TYPE       = 1;
     // 采购项目类型
-    protected int PURCHASE_PROJECT_TYPE      = 2;
+    protected int    PURCHASE_PROJECT_TYPE      = 2;
+    // 新平台数据
+    protected String SOURCE_NEW                 = "new";
+    // 老平台数据
+    protected String SOURCE_OLD                 = "old";
 
 
     protected String ID                          = "id";
@@ -74,6 +77,8 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected String CODE                        = "code";
     protected String CITY                        = "city";
     protected String COUNTY                      = "county";
+    // 数据来源，new表示新平台，old表示老平台
+    protected String SOURCE                      = "source";
 
 
     protected Map<String, Object> appendIdToResult(Map<String, Object> result) {
@@ -82,18 +87,14 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
         return result;
     }
 
-    private String generateOpportunityId(Map<String, Object> result) {
-        Long projectId = (Long) result.get(PROJECT_ID);
-        Long purchaseId = (Long) result.get(PURCHASE_ID);
-        if (projectId == null) {
-            throw new RuntimeException("商机ID生成失败，原因：项目ID为空!");
-        }
-        if (StringUtils.isEmpty(purchaseId)) {
-            throw new RuntimeException("商机ID生成失败，原因：采购商ID为空!");
-        }
-
-        return DigestUtils.md5DigestAsHex((projectId + "_" + purchaseId).getBytes());
-    }
+    /**
+     * id生成器
+     * 注意：如果商机id生成策略变更了，需要重新导入一次数据
+     *
+     * @param result
+     * @return
+     */
+    protected abstract String generateOpportunityId(Map<String, Object> result);
 
     protected void doSyncProjectDataService(DataSource dataSource, String countSql, String querySql, List<Object> params) {
         long count = DBUtil.count(dataSource, countSql, params);
