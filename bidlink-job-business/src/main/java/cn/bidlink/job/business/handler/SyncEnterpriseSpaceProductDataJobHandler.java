@@ -92,7 +92,8 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends IJobHandler /*impl
                 "\tid,\n" +
                 "\tCOMPANYID AS companyId,\n" +
                 "\tPICFILE AS picFile,\n" +
-                "\tOTHERNAME AS productName,\n" +
+                "\ttitle AS productName,\n" +
+                "\ttitle AS productNameNotAnalyzed,\n" +
                 "\tCOMPANYNAME AS companyName,\n" +
                 "\tSTATE AS state,\n" +
                 "\tZONESTR AS zoneStr\n" +
@@ -120,7 +121,8 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends IJobHandler /*impl
                 "\tid,\n" +
                 "\tCOMPANYID AS companyId,\n" +
                 "\tPICFILE AS picFile,\n" +
-                "\tOTHERNAME AS productName,\n" +
+                "\ttitle AS productName,\n" +
+                "\ttitle AS productNameNotAnalyzed,\n" +
                 "\tCOMPANYNAME AS companyName,\n" +
                 "\tSTATE AS state,\n" +
                 "\tZONESTR AS zoneStr\n" +

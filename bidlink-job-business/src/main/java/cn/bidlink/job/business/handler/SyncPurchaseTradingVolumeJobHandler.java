@@ -22,6 +22,8 @@ import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,13 +57,15 @@ public class SyncPurchaseTradingVolumeJobHandler extends IJobHandler /*implement
     private int pageSize;
 
     private String ID = "id";
+    private String COMPANY_ID = "companyId";
     private String PURCHASE_TRADING_VOLUME = "purchaseTradingVolume";
     private String BID_TRADING_VOLUME = "bidTradingVolume";
     private String TRADING_VOLUME = "tradingVolume";
     private String LONG_TRADING_VOLUME = "longTradingVolume";
     private String COMPANY_SITE_ALIAS = "companySiteAlias";
-
-
+    private String PURCHASE_PROJECT_COUNT = "purchaseProjectCount";
+    private String BID_PROJECT_COUNT = "bidProjectCount";
+    private String PROJECT_COUNT = "projectCount";
 
 
     @Override
@@ -104,7 +108,13 @@ public class SyncPurchaseTradingVolumeJobHandler extends IJobHandler /*implement
         String queryUpdatedPurchaseSql = "SELECT\n"
                 + "   trc.id,\n"
                 + "   trc.name AS purchaseName,\n"
+                + "   trc.name AS purchaseNameNotAnalyzed,\n"
                 + "   trc.WWW_STATION AS wwwStationAlias,\n"
+                + "   trc.INDUSTRY_STR AS industryStr,\n"
+                + "   trc.INDUSTRY_STR AS industry,\n"
+                + "   trc.ZONE_STR AS zoneStr,\n"
+                + "   trc.ZONE_STR AS zoneStrIk,\n"
+                + "   trc.COMP_TYPE_STR AS compTypeStr,\n"
                 + "   trc.company_site AS companySiteAlias\n"
                 + "FROM\n"
                 + "   t_reg_company trc\n"
@@ -135,7 +145,12 @@ public class SyncPurchaseTradingVolumeJobHandler extends IJobHandler /*implement
         String queryCreatedPurchaseSql = "SELECT\n"
                 + "   trc.id,\n"
                 + "   trc.name AS purchaseName,\n"
+                + "   trc.name AS purchaseNameNotAnalyzed,\n"
                 + "   trc.WWW_STATION AS wwwStationAlias,\n"
+                + "   trc.INDUSTRY_STR AS industry,\n"
+                + "   trc.INDUSTRY_STR AS industryStr,\n"
+                + "   trc.ZONE_STR AS zoneStrIk,\n"
+                + "   trc.COMP_TYPE_STR AS compTypeStr,\n"
                 + "   trc.company_site AS companySiteAlias\n"
                 + "FROM\n"
                 + "   t_reg_company trc\n"
@@ -174,33 +189,102 @@ public class SyncPurchaseTradingVolumeJobHandler extends IJobHandler /*implement
                     refresh(purchaser);
                 }
 
-                // 添加采购商交易额
+                // 添加采购交易额
                 appendPurchaseTradingVolume(purchasers, purchaseIds);
+
                 // 添加招标交易额
                 appendBidTradingVolume(purchasers, purchaseIds);
+
+                // 添加采购项目数量
+                appendPurchaseProjectCount(purchasers, purchaseIds);
+
+                // 添加招标项目数量
+                appendBidProjectCount(purchasers, purchaseIds);
+
                 // 批量插入es中
                 batchInsert(purchasers);
             }
         }
     }
 
+    private void appendBidProjectCount(List<Map<String, Object>> purchasers, ArrayList<Long> purchaseIds) {
+
+        String queryBidSqlTemplate = "SELECT\n" +
+                "\tcount( ID ) AS bidProjectCount,\n" +
+                "\tCOMPANY_ID AS companyId \n" +
+                "FROM\n" +
+                "\tproj_inter_project \n" +
+                "WHERE\n" +
+                "\tPROJECT_STATUS IN ( 9, 11 ) AND company_id in (%s)\n" +
+                "GROUP BY\n" +
+                "\tCOMPANY_ID;";
+
+        if (!CollectionUtils.isEmpty(purchaseIds)) {
+            String queryBidSql = String.format(queryBidSqlTemplate, StringUtils.collectionToCommaDelimitedString(purchaseIds));
+            Map<Long, Long> bidProjectCountMap = DBUtil.query(ycDataSource, queryBidSql, null, new DBUtil.ResultSetCallback<Map<Long, Long>>() {
+                @Override
+                public Map<Long, Long> execute(ResultSet resultSet) throws SQLException {
+                    HashMap<Long, Long> projectCountMap = new HashMap<>();
+                    while (resultSet.next()) {
+                        projectCountMap.put(resultSet.getLong(COMPANY_ID), resultSet.getLong(BID_PROJECT_COUNT));
+                    }
+                    return projectCountMap;
+                }
+            });
+            //计算总的交易额
+            for (Map<String, Object> purchaser : purchasers) {
+                //采购商招标项目个数
+                Long bidProjectCount = bidProjectCountMap.get(Long.parseLong(((String) purchaser.get(ID))));
+                if (bidProjectCount != null) {
+                    //采购商总交易额
+                    purchaser.put(BID_PROJECT_COUNT, bidProjectCount);
+                    Long projectCount = (Long) purchaser.get(PURCHASE_PROJECT_COUNT) + bidProjectCount;
+                    purchaser.put(PROJECT_COUNT, projectCount);
+                } else {
+                    purchaser.put(BID_PROJECT_COUNT, 0);
+                    Long projectCount = (Long) purchaser.get(PURCHASE_PROJECT_COUNT);
+                    purchaser.put(PROJECT_COUNT, projectCount);
+                }
+            }
+
+        }
+    }
+
+    private void appendPurchaseProjectCount(List<Map<String, Object>> purchasers, ArrayList<Long> purchaseIds) {
+        String queryPurchaserSqlTemplate = "SELECT\n"
+                + "   count(1) AS purchaseProjectCount,\n"
+                + "   bp.comp_id AS companyId\n"
+                + "FROM\n"
+                + "   bmpfjz_project bp\n"
+                + "WHERE bp.project_status IN (8, 9)\n"
+                + "AND bp.comp_id IN (%s) group by bp.comp_id";
+        if (!CollectionUtils.isEmpty(purchaseIds)) {
+            String querySql = String.format(queryPurchaserSqlTemplate, StringUtils.collectionToCommaDelimitedString(purchaseIds));
+            Map<Long, Long> purchaseProjectCountMap = DBUtil.query(ycDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Long, Long>>() {
+                @Override
+                public Map<Long, Long> execute(ResultSet resultSet) throws SQLException {
+                    HashMap<Long, Long> projectCountMap = new HashMap<>();
+                    while (resultSet.next()) {
+                        projectCountMap.put(resultSet.getLong("companyId"), resultSet.getLong("purchaseProjectCount"));
+                    }
+                    return projectCountMap;
+                }
+            });
+
+            for (Map<String, Object> purchaser : purchasers) {
+                Long purchaseProjectCount = purchaseProjectCountMap.get(Long.parseLong(((String) purchaser.get(ID))));
+                if (purchaseProjectCount == null) {
+                    purchaser.put(PURCHASE_PROJECT_COUNT, 0L);
+                } else {
+                    purchaser.put(PURCHASE_PROJECT_COUNT, purchaseProjectCount);
+                }
+            }
+        }
+
+
+    }
+
     private void batchInsert(List<Map<String, Object>> purchases) {
-//        for (Map<String, Object> purchase : purchases) {
-//            System.out.println(JSON.toJSONString(purchase, new ValueFilter() {
-//                @Override
-//                public Object process(Object object, String propertyName, Object propertyValue) {
-//                    if (propertyValue instanceof java.util.Date) {
-//                        //是date类型按指定日期格式转换
-//                        return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-//                    } else {
-//
-//                        return propertyValue;
-//                    }
-//                }
-//            }));
-//        }
-
-
         if (!CollectionUtils.isEmpty(purchases)) {
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> purchase : purchases) {
@@ -253,7 +337,7 @@ public class SyncPurchaseTradingVolumeJobHandler extends IJobHandler /*implement
             HashMap<String, BigDecimal> bidAttributeMap = new HashMap<>();
             if (!CollectionUtils.isEmpty(bidTradingVolumeList)) {
                 for (Map<String, Object> bidTradingVolumeMap : bidTradingVolumeList) {
-                    bidAttributeMap.put(String.valueOf(bidTradingVolumeMap.get(ID)), ((BigDecimal)bidTradingVolumeMap.get(BID_TRADING_VOLUME)));
+                    bidAttributeMap.put(String.valueOf(bidTradingVolumeMap.get(ID)), ((BigDecimal) bidTradingVolumeMap.get(BID_TRADING_VOLUME)));
                 }
             }
 
@@ -273,11 +357,9 @@ public class SyncPurchaseTradingVolumeJobHandler extends IJobHandler /*implement
                     purchaser.put(TRADING_VOLUME, tradingVolume.toString());
                     purchaser.put(LONG_TRADING_VOLUME, tradingVolume.longValue());
                 }
-                //处理为String类型
+                // 处理为String类型
                 purchaser.put(PURCHASE_TRADING_VOLUME, purchaser.get(PURCHASE_TRADING_VOLUME).toString());
             }
-
-
         }
     }
 
@@ -308,7 +390,7 @@ public class SyncPurchaseTradingVolumeJobHandler extends IJobHandler /*implement
             //list<Map>转换为map
             if (!CollectionUtils.isEmpty(purchaseTradingVolumeList)) {
                 for (Map<String, Object> map : purchaseTradingVolumeList) {
-                    purchaseAttributeMap.put(String.valueOf(map.get(ID)), ((BigDecimal)map.get(PURCHASE_TRADING_VOLUME)));
+                    purchaseAttributeMap.put(String.valueOf(map.get(ID)), ((BigDecimal) map.get(PURCHASE_TRADING_VOLUME)));
                 }
             }
             //遍历采购商封装交易额
