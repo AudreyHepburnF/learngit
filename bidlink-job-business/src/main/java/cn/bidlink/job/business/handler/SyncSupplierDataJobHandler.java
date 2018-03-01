@@ -109,6 +109,8 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     private String TOTAL_PRODUCT               = "totalProduct";
     private String TOTAL_COOPERATED_PURCHASER  = "totalCooperatedPurchaser";
     private String REGION                      = "region";
+    private String COMPANY_NAME                = "companyName";
+    private String COMPANY_NAME_NOT_ANALYZED   = "companyNameNotAnalyzed";
 
     // 两位有效数字，四舍五入
     private final DecimalFormat format = new DecimalFormat("0.00");
@@ -486,6 +488,8 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     }
 
     private void refresh(Map<String, Object> resultToUse) {
+        // 添加不分词字段
+        resultToUse.put(COMPANY_NAME_NOT_ANALYZED, resultToUse.get(COMPANY_NAME));
         // 处理所在地区
         Object areaObj = resultToUse.get(AREA);
         if (areaObj != null) {
