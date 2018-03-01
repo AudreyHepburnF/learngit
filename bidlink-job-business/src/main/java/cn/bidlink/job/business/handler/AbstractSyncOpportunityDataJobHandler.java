@@ -61,6 +61,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected String DIRECTORY_NAME              = "directoryName";
     protected String DIRECTORY_NAME_NOT_ANALYZED = "directoryNameNotAnalyzed";
     protected String PURCHASE_NAME               = "purchaseName";
+    protected String PURCHASE_NAME_NOT_ANALYZED  = "purchaseNameNotAnalyzed";
     protected String PROJECT_CODE                = "projectCode";
     protected String PROJECT_NAME                = "projectName";
     protected String PROJECT_NAME_NOT_ANALYZED   = "projectNameNotAnalyzed";
@@ -167,10 +168,11 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
             result.put(FIRST_DIRECTORY_NAME, null);
             result.put(DIRECTORY_NAME_COUNT, 0);
         }
-
+        // 添加不分词字段
+        result.put(PROJECT_NAME_NOT_ANALYZED, result.get(PROJECT_NAME));
+        result.put(PURCHASE_NAME_NOT_ANALYZED, result.get(PURCHASE_NAME));
         // 移除项目状态
         result.remove(PROJECT_STATUS);
-        result.put(PROJECT_NAME_NOT_ANALYZED, result.get(PROJECT_NAME));
         // 同步时间
         result.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
         // 转换long字段类型，防止前端js精度溢出
