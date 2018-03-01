@@ -1,5 +1,6 @@
 package cn.bidlink.job.business.handler;
 
+import cn.bidlink.job.business.utils.AreaUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
@@ -17,6 +18,8 @@ import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.util.*;
+
+import static cn.bidlink.job.business.utils.AreaUtil.queryAreaInfo;
 
 
 /**
@@ -54,7 +57,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
                                                                    "cluster.index",
                                                                    "cluster.type.supplier_opportunity",
-                                                                   QueryBuilders.boolQuery().must(QueryBuilders.termQuery("projectType", PURCHASE_PROJECT_TYPE)));
+                                                                   QueryBuilders.boolQuery().must(QueryBuilders.termQuery("source", SOURCE_OLD)));
         logger.info("采购项目商机同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
         syncPurchaseProjectDataService(lastSyncTime);
         fixExpiredAutoStopTypePurchaseProjectDataService(lastSyncTime);
@@ -190,11 +193,11 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
     protected void appendTenantKeyAndAreaStrToResult(List<Map<String, Object>> resultToExecute, Set<Long> purchaseIds) {
         if (purchaseIds.size() > 0) {
             Map<Long, Object> tenantKeyMap = queryTenantKey(purchaseIds);
-            Map<Long, AreaInfo> areaMap = queryArea(purchaseIds);
+            Map<Long, AreaUtil.AreaInfo> areaMap = queryAreaInfo(centerDataSource, purchaseIds);
             for (Map<String, Object> result : resultToExecute) {
                 Long purchaseId = Long.valueOf(String.valueOf(result.get(PURCHASE_ID)));
                 result.put(TENANT_KEY, tenantKeyMap.get(purchaseId));
-                AreaInfo areaInfo = areaMap.get(purchaseId);
+                AreaUtil.AreaInfo areaInfo = areaMap.get(purchaseId);
                 result.put(AREA_STR, areaInfo.getAreaStr());
                 // 添加ik分词的areaStr
                 result.put(AREA_STR_IK, result.get(AREA_STR));

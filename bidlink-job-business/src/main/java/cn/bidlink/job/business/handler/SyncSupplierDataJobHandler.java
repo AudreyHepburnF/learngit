@@ -1,6 +1,7 @@
 package cn.bidlink.job.business.handler;
 
-import cn.bidlink.job.business.contants.Regions;
+import cn.bidlink.job.business.utils.AreaUtil;
+import cn.bidlink.job.business.utils.RegionUtil;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
@@ -495,7 +496,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
         if (areaObj != null) {
             String areaCode = String.valueOf(areaObj);
             if (areaCode != null && areaCode.length() > 2) {
-                resultToUse.put(REGION, Regions.regionMap.get(areaCode.substring(0, 2)));
+                resultToUse.put(REGION, RegionUtil.regionMap.get(areaCode.substring(0, 2)));
             }
         }
         resultToUse.remove(AREA);
@@ -582,7 +583,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
 
     private void appendAreaStrToResult(List<Map<String, Object>> resultToExecute, Set<Long> supplierIds) {
         if (supplierIds.size() > 0) {
-            Map<Long, Object> areaMap = queryArea(supplierIds);
+            Map<Long, Object> areaMap = AreaUtil.queryArea(centerDataSource, supplierIds);
             for (Map<String, Object> result : resultToExecute) {
                 Long supplierId = Long.valueOf(String.valueOf(result.get(ID)));
                 Object value = areaMap.get(supplierId);
@@ -591,62 +592,6 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
                 result.put(ZONE_STR, value);
             }
         }
-    }
-
-    private Map<Long, Object> queryArea(Set<Long> supplierIds) {
-        String queryAreaTemplate = "SELECT\n"
-                                   + "   t3.ID AS id,\n"
-                                   + "   t3.AREA AS area,\n"
-                                   + "   t3.CITY AS city,\n"
-                                   + "   tcrd.`VALUE` AS county\n"
-                                   + "FROM\n"
-                                   + "   (\n"
-                                   + "      SELECT\n"
-                                   + "         t2.ID, t2.AREA, t2.COUNTY, tcrd.`VALUE` AS CITY\n"
-                                   + "      FROM\n"
-                                   + "         (\n"
-                                   + "            SELECT\n"
-                                   + "               t1.ID, t1.CITY, t1.COUNTY, tcrd.`VALUE` AS AREA\n"
-                                   + "            FROM\n"
-                                   + "               (SELECT ID, COUNTRY, AREA, CITY, COUNTY FROM t_reg_company WHERE ID IN (%s) AND TYPE = 13 AND COUNTRY IS NOT NULL) t1\n"
-                                   + "            JOIN t_reg_center_dict tcrd ON t1.AREA = tcrd.`KEY`\n"
-                                   + "            WHERE\n"
-                                   + "               tcrd.TYPE = 'country'\n"
-                                   + "         ) t2\n"
-                                   + "      LEFT JOIN t_reg_center_dict tcrd ON t2.CITY = tcrd.`KEY`\n"
-                                   + "      WHERE\n"
-                                   + "         tcrd.TYPE = 'country' OR tcrd.TYPE IS NULL\n"
-                                   + "   ) t3\n"
-                                   + "LEFT JOIN t_reg_center_dict tcrd ON t3.COUNTY = tcrd.`KEY`\n"
-                                   + "WHERE\n"
-                                   + "   tcrd.TYPE = 'country' OR tcrd.TYPE IS NULL";
-
-        String queryAreaSql = String.format(queryAreaTemplate, StringUtils.collectionToCommaDelimitedString(supplierIds));
-        List<Map<String, Object>> query = query(centerDataSource, queryAreaSql, null);
-        Map<Long, Object> areaMap = new HashMap<>();
-        for (Map<String, Object> map : query) {
-            Object area = map.get(AREA);
-            Object city = map.get(CITY);
-            Object county = map.get(COUNTY);
-            String areaStr = "";
-            if (area != null) {
-                areaStr += area;
-            }
-
-            if (city != null) {
-                areaStr += city;
-            }
-
-            if (county != null) {
-                areaStr += county;
-            }
-            // 特殊处理
-            if (areaStr != null && areaStr.indexOf("市辖区") > -1) {
-                areaStr = areaStr.replace("市辖区", "");
-            }
-            areaMap.put((Long) map.get(ID), areaStr);
-        }
-        return areaMap;
     }
 
     /**
