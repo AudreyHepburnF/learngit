@@ -1,4 +1,4 @@
-package cn.bidlink.job.business.contants;
+package cn.bidlink.job.business.utils;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import java.util.Map;
  * @description :
  * @date : 2018/2/27
  */
-public abstract class Regions {
+public abstract class RegionUtil {
     // 每个省，直辖市对应的地区
     public static final Map<String, String> regionMap;
 

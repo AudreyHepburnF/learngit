@@ -1,9 +1,11 @@
 package cn.bidlink.job.business.handler;
 
-import cn.bidlink.job.business.contants.Regions;
+import cn.bidlink.job.business.utils.RegionUtil;
+import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -50,11 +52,10 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
      * 同步商机数据，分为采购商机和招标商机
      */
     private void syncOpportunityData() {
-//        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
-//                                                                   "cluster.index",
-//                                                                   "cluster.type.supplier_opportunity",
-//                                                                   QueryBuilders.boolQuery().must(QueryBuilders.termQuery("projectType", PURCHASE_PROJECT_TYPE)));
-        Timestamp lastSyncTime = SyncTimeUtil.GMT_TIME;
+        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
+                                                                   "cluster.index",
+                                                                   "cluster.type.supplier_opportunity",
+                                                                   QueryBuilders.boolQuery().must(QueryBuilders.termQuery("source", SOURCE_NEW)));
         logger.info("采购项目商机同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
         syncPurchaseProjectDataService(lastSyncTime);
     }
@@ -136,7 +137,7 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
                 Object value = result.get(PROVINCE);
                 if (value != null) {
                     String regionKey = ((String) value).substring(0, 2);
-                    result.put(REGION, Regions.regionMap.get(regionKey));
+                    result.put(REGION, RegionUtil.regionMap.get(regionKey));
                 }
             }
         }
@@ -175,8 +176,8 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
         result.put(QUOTE_STOP_TIME, SyncTimeUtil.toDateString(result.get(QUOTE_STOP_TIME)));
         result.remove(REAL_QUOTE_STOP_TIME);
         result.remove(PROVINCE);
-        // 添加ik分词的areaStr
-        result.put(AREA_STR_IK, result.get(AREA_STR));
+        // 添加不分词的areaStr
+        result.put(AREA_STR_NOT_ANALYZED, result.get(AREA_STR));
         // 项目类型
         result.put(PROJECT_TYPE, PURCHASE_PROJECT_TYPE);
         // 新平台

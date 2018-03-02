@@ -1,6 +1,5 @@
 package cn.bidlink.job.business.handler;
 
-import cn.bidlink.job.business.contants.Regions;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
@@ -61,22 +60,22 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected String DIRECTORY_NAME              = "directoryName";
     protected String DIRECTORY_NAME_NOT_ANALYZED = "directoryNameNotAnalyzed";
     protected String PURCHASE_NAME               = "purchaseName";
-    protected String PURCHASE_NAME_NOT_ANALYZED  = "purchaseNameNotAnalyzed";
-    protected String PROJECT_CODE                = "projectCode";
-    protected String PROJECT_NAME                = "projectName";
-    protected String PROJECT_NAME_NOT_ANALYZED   = "projectNameNotAnalyzed";
-    protected String PROJECT_STATUS              = "projectStatus";
-    protected String TENANT_KEY                  = "tenantKey";
-    protected String AREA_STR                    = "areaStr";
-    protected String AREA_STR_IK                 = "areaStrIk";
-    protected String REGION                      = "region";
-    protected String STATUS                      = "status";
-    protected String FIRST_DIRECTORY_NAME        = "firstDirectoryName";
-    protected String DIRECTORY_NAME_COUNT        = "directoryNameCount";
-    protected String QUOTE_STOP_TIME             = "quoteStopTime";
-    protected String AREA                        = "area";
-    protected String CODE                        = "code";
-    protected String CITY                        = "city";
+    protected String PURCHASE_NAME_NOT_ANALYZED = "purchaseNameNotAnalyzed";
+    protected String PROJECT_CODE               = "projectCode";
+    protected String PROJECT_NAME               = "projectName";
+    protected String PROJECT_NAME_NOT_ANALYZED  = "projectNameNotAnalyzed";
+    protected String PROJECT_STATUS             = "projectStatus";
+    protected String TENANT_KEY                 = "tenantKey";
+    protected String AREA_STR                   = "areaStr";
+    protected String AREA_STR_NOT_ANALYZED      = "areaStrNotAnalyzed";
+    protected String REGION                     = "region";
+    protected String STATUS                     = "status";
+    protected String FIRST_DIRECTORY_NAME       = "firstDirectoryName";
+    protected String DIRECTORY_NAME_COUNT       = "directoryNameCount";
+    protected String QUOTE_STOP_TIME            = "quoteStopTime";
+    protected String AREA                       = "area";
+    protected String CODE                       = "code";
+    protected String CITY                       = "city";
     protected String COUNTY                      = "county";
     // 数据来源，new表示新平台，old表示老平台
     protected String SOURCE                      = "source";
@@ -206,106 +205,6 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
             tenantKeyMap.put((Long) map.get(PURCHASE_ID), map.get(TENANT_KEY));
         }
         return tenantKeyMap;
-    }
-
-    /**
-     * 查询采购商的区域
-     *
-     * @param purchaseIds
-     * @return
-     */
-    protected Map<Long, AreaInfo> queryArea(Set<Long> purchaseIds) {
-        String queryAreaTemplate = "SELECT\n"
-                                   + "   t3.ID AS purchaseId,\n"
-                                   + "   t3.AREA AS area,\n"
-                                   + "   t3.CODE AS code,\n"
-                                   + "   t3.CITY AS city,\n"
-                                   + "   tcrd.`VALUE` AS county\n"
-                                   + "FROM\n"
-                                   + "   (\n"
-                                   + "      SELECT\n"
-                                   + "         t2.ID, t2.AREA, t2.CODE,t2.COUNTY, tcrd.`VALUE` AS CITY\n"
-                                   + "      FROM\n"
-                                   + "         (\n"
-                                   + "            SELECT\n"
-                                   + "               t1.ID, t1.CITY, t1.COUNTY, tcrd.`KEY` AS CODE, tcrd.`VALUE` AS AREA\n"
-                                   + "            FROM\n"
-                                   + "               (SELECT ID, COUNTRY, AREA, CITY, COUNTY FROM t_reg_company WHERE ID IN (%s) AND TYPE = 12 AND COUNTRY IS NOT NULL) t1\n"
-                                   + "            JOIN t_reg_center_dict tcrd ON t1.AREA = tcrd.`KEY`\n"
-                                   + "            WHERE\n"
-                                   + "               tcrd.TYPE = 'country'\n"
-                                   + "         ) t2\n"
-                                   + "      JOIN t_reg_center_dict tcrd ON t2.CITY = tcrd.`KEY`\n"
-                                   + "      WHERE\n"
-                                   + "         tcrd.TYPE = 'country'\n"
-                                   + "   ) t3\n"
-                                   + "JOIN t_reg_center_dict tcrd ON t3.COUNTY = tcrd.`KEY`\n"
-                                   + "WHERE\n"
-                                   + "   tcrd.TYPE = 'country'";
-
-        String queryAreaSql = String.format(queryAreaTemplate, StringUtils.collectionToCommaDelimitedString(purchaseIds));
-        List<Map<String, Object>> query = DBUtil.query(centerDataSource, queryAreaSql, null);
-        Map<Long, AreaInfo> areaMap = new HashMap<>();
-        for (Map<String, Object> map : query) {
-            Object area = map.get(AREA);
-            Object city = map.get(CITY);
-            Object county = map.get(COUNTY);
-            String areaStr = "";
-            if (area != null) {
-                areaStr += area;
-            }
-
-            if (city != null) {
-                areaStr += city;
-            }
-
-            if (county != null) {
-                areaStr += county;
-            }
-            // 特殊处理
-            if (areaStr != null && areaStr.indexOf("市辖区") > -1) {
-                areaStr = areaStr.replace("市辖区", "");
-            }
-
-            AreaInfo areaInfo = new AreaInfo(areaStr);
-            // 处理省、直辖市
-            String code = (String) map.get(CODE);
-            if (code != null && code.length() > 2) {
-                areaInfo.region = Regions.regionMap.get(code.substring(0, 2));
-            }
-            areaMap.put((Long) map.get(PURCHASE_ID), areaInfo);
-        }
-        return areaMap;
-    }
-
-    static class AreaInfo {
-        private String areaStr;
-        private String region;
-
-        public String getAreaStr() {
-            return areaStr;
-        }
-
-        public String getRegion() {
-            return region;
-        }
-
-        public AreaInfo(String areaStr) {
-            this.areaStr = areaStr;
-        }
-
-        public AreaInfo(String areaStr, String region) {
-            this.areaStr = areaStr;
-            this.region = region;
-        }
-
-        @Override
-        public String toString() {
-            return "RegionCla{" +
-                   "areaStr='" + areaStr + '\'' +
-                   ", region='" + region + '\'' +
-                   '}';
-        }
     }
 
     protected void batchExecute(List<Map<String, Object>> resultsToUpdate) {
