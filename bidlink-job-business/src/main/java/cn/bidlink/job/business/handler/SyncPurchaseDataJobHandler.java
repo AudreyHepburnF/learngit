@@ -37,10 +37,10 @@ import java.util.Map;
  * @Date 2017/11/29
  */
 @Service
-@JobHander(value = "syncPurchaseTradingVolumeJobHandler")
-public class SyncPurchaseTradingVolumeJobHandler extends IJobHandler /*implements InitializingBean*/ {
+@JobHander(value = "syncPurchaseDataJobHandler")
+public class SyncPurchaseDataJobHandler extends IJobHandler /*implements InitializingBean*/ {
 
-    private Logger logger = LoggerFactory.getLogger(SyncPurchaseTradingVolumeJobHandler.class);
+    private Logger logger = LoggerFactory.getLogger(SyncPurchaseDataJobHandler.class);
 
     @Autowired
     private ElasticClient elasticClient;
@@ -111,9 +111,9 @@ public class SyncPurchaseTradingVolumeJobHandler extends IJobHandler /*implement
                 + "   trc.name AS purchaseNameNotAnalyzed,\n"
                 + "   trc.WWW_STATION AS wwwStationAlias,\n"
                 + "   trc.INDUSTRY_STR AS industryStr,\n"
-                + "   trc.INDUSTRY_STR AS industry,\n"
+                + "   trc.INDUSTRY_STR AS industryStrNotAnalyzed,\n"
                 + "   trc.ZONE_STR AS zoneStr,\n"
-                + "   trc.ZONE_STR AS zoneStrIk,\n"
+                + "   trc.ZONE_STR AS zoneStrNotAnalyzed,\n"
                 + "   trc.COMP_TYPE_STR AS compTypeStr,\n"
                 + "   trc.company_site AS companySiteAlias\n"
                 + "FROM\n"
@@ -147,9 +147,10 @@ public class SyncPurchaseTradingVolumeJobHandler extends IJobHandler /*implement
                 + "   trc.name AS purchaseName,\n"
                 + "   trc.name AS purchaseNameNotAnalyzed,\n"
                 + "   trc.WWW_STATION AS wwwStationAlias,\n"
-                + "   trc.INDUSTRY_STR AS industry,\n"
+                + "   trc.INDUSTRY_STR AS industryStrNotAnalyzed,\n"
                 + "   trc.INDUSTRY_STR AS industryStr,\n"
-                + "   trc.ZONE_STR AS zoneStrIk,\n"
+                + "   trc.ZONE_STR AS zoneStrNotAnalyzed,\n"
+                + "   trc.ZONE_STR AS zoneStr,\n"
                 + "   trc.COMP_TYPE_STR AS compTypeStr,\n"
                 + "   trc.company_site AS companySiteAlias\n"
                 + "FROM\n"
