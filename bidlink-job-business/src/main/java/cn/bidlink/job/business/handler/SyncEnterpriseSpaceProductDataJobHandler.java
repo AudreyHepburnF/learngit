@@ -96,6 +96,7 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends IJobHandler /*impl
                 "\ttitle AS productNameNotAnalyzed,\n" +
                 "\tCOMPANYNAME AS companyName,\n" +
                 "\tSTATE AS state,\n" +
+                "\tZONESTR AS zoneStrNotAnalyzed,\n" +
                 "\tZONESTR AS zoneStr\n" +
                 "FROM\n" +
                 "\tspace_product \n" +
@@ -125,6 +126,7 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends IJobHandler /*impl
                 "\ttitle AS productNameNotAnalyzed,\n" +
                 "\tCOMPANYNAME AS companyName,\n" +
                 "\tSTATE AS state,\n" +
+                "\tZONESTR AS zoneStrNotAnalyzed,\n" +
                 "\tZONESTR AS zoneStr\n" +
                 "FROM\n" +
                 "\tspace_product \n" +
