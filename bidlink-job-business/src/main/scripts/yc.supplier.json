@@ -11,6 +11,14 @@
         "type": "string",
         "analyzer": "standard"
       },
+      "areaStr": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "areaStrNotAnalyzed": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
       "authCodeId": {
         "type": "string",
         "index": "not_analyzed"
@@ -55,17 +63,20 @@
         "type": "string",
         "analyzer": "ik"
       },
-      "companyNameNotAnalyzed": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
       "companyNameEn": {
         "type": "string",
         "analyzer": "standard"
       },
+      "companyNameNotAnalyzed": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
       "companySite": {
         "type": "string",
         "analyzer": "standard"
+      },
+      "companyTypStr": {
+        "type": "string"
       },
       "companyType": {
         "type": "integer"
@@ -96,12 +107,12 @@
         "type": "string",
         "index": "not_analyzed"
       },
+      "enterpriseSpaceActive": {
+        "type": "integer"
+      },
       "enterpriseSpaceDetail": {
         "type": "string",
         "index": "not_analyzed"
-      },
-      "enterpriseSpaceActive": {
-        "type": "integer"
       },
       "foundedDate": {
         "type": "date",

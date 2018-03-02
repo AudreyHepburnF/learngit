@@ -200,10 +200,12 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
                 Long purchaseId = Long.valueOf(String.valueOf(result.get(PURCHASE_ID)));
                 result.put(TENANT_KEY, tenantKeyMap.get(purchaseId));
                 AreaUtil.AreaInfo areaInfo = areaMap.get(purchaseId);
-                result.put(AREA_STR, areaInfo.getAreaStr());
-                // 添加不分词的areaStr
-                result.put(AREA_STR_NOT_ANALYZED, result.get(AREA_STR));
-                result.put(REGION, areaInfo.getRegion());
+                if (areaInfo != null) {
+                    result.put(AREA_STR, areaInfo.getAreaStr());
+                    // 添加不分词的areaStr
+                    result.put(AREA_STR_NOT_ANALYZED, result.get(AREA_STR));
+                    result.put(REGION, areaInfo.getRegion());
+                }
             }
         }
     }

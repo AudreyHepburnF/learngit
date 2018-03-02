@@ -10,33 +10,6 @@ import java.util.Map;
 import java.util.Set;
 
 public abstract class AreaUtil {
-    private static String queryAreaTemplate = "SELECT\n"
-                               + "   t3.ID AS id,\n"
-                               + "   t3.AREA AS area,\n"
-                               + "   t3.CITY AS city,\n"
-                               + "   tcrd.`VALUE` AS county\n"
-                               + "FROM\n"
-                               + "   (\n"
-                               + "      SELECT\n"
-                               + "         t2.ID, t2.AREA, t2.COUNTY, tcrd.`VALUE` AS CITY\n"
-                               + "      FROM\n"
-                               + "         (\n"
-                               + "            SELECT\n"
-                               + "               t1.ID, t1.CITY, t1.COUNTY, tcrd.`VALUE` AS AREA\n"
-                               + "            FROM\n"
-                               + "               (SELECT ID, COUNTRY, AREA, CITY, COUNTY FROM t_reg_company WHERE ID IN (%s) AND COUNTRY IS NOT NULL) t1\n"
-                               + "            JOIN t_reg_center_dict tcrd ON t1.AREA = tcrd.`KEY`\n"
-                               + "            WHERE\n"
-                               + "               tcrd.TYPE = 'country'\n"
-                               + "         ) t2\n"
-                               + "      LEFT JOIN t_reg_center_dict tcrd ON t2.CITY = tcrd.`KEY`\n"
-                               + "      WHERE\n"
-                               + "         tcrd.TYPE = 'country' OR tcrd.TYPE IS NULL\n"
-                               + "   ) t3\n"
-                               + "LEFT JOIN t_reg_center_dict tcrd ON t3.COUNTY = tcrd.`KEY`\n"
-                               + "WHERE\n"
-                               + "   tcrd.TYPE = 'country' OR tcrd.TYPE IS NULL";
-
     private static String queryAreaInfoTemplate = "SELECT\n"
                                                   + "   t3.ID AS id,\n"
                                                   + "   t3.AREA AS area,\n"
@@ -64,35 +37,6 @@ public abstract class AreaUtil {
                                                   + "JOIN t_reg_center_dict tcrd ON t3.COUNTY = tcrd.`KEY`\n"
                                                   + "WHERE\n"
                                                   + "   tcrd.TYPE = 'country'";
-
-    public static Map<Long, Object> queryArea(DataSource dataSource, Set<Long> companyIds) {
-        String queryAreaSql = String.format(queryAreaTemplate, StringUtils.collectionToCommaDelimitedString(companyIds));
-        List<Map<String, Object>> query = DBUtil.query(dataSource, queryAreaSql, null);
-        Map<Long, Object> areaMap = new HashMap<Long, Object>();
-        for (Map<String, Object> map : query) {
-            Object area = map.get("area");
-            Object city = map.get("city");
-            Object county = map.get("county");
-            String areaStr = "";
-            if (area != null) {
-                areaStr += area;
-            }
-
-            if (city != null) {
-                areaStr += city;
-            }
-
-            if (county != null) {
-                areaStr += county;
-            }
-            // 特殊处理
-            if (areaStr != null && areaStr.indexOf("市辖区") > -1) {
-                areaStr = areaStr.replace("市辖区", "");
-            }
-            areaMap.put((Long) map.get("id"), areaStr);
-        }
-        return areaMap;
-    }
 
     public static Map<Long, AreaInfo> queryAreaInfo(DataSource dataSource, Set<Long> companyIds) {
         String queryAreaSql = String.format(queryAreaInfoTemplate, StringUtils.collectionToCommaDelimitedString(companyIds));
