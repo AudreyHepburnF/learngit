@@ -1,5 +1,6 @@
 package cn.bidlink.job.business.handler;
 
+import cn.bidlink.job.business.utils.AreaUtil;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
@@ -25,10 +26,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author <a href="mailto:zhihuizhou@ebnew.com">zhouzhihui</a>
@@ -66,6 +64,9 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
     private String PURCHASE_PROJECT_COUNT = "purchaseProjectCount";
     private String BID_PROJECT_COUNT = "bidProjectCount";
     private String PROJECT_COUNT = "projectCount";
+    private String REGION = "region";
+    private String AREA_STR = "areaStr";
+    private String AREA_STR_NOT_ANALYZED = "areaStrNotAnalyzed";
 
 
     @Override
@@ -202,8 +203,31 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
                 // 添加招标项目数量
                 appendBidProjectCount(purchasers, purchaseIds);
 
+                // 添加采购商区域信息
+                appendPurchaseRegion(purchasers, purchaseIds);
+
                 // 批量插入es中
                 batchInsert(purchasers);
+            }
+        }
+    }
+
+    private void appendPurchaseRegion(List<Map<String, Object>> purchasers, ArrayList<Long> purchaseIds) {
+        HashSet<Long> companyIds = new HashSet<>();
+        for (Long purchaseId : purchaseIds) {
+            companyIds.add(purchaseId);
+        }
+        Map<Long, AreaUtil.AreaInfo> areaInfoMap = AreaUtil.queryAreaInfo(centerDataSource, companyIds);
+        for (Map<String, Object> purchaser : purchasers) {
+            AreaUtil.AreaInfo areaInfo = areaInfoMap.get(Long.parseLong(((String) purchaser.get(ID))));
+            if (areaInfo != null) {
+                purchaser.put(REGION, areaInfo.getRegion());
+                purchaser.put(AREA_STR, areaInfo.getAreaStr());
+                purchaser.put(AREA_STR_NOT_ANALYZED, areaInfo.getAreaStr());
+            } else {
+                purchaser.put(REGION, null);
+                purchaser.put(AREA_STR, null);
+                purchaser.put(AREA_STR_NOT_ANALYZED, null);
             }
         }
     }
