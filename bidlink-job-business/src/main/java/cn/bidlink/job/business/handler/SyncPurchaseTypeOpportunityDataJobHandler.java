@@ -57,7 +57,9 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
                                                                    "cluster.index",
                                                                    "cluster.type.supplier_opportunity",
-                                                                   QueryBuilders.boolQuery().must(QueryBuilders.termQuery("source", SOURCE_OLD)));
+                                                                   QueryBuilders.boolQuery()
+                                                                           .must(QueryBuilders.termQuery("projectType", PURCHASE_PROJECT_TYPE))
+                                                                           .must(QueryBuilders.termQuery("source", SOURCE_OLD)));
         logger.info("采购项目商机同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
         syncPurchaseProjectDataService(lastSyncTime);
         fixExpiredAutoStopTypePurchaseProjectDataService(lastSyncTime);

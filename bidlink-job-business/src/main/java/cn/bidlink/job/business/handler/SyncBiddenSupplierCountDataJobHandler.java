@@ -155,6 +155,7 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
     private void doSyncBiddenSupplierCountData(int projectType, QuerySqlBuilder querySqlBuilder) {
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
                 .must(QueryBuilders.termQuery("status", 1))
+                .must(QueryBuilders.termQuery("source", "old"))
                 .must(QueryBuilders.termQuery("projectType", projectType));
 
         int batchSize = 500;

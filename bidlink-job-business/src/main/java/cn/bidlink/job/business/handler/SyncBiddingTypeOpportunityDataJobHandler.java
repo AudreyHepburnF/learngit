@@ -51,7 +51,9 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
                                                                    "cluster.index",
                                                                    "cluster.type.supplier_opportunity",
-                                                                   QueryBuilders.boolQuery().must(QueryBuilders.termQuery("source", SOURCE_OLD)));
+                                                                   QueryBuilders.boolQuery()
+                                                                           .must(QueryBuilders.termQuery("projectType", BIDDING_PROJECT_TYPE))
+                                                                           .must(QueryBuilders.termQuery("source", SOURCE_OLD)));
         logger.info("招标项目商机同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
         syncBiddingProjectDataService(lastSyncTime);
     }
