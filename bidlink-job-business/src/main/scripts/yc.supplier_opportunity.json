@@ -4,11 +4,12 @@
   "supplier_opportunity": {
     "properties": {
       "areaStr": {
-        "type": "string"
-      },
-      "areaStrIk": {
         "type": "string",
         "analyzer": "ik"
+      },
+      "areaStrNotAnalyzed": {
+        "type": "string",
+        "index": "not_analyzed"
       },
       "biddenSupplierCount": {
         "type": "integer"

@@ -224,8 +224,8 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                 result.put(TENANT_KEY, tenantKeyMap.get(purchaseId));
                 AreaUtil.AreaInfo areaInfo = areaMap.get(purchaseId);
                 result.put(AREA_STR, areaInfo.getAreaStr());
-                // 添加ik分词的areaStr
-                result.put(AREA_STR_IK, result.get(AREA_STR));
+                // 添加不分词的areaStr
+                result.put(AREA_STR_NOT_ANALYZED, result.get(AREA_STR));
                 result.put(REGION, areaInfo.getRegion());
             }
         }

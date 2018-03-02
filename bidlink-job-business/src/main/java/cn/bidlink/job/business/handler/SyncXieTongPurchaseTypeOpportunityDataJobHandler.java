@@ -176,8 +176,8 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
         result.put(QUOTE_STOP_TIME, SyncTimeUtil.toDateString(result.get(QUOTE_STOP_TIME)));
         result.remove(REAL_QUOTE_STOP_TIME);
         result.remove(PROVINCE);
-        // 添加ik分词的areaStr
-        result.put(AREA_STR_IK, result.get(AREA_STR));
+        // 添加不分词的areaStr
+        result.put(AREA_STR_NOT_ANALYZED, result.get(AREA_STR));
         // 项目类型
         result.put(PROJECT_TYPE, PURCHASE_PROJECT_TYPE);
         // 新平台
