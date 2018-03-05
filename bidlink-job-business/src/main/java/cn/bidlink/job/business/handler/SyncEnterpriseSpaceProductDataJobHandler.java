@@ -2,7 +2,6 @@ package cn.bidlink.job.business.handler;
 
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
-import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.ValueFilter;
@@ -67,12 +66,13 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends IJobHandler /*impl
     }
 
     private void syncEnterpriseSpaceData() {
-        Timestamp lastTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
-                "cluster.index",
-                "cluster.type.enterprise_space_product",
-                null);
-        logger.info("企业空间同步lastTime:" + new DateTime(lastTime).toString("yyyy-MM-dd HH:mm:ss") + "\n" +
-                ", syncTime:" + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
+//        Timestamp lastTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
+//                "cluster.index",
+//                "cluster.type.enterprise_space_product",
+//                null);
+//        logger.info("企业空间同步lastTime:" + new DateTime(lastTime).toString("yyyy-MM-dd HH:mm:ss") + "\n" +
+//                ", syncTime:" + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
+        Timestamp lastTime = SyncTimeUtil.GMT_TIME;
         syncCreateEnterpriseSpaceService(lastTime);
         syncUpdateEnterpriseSpaceService(lastTime);
     }
@@ -97,6 +97,7 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends IJobHandler /*impl
                 "\tCOMPANYNAME AS companyName,\n" +
                 "\tSTATE AS state,\n" +
                 "\tZONESTR AS zoneStrNotAnalyzed,\n" +
+                "\tcreate_time AS createTime,\n" +
                 "\tZONESTR AS zoneStr\n" +
                 "FROM\n" +
                 "\tspace_product \n" +
@@ -127,6 +128,7 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends IJobHandler /*impl
                 "\tCOMPANYNAME AS companyName,\n" +
                 "\tSTATE AS state,\n" +
                 "\tZONESTR AS zoneStrNotAnalyzed,\n" +
+                "\tcreate_time AS createTime,\n" +
                 "\tZONESTR AS zoneStr\n" +
                 "FROM\n" +
                 "\tspace_product \n" +
