@@ -142,7 +142,7 @@
                 <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
                 <pom.cluster.type.enterprise_space_product>enterprise_space_product</pom.cluster.type.enterprise_space_product>
                 <pom.cluster.type.purchase>purchase</pom.cluster.type.purchase>
-                <pom.path.conf>F:/es/config/</pom.path.conf>
+                <pom.path.conf>D:/es/config/</pom.path.conf>
                 <pom.searchguard.enable>true</pom.searchguard.enable>
                 <pom.searchguard.ssl.transport.keystore_filepath>admin-keystore.jks</pom.searchguard.ssl.transport.keystore_filepath>
                 <pom.searchguard.ssl.transport.truststore_filepath>truststore.jks</pom.searchguard.ssl.transport.truststore_filepath>
