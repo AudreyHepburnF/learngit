@@ -1,7 +1,6 @@
 package cn.bidlink.job.business.handler;
 
 import cn.bidlink.job.business.utils.AreaUtil;
-import cn.bidlink.job.business.utils.RegionUtil;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
@@ -85,6 +84,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     private String ID                          = "id";
     private String CORE                        = "core";
     private String AREA_STR                    = "areaStr";
+    private String AREA_STR_NOT_ANALYZED       = "areaStrNotAnalyzed";
     private String ZONE_STR                    = "zoneStr";
     private String AREA                        = "area";
     private String CITY                        = "city";
@@ -489,19 +489,9 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     }
 
     private void refresh(Map<String, Object> resultToUse) {
+        resultToUse.remove(AREA);
         // 添加不分词字段
         resultToUse.put(COMPANY_NAME_NOT_ANALYZED, resultToUse.get(COMPANY_NAME));
-        // 处理所在地区
-        Object areaObj = resultToUse.get(AREA);
-        if (areaObj != null) {
-            String areaCode = String.valueOf(areaObj);
-            if (areaCode != null && areaCode.length() > 2) {
-                resultToUse.put(REGION, RegionUtil.regionMap.get(areaCode.substring(0, 2)));
-            }
-        }
-        resultToUse.remove(AREA);
-        // 重置zoneStr，使得zoneStr和areaStr一致
-        resultToUse.put(ZONE_STR, resultToUse.get(AREA_STR));
         // 重置注册资金，四舍五入，保留两位有效数字
         Object value = resultToUse.get(FUND);
         if (value != null && value instanceof BigDecimal) {
@@ -583,13 +573,15 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
 
     private void appendAreaStrToResult(List<Map<String, Object>> resultToExecute, Set<Long> supplierIds) {
         if (supplierIds.size() > 0) {
-            Map<Long, Object> areaMap = AreaUtil.queryArea(centerDataSource, supplierIds);
+            Map<Long, AreaUtil.AreaInfo> areaInfoMap = AreaUtil.queryAreaInfo(centerDataSource, supplierIds);
             for (Map<String, Object> result : resultToExecute) {
                 Long supplierId = Long.valueOf(String.valueOf(result.get(ID)));
-                Object value = areaMap.get(supplierId);
-                result.put(AREA_STR, value);
-                // 重置zoneStr，使得zoneStr和areaStr一致
-                result.put(ZONE_STR, value);
+                AreaUtil.AreaInfo areaInfo = areaInfoMap.get(supplierId);
+                if (areaInfo != null) {
+                    result.put(AREA_STR, areaInfo.getAreaStr());
+                    result.put(AREA_STR_NOT_ANALYZED, areaInfo.getAreaStr());
+                    result.put(REGION, areaInfo.getRegion());
+                }
             }
         }
     }

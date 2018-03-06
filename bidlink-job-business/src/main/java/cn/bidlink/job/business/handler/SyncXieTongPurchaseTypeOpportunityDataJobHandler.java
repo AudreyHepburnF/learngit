@@ -42,14 +42,14 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
 
     public ReturnT<String> execute(String... strings) throws Exception {
         SyncTimeUtil.setCurrentDate();
-        logger.info("同步采购项目的商机开始");
+        logger.info("同步协同采购项目的商机开始");
         syncOpportunityData();
-        logger.info("同步采购项目的商机结束");
+        logger.info("同步协同采购项目的商机结束");
         return ReturnT.SUCCESS;
     }
 
     /**
-     * 同步商机数据，分为采购商机和招标商机
+     * 同步采购商机
      */
     private void syncOpportunityData() {
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
@@ -58,7 +58,7 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
                                                                    QueryBuilders.boolQuery()
                                                                            .must(QueryBuilders.termQuery("projectType", PURCHASE_PROJECT_TYPE))
                                                                            .must(QueryBuilders.termQuery("source", SOURCE_NEW)));
-        logger.info("采购项目商机同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
+        logger.info("协同采购项目商机同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
         syncPurchaseProjectDataService(lastSyncTime);
     }
 
