@@ -7,10 +7,13 @@ import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
+import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.List;
@@ -21,16 +24,21 @@ import static cn.bidlink.job.business.utils.AreaUtil.queryAreaInfo;
 
 
 /**
- * 同步招标商机数据
+ * 同步协同平台招标商机数据
+ * 注意：可以代替{@link SyncBiddingTypeOpportunityDataJobHandler}
  *
  * @author : <a href="mailto:zikaifeng@ebnew.com">冯子恺</a>
  * @version : Ver 1.0
  * @description :
  * @date : 2017/8/7
  */
-@JobHander(value = "syncBiddingTypeOpportunityDataJobHandler")
+@JobHander(value = "syncXieTongBidTypeOpportunityDataJobHandler")
 @Service
-public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpportunityDataJobHandler /*implements InitializingBean*/ {
+public class SyncXieTongBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunityDataJobHandler /*implements InitializingBean*/ {
+    @Autowired
+    @Qualifier("synergyDataSource")
+    protected DataSource synergyDataSource;
+
     private String END_TIME        = "endTime";
     private String OPEN_RANGE_TYPE = "openRangeType";
     // 撤项
@@ -45,7 +53,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
     }
 
     /**
-     * 同步商机数据，分为采购商机和招标商机
+     * 同步招标商机
      */
     private void syncOpportunityData() {
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
@@ -53,7 +61,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                                                    "cluster.type.supplier_opportunity",
                                                                    QueryBuilders.boolQuery()
                                                                            .must(QueryBuilders.termQuery("projectType", BIDDING_PROJECT_TYPE))
-                                                                           .must(QueryBuilders.termQuery("source", SOURCE_OLD)));
+                                                                           .must(QueryBuilders.termQuery("source", SOURCE_NEW)));
         logger.info("招标项目商机同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
         syncBiddingProjectDataService(lastSyncTime);
     }
@@ -74,7 +82,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
         String countNothingSql = "SELECT\n"
                                  + "   count(1)\n"
                                  + "FROM\n"
-                                 + "   proj_inter_project pip\n"
+                                 + "   bid_project pip\n"
                                  + "JOIN notice_bid nb ON pip.id = nb.PROJECT_ID\n"
                                  + "WHERE\n"
                                  + "   pip.TENDER_MODE = 1\n"
@@ -106,7 +114,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                  + "         nb.BID_ENDTIME,\n"
                                  + "         nb.CREATE_TIME\n"
                                  + "      FROM\n"
-                                 + "         proj_inter_project pip\n"
+                                 + "         bid_project pip\n"
                                  + "      JOIN notice_bid nb ON pip.id = nb.PROJECT_ID\n"
                                  + "      WHERE\n"
                                  + "         pip.TENDER_MODE = 1\n"
@@ -125,7 +133,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
         String countPreQualifySql = "SELECT\n"
                                     + "    count(1)\n"
                                     + "      FROM\n"
-                                    + "proj_inter_project pip\n"
+                                    + "bid_project pip\n"
                                     + "JOIN pqt_prequalify pp ON pip.id = pp.PROJECT_ID\n"
                                     + "WHERE\n"
                                     + "   pip.TENDER_MODE = 1\n"
@@ -156,7 +164,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                     + "         pp.CREATE_TIME,\n"
                                     + "         pp.END_TIME\n"
                                     + "      FROM\n"
-                                    + "proj_inter_project pip\n"
+                                    + "bid_project pip\n"
                                     + "JOIN pqt_prequalify pp ON pip.id = pp.PROJECT_ID\n"
                                     + "WHERE\n"
                                     + "   pip.TENDER_MODE = 1\n"
@@ -203,7 +211,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                   + "         nb.CREATE_TIME,\n"
                                   + "         nb.TECHNICAL_ADVICE_CUT_TIME\n"
                                   + "      FROM\n"
-                                  + "         proj_inter_project pip\n"
+                                  + "         bid_project pip\n"
                                   + "      JOIN notice_bid nb ON pip.id = nb.PROJECT_ID\n"
                                   + "      WHERE\n"
                                   + "         pip.TENDER_MODE = 1\n"
@@ -276,7 +284,8 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
         }
     }
 
-//        @Override
+
+//    @Override
 //    public void afterPropertiesSet() throws Exception {
 //        execute();
 //    }
