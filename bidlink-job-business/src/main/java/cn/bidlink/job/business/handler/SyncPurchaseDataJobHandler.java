@@ -55,19 +55,19 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
     @Value("${pageSize}")
     private int pageSize;
 
-    private String ID = "id";
-    private String COMPANY_ID = "companyId";
+    private String ID                      = "id";
+    private String COMPANY_ID              = "companyId";
     private String PURCHASE_TRADING_VOLUME = "purchaseTradingVolume";
-    private String BID_TRADING_VOLUME = "bidTradingVolume";
-    private String TRADING_VOLUME = "tradingVolume";
-    private String LONG_TRADING_VOLUME = "longTradingVolume";
-    private String COMPANY_SITE_ALIAS = "companySiteAlias";
-    private String PURCHASE_PROJECT_COUNT = "purchaseProjectCount";
-    private String BID_PROJECT_COUNT = "bidProjectCount";
-    private String PROJECT_COUNT = "projectCount";
-    private String REGION = "region";
-    private String AREA_STR = "areaStr";
-    private String AREA_STR_NOT_ANALYZED = "areaStrNotAnalyzed";
+    private String BID_TRADING_VOLUME      = "bidTradingVolume";
+    private String TRADING_VOLUME          = "tradingVolume";
+    private String LONG_TRADING_VOLUME     = "longTradingVolume";
+    private String COMPANY_SITE_ALIAS      = "companySiteAlias";
+    private String PURCHASE_PROJECT_COUNT  = "purchaseProjectCount";
+    private String BID_PROJECT_COUNT       = "bidProjectCount";
+    private String PROJECT_COUNT           = "projectCount";
+    private String REGION                  = "region";
+    private String AREA_STR                = "areaStr";
+    private String AREA_STR_NOT_ANALYZED   = "areaStrNotAnalyzed";
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
