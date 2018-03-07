@@ -32,21 +32,21 @@ import java.util.*;
 /**
  * @author <a href="mailto:zhihuizhou@ebnew.com">zhouzhihui</a>
  * @version Ver 1.0
- * @description:同步采购商和交易额
+ * @description:同步xieTong平台采购商
  * @Date 2017/11/29
  */
 @Service
-@JobHander(value = "syncPurchaseDataJobHandler")
-public class SyncPurchaseDataJobHandler extends IJobHandler /*implements InitializingBean*/ {
+@JobHander(value = "syncXieTongPurchaseDataJobHandler")
+public class SyncXieTongPurchaseDataJobHandler extends IJobHandler /*implements InitializingBean*/ {
 
-    private Logger logger = LoggerFactory.getLogger(SyncPurchaseDataJobHandler.class);
+    private Logger logger = LoggerFactory.getLogger(SyncXieTongPurchaseDataJobHandler.class);
 
     @Autowired
     private ElasticClient elasticClient;
 
     @Autowired
-    @Qualifier("ycDataSource")
-    private DataSource ycDataSource;
+    @Qualifier("synergyDataSource")
+    private DataSource synergyDataSource;
 
     @Autowired
     @Qualifier("centerDataSource")
@@ -55,26 +55,26 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
     @Value("${pageSize}")
     private int pageSize;
 
-    private String ID                      = "id";
-    private String COMPANY_ID              = "companyId";
+    private String ID = "id";
+    private String COMPANY_ID = "companyId";
     private String PURCHASE_TRADING_VOLUME = "purchaseTradingVolume";
-    private String BID_TRADING_VOLUME      = "bidTradingVolume";
-    private String TRADING_VOLUME          = "tradingVolume";
-    private String LONG_TRADING_VOLUME     = "longTradingVolume";
-    private String COMPANY_SITE_ALIAS      = "companySiteAlias";
-    private String PURCHASE_PROJECT_COUNT  = "purchaseProjectCount";
-    private String BID_PROJECT_COUNT       = "bidProjectCount";
-    private String PROJECT_COUNT           = "projectCount";
-    private String REGION                  = "region";
-    private String AREA_STR                = "areaStr";
-    private String AREA_STR_NOT_ANALYZED   = "areaStrNotAnalyzed";
+    private String BID_TRADING_VOLUME = "bidTradingVolume";
+    private String TRADING_VOLUME = "tradingVolume";
+    private String LONG_TRADING_VOLUME = "longTradingVolume";
+    private String COMPANY_SITE_ALIAS = "companySiteAlias";
+    private String PURCHASE_PROJECT_COUNT = "purchaseProjectCount";
+    private String BID_PROJECT_COUNT = "bidProjectCount";
+    private String PROJECT_COUNT = "projectCount";
+    private String REGION = "region";
+    private String AREA_STR = "areaStr";
+    private String AREA_STR_NOT_ANALYZED = "areaStrNotAnalyzed";
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
         SyncTimeUtil.setCurrentDate();
-        logger.info("同步采购商开始");
+        logger.info("同步协同平台采购商开始");
         synPurchase();
-        logger.info("同步采购商结束");
+        logger.info("同步协同平台采购商结束");
         return ReturnT.SUCCESS;
     }
 
@@ -106,7 +106,6 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
                 + "   trc.WWW_STATION AS wwwStationAlias,\n"
                 + "   trc.INDUSTRY_STR AS industryStrNotAnalyzed,\n"
                 + "   trc.INDUSTRY_STR AS industryStr,\n"
-                + "   trc.INDUSTRY AS industry,\n"
                 + "   trc.ZONE_STR AS zoneStrNotAnalyzed,\n"
                 + "   trc.ZONE_STR AS zoneStr,\n"
                 + "   trc.COMP_TYPE_STR AS compTypeStr,\n"
@@ -137,7 +136,6 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
                 + "   trc.WWW_STATION AS wwwStationAlias,\n"
                 + "   trc.INDUSTRY_STR AS industryStr,\n"
                 + "   trc.INDUSTRY_STR AS industryStrNotAnalyzed,\n"
-                + "   trc.INDUSTRY AS industry,\n"
                 + "   trc.ZONE_STR AS zoneStr,\n"
                 + "   trc.ZONE_STR AS zoneStrNotAnalyzed,\n"
                 + "   trc.COMP_TYPE_STR AS compTypeStr,\n"
@@ -201,27 +199,29 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
     }
 
     private void appendPurchaseTradingVolume(List<Map<String, Object>> purchases, String purchaseIdToString) {
-        String queryPurchaserSqlTemplate = "SELECT\n"
-                + "   sum(bpe.deal_total_price) AS purchaseTradingVolume ,\n"
-                + "   bp.comp_id AS id\n"
-                + "FROM\n"
-                + "   bmpfjz_project bp\n"
-                + "LEFT JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id AND bp.comp_id = bpe.comp_id\n"
-                + "AND bp.project_status IN (8, 9)\n"
-                + "WHERE bpe.deal_total_price is not null\n"
-                + "AND bp.comp_id IN (%s)\n"
-                + "GROUP BY\n"
-                + "   bp.comp_id";
+        String queryPurchaserSqlTemplate = "SELECT\n" +
+                "\tsum( ppe.deal_total_price ) AS purchaseTradingVolume,\n" +
+                "\tpp.company_id AS companyId \n" +
+                "FROM\n" +
+                "\tpurchase_project pp\n" +
+                "\tLEFT JOIN purchase_project_ext ppe ON pp.id = ppe.id \n" +
+                "\tAND pp.company_id = ppe.company_id \n" +
+                "\tAND pp.project_status IN ( 5, 6 ) \n" +
+                "WHERE\n" +
+                "\tppe.deal_total_price IS NOT NULL \n" +
+                "\tAND pp.company_id IN (%s) \n" +
+                "GROUP BY\n" +
+                "\tpp.company_id;";
 
         if (!StringUtils.isEmpty(purchaseIdToString)) {
             String queryPurchaseSql = String.format(queryPurchaserSqlTemplate, purchaseIdToString);
             // 根据采购商id查询交易额
-            List<Map<String, Object>> purchaseTradingVolumeList = DBUtil.query(ycDataSource, queryPurchaseSql, null);
+            List<Map<String, Object>> purchaseTradingVolumeList = DBUtil.query(synergyDataSource, queryPurchaseSql, null);
             HashMap<String, BigDecimal> purchaseAttributeMap = new HashMap<>();
             // list<Map>转换为map
             if (!CollectionUtils.isEmpty(purchaseTradingVolumeList)) {
                 for (Map<String, Object> map : purchaseTradingVolumeList) {
-                    purchaseAttributeMap.put(String.valueOf(map.get(ID)), ((BigDecimal) map.get(PURCHASE_TRADING_VOLUME)));
+                    purchaseAttributeMap.put(String.valueOf(map.get(COMPANY_ID)), ((BigDecimal) map.get(PURCHASE_TRADING_VOLUME)));
                 }
             }
             // 遍历采购商封装交易额
@@ -237,33 +237,38 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
             }
 
         }
-
     }
 
     private void appendBidTradingVolume(List<Map<String, Object>> purchasers, String purchaseIdToString) {
-        String queryBidSqlTemplate = "SELECT\n"
-                + "   bp.company_id AS id,\n"
-                + "   sum(bp.total_bid_price) AS bidTradingVolume\n"
-                + "FROM\n"
-                + "   bid_product bp\n"
-                + "WHERE bp.total_bid_price is not null\n"
-                + "AND bp.company_id IN (%s)\n"
-                + "GROUP BY\n"
-                + "     bp.company_id\n";
+        String queryBidSqlTemplate = "SELECT\n" +
+                "\tbsp.company_id AS companyId,\n" +
+                "\tsum( bs.bid_total_price ) AS bidTradingVolume \n" +
+                "FROM\n" +
+                "\tbid_sub_project bsp\n" +
+                "\tLEFT JOIN bid_supplier bs ON bsp.project_id = bs.project_id \n" +
+                "\tAND bsp.id = bs.sub_project_id \n" +
+                "\tAND bsp.company_id = bs.company_id \n" +
+                "WHERE\n" +
+                "\tbsp.project_status IN ( 2, 3 ) \n" +
+                "\tAND bs.is_win_bid = 1 \n" +
+                "\tAND bs.bid_total_price IS NOT NULL\n" +
+                "\tAND bs.company_id in (%s)\n" +
+                "GROUP BY\n" +
+                "\tbsp.company_id;";
 
         if (!StringUtils.isEmpty(purchaseIdToString)) {
             String queryBidSql = String.format(queryBidSqlTemplate, purchaseIdToString);
-            List<Map<String, Object>> bidTradingVolumeList = DBUtil.query(ycDataSource, queryBidSql, null);
+            List<Map<String, Object>> bidTradingVolumeList = DBUtil.query(synergyDataSource, queryBidSql, null);
             HashMap<String, BigDecimal> bidAttributeMap = new HashMap<>();
             if (!CollectionUtils.isEmpty(bidTradingVolumeList)) {
                 for (Map<String, Object> bidTradingVolumeMap : bidTradingVolumeList) {
-                    bidAttributeMap.put(String.valueOf(bidTradingVolumeMap.get(ID)), ((BigDecimal) bidTradingVolumeMap.get(BID_TRADING_VOLUME)));
+                    bidAttributeMap.put(String.valueOf(bidTradingVolumeMap.get(COMPANY_ID)), ((BigDecimal) bidTradingVolumeMap.get(BID_TRADING_VOLUME)));
                 }
             }
 
-            //计算总的交易额
+            // 计算总的交易额
             for (Map<String, Object> purchaser : purchasers) {
-                //采购商招标额
+                // 采购商招标额
                 BigDecimal bidTradingVolume = bidAttributeMap.get(purchaser.get(ID));
                 if (bidTradingVolume != null) {
                     //采购商总交易额
@@ -284,16 +289,19 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
     }
 
     private void appendPurchaseProjectCount(List<Map<String, Object>> purchasers, String purchaseIdToString) {
-        String queryPurchaserSqlTemplate = "SELECT\n"
-                + "   count(1) AS purchaseProjectCount,\n"
-                + "   bp.comp_id AS companyId\n"
-                + "FROM\n"
-                + "   bmpfjz_project bp\n"
-                + "WHERE bp.project_status IN (8, 9)\n"
-                + "AND bp.comp_id IN (%s) group by bp.comp_id";
+        String queryPurchaserSqlTemplate = "SELECT\n" +
+                "\tcount( 1 ) AS purchaseProjectCount,\n" +
+                "\tpp.company_id AS companyId \n" +
+                "FROM\n" +
+                "\tpurchase_project pp \n" +
+                "WHERE\n" +
+                "\tpp.project_status IN ( 5, 6 ) \n" +
+                "\tAND pp.company_id IN (%s) \n" +
+                "GROUP BY\n" +
+                "\tpp.company_id";
         if (!StringUtils.isEmpty(purchaseIdToString)) {
             String querySql = String.format(queryPurchaserSqlTemplate, purchaseIdToString);
-            Map<Long, Long> purchaseProjectCountMap = DBUtil.query(ycDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Long, Long>>() {
+            Map<Long, Long> purchaseProjectCountMap = DBUtil.query(synergyDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Long, Long>>() {
                 @Override
                 public Map<Long, Long> execute(ResultSet resultSet) throws SQLException {
                     HashMap<Long, Long> projectCountMap = new HashMap<>();
@@ -317,18 +325,19 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
 
     private void appendBidProjectCount(List<Map<String, Object>> purchasers, String purchaseIdToString) {
         String queryBidSqlTemplate = "SELECT\n" +
-                "\tcount( ID ) AS bidProjectCount,\n" +
-                "\tCOMPANY_ID AS companyId \n" +
+                "\tcount( 1 ) AS bidProjectCount,\n" +
+                "\tcompany_id AS companyId \n" +
                 "FROM\n" +
-                "\tproj_inter_project \n" +
+                "\tbid_sub_project \n" +
                 "WHERE\n" +
-                "\tPROJECT_STATUS IN ( 9, 11 ) AND company_id in (%s)\n" +
+                "\tproject_status IN ( 2, 3 ) \n" +
+                "\tAND company_id IN (%s) \n" +
                 "GROUP BY\n" +
-                "\tCOMPANY_ID;";
+                "\tcompany_id";
 
         if (!StringUtils.isEmpty(purchaseIdToString)) {
             String queryBidSql = String.format(queryBidSqlTemplate, purchaseIdToString);
-            Map<Long, Long> bidProjectCountMap = DBUtil.query(ycDataSource, queryBidSql, null, new DBUtil.ResultSetCallback<Map<Long, Long>>() {
+            Map<Long, Long> bidProjectCountMap = DBUtil.query(synergyDataSource, queryBidSql, null, new DBUtil.ResultSetCallback<Map<Long, Long>>() {
                 @Override
                 public Map<Long, Long> execute(ResultSet resultSet) throws SQLException {
                     HashMap<Long, Long> projectCountMap = new HashMap<>();
@@ -338,12 +347,12 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
                     return projectCountMap;
                 }
             });
-            //计算总的交易额
+            // 计算总的交易额
             for (Map<String, Object> purchaser : purchasers) {
-                //采购商招标项目个数
+                // 采购商招标项目个数
                 Long bidProjectCount = bidProjectCountMap.get(Long.parseLong(((String) purchaser.get(ID))));
                 if (bidProjectCount != null) {
-                    //采购商总交易额
+                    // 采购商总项目数
                     purchaser.put(BID_PROJECT_COUNT, bidProjectCount);
                     Long projectCount = (Long) purchaser.get(PURCHASE_PROJECT_COUNT) + bidProjectCount;
                     purchaser.put(PROJECT_COUNT, projectCount);
@@ -385,7 +394,7 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
                         .setSource(JSON.toJSONString(purchase, new ValueFilter() {
                             @Override
                             public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof java.util.Date) {
+                                if (propertyValue instanceof Date) {
                                     //是date类型按指定日期格式转换
                                     return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
                                 } else {
