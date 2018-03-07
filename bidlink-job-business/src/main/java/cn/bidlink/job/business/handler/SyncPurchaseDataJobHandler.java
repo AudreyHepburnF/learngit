@@ -80,11 +80,11 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
 
     private void synPurchase() {
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
-                                                                   "cluster.index",
-                                                                   "cluster.type.purchase",
-                                                                   null);
+                "cluster.index",
+                "cluster.type.purchase",
+                null);
         logger.info("采购商同步lastTime:" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss") + "\n" +
-                    ", syncTime:" + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
+                ", syncTime:" + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
         //同步插入数据
         syncCreatePurchaseProjectData(lastSyncTime);
         //同步更新数据
@@ -93,29 +93,30 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
 
     private void syncCreatePurchaseProjectData(Timestamp lastSyncTime) {
         String countCreatedPurchaseSql = "SELECT\n"
-                                         + "   count(1)\n"
-                                         + "FROM\n"
-                                         + "   t_reg_company trc\n"
-                                         + "WHERE\n"
-                                         + "     trc.TYPE = 12\n"
-                                         + "AND  trc.create_date >= ?";
+                + "   count(1)\n"
+                + "FROM\n"
+                + "   t_reg_company trc\n"
+                + "WHERE\n"
+                + "     trc.TYPE = 12\n"
+                + "AND  trc.create_date >= ?";
         String queryCreatedPurchaseSql = "SELECT\n"
-                                         + "   trc.id,\n"
-                                         + "   trc.name AS purchaseName,\n"
-                                         + "   trc.name AS purchaseNameNotAnalyzed,\n"
-                                         + "   trc.WWW_STATION AS wwwStationAlias,\n"
-                                         + "   trc.INDUSTRY_STR AS industryStrNotAnalyzed,\n"
-                                         + "   trc.INDUSTRY_STR AS industryStr,\n"
-                                         + "   trc.ZONE_STR AS zoneStrNotAnalyzed,\n"
-                                         + "   trc.ZONE_STR AS zoneStr,\n"
-                                         + "   trc.COMP_TYPE_STR AS compTypeStr,\n"
-                                         + "   trc.company_site AS companySiteAlias\n"
-                                         + "FROM\n"
-                                         + "   t_reg_company trc\n"
-                                         + "WHERE\n"
-                                         + "     trc.TYPE = 12\n"
-                                         + "AND  trc.create_date >= ?\n"
-                                         + "LIMIT ?, ?";
+                + "   trc.id,\n"
+                + "   trc.name AS purchaseName,\n"
+                + "   trc.name AS purchaseNameNotAnalyzed,\n"
+                + "   trc.WWW_STATION AS wwwStationAlias,\n"
+                + "   trc.INDUSTRY_STR AS industryStrNotAnalyzed,\n"
+                + "   trc.INDUSTRY_STR AS industryStr,\n"
+                + "   trc.INDUSTRY AS industry,\n"
+                + "   trc.ZONE_STR AS zoneStrNotAnalyzed,\n"
+                + "   trc.ZONE_STR AS zoneStr,\n"
+                + "   trc.COMP_TYPE_STR AS compTypeStr,\n"
+                + "   trc.company_site AS companySiteAlias\n"
+                + "FROM\n"
+                + "   t_reg_company trc\n"
+                + "WHERE\n"
+                + "     trc.TYPE = 12\n"
+                + "AND  trc.create_date >= ?\n"
+                + "LIMIT ?, ?";
         ArrayList<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
         doSyncProjectDataService(countCreatedPurchaseSql, queryCreatedPurchaseSql, params);
@@ -123,29 +124,30 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
 
     private void syncUpdatedPurchaseProjectData(Timestamp lastSyncTime) {
         String countUpdatedPurchaseSql = "SELECT\n"
-                                         + "   count(1)\n"
-                                         + "FROM\n"
-                                         + "   t_reg_company trc\n"
-                                         + "WHERE\n"
-                                         + "     trc.TYPE = 12\n"
-                                         + "AND  trc.update_time >= ?";
+                + "   count(1)\n"
+                + "FROM\n"
+                + "   t_reg_company trc\n"
+                + "WHERE\n"
+                + "     trc.TYPE = 12\n"
+                + "AND  trc.update_time >= ?";
         String queryUpdatedPurchaseSql = "SELECT\n"
-                                         + "   trc.id,\n"
-                                         + "   trc.name AS purchaseName,\n"
-                                         + "   trc.name AS purchaseNameNotAnalyzed,\n"
-                                         + "   trc.WWW_STATION AS wwwStationAlias,\n"
-                                         + "   trc.INDUSTRY_STR AS industryStr,\n"
-                                         + "   trc.INDUSTRY_STR AS industryStrNotAnalyzed,\n"
-                                         + "   trc.ZONE_STR AS zoneStr,\n"
-                                         + "   trc.ZONE_STR AS zoneStrNotAnalyzed,\n"
-                                         + "   trc.COMP_TYPE_STR AS compTypeStr,\n"
-                                         + "   trc.company_site AS companySiteAlias\n"
-                                         + "FROM\n"
-                                         + "   t_reg_company trc\n"
-                                         + "WHERE\n"
-                                         + "     trc.TYPE = 12\n"
-                                         + "AND   trc.update_time >= ?\n"
-                                         + "LIMIT ?, ?";
+                + "   trc.id,\n"
+                + "   trc.name AS purchaseName,\n"
+                + "   trc.name AS purchaseNameNotAnalyzed,\n"
+                + "   trc.WWW_STATION AS wwwStationAlias,\n"
+                + "   trc.INDUSTRY_STR AS industryStr,\n"
+                + "   trc.INDUSTRY_STR AS industryStrNotAnalyzed,\n"
+                + "   trc.INDUSTRY AS industry,\n"
+                + "   trc.ZONE_STR AS zoneStr,\n"
+                + "   trc.ZONE_STR AS zoneStrNotAnalyzed,\n"
+                + "   trc.COMP_TYPE_STR AS compTypeStr,\n"
+                + "   trc.company_site AS companySiteAlias\n"
+                + "FROM\n"
+                + "   t_reg_company trc\n"
+                + "WHERE\n"
+                + "     trc.TYPE = 12\n"
+                + "AND   trc.update_time >= ?\n"
+                + "LIMIT ?, ?";
         ArrayList<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
         doSyncProjectDataService(countUpdatedPurchaseSql, queryUpdatedPurchaseSql, params);
@@ -200,16 +202,16 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
 
     private void appendPurchaseTradingVolume(List<Map<String, Object>> purchases, String purchaseIdToString) {
         String queryPurchaserSqlTemplate = "SELECT\n"
-                                           + "   sum(bpe.deal_total_price) AS purchaseTradingVolume ,\n"
-                                           + "   bp.comp_id AS id\n"
-                                           + "FROM\n"
-                                           + "   bmpfjz_project bp\n"
-                                           + "LEFT JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id AND bp.comp_id = bpe.comp_id\n"
-                                           + "AND bp.project_status IN (8, 9)\n"
-                                           + "WHERE bpe.deal_total_price is not null\n"
-                                           + "AND bp.comp_id IN (%s)\n"
-                                           + "GROUP BY\n"
-                                           + "   bp.comp_id";
+                + "   sum(bpe.deal_total_price) AS purchaseTradingVolume ,\n"
+                + "   bp.comp_id AS id\n"
+                + "FROM\n"
+                + "   bmpfjz_project bp\n"
+                + "LEFT JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id AND bp.comp_id = bpe.comp_id\n"
+                + "AND bp.project_status IN (8, 9)\n"
+                + "WHERE bpe.deal_total_price is not null\n"
+                + "AND bp.comp_id IN (%s)\n"
+                + "GROUP BY\n"
+                + "   bp.comp_id";
 
         if (!StringUtils.isEmpty(purchaseIdToString)) {
             String queryPurchaseSql = String.format(queryPurchaserSqlTemplate, purchaseIdToString);
@@ -240,14 +242,14 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
 
     private void appendBidTradingVolume(List<Map<String, Object>> purchasers, String purchaseIdToString) {
         String queryBidSqlTemplate = "SELECT\n"
-                                     + "   bp.company_id AS id,\n"
-                                     + "   sum(bp.total_bid_price) AS bidTradingVolume\n"
-                                     + "FROM\n"
-                                     + "   bid_product bp\n"
-                                     + "WHERE bp.total_bid_price is not null\n"
-                                     + "AND bp.company_id IN (%s)\n"
-                                     + "GROUP BY\n"
-                                     + "     bp.company_id\n";
+                + "   bp.company_id AS id,\n"
+                + "   sum(bp.total_bid_price) AS bidTradingVolume\n"
+                + "FROM\n"
+                + "   bid_product bp\n"
+                + "WHERE bp.total_bid_price is not null\n"
+                + "AND bp.company_id IN (%s)\n"
+                + "GROUP BY\n"
+                + "     bp.company_id\n";
 
         if (!StringUtils.isEmpty(purchaseIdToString)) {
             String queryBidSql = String.format(queryBidSqlTemplate, purchaseIdToString);
@@ -283,12 +285,12 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
 
     private void appendPurchaseProjectCount(List<Map<String, Object>> purchasers, String purchaseIdToString) {
         String queryPurchaserSqlTemplate = "SELECT\n"
-                                           + "   count(1) AS purchaseProjectCount,\n"
-                                           + "   bp.comp_id AS companyId\n"
-                                           + "FROM\n"
-                                           + "   bmpfjz_project bp\n"
-                                           + "WHERE bp.project_status IN (8, 9)\n"
-                                           + "AND bp.comp_id IN (%s) group by bp.comp_id";
+                + "   count(1) AS purchaseProjectCount,\n"
+                + "   bp.comp_id AS companyId\n"
+                + "FROM\n"
+                + "   bmpfjz_project bp\n"
+                + "WHERE bp.project_status IN (8, 9)\n"
+                + "AND bp.comp_id IN (%s) group by bp.comp_id";
         if (!StringUtils.isEmpty(purchaseIdToString)) {
             String querySql = String.format(queryPurchaserSqlTemplate, purchaseIdToString);
             Map<Long, Long> purchaseProjectCountMap = DBUtil.query(ycDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Long, Long>>() {
@@ -315,14 +317,14 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
 
     private void appendBidProjectCount(List<Map<String, Object>> purchasers, String purchaseIdToString) {
         String queryBidSqlTemplate = "SELECT\n" +
-                                     "\tcount( ID ) AS bidProjectCount,\n" +
-                                     "\tCOMPANY_ID AS companyId \n" +
-                                     "FROM\n" +
-                                     "\tproj_inter_project \n" +
-                                     "WHERE\n" +
-                                     "\tPROJECT_STATUS IN ( 9, 11 ) AND company_id in (%s)\n" +
-                                     "GROUP BY\n" +
-                                     "\tCOMPANY_ID;";
+                "\tcount( ID ) AS bidProjectCount,\n" +
+                "\tCOMPANY_ID AS companyId \n" +
+                "FROM\n" +
+                "\tproj_inter_project \n" +
+                "WHERE\n" +
+                "\tPROJECT_STATUS IN ( 9, 11 ) AND company_id in (%s)\n" +
+                "GROUP BY\n" +
+                "\tCOMPANY_ID;";
 
         if (!StringUtils.isEmpty(purchaseIdToString)) {
             String queryBidSql = String.format(queryBidSqlTemplate, purchaseIdToString);
@@ -377,21 +379,21 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> purchase : purchases) {
                 bulkRequest.add(elasticClient.getTransportClient()
-                                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
-                                                      elasticClient.getProperties().getProperty("cluster.type.purchase"),
-                                                      String.valueOf(purchase.get(ID)))
-                                        .setSource(JSON.toJSONString(purchase, new ValueFilter() {
-                                            @Override
-                                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                                if (propertyValue instanceof java.util.Date) {
-                                                    //是date类型按指定日期格式转换
-                                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                                } else {
+                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
+                                elasticClient.getProperties().getProperty("cluster.type.purchase"),
+                                String.valueOf(purchase.get(ID)))
+                        .setSource(JSON.toJSONString(purchase, new ValueFilter() {
+                            @Override
+                            public Object process(Object object, String propertyName, Object propertyValue) {
+                                if (propertyValue instanceof java.util.Date) {
+                                    //是date类型按指定日期格式转换
+                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
+                                } else {
 
-                                                    return propertyValue;
-                                                }
-                                            }
-                                        })));
+                                    return propertyValue;
+                                }
+                            }
+                        })));
             }
             BulkResponse response = bulkRequest.execute().actionGet();
             //是否失败
