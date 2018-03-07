@@ -97,6 +97,8 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     private String TENANT_ID                   = "tenantId";
     private String MOBILE                      = "mobile";
     private String TEL                         = "tel";
+    private String MAIN_PRODUCT                = "mainProduct";
+    private String MAIN_PRODUCT_NOT_ANALYZED   = "mainProductNotAnalyzed";
     private String LOGIN_NAME                  = "loginName";
     private String ENTERPRISE_SPACE            = "enterpriseSpace";
     private String ENTERPRISE_SPACE_DETAIL     = "enterpriseSpaceDetail";
@@ -492,6 +494,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
         resultToUse.remove(AREA);
         // 添加不分词字段
         resultToUse.put(COMPANY_NAME_NOT_ANALYZED, resultToUse.get(COMPANY_NAME));
+        resultToUse.put(MAIN_PRODUCT_NOT_ANALYZED, resultToUse.get(MAIN_PRODUCT));
         // 重置注册资金，四舍五入，保留两位有效数字
         Object value = resultToUse.get(FUND);
         if (value != null && value instanceof BigDecimal) {

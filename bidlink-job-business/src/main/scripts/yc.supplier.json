@@ -146,6 +146,10 @@
         "type": "string",
         "analyzer": "ik"
       },
+      "mainProductNotAnalyzed": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
       "mobile": {
         "type": "string",
         "index": "not_analyzed"
