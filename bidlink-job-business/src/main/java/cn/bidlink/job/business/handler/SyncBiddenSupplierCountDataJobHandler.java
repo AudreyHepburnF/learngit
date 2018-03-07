@@ -96,7 +96,7 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
             Set<Pair> bidProjectPairs = new HashSet<>();
 
             for (SearchHit searchHit : searchHits) {
-                if (searchHit.getSource().get("projectType") == PURCHASE_PROJECT_TYPE) {
+                if (((Integer) searchHit.getSource().get("projectType")) == PURCHASE_PROJECT_TYPE) {
                     purchaseProjectSource.add(searchHit.getSource());
                     Long projectId = Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID)));
                     Long companyId = Long.valueOf(String.valueOf(searchHit.getSource().get(PURCHASE_ID)));
