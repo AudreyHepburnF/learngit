@@ -30,13 +30,13 @@ public abstract class AreaUtil {
                                                   + "            WHERE\n"
                                                   + "               tcrd.TYPE = 'country'\n"
                                                   + "         ) t2\n"
-                                                  + "      JOIN t_reg_center_dict tcrd ON t2.CITY = tcrd.`KEY`\n"
+                                                  + "      LEFT JOIN t_reg_center_dict tcrd ON t2.CITY = tcrd.`KEY`\n"
                                                   + "      WHERE\n"
-                                                  + "         tcrd.TYPE = 'country'\n"
+                                                  + "         tcrd.TYPE = 'country' OR tcrd.TYPE IS NULL\n"
                                                   + "   ) t3\n"
-                                                  + "JOIN t_reg_center_dict tcrd ON t3.COUNTY = tcrd.`KEY`\n"
+                                                  + "LEFT JOIN t_reg_center_dict tcrd ON t3.COUNTY = tcrd.`KEY`\n"
                                                   + "WHERE\n"
-                                                  + "   tcrd.TYPE = 'country'";
+                                                  + "   tcrd.TYPE = 'country' OR tcrd.TYPE IS NULL";
 
     public static Map<Long, AreaInfo> queryAreaInfo(DataSource dataSource, Set<Long> companyIds) {
         String queryAreaSql = String.format(queryAreaInfoTemplate, StringUtils.collectionToCommaDelimitedString(companyIds));
