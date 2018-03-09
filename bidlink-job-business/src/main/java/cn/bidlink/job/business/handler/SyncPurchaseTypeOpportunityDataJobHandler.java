@@ -114,7 +114,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
             String queryTemplateSql = "SELECT\n"
                                       + "   b.*, bpi.`name` AS directoryName\n"
                                       + "FROM\n"
-                                      + "   (\n"
+                                      + "   ( SELECT\n"
                                       + "   bp.comp_id AS purchaseId,\n"
                                       + "   bp.comp_name AS purchaseName,\n"
                                       + "   bp.id AS projectId,\n"
