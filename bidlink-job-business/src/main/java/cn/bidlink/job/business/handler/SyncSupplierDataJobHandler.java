@@ -19,7 +19,6 @@ import org.elasticsearch.search.SearchHits;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,7 +48,7 @@ import static cn.bidlink.job.common.utils.DBUtil.query;
  */
 @JobHander(value = "syncSupplierDataJobHandler")
 @Service
-public class SyncSupplierDataJobHandler extends JobHandler implements InitializingBean {
+public class SyncSupplierDataJobHandler extends JobHandler /*implements InitializingBean*/ {
     private Logger logger = LoggerFactory.getLogger(SyncSupplierDataJobHandler.class);
 
     @Autowired
@@ -123,11 +122,11 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
 
     private Map<String, String> industryCodeMap = new HashMap<>();
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        pageSize = 1000;
-        industryCodeMap = initIndustryCodeMap();
-    }
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+//        pageSize = 1000;
+//        industryCodeMap = initIndustryCodeMap();
+//    }
 
     private Map<String, String> initIndustryCodeMap() {
         String queryIndustrySql = "SELECT code, name_cn, name_en, type from t_reg_code_trade_class";
@@ -379,6 +378,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
                                   + "   trc.FUNDUNIT AS fundUnit,\n"
                                   + "   trc.INDUSTRY AS industryCode,\n"
 //                                  + "   trc.INDUSTRY_STR AS industryStr,\n"
+                                  + "   trc.company_logo AS companyLogo,\n"
                                   + "   trc.MAIN_PRODUCT AS mainProduct,\n"
                                   + "   trc.WORKPATTERN AS workPattern,\n"
                                   + "   trc.TEL AS tel,\n"
@@ -433,6 +433,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
                                  + "   trc.FUNDUNIT AS fundUnit,\n"
                                  + "   trc.INDUSTRY AS industryCode,\n"
 //                                 + "   trc.INDUSTRY_STR AS industryStr,\n"
+                                 + "   trc.company_logo AS companyLogo,\n"
                                  + "   trc.MAIN_PRODUCT AS mainProduct,\n"
                                  + "   trc.WORKPATTERN AS workPattern,\n"
                                  + "   trc.TEL AS tel,\n"

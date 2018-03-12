@@ -215,6 +215,10 @@
       "zoneStr": {
         "type": "string",
         "analyzer": "ik"
+      },
+      "companyLogo": {
+        "type": "string",
+        "index": "not_analyzed"
       }
     }
   }
