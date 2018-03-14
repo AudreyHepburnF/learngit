@@ -76,10 +76,11 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     @Value("${supplierProduct.threadNum:10}")
     private int threadNum;
 
-    private String ID                     = "id";
-    private String DIRECTORY_NAME         = "directoryNameAlias";
-    private String SUPPLIER_ID            = "supplierId";
-    private String SUPPLIER_DIRECTORY_REL = "supplierDirectoryRel";
+    private String ID                           = "id";
+    private String DIRECTORY_NAME               = "directoryNameAlias";
+    private String DIRECTORY_NAME_NOT_ANALYZED  = "directoryNameAliasNotAnalyzed";
+    private String SUPPLIER_ID                  = "supplierId";
+    private String SUPPLIER_DIRECTORY_REL       = "supplierDirectoryRel";
 
     // 主营产品类型
     private static final int MAIN_PRODUCT_DIRECTORY_REL = 4;
@@ -375,6 +376,8 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
         // 将多个拼接在一起的采购品分割为单个采购品
         resultToUse.remove(DIRECTORY_NAME);
         resultToUse.put(DIRECTORY_NAME, directoryName.trim());
+        // add by zhihuizhou 添加directoryNameAliasNotAnalyzed字段
+        resultToUse.put(DIRECTORY_NAME_NOT_ANALYZED, resultToUse.get(DIRECTORY_NAME));
         // 生成Id
         resultToUse.put(ID, generateSupplierProductId(resultToUse));
         // 将supplierId转为string
