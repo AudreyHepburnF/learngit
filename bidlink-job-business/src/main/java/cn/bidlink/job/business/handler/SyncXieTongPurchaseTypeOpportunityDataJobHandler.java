@@ -1,6 +1,6 @@
 package cn.bidlink.job.business.handler;
 
-import cn.bidlink.job.business.utils.RegionUtil;
+import cn.bidlink.job.business.utils.AreaUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static cn.bidlink.job.business.utils.AreaUtil.queryAreaInfo;
 
 
 /**
@@ -135,11 +137,15 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
 
     protected void appendTenantKeyAndAreaStrToResult(List<Map<String, Object>> resultToExecute, Set<Long> purchaseIds) {
         if (purchaseIds.size() > 0) {
+            Map<Long, AreaUtil.AreaInfo> areaMap = queryAreaInfo(centerDataSource, purchaseIds);
             for (Map<String, Object> result : resultToExecute) {
-                Object value = result.get(PROVINCE);
-                if (value != null) {
-                    String regionKey = ((String) value).substring(0, 2);
-                    result.put(REGION, RegionUtil.regionMap.get(regionKey));
+                Long purchaseId = Long.valueOf(String.valueOf(result.get(PURCHASE_ID)));
+                AreaUtil.AreaInfo areaInfo = areaMap.get(purchaseId);
+                if (areaInfo != null) {
+                    result.put(AREA_STR, areaInfo.getAreaStr());
+                    // 添加不分词的areaStr
+                    result.put(AREA_STR_NOT_ANALYZED, result.get(AREA_STR));
+                    result.put(REGION, areaInfo.getRegion());
                 }
             }
         }
@@ -174,8 +180,8 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
 
     protected void refresh(Map<String, Object> result, Map<Long, Set<String>> projectDirectoryMap) {
         super.refresh(result, projectDirectoryMap);
-        // 移除不需要的属性
         result.put(QUOTE_STOP_TIME, SyncTimeUtil.toDateString(result.get(QUOTE_STOP_TIME)));
+        // 移除不需要的属性
         result.remove(REAL_QUOTE_STOP_TIME);
         result.remove(PROVINCE);
         // 添加不分词的areaStr
