@@ -44,9 +44,9 @@ public class SyncXieTongBidTypeOpportunityDataJobHandler extends AbstractSyncOpp
 
     public ReturnT<String> execute(String... strings) throws Exception {
         SyncTimeUtil.setCurrentDate();
-        logger.info("同步招标项目的商机开始");
+        logger.info("同步协同招标项目的商机开始");
         syncOpportunityData();
-        logger.info("同步招标项目的商机结束");
+        logger.info("同步协同招标项目的商机结束");
         return ReturnT.SUCCESS;
     }
 
