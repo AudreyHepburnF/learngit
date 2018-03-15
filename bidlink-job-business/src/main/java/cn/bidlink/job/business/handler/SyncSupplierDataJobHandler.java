@@ -351,7 +351,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     }
 
     private void doInsertedSupplierData(Timestamp lastSyncTime) {
-        String countInsertedSql = "SELECT count(1) FROM t_reg_company trc JOIN t_reg_user tru ON trc.id = tru.COMPANY_ID and trc.type = 13 and trc.COMP_TYPE IS NOT NULL WHERE trc.CREATE_DATE > ?";
+        String countInsertedSql = "SELECT count(1) FROM t_reg_company trc JOIN t_reg_user tru ON trc.id = tru.COMPANY_ID and trc.type = 13 WHERE trc.CREATE_DATE > ?";
         String queryInsertedSql = "SELECT\n"
                                   + "trc.id,\n"
                                   + "   trc.`NAME` AS companyName,\n"
@@ -380,6 +380,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
                                   + "   trc.FUNDUNIT AS fundUnit,\n"
                                   + "   trc.INDUSTRY AS industryCode,\n"
 //                                  + "   trc.INDUSTRY_STR AS industryStr,\n"
+                                  + "   trc.company_logo AS companyLogo,\n"
                                   + "   trc.MAIN_PRODUCT AS mainProduct,\n"
                                   + "   trc.WORKPATTERN AS workPattern,\n"
                                   + "   trc.TEL AS tel,\n"
@@ -395,7 +396,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
                                   + "   IFNULL(tucs.CREDIT_MEDAL_STATUS,0) AS core\n"
                                   + "FROM\n"
                                   + "   t_reg_company trc\n"
-                                  + "JOIN t_reg_user tru ON trc.id = tru.COMPANY_ID and trc.type = 13 and trc.COMP_TYPE IS NOT NULL\n"
+                                  + "JOIN t_reg_user tru ON trc.id = tru.COMPANY_ID and trc.type = 13 \n"
                                   + "LEFT JOIN t_uic_company_status tucs ON trc.id = tucs.COMP_ID\n"
                                   + "LEFT JOIN t_reg_code_comp_type trcct ON trc.COMP_TYPE = trcct.ID\n"
                                   + "WHERE trc.CREATE_DATE > ?\n"
@@ -405,7 +406,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     }
 
     private void doUpdatedSupplierData(Timestamp lastSyncTime) {
-        String countUpdatedSql = "SELECT count(1) FROM t_reg_company trc JOIN t_reg_user tru ON trc.id = tru.COMPANY_ID and trc.type = 13 and trc.COMP_TYPE IS NOT NULL WHERE trc.UPDATE_TIME > ?";
+        String countUpdatedSql = "SELECT count(1) FROM t_reg_company trc JOIN t_reg_user tru ON trc.id = tru.COMPANY_ID and trc.type = 13 WHERE trc.UPDATE_TIME > ?";
         String queryUpdatedSql = "SELECT\n"
                                  + "   trc.id,\n"
                                  + "   trc.`NAME` AS companyName,\n"
@@ -434,6 +435,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
                                  + "   trc.FUNDUNIT AS fundUnit,\n"
                                  + "   trc.INDUSTRY AS industryCode,\n"
 //                                 + "   trc.INDUSTRY_STR AS industryStr,\n"
+                                 + "   trc.company_logo AS companyLogo,\n"
                                  + "   trc.MAIN_PRODUCT AS mainProduct,\n"
                                  + "   trc.WORKPATTERN AS workPattern,\n"
                                  + "   trc.TEL AS tel,\n"
@@ -449,7 +451,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
                                  + "   IFNULL(tucs.CREDIT_MEDAL_STATUS,0) AS core\n"
                                  + "FROM\n"
                                  + "   t_reg_company trc\n"
-                                 + "JOIN t_reg_user tru ON trc.id = tru.COMPANY_ID and trc.type = 13 and trc.COMP_TYPE IS NOT NULL\n"
+                                 + "JOIN t_reg_user tru ON trc.id = tru.COMPANY_ID and trc.type = 13\n"
                                  + "LEFT JOIN t_uic_company_status tucs ON trc.id = tucs.COMP_ID\n"
                                  + "LEFT JOIN t_reg_code_comp_type trcct ON trc.COMP_TYPE = trcct.ID\n"
                                  + "WHERE trc.UPDATE_TIME > ?\n"

@@ -3,7 +3,6 @@ package cn.bidlink.job.business.handler;
 import cn.bidlink.job.business.utils.AreaUtil;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
-import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.ValueFilter;
@@ -79,12 +78,7 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
     }
 
     private void synPurchase() {
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
-                "cluster.index",
-                "cluster.type.purchase",
-                null);
-        logger.info("采购商同步lastTime:" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss") + "\n" +
-                ", syncTime:" + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
+        Timestamp lastSyncTime = SyncTimeUtil.GMT_TIME;
         //同步插入数据
         syncCreatePurchaseProjectData(lastSyncTime);
         //同步更新数据
@@ -96,8 +90,10 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
                 + "   count(1)\n"
                 + "FROM\n"
                 + "   t_reg_company trc\n"
+                + "   left join open_account oa ON trc.ID = oa.COMPANY_ID \n"
                 + "WHERE\n"
                 + "     trc.TYPE = 12\n"
+                + "AND oa.EXAMINE_STATUS = 2\n"
                 + "AND  trc.create_date >= ?";
         String queryCreatedPurchaseSql = "SELECT\n"
                 + "   trc.id,\n"
@@ -113,8 +109,10 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
                 + "   trc.company_site AS companySiteAlias\n"
                 + "FROM\n"
                 + "   t_reg_company trc\n"
+                + "   left join open_account oa ON trc.ID = oa.COMPANY_ID \n"
                 + "WHERE\n"
                 + "     trc.TYPE = 12\n"
+                + "AND oa.EXAMINE_STATUS = 2\n"
                 + "AND  trc.create_date >= ?\n"
                 + "LIMIT ?, ?";
         ArrayList<Object> params = new ArrayList<>();
@@ -127,8 +125,10 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
                 + "   count(1)\n"
                 + "FROM\n"
                 + "   t_reg_company trc\n"
+                + "   left join open_account oa ON trc.ID = oa.COMPANY_ID \n"
                 + "WHERE\n"
                 + "     trc.TYPE = 12\n"
+                + "AND oa.EXAMINE_STATUS = 2\n"
                 + "AND  trc.update_time >= ?";
         String queryUpdatedPurchaseSql = "SELECT\n"
                 + "   trc.id,\n"
@@ -144,8 +144,10 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
                 + "   trc.company_site AS companySiteAlias\n"
                 + "FROM\n"
                 + "   t_reg_company trc\n"
+                + "   left join open_account oa ON trc.ID = oa.COMPANY_ID \n"
                 + "WHERE\n"
                 + "     trc.TYPE = 12\n"
+                + "AND oa.EXAMINE_STATUS = 2\n"
                 + "AND   trc.update_time >= ?\n"
                 + "LIMIT ?, ?";
         ArrayList<Object> params = new ArrayList<>();
