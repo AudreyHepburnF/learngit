@@ -93,6 +93,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     private String AUTH_CODE_ID                = "authCodeId";
     private String AUTHEN_NUMBER               = "authenNumber";
     private String CODE                        = "code";
+    private String AREA_CODE                   = "areaCode";
     private String FUND                        = "fund";
     private String TENANT_ID                   = "tenantId";
     private String MOBILE                      = "mobile";
@@ -584,6 +585,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
                     result.put(AREA_STR, areaInfo.getAreaStr());
                     result.put(AREA_STR_NOT_ANALYZED, areaInfo.getAreaStr());
                     result.put(REGION, areaInfo.getRegion());
+                    result.put(AREA_CODE, areaInfo.getAreaCode());
                 }
             }
         }

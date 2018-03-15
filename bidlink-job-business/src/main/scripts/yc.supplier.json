@@ -11,6 +11,10 @@
         "type": "string",
         "analyzer": "standard"
       },
+      "areaCode": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
       "areaStr": {
         "type": "string",
         "analyzer": "ik"

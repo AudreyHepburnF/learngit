@@ -115,7 +115,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
                                       + "   b.*, bpi.`name` AS directoryName\n"
                                       + "FROM\n"
                                       + "   (\n"
-                                      + "   bp.comp_id AS purchaseId,\n"
+                                      + "   SELECT bp.comp_id AS purchaseId,\n"
                                       + "   bp.comp_name AS purchaseName,\n"
                                       + "   bp.id AS projectId,\n"
                                       + "   bp.`code` AS projectCode,\n"
