@@ -41,6 +41,7 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
 
     private String REAL_QUOTE_STOP_TIME = "realQuoteStopTime";
     private String PROVINCE             = "province";
+    private String IS_CORE              = "isCore";
 
     public ReturnT<String> execute(String... strings) throws Exception {
         SyncTimeUtil.setCurrentDate();
@@ -180,6 +181,11 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
 
     protected void refresh(Map<String, Object> result, Map<Long, Set<String>> projectDirectoryMap) {
         super.refresh(result, projectDirectoryMap);
+        // 转换字段类型
+        Object isCore = result.get(IS_CORE);
+        if (isCore instanceof Boolean) {
+            result.put("isCore", isCore != null && ((Boolean) isCore) ? 1 : 0);
+        }
         result.put(QUOTE_STOP_TIME, SyncTimeUtil.toDateString(result.get(QUOTE_STOP_TIME)));
         // 移除不需要的属性
         result.remove(REAL_QUOTE_STOP_TIME);
