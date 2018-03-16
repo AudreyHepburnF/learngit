@@ -13,7 +13,7 @@ public abstract class AreaUtil {
     private static String queryAreaInfoTemplate = "SELECT\n"
                                                   + "   t3.ID AS id,\n"
                                                   + "   t3.AREA AS area,\n"
-                                                  + "   t3.CODE AS code,\n"
+                                                  + "   t3.CODE AS areaCode,\n"
                                                   + "   t3.CITY AS city,\n"
                                                   + "   tcrd.`VALUE` AS county\n"
                                                   + "FROM\n"
@@ -65,8 +65,9 @@ public abstract class AreaUtil {
 
             AreaInfo areaInfo = new AreaInfo(areaStr);
             // 处理省、直辖市
-            String code = (String) map.get("code");
+            String code = (String) map.get("areaCode");
             if (code != null && code.length() > 2) {
+                areaInfo.areaCode = code;
                 areaInfo.region = RegionUtil.regionMap.get(code.substring(0, 2));
             }
             areaMap.put((Long) map.get("id"), areaInfo);
@@ -75,8 +76,9 @@ public abstract class AreaUtil {
     }
 
     public static class AreaInfo {
-        private String areaStr;
-        private String region;
+        private String areaStr;     // 省市地区，一级省份，一级市
+        private String region;      // 地区，比如东北地区
+        private String areaCode;    // 省市地区编号，对应areaStr
 
         public String getAreaStr() {
             return areaStr;
@@ -84,6 +86,22 @@ public abstract class AreaUtil {
 
         public String getRegion() {
             return region;
+        }
+
+        public String getAreaCode() {
+            return areaCode;
+        }
+
+        public void setAreaStr(String areaStr) {
+            this.areaStr = areaStr;
+        }
+
+        public void setRegion(String region) {
+            this.region = region;
+        }
+
+        public void setAreaCode(String areaCode) {
+            this.areaCode = areaCode;
         }
 
         public AreaInfo(String areaStr) {

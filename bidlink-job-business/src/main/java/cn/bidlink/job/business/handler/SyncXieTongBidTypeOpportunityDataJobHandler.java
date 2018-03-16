@@ -39,16 +39,14 @@ public class SyncXieTongBidTypeOpportunityDataJobHandler extends AbstractSyncOpp
     @Qualifier("synergyDataSource")
     protected DataSource synergyDataSource;
 
-    private String END_TIME        = "endTime";
     private String OPEN_RANGE_TYPE = "openRangeType";
-    // 撤项
-    private int WITH_DRAWED = 12;
+    private String NODE            = "node";
 
     public ReturnT<String> execute(String... strings) throws Exception {
         SyncTimeUtil.setCurrentDate();
-        logger.info("同步招标项目的商机开始");
+        logger.info("同步协同招标项目的商机开始");
         syncOpportunityData();
-        logger.info("同步招标项目的商机结束");
+        logger.info("同步协同招标项目的商机结束");
         return ReturnT.SUCCESS;
     }
 
@@ -72,166 +70,47 @@ public class SyncXieTongBidTypeOpportunityDataJobHandler extends AbstractSyncOpp
      * @param lastSyncTime
      */
     private void syncBiddingProjectDataService(Timestamp lastSyncTime) {
-        syncNothingBiddingProjectDataService(lastSyncTime);
-        syncPreQualifyBiddingProjectDataService(lastSyncTime);
-//        syncTwoStageBiddingProjectDataService(lastSyncTime);
-    }
-
-    private void syncNothingBiddingProjectDataService(Timestamp lastSyncTime) {
-        logger.info("同步什么都不需要招标项目的商机开始");
-        String countNothingSql = "SELECT\n"
+        String countUpdatedSql = "SELECT\n"
                                  + "   count(1)\n"
                                  + "FROM\n"
-                                 + "   bid_project pip\n"
-                                 + "JOIN notice_bid nb ON pip.id = nb.PROJECT_ID\n"
+                                 + "   bid_sub_project\n"
                                  + "WHERE\n"
-                                 + "   pip.TENDER_MODE = 1\n"
-                                 + "AND pip.IS_PREQUALIFY = 2\n"
-                                 + "AND pip.IS_TWO_STAGE = 2\n"
-                                 + "AND nb.BID_ENDTIME IS NOT NULL";
-        // 什么都不需要
-        String queryNothingSql = "SELECT\n"
-                                 + "    project.ID AS projectId,\n"
-                                 + "    project.PROJECT_NUMBER AS projectCode,\n"
-                                 + "    project.PROJECT_NAME AS projectName,\n"
-//                                 + "    project.REGION AS areaStr,\n"
-                                 + "    project.COMPANY_ID AS purchaseId,\n"
-                                 + "    project.PROJECT_STATUS AS projectStatus,\n"
-                                 + "    project.TENDER_NAMES AS purchaseName,\n"
-                                 + "    project.CREATE_TIME AS createTime,\n"
-                                 + "    project.BID_ENDTIME AS endTime,\n"
-                                 + "    product.PRODUCT_NAME AS directoryName\n"
+                                 + "   is_bid_open = 1 AND process_status > 12 AND update_time > ?";
+        String queryUpdatedSql = "SELECT\n"
+                                 + "   project.*, bpi.`name` AS directoryName\n"
                                  + "FROM\n"
                                  + "   (\n"
                                  + "      SELECT\n"
-                                 + "         pip.ID,\n"
-                                 + "         pip.PROJECT_NUMBER,\n"
-                                 + "         pip.PROJECT_NAME,\n"
-                                 + "         pip.REGION,\n"
-                                 + "         pip.COMPANY_ID,\n"
-                                 + "         pip.PROJECT_STATUS,\n"
-                                 + "         pip.TENDER_NAMES,\n"
-                                 + "         nb.BID_ENDTIME,\n"
-                                 + "         nb.CREATE_TIME\n"
+                                 + "         id AS projectId,\n"
+                                 + "         project_code AS projectCode,\n"
+                                 + "         project_name AS projectName,\n"
+                                 + "         project_status AS projectStatus,\n"
+                                 + "         company_id AS purchaseId,\n"
+                                 + "         company_name AS purchaseName,\n"
+                                 + "         create_time,\n"
+                                 + "         node,\n"
+                                 + "         bid_open_time AS createTime,\n"
+                                 + "         bid_endtime AS quoteStopTime,\n"
+                                 + "         update_time AS updateTime\n"
                                  + "      FROM\n"
-                                 + "         bid_project pip\n"
-                                 + "      JOIN notice_bid nb ON pip.id = nb.PROJECT_ID\n"
+                                 + "         bid_sub_project\n"
                                  + "      WHERE\n"
-                                 + "         pip.TENDER_MODE = 1\n"
-                                 + "      AND pip.IS_PREQUALIFY = 2\n"
-                                 + "      AND pip.IS_TWO_STAGE = 2\n"
-                                 + "      AND nb.BID_ENDTIME IS NOT NULL"
+                                 + "         is_bid_open = 1\n"
+                                 + "      AND node > 1\n"
+                                 + "      AND update_time > ?\n"
                                  + "      LIMIT ?,?\n"
                                  + "   ) project\n"
-                                 + "LEFT JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
-        doSyncProjectDataService(ycDataSource, countNothingSql, queryNothingSql, Collections.emptyList());
-        logger.info("同步什么都不需要招标项目的商机结束");
+                                 + "JOIN bid_project_item bpi ON project.projectId = bpi.sub_project_id";
+        doSyncProjectDataService(synergyDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList(((Object) lastSyncTime)));
     }
 
-    private void syncPreQualifyBiddingProjectDataService(Timestamp lastSyncTime) {
-        logger.info("同步资格预审招标项目的商机开始");
-        String countPreQualifySql = "SELECT\n"
-                                    + "    count(1)\n"
-                                    + "      FROM\n"
-                                    + "bid_project pip\n"
-                                    + "JOIN pqt_prequalify pp ON pip.id = pp.PROJECT_ID\n"
-                                    + "WHERE\n"
-                                    + "   pip.TENDER_MODE = 1\n"
-                                    + "AND pip.IS_PREQUALIFY = 1\n"
-                                    + "AND pip.IS_TWO_STAGE = 2";
-        // 资格预审
-        String queryPreQualifySql = "SELECT\n"
-                                    + "    project.ID AS projectId,\n"
-                                    + "    project.PROJECT_NUMBER AS projectCode,\n"
-                                    + "    project.PROJECT_NAME AS projectName,\n"
-//                                    + "    project.REGION AS areaStr,\n"
-                                    + "    project.COMPANY_ID AS purchaseId,\n"
-                                    + "    project.PROJECT_STATUS AS projectStatus,\n"
-                                    + "    project.TENDER_NAMES AS purchaseName,\n"
-                                    + "    project.CREATE_TIME AS createTime,\n"
-                                    + "    project.END_TIME AS endTime,\n"
-                                    + "    product.PRODUCT_NAME AS directoryName\n"
-                                    + "FROM\n"
-                                    + "   (\n"
-                                    + "      SELECT\n"
-                                    + "         pip.ID,\n"
-                                    + "         pip.PROJECT_NUMBER,\n"
-                                    + "         pip.PROJECT_NAME,\n"
-                                    + "         pip.REGION,\n"
-                                    + "         pip.COMPANY_ID,\n"
-                                    + "         pip.PROJECT_STATUS,\n"
-                                    + "         pip.TENDER_NAMES,\n"
-                                    + "         pp.CREATE_TIME,\n"
-                                    + "         pp.END_TIME\n"
-                                    + "      FROM\n"
-                                    + "bid_project pip\n"
-                                    + "JOIN pqt_prequalify pp ON pip.id = pp.PROJECT_ID\n"
-                                    + "WHERE\n"
-                                    + "   pip.TENDER_MODE = 1\n"
-                                    + "AND pip.IS_PREQUALIFY = 1\n"
-                                    + "AND pip.IS_TWO_STAGE = 2\n"
-                                    + "LIMIT ?,?\n"
-                                    + ") project\n"
-                                    + "LEFT JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
-        doSyncProjectDataService(ycDataSource, countPreQualifySql, queryPreQualifySql, Collections.emptyList());
-        logger.info("同步资格预审招标项目的商机结束");
-    }
-
-    private void syncTwoStageBiddingProjectDataService(Timestamp lastSyncTime) {
-        logger.info("同步两阶段招标项目的商机开始");
-        String countTwoStageSql = "SELECT\n"
-                                  + "   count(1)\n"
-                                  + "FROM\n"
-                                  + "   proj_inter_project pip\n"
-                                  + "JOIN notice_bid nb ON pip.id = nb.PROJECT_ID\n"
-                                  + "WHERE\n"
-                                  + "   pip.TENDER_MODE = 1\n"
-                                  + "AND pip.IS_PREQUALIFY = 2\n"
-                                  + "AND pip.IS_TWO_STAGE = 1";
-        // 两阶段
-        String queryTwoStageSql = "SELECT\n"
-                                  + "    project.ID AS projectId,\n"
-                                  + "    project.PROJECT_NUMBER AS projectCode,\n"
-                                  + "    project.PROJECT_NAME AS projectName,\n"
-//                                  + "    project.REGION AS areaStr,\n"
-                                  + "    project.COMPANY_ID AS purchaseId,\n"
-                                  + "    project.TENDER_NAMES AS purchaseName,\n"
-                                  + "    project.CREATE_TIME AS createTime,\n"
-                                  + "    project.TECHNICAL_ADVICE_CUT_TIME AS endTime,\n"
-                                  + "    product.PRODUCT_NAME AS directoryName\n"
-                                  + "FROM\n"
-                                  + "   (\n"
-                                  + "      SELECT\n"
-                                  + "         pip.ID,\n"
-                                  + "         pip.PROJECT_NUMBER,\n"
-                                  + "         pip.PROJECT_NAME,\n"
-                                  + "         pip.REGION,\n"
-                                  + "         pip.COMPANY_ID,\n"
-                                  + "         pip.TENDER_NAMES,\n"
-                                  + "         nb.CREATE_TIME,\n"
-                                  + "         nb.TECHNICAL_ADVICE_CUT_TIME\n"
-                                  + "      FROM\n"
-                                  + "         bid_project pip\n"
-                                  + "      JOIN notice_bid nb ON pip.id = nb.PROJECT_ID\n"
-                                  + "      WHERE\n"
-                                  + "         pip.TENDER_MODE = 1\n"
-                                  + "      AND pip.IS_PREQUALIFY = 2\n"
-                                  + "      AND pip.IS_TWO_STAGE = 1\n"
-                                  + "      LIMIT ?,?\n"
-                                  + "   ) project\n"
-                                  + "JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
-        doSyncProjectDataService(ycDataSource, countTwoStageSql, queryTwoStageSql, Collections.emptyList());
-        logger.info("同步两阶段招标项目的商机结束");
-    }
 
     @Override
     protected void appendTenantKeyAndAreaStrToResult(List<Map<String, Object>> resultToExecute, Set<Long> purchaseIds) {
         if (purchaseIds.size() > 0) {
-            Map<Long, Object> tenantKeyMap = queryTenantKey(purchaseIds);
             Map<Long, AreaUtil.AreaInfo> areaMap = queryAreaInfo(centerDataSource, purchaseIds);
             for (Map<String, Object> result : resultToExecute) {
                 Long purchaseId = Long.valueOf(String.valueOf(result.get(PURCHASE_ID)));
-                result.put(TENANT_KEY, tenantKeyMap.get(purchaseId));
                 AreaUtil.AreaInfo areaInfo = areaMap.get(purchaseId);
                 if (areaInfo != null) {
                     result.put(AREA_STR, areaInfo.getAreaStr());
@@ -254,32 +133,45 @@ public class SyncXieTongBidTypeOpportunityDataJobHandler extends AbstractSyncOpp
             throw new RuntimeException("商机ID生成失败，原因：采购商ID为空!");
         }
 
-        return DigestUtils.md5DigestAsHex((projectId + "_" + purchaseId + "_" + SOURCE_OLD).getBytes());
+        return DigestUtils.md5DigestAsHex((projectId + "_" + purchaseId + "_" + SOURCE_NEW).getBytes());
     }
 
     protected void refresh(Map<String, Object> result, Map<Long, Set<String>> projectDirectoryMap) {
         super.refresh(result, projectDirectoryMap);
-        // 移除不需要的属性
-        result.put(QUOTE_STOP_TIME, SyncTimeUtil.toDateString(result.get(END_TIME)));
-        result.remove(END_TIME);
+        result.put(QUOTE_STOP_TIME, SyncTimeUtil.toDateString(result.get(QUOTE_STOP_TIME)));
         // 项目类型
         result.put(PROJECT_TYPE, BIDDING_PROJECT_TYPE);
         // 公开类型，默认为1
         result.put(OPEN_RANGE_TYPE, 1);
-        // 老平台
-        result.put(SOURCE, SOURCE_OLD);
+        // 新平台
+        result.put(SOURCE, SOURCE_NEW);
     }
 
     @Override
     protected void parseOpportunity(Timestamp currentDate, List<Map<String, Object>> resultToExecute, Map<String, Object> result) {
+        int PROJECT_EXECUTING = 1;  // 项目正在进行中
         Integer projectStatus = (Integer) result.get(PROJECT_STATUS);
-        Timestamp endTime = (Timestamp) result.get(END_TIME);
-        // 撤销，或者大于招标截止时间，判断为无效商机
-        if (projectStatus == WITH_DRAWED || currentDate.after(endTime)) {
-            result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
-            resultToExecute.add(appendIdToResult(result));
+        // 项目不在进行中，商机无效
+        if (projectStatus == PROJECT_EXECUTING) { //
+            int BIDDING = 2;    // 投标阶段
+            Integer node = (Integer) result.get(NODE);
+            // 不在投标阶段，商机无效
+            if (node == BIDDING) {
+                Timestamp endTime = (Timestamp) result.get(QUOTE_STOP_TIME);
+                // 小于投标截止时间，商机有效，否则无效
+                if (currentDate.before(endTime)) {
+                    result.put(STATUS, VALID_OPPORTUNITY_STATUS);
+                    resultToExecute.add(appendIdToResult(result));
+                } else {
+                    result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
+                    resultToExecute.add(appendIdToResult(result));
+                }
+            } else {
+                result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
+                resultToExecute.add(appendIdToResult(result));
+            }
         } else {
-            result.put(STATUS, VALID_OPPORTUNITY_STATUS);
+            result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
             resultToExecute.add(appendIdToResult(result));
         }
     }

@@ -93,6 +93,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     private String AUTH_CODE_ID                = "authCodeId";
     private String AUTHEN_NUMBER               = "authenNumber";
     private String CODE                        = "code";
+    private String AREA_CODE                   = "areaCode";
     private String FUND                        = "fund";
     private String TENANT_ID                   = "tenantId";
     private String MOBILE                      = "mobile";
@@ -401,7 +402,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
                                   + "WHERE trc.CREATE_DATE > ?\n"
                                   + "GROUP BY trc.ID\n"
                                   + "LIMIT ?,?";
-        doSyncSupplierData(countInsertedSql, queryInsertedSql, lastSyncTime, true);
+        doSyncSupplierData(countInsertedSql, queryInsertedSql, lastSyncTime);
     }
 
     private void doUpdatedSupplierData(Timestamp lastSyncTime) {
@@ -456,10 +457,10 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
                                  + "WHERE trc.UPDATE_TIME > ?\n"
                                  + "GROUP BY trc.ID\n"
                                  + "LIMIT ?,?";
-        doSyncSupplierData(countUpdatedSql, queryUpdatedSql, lastSyncTime, false);
+        doSyncSupplierData(countUpdatedSql, queryUpdatedSql, lastSyncTime);
     }
 
-    private void doSyncSupplierData(String countSql, String querySql, Timestamp createTime, boolean insert) {
+    private void doSyncSupplierData(String countSql, String querySql, Timestamp createTime) {
         List<Object> params = new ArrayList<>();
         params.add(createTime);
         long count = DBUtil.count(centerDataSource, countSql, params);
@@ -478,10 +479,8 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
                     refresh(result);
                 }
 
-                if (insert) {
-                    // 添加区域
-                    appendAreaStrToResult(resultToExecute, supplierIds);
-                }
+                // 添加区域
+                appendAreaStrToResult(resultToExecute, supplierIds);
                 // 添加诚信等级
                 appendCreditToResult(resultToExecute, supplierIds);
                 // 添加企业空间
@@ -586,6 +585,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
                     result.put(AREA_STR, areaInfo.getAreaStr());
                     result.put(AREA_STR_NOT_ANALYZED, areaInfo.getAreaStr());
                     result.put(REGION, areaInfo.getRegion());
+                    result.put(AREA_CODE, areaInfo.getAreaCode());
                 }
             }
         }
