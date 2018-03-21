@@ -73,6 +73,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected String FIRST_DIRECTORY_NAME        = "firstDirectoryName";
     protected String DIRECTORY_NAME_COUNT        = "directoryNameCount";
     protected String QUOTE_STOP_TIME             = "quoteStopTime";
+    protected String PROCESS_STATUS              = "processStatus";
     protected String AREA                        = "area";
     protected String CODE                        = "code";
     protected String CITY                        = "city";
