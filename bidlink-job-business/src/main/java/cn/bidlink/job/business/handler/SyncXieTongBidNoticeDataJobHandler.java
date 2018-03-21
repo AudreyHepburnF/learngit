@@ -14,7 +14,6 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,14 +32,11 @@ import java.util.*;
  */
 @Service
 @JobHander("syncXieTongBidNoticeDataJobHandler")
-public class SyncXieTongBidNoticeDataJobHandler extends IJobHandler implements InitializingBean {
+public class SyncXieTongBidNoticeDataJobHandler extends IJobHandler /*implements InitializingBean*/ {
 
     private Logger logger = LoggerFactory.getLogger(SyncXieTongBidNoticeDataJobHandler.class);
     @Autowired
     private ElasticClient elasticClient;
-
-    @Autowired
-    private Properties properties;
 
     @Autowired
     @Qualifier("synergyDataSource")
@@ -220,6 +216,7 @@ public class SyncXieTongBidNoticeDataJobHandler extends IJobHandler implements I
         result.put(PROJECT_ID, String.valueOf(result.get(PROJECT_ID)));
         result.put(PROJECT_NAME_ALIAS, result.get(PROJECT_NAME));
         result.put(COMPANY_NAME_ALIAS, result.get(COMPANY_NAME));
+
         // 添加同步时间字段
         result.put(SYNC_TIME, SyncTimeUtil.getCurrentDate());
     }
@@ -231,8 +228,8 @@ public class SyncXieTongBidNoticeDataJobHandler extends IJobHandler implements I
         return paramsToUse;
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        execute();
-    }
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+//        execute();
+//    }
 }
