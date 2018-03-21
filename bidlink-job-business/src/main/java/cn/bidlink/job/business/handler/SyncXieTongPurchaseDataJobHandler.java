@@ -3,7 +3,6 @@ package cn.bidlink.job.business.handler;
 import cn.bidlink.job.business.utils.AreaUtil;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
-import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.ValueFilter;
@@ -55,19 +54,19 @@ public class SyncXieTongPurchaseDataJobHandler extends IJobHandler /*implements 
     @Value("${pageSize}")
     private int pageSize;
 
-    private String ID = "id";
-    private String COMPANY_ID = "companyId";
+    private String ID                      = "id";
+    private String COMPANY_ID              = "companyId";
     private String PURCHASE_TRADING_VOLUME = "purchaseTradingVolume";
-    private String BID_TRADING_VOLUME = "bidTradingVolume";
-    private String TRADING_VOLUME = "tradingVolume";
-    private String LONG_TRADING_VOLUME = "longTradingVolume";
-    private String COMPANY_SITE_ALIAS = "companySiteAlias";
-    private String PURCHASE_PROJECT_COUNT = "purchaseProjectCount";
-    private String BID_PROJECT_COUNT = "bidProjectCount";
-    private String PROJECT_COUNT = "projectCount";
-    private String REGION = "region";
-    private String AREA_STR = "areaStr";
-    private String AREA_STR_NOT_ANALYZED = "areaStrNotAnalyzed";
+    private String BID_TRADING_VOLUME      = "bidTradingVolume";
+    private String TRADING_VOLUME          = "tradingVolume";
+    private String LONG_TRADING_VOLUME     = "longTradingVolume";
+    private String COMPANY_SITE_ALIAS      = "companySiteAlias";
+    private String PURCHASE_PROJECT_COUNT  = "purchaseProjectCount";
+    private String BID_PROJECT_COUNT       = "bidProjectCount";
+    private String PROJECT_COUNT           = "projectCount";
+    private String REGION                  = "region";
+    private String AREA_STR                = "areaStr";
+    private String AREA_STR_NOT_ANALYZED   = "areaStrNotAnalyzed";
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
@@ -79,15 +78,8 @@ public class SyncXieTongPurchaseDataJobHandler extends IJobHandler /*implements 
     }
 
     private void synPurchase() {
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
-                "cluster.index",
-                "cluster.type.purchase",
-                null);
-        logger.info("采购商同步lastTime:" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss") + "\n" +
-                ", syncTime:" + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
-        //同步插入数据
+        Timestamp lastSyncTime = SyncTimeUtil.GMT_TIME;
         syncCreatePurchaseProjectData(lastSyncTime);
-        //同步更新数据
         syncUpdatedPurchaseProjectData(lastSyncTime);
     }
 
@@ -96,8 +88,10 @@ public class SyncXieTongPurchaseDataJobHandler extends IJobHandler /*implements 
                 + "   count(1)\n"
                 + "FROM\n"
                 + "   t_reg_company trc\n"
+                + "   left join open_account oa ON trc.ID = oa.COMPANY_ID \n"
                 + "WHERE\n"
                 + "     trc.TYPE = 12\n"
+                + "AND oa.EXAMINE_STATUS = 2\n"
                 + "AND  trc.create_date >= ?";
         String queryCreatedPurchaseSql = "SELECT\n"
                 + "   trc.id,\n"
@@ -106,14 +100,17 @@ public class SyncXieTongPurchaseDataJobHandler extends IJobHandler /*implements 
                 + "   trc.WWW_STATION AS wwwStationAlias,\n"
                 + "   trc.INDUSTRY_STR AS industryStrNotAnalyzed,\n"
                 + "   trc.INDUSTRY_STR AS industryStr,\n"
+                + "   trc.INDUSTRY AS industry,\n"
                 + "   trc.ZONE_STR AS zoneStrNotAnalyzed,\n"
                 + "   trc.ZONE_STR AS zoneStr,\n"
                 + "   trc.COMP_TYPE_STR AS compTypeStr,\n"
                 + "   trc.company_site AS companySiteAlias\n"
                 + "FROM\n"
                 + "   t_reg_company trc\n"
+                + "   left join open_account oa ON trc.ID = oa.COMPANY_ID \n"
                 + "WHERE\n"
                 + "     trc.TYPE = 12\n"
+                + "AND oa.EXAMINE_STATUS = 2\n"
                 + "AND  trc.create_date >= ?\n"
                 + "LIMIT ?, ?";
         ArrayList<Object> params = new ArrayList<>();
@@ -126,8 +123,10 @@ public class SyncXieTongPurchaseDataJobHandler extends IJobHandler /*implements 
                 + "   count(1)\n"
                 + "FROM\n"
                 + "   t_reg_company trc\n"
+                + "   left join open_account oa ON trc.ID = oa.COMPANY_ID \n"
                 + "WHERE\n"
                 + "     trc.TYPE = 12\n"
+                + "AND oa.EXAMINE_STATUS = 2\n"
                 + "AND  trc.update_time >= ?";
         String queryUpdatedPurchaseSql = "SELECT\n"
                 + "   trc.id,\n"
@@ -136,14 +135,17 @@ public class SyncXieTongPurchaseDataJobHandler extends IJobHandler /*implements 
                 + "   trc.WWW_STATION AS wwwStationAlias,\n"
                 + "   trc.INDUSTRY_STR AS industryStr,\n"
                 + "   trc.INDUSTRY_STR AS industryStrNotAnalyzed,\n"
+                + "   trc.INDUSTRY AS industry,\n"
                 + "   trc.ZONE_STR AS zoneStr,\n"
                 + "   trc.ZONE_STR AS zoneStrNotAnalyzed,\n"
                 + "   trc.COMP_TYPE_STR AS compTypeStr,\n"
                 + "   trc.company_site AS companySiteAlias\n"
                 + "FROM\n"
                 + "   t_reg_company trc\n"
+                + "   left join open_account oa ON trc.ID = oa.COMPANY_ID \n"
                 + "WHERE\n"
                 + "     trc.TYPE = 12\n"
+                + "AND oa.EXAMINE_STATUS = 2\n"
                 + "AND   trc.update_time >= ?\n"
                 + "LIMIT ?, ?";
         ArrayList<Object> params = new ArrayList<>();
@@ -206,9 +208,10 @@ public class SyncXieTongPurchaseDataJobHandler extends IJobHandler /*implements 
                 "\tpurchase_project pp\n" +
                 "\tLEFT JOIN purchase_project_ext ppe ON pp.id = ppe.id \n" +
                 "\tAND pp.company_id = ppe.company_id \n" +
-                "\tAND pp.project_status IN ( 5, 6 ) \n" +
+                "\t\n" +
                 "WHERE\n" +
-                "\tppe.deal_total_price IS NOT NULL \n" +
+                "\tpp.process_status IN ( 31, 40 )  \n" +
+                "\tAND ppe.deal_total_price IS NOT NULL \n" +
                 "\tAND pp.company_id IN (%s) \n" +
                 "GROUP BY\n" +
                 "\tpp.company_id;";
@@ -295,7 +298,7 @@ public class SyncXieTongPurchaseDataJobHandler extends IJobHandler /*implements 
                 "FROM\n" +
                 "\tpurchase_project pp \n" +
                 "WHERE\n" +
-                "\tpp.project_status IN ( 5, 6 ) \n" +
+                "\tpp.process_status IN ( 31, 40 )\n" +
                 "\tAND pp.company_id IN (%s) \n" +
                 "GROUP BY\n" +
                 "\tpp.company_id";

@@ -1,0 +1,147 @@
+// 方式1：直接在head界面操作，yc_test/bid_notice/_mapping POST
+// 方式2：curl -XPOST http://dcsearch.api.yuecai.com/yc_test/bid_notice/_mapping -d'
+{
+  "bid_notice": {
+    "properties": {
+      "bailFree": {
+        "type": "long"
+      },
+      "bidBail": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "bidDescribe": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "bidDocMoney": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "bidDocOverTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "bidDocStartTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "bidEndTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "bidOpenAddress": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "bidOpenTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "bidType": {
+        "type": "integer"
+      },
+      "companyId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "companyName": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "companyNameAlias": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "docFree": {
+        "type": "long"
+      },
+      "fileGainAddress": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "id": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "isBailFree": {
+        "type": "integer"
+      },
+      "isDocFree": {
+        "type": "integer"
+      },
+      "linkMail": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "linkMan": {
+        "type": "string"
+      },
+      "linkManAlias": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "linkPhone": {
+        "type": "string"
+      },
+      "linkPhoneAlias": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "linkTel": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "noticePublishTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "openType": {
+        "type": "integer"
+      },
+      "projectCode": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "projectId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "projectName": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "projectNameAlias": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "putFileType": {
+        "type": "integer"
+      },
+      "qualification": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "remarks": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "subProjectId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "syncTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "tenderName": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "unit": {
+        "type": "string",
+        "index": "not_analyzed"
+      }
+    }
+  }
+}
