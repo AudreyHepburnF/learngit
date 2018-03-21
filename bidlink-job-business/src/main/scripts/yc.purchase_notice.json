@@ -1,0 +1,70 @@
+// 方式1：直接在head界面操作，yc_test/purchase_notice/_mapping POST
+// 方式2：curl -XPOST http://dcsearch.api.yuecai.com/yc_test/purchase_notice/_mapping -d'
+{
+  "purchase_notice": {
+    "properties": {
+      "id": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "projectId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "projectNameAlias": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "projectCode": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "quoteStopTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "publishNoticeTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "projectInfo": {
+        "type": "string"
+      },
+      "linkMail": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "linkMan": {
+        "type": "string"
+      },
+      "linkPhone": {
+        "type": "string"
+      },
+      "linkTel": {
+        "type": "string"
+      },
+      "isShowTel": {
+        "type": "integer"
+      },
+      "isShowMobile": {
+        "type": "integer"
+      },
+      "companyId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "companyNameAlias": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "syncTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "createTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      }
+    }
+  }
+}
