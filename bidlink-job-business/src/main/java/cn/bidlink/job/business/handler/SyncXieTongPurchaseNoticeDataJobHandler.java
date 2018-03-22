@@ -14,7 +14,6 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,7 +35,7 @@ import java.util.Map;
  */
 @Service
 @JobHander("syncXieTongPurchaseNoticeDataJobHandler")
-public class SyncXieTongPurchaseNoticeDataJobHandler extends IJobHandler implements InitializingBean {
+public class SyncXieTongPurchaseNoticeDataJobHandler extends IJobHandler /*implements InitializingBean*/ {
 
     private Logger logger = LoggerFactory.getLogger(SyncXieTongPurchaseNoticeDataJobHandler.class);
 
@@ -303,8 +302,8 @@ public class SyncXieTongPurchaseNoticeDataJobHandler extends IJobHandler impleme
         return paramsToUse;
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        execute();
-    }
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+//        execute();
+//    }
 }
