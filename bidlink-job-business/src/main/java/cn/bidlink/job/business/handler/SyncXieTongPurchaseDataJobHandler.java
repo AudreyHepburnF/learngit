@@ -31,7 +31,7 @@ import java.util.*;
 /**
  * @author <a href="mailto:zhihuizhou@ebnew.com">zhouzhihui</a>
  * @version Ver 1.0
- * @description:同步xieTong平台采购商
+ * @description:同步xieTong平台采购商(注意:可以替代 {@link SyncPurchaseDataJobHandler})
  * @Date 2017/11/29
  */
 @Service

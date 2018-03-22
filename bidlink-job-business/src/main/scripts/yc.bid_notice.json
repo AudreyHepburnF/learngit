@@ -70,6 +70,12 @@
       "isDocFree": {
         "type": "integer"
       },
+      "linkTelIsShow": {
+        "type": "integer"
+      },
+      "linkPhoneIsShow": {
+        "type": "integer"
+      },
       "linkMail": {
         "type": "string",
         "index": "not_analyzed"

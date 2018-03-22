@@ -102,6 +102,8 @@ public class SyncXieTongBidNoticeDataJobHandler extends IJobHandler /*implements
                 "\tlink_mail AS linkMail,\n" +
                 "\tlink_phone AS linkPhone,\n" +
                 "\tlink_tel AS linkTel,\n" +
+                "\tlink_tel_is_show AS linkTelIsShow,\n" +
+                "\tlink_phone_is_show AS linkPhoneIsShow,\n" +
                 "\tunit AS unit,\n" +
                 "\tbid_doc_start_time AS bidDocStartTime,\n" +
                 "\tbid_doc_over_time AS bidDocOverTime,\n" +
@@ -150,6 +152,8 @@ public class SyncXieTongBidNoticeDataJobHandler extends IJobHandler /*implements
                 "\tlink_mail AS linkMail,\n" +
                 "\tlink_phone AS linkPhone,\n" +
                 "\tlink_tel AS linkTel,\n" +
+                "\tlink_tel_is_show AS linkTelIsShow,\n" +
+                "\tlink_phone_is_show AS linkPhoneIsShow,\n" +
                 "\tunit AS unit,\n" +
                 "\tbid_doc_start_time AS bidDocStartTime,\n" +
                 "\tbid_doc_over_time AS bidDocOverTime,\n" +
