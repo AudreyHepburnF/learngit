@@ -78,7 +78,7 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
                                  + "LEFT JOIN purchase_project_control ppc ON pp.id = ppc.id\n"
                                  + "AND pp.company_id = ppc.company_id\n"
                                  + "WHERE\n"
-                                 + "   pp.project_status = 2\n"
+                                 + "   pp.process_status > 13\n"
                                  + "AND ppc.project_open_range = 1 AND pp.update_time > ?";
         String queryUpdatedSql = "SELECT\n"
                                  + "   s.*, ppi.`name` AS directoryName\n"
@@ -94,6 +94,7 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
                                  + "         ppc.project_open_range AS openRangeType,\n"
                                  + "         ppc.is_core AS isCore,\n"
                                  + "         pp.project_status AS projectStatus,\n"
+                                 + "         pp.process_status AS processStatus,\n"
                                  + "         pp.quote_stop_time AS quoteStopTime,\n"
                                  + "         pp.real_quote_stop_time AS realQuoteStopTime,\n"
                                  + "         pp.zone_str AS areaStr,\n"
@@ -113,7 +114,7 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
                                  + "   LEFT JOIN purchase_project_control ppc ON pp.id = ppc.id\n"
                                  + "   AND pp.company_id = ppc.company_id\n"
                                  + "   WHERE\n"
-                                 + "      pp.project_status = 2\n"
+                                 + "   pp.process_status > 13\n"
                                  + "   AND ppc.project_open_range = 1 AND pp.update_time > ?\n"
                                  + "   LIMIT ?,?\n"
                                  + "   ) s\n"
@@ -160,22 +161,18 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
      * @param result          从数据库获取的数据
      */
     protected void parseOpportunity(Timestamp currentDate, List<Map<String, Object>> resultToExecute, Map<String, Object> result) {
-        // 判断商机
+        int PROJECT_EXECUTING = 1;  // 项目正在进行
+        int PROCESS_TO_QUOTE = 20;  // 待截标
+        int processStatus = (int) result.get(PROCESS_STATUS);
+        int projectStatus = (int) result.get(PROJECT_STATUS);
         Timestamp quoteStopTime = (Timestamp) result.get(QUOTE_STOP_TIME);
-        Timestamp realQuoteStopTime = (Timestamp) result.get(REAL_QUOTE_STOP_TIME);
-        // 已截标
-        if (realQuoteStopTime != null) {
-            result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
+        // 小于截止时间且待截标且进行中，则为商机，否则不是商机
+        if (currentDate.before(quoteStopTime) && processStatus == PROCESS_TO_QUOTE && projectStatus == PROJECT_EXECUTING) {
+            result.put(STATUS, VALID_OPPORTUNITY_STATUS);
             resultToExecute.add(appendIdToResult(result));
         } else {
-            // 未过期
-            if (quoteStopTime.before(currentDate)) {
-                result.put(STATUS, VALID_OPPORTUNITY_STATUS);
-                resultToExecute.add(appendIdToResult(result));
-            } else {
-                result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
-                resultToExecute.add(appendIdToResult(result));
-            }
+            result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
+            resultToExecute.add(appendIdToResult(result));
         }
     }
 

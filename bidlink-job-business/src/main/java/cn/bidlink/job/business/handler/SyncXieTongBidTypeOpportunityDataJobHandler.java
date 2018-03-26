@@ -75,7 +75,7 @@ public class SyncXieTongBidTypeOpportunityDataJobHandler extends AbstractSyncOpp
                                  + "FROM\n"
                                  + "   bid_sub_project\n"
                                  + "WHERE\n"
-                                 + "   is_bid_open = 1 AND process_status > 12 AND update_time > ?";
+                                 + "   is_bid_open = 1 AND node > 1 AND update_time > ?";
         String queryUpdatedSql = "SELECT\n"
                                  + "   project.*, bpi.`name` AS directoryName\n"
                                  + "FROM\n"
@@ -150,26 +150,14 @@ public class SyncXieTongBidTypeOpportunityDataJobHandler extends AbstractSyncOpp
     @Override
     protected void parseOpportunity(Timestamp currentDate, List<Map<String, Object>> resultToExecute, Map<String, Object> result) {
         int PROJECT_EXECUTING = 1;  // 项目正在进行中
+        int BIDDING = 2;            // 投标阶段
+        Integer node = (Integer) result.get(NODE);
         Integer projectStatus = (Integer) result.get(PROJECT_STATUS);
-        // 项目不在进行中，商机无效
-        if (projectStatus == PROJECT_EXECUTING) { //
-            int BIDDING = 2;    // 投标阶段
-            Integer node = (Integer) result.get(NODE);
-            // 不在投标阶段，商机无效
-            if (node == BIDDING) {
-                Timestamp endTime = (Timestamp) result.get(QUOTE_STOP_TIME);
-                // 小于投标截止时间，商机有效，否则无效
-                if (currentDate.before(endTime)) {
-                    result.put(STATUS, VALID_OPPORTUNITY_STATUS);
-                    resultToExecute.add(appendIdToResult(result));
-                } else {
-                    result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
-                    resultToExecute.add(appendIdToResult(result));
-                }
-            } else {
-                result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
-                resultToExecute.add(appendIdToResult(result));
-            }
+        Timestamp quoteStopTime = (Timestamp) result.get(QUOTE_STOP_TIME);
+        // 小于截止时间且项目正在进行中且节点是投标阶段，则为商机，否则不是商机
+        if (currentDate.before(quoteStopTime) && projectStatus == PROJECT_EXECUTING && node == BIDDING) {
+            result.put(STATUS, VALID_OPPORTUNITY_STATUS);
+            resultToExecute.add(appendIdToResult(result));
         } else {
             result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
             resultToExecute.add(appendIdToResult(result));
