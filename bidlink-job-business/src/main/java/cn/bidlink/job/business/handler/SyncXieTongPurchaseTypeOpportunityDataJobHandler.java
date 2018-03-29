@@ -81,7 +81,7 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
                                  + "   pp.process_status > 13\n"
                                  + "AND ppc.project_open_range = 1 AND pp.update_time > ?";
         String queryUpdatedSql = "SELECT\n"
-                                 + "   s.*, ppi.`name` AS directoryName\n"
+                                 + "   s.*, ppi.id AS directoryId,ppi.`name` AS directoryName\n"
                                  + "FROM\n"
                                  + "   (\n"
                                  + "      SELECT\n"
@@ -167,7 +167,9 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
         int projectStatus = (int) result.get(PROJECT_STATUS);
         Timestamp quoteStopTime = (Timestamp) result.get(QUOTE_STOP_TIME);
         // 小于截止时间且待截标且进行中，则为商机，否则不是商机
-        if (currentDate.before(quoteStopTime) && processStatus == PROCESS_TO_QUOTE && projectStatus == PROJECT_EXECUTING) {
+        if (currentDate.before(quoteStopTime)
+            && processStatus == PROCESS_TO_QUOTE
+            && projectStatus == PROJECT_EXECUTING) {
             result.put(STATUS, VALID_OPPORTUNITY_STATUS);
             resultToExecute.add(appendIdToResult(result));
         } else {
@@ -176,7 +178,7 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
         }
     }
 
-    protected void refresh(Map<String, Object> result, Map<Long, Set<String>> projectDirectoryMap) {
+    protected void refresh(Map<String, Object> result, Map<Long, Set<DirectoryEntity>> projectDirectoryMap) {
         super.refresh(result, projectDirectoryMap);
         // 转换字段类型
         Object isCore = result.get(IS_CORE);
