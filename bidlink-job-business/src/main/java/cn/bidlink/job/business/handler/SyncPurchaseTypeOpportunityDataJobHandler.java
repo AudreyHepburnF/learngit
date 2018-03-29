@@ -168,7 +168,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
                                  + "   bpe.bid_result_show_type = 1\n"
                                  + "AND bp.update_time > ?\n"
                                  + "AND bp.project_status IN (5, 6, 10)";
-        String queryUpdatedSql = "SELECT b.*, bpi.`name` AS directoryName FROM (SELECT\n"
+        String queryUpdatedSql = "SELECT b.*, bpi.id AS directoryId, bpi.`name` AS directoryName FROM (SELECT\n"
                                  + "   bp.comp_id AS purchaseId,\n"
                                  + "   bp.comp_name AS purchaseName,\n"
                                  + "   bp.id AS projectId,\n"
@@ -275,7 +275,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
         return DigestUtils.md5DigestAsHex((projectId + "_" + purchaseId + "_" + SOURCE_OLD).getBytes());
     }
 
-    protected void refresh(Map<String, Object> result, Map<Long, Set<String>> projectDirectoryMap) {
+    protected void refresh(Map<String, Object> result, Map<Long, Set<DirectoryEntity>> projectDirectoryMap) {
         super.refresh(result, projectDirectoryMap);
         // 移除不需要的属性
         result.remove(BID_STOP_TYPE);

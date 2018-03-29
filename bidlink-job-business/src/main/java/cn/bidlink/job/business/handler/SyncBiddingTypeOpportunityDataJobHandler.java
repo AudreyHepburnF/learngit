@@ -92,6 +92,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                  + "    project.TENDER_NAMES AS purchaseName,\n"
                                  + "    project.CREATE_TIME AS createTime,\n"
                                  + "    project.BID_ENDTIME AS endTime,\n"
+                                 + "    product.id AS directoryId,\n"
                                  + "    product.PRODUCT_NAME AS directoryName\n"
                                  + "FROM\n"
                                  + "   (\n"
@@ -142,6 +143,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                     + "    project.TENDER_NAMES AS purchaseName,\n"
                                     + "    project.CREATE_TIME AS createTime,\n"
                                     + "    project.END_TIME AS endTime,\n"
+                                    + "    product.id AS directoryId,\n"
                                     + "    product.PRODUCT_NAME AS directoryName\n"
                                     + "FROM\n"
                                     + "   (\n"
@@ -190,6 +192,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
                                   + "    project.TENDER_NAMES AS purchaseName,\n"
                                   + "    project.CREATE_TIME AS createTime,\n"
                                   + "    project.TECHNICAL_ADVICE_CUT_TIME AS endTime,\n"
+                                  + "    product.id AS directoryId,\n"
                                   + "    product.PRODUCT_NAME AS directoryName\n"
                                   + "FROM\n"
                                   + "   (\n"
@@ -249,7 +252,7 @@ public class SyncBiddingTypeOpportunityDataJobHandler extends AbstractSyncOpport
         return DigestUtils.md5DigestAsHex((projectId + "_" + purchaseId + "_" + SOURCE_OLD).getBytes());
     }
 
-    protected void refresh(Map<String, Object> result, Map<Long, Set<String>> projectDirectoryMap) {
+    protected void refresh(Map<String, Object> result, Map<Long, Set<DirectoryEntity>> projectDirectoryMap) {
         super.refresh(result, projectDirectoryMap);
         // 移除不需要的属性
         result.put(QUOTE_STOP_TIME, SyncTimeUtil.toDateString(result.get(END_TIME)));
