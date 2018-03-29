@@ -58,6 +58,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected String PROJECT_ID                  = "projectId";
     protected String PROJECT_TYPE                = "projectType";
     protected String DIRECTORY_NAME              = "directoryName";
+    protected String DIRECTORY_ID                = "directoryId";
     protected String DIRECTORY_NAME_NOT_ANALYZED = "directoryNameNotAnalyzed";
     protected String PURCHASE_NAME               = "purchaseName";
     protected String PURCHASE_NAME_NOT_ANALYZED  = "purchaseNameNotAnalyzed";
@@ -97,6 +98,35 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
      */
     protected abstract String generateOpportunityId(Map<String, Object> result);
 
+    protected class DirectoryEntity {
+        protected Long directoryId;
+        protected String directoryName;
+
+        public DirectoryEntity(Long directoryId, String directoryName) {
+            this.directoryId = directoryId;
+            this.directoryName = directoryName;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            DirectoryEntity that = (DirectoryEntity) o;
+
+            if (directoryId != null ? !directoryId.equals(that.directoryId) : that.directoryId != null) return false;
+            return directoryName != null ? directoryName.equals(that.directoryName) : that.directoryName == null;
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = directoryId != null ? directoryId.hashCode() : 0;
+            result = 31 * result + (directoryName != null ? directoryName.hashCode() : 0);
+            return result;
+        }
+    }
+
     protected void doSyncProjectDataService(DataSource dataSource, String countSql, String querySql, List<Object> params) {
         long count = DBUtil.count(dataSource, countSql, params);
         logger.debug("执行countSql : {}, params : {}，共{}条", countSql, params, count);
@@ -109,17 +139,19 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
                 logger.debug("执行querySql : {}, params : {}，共{}条", querySql, paramsToUse, results.size());
                 List<Map<String, Object>> resultToExecute = new ArrayList<>();
                 // 保存项目的采购品
-                Map<Long, Set<String>> projectDirectoryMap = new LinkedHashMap<>();
+                Map<Long, Set<DirectoryEntity>> projectDirectoryMap = new LinkedHashMap<>();
                 for (Map<String, Object> result : results) {
                     Long projectId = (Long) result.get(PROJECT_ID);
                     String directoryName = (String) result.get(DIRECTORY_NAME);
+                    Long directoryId = (Long) result.get(DIRECTORY_ID);
+
                     if (projectDirectoryMap.get(projectId) == null) {
-                        projectDirectoryMap.put(projectId, new LinkedHashSet<String>());
+                        projectDirectoryMap.put(projectId, new LinkedHashSet<DirectoryEntity>());
                         parseOpportunity(currentDate, resultToExecute, result);
                     }
                     // 招标项目的采购品可能为空
                     if (!StringUtils.isEmpty(directoryName)) {
-                        projectDirectoryMap.get(projectId).add(directoryName);
+                        projectDirectoryMap.get(projectId).add(new DirectoryEntity(directoryId, directoryName));
                     }
                 }
 
@@ -153,15 +185,15 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
      * @param result
      * @param projectDirectoryMap
      */
-    protected void refresh(Map<String, Object> result, Map<Long, Set<String>> projectDirectoryMap) {
-        Set<String> directoryNames = projectDirectoryMap.get(result.get(PROJECT_ID));
-        if (!CollectionUtils.isEmpty(directoryNames)) {
+    protected void refresh(Map<String, Object> result, Map<Long, Set<DirectoryEntity>> projectDirectoryMap) {
+        Set<DirectoryEntity> directoryEntities = projectDirectoryMap.get(result.get(PROJECT_ID));
+        if (!CollectionUtils.isEmpty(directoryEntities)) {
             // 采购品
-            String directoryNameList = StringUtils.collectionToCommaDelimitedString(directoryNames);
+            String directoryNameList = getDirectoryNames(directoryEntities);
             result.put(DIRECTORY_NAME, directoryNameList);
             result.put(DIRECTORY_NAME_NOT_ANALYZED, directoryNameList);
-            result.put(FIRST_DIRECTORY_NAME, directoryNames.iterator().next());
-            result.put(DIRECTORY_NAME_COUNT, directoryNames.size());
+            result.put(FIRST_DIRECTORY_NAME, directoryEntities.iterator().next().directoryName);
+            result.put(DIRECTORY_NAME_COUNT, directoryEntities.size());
         } else {
             result.put(DIRECTORY_NAME, null);
             result.put(DIRECTORY_NAME_NOT_ANALYZED, null);
@@ -177,8 +209,23 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
         result.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
         // 转换long字段类型，防止前端js精度溢出
         // for fuck js
+        result.put(DIRECTORY_ID, String.valueOf(result.get(DIRECTORY_ID)));
         result.put(PROJECT_ID, String.valueOf(result.get(PROJECT_ID)));
         result.put(PURCHASE_ID, String.valueOf(result.get(PURCHASE_ID)));
+    }
+
+    /**
+     * 获取所有的采购品名称
+     *
+     * @param directoryEntities
+     * @return
+     */
+    private String getDirectoryNames(Set<DirectoryEntity> directoryEntities) {
+        List<String> directoryNames = new ArrayList<>();
+        for (DirectoryEntity directoryEntity : directoryEntities) {
+            directoryNames.add(directoryEntity.directoryName);
+        }
+        return StringUtils.collectionToCommaDelimitedString(directoryNames);
     }
 
 

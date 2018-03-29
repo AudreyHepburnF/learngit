@@ -77,7 +77,7 @@ public class SyncXieTongBidTypeOpportunityDataJobHandler extends AbstractSyncOpp
                                  + "WHERE\n"
                                  + "   is_bid_open = 1 AND node > 1 AND update_time > ?";
         String queryUpdatedSql = "SELECT\n"
-                                 + "   project.*, bpi.`name` AS directoryName\n"
+                                 + "   project.*,bpi.id AS directoryId, bpi.`name` AS directoryName\n"
                                  + "FROM\n"
                                  + "   (\n"
                                  + "      SELECT\n"
@@ -136,7 +136,7 @@ public class SyncXieTongBidTypeOpportunityDataJobHandler extends AbstractSyncOpp
         return DigestUtils.md5DigestAsHex((projectId + "_" + purchaseId + "_" + SOURCE_NEW).getBytes());
     }
 
-    protected void refresh(Map<String, Object> result, Map<Long, Set<String>> projectDirectoryMap) {
+    protected void refresh(Map<String, Object> result, Map<Long, Set<DirectoryEntity>> projectDirectoryMap) {
         super.refresh(result, projectDirectoryMap);
         result.put(QUOTE_STOP_TIME, SyncTimeUtil.toDateString(result.get(QUOTE_STOP_TIME)));
         // 项目类型
@@ -155,7 +155,9 @@ public class SyncXieTongBidTypeOpportunityDataJobHandler extends AbstractSyncOpp
         Integer projectStatus = (Integer) result.get(PROJECT_STATUS);
         Timestamp quoteStopTime = (Timestamp) result.get(QUOTE_STOP_TIME);
         // 小于截止时间且项目正在进行中且节点是投标阶段，则为商机，否则不是商机
-        if (currentDate.before(quoteStopTime) && projectStatus == PROJECT_EXECUTING && node == BIDDING) {
+        if (currentDate.before(quoteStopTime)
+            && projectStatus == PROJECT_EXECUTING
+            && node == BIDDING) {
             result.put(STATUS, VALID_OPPORTUNITY_STATUS);
             resultToExecute.add(appendIdToResult(result));
         } else {
