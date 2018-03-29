@@ -64,6 +64,9 @@
         "type": "string",
         "index": "not_analyzed"
       },
+      "gainFileType": {
+        "type": "integer"
+      },
       "isBailFree": {
         "type": "integer"
       },
