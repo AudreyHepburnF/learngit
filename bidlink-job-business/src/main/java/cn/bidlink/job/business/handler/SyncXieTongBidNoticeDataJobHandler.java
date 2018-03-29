@@ -110,6 +110,7 @@ public class SyncXieTongBidNoticeDataJobHandler extends IJobHandler /*implements
                 "\tcompany_name AS companyName,\n" +
                 "\tnotice_publish_time AS noticePublishTime,\n" +
                 "\tsub_project_id AS subProjectId,\n" +
+                "\tgain_file_type AS gainFileType,\n" +
                 "\tfile_gain_address AS fileGainAddress \n" +
                 "FROM\n" +
                 "\tbid_notice \n" +
@@ -160,6 +161,7 @@ public class SyncXieTongBidNoticeDataJobHandler extends IJobHandler /*implements
                 "\tcompany_name AS companyName,\n" +
                 "\tnotice_publish_time AS noticePublishTime,\n" +
                 "\tsub_project_id AS subProjectId,\n" +
+                "\tgain_file_type AS gainFileType,\n" +
                 "\tfile_gain_address AS fileGainAddress \n" +
                 "FROM\n" +
                 "\tbid_notice \n" +
