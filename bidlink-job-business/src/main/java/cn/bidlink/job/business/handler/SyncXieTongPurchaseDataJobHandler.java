@@ -253,7 +253,7 @@ public class SyncXieTongPurchaseDataJobHandler extends IJobHandler /*implements 
                 "\tAND bsp.company_id = bs.company_id \n" +
                 "WHERE\n" +
                 "\tbsp.project_status IN ( 2, 3 ) \n" +
-                "\tAND bs.is_win_bid = 1 \n" +
+                "\tAND bs.win_bid_status = 1 \n" +
                 "\tAND bs.bid_total_price IS NOT NULL\n" +
                 "\tAND bs.company_id in (%s)\n" +
                 "GROUP BY\n" +
