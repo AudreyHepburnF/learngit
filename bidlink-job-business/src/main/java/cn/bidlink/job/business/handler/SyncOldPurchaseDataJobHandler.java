@@ -36,14 +36,15 @@ import java.util.*;
 /**
  * @author <a href="mailto:zhihuizhou@ebnew.com">zhouzhihui</a>
  * @version Ver 1.0
- * @description:同步xieTong平台采购商(注意:可以替代 {@link SyncPurchaseDataJobHandler})
+ * @description:初始化开户表open_account没有记录的采购商数据(注意:可以替代 {@link SyncXieTongPurchaseDataJobHandler})
+ * 注意事项:2017-06-27 14:51:13 之前的采购商数据默认为开户成功
  * @Date 2017/11/29
  */
 @Service
-@JobHander(value = "syncXieTongPurchaseDataJobHandler")
-public class SyncXieTongPurchaseDataJobHandler extends IJobHandler /*implements InitializingBean*/ {
+@JobHander(value = "syncOldPurchaseDataJobHandler")
+public class SyncOldPurchaseDataJobHandler extends IJobHandler /*implements InitializingBean*/ {
 
-    private Logger logger = LoggerFactory.getLogger(SyncXieTongPurchaseDataJobHandler.class);
+    private Logger logger = LoggerFactory.getLogger(SyncOldPurchaseDataJobHandler.class);
 
     @Autowired
     private ElasticClient elasticClient;
@@ -75,7 +76,6 @@ public class SyncXieTongPurchaseDataJobHandler extends IJobHandler /*implements 
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
-        SyncTimeUtil.setCurrentDate();
         logger.info("同步协同平台采购商开始");
         synPurchase();
         logger.info("同步协同平台采购商结束");
@@ -83,55 +83,11 @@ public class SyncXieTongPurchaseDataJobHandler extends IJobHandler /*implements 
     }
 
     private void synPurchase() {
+        // 初始化以前没有开户信息的采购商数据
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.purchase", null);
-        logger.info("同步新平台采购商数据 lastSyncTime:" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n"
-                + ",syncTime:" + new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
         syncPurchaserDataService(lastSyncTime);
-        // 同步没有开户信息采购商数据
-        syncOldPurchaserDataService(lastSyncTime);
         syncPurchaserStatService(lastSyncTime);
-
     }
-
-    private void syncOldPurchaserDataService(Timestamp lastSyncTime) {
-        // 初始化后只需要更新
-        syncOldUpdatedPurchaserData(lastSyncTime);
-    }
-
-    private void syncOldUpdatedPurchaserData(Timestamp lastSyncTime) {
-            String countUpdatedPurchaseSql = "SELECT\n"
-                    + "   count(1)\n"
-                    + "FROM\n"
-                    + "   t_reg_company trc\n"
-                    + "   left join open_account oa ON trc.ID = oa.COMPANY_ID \n"
-                    + "WHERE\n"
-                    + "     trc.TYPE = 12\n"
-                    + "AND oa.EXAMINE_STATUS = 2\n"
-                    + "AND  trc.update_time >= ?"
-                    + "AND trc.create_date < \"2017-06-27 14:51:13\"";
-            String queryUpdatedPurchaseSql = "SELECT\n" +
-                    "\ttrc.id,\n" +
-                    "\ttrc.NAME AS purchaseName,\n" +
-                    "\ttrc.NAME AS purchaseNameNotAnalyzed,\n" +
-                    "\ttrc.WWW_STATION AS wwwStationAlias,\n" +
-                    "\ttrc.INDUSTRY_STR AS industryStr,\n" +
-                    "\ttrc.INDUSTRY_STR AS industryStrNotAnalyzed,\n" +
-                    "\ttrc.INDUSTRY AS industry,\n" +
-                    "\ttrc.ZONE_STR AS zoneStr,\n" +
-                    "\ttrc.ZONE_STR AS zoneStrNotAnalyzed,\n" +
-                    "\ttrc.COMP_TYPE_STR AS compTypeStr,\n" +
-                    "\ttrc.company_site AS companySiteAlias \n" +
-                    "FROM\n" +
-                    "\tt_reg_company trc \n" +
-                    "WHERE\n" +
-                    "\ttrc.TYPE = 12 \n" +
-                    "\tAND trc.create_date < \"2017-06-27 14:51:13\"" +
-                    "\tAND  trc.update_time >= ?\n" +
-                    "LIMIT ?, ?";
-            ArrayList<Object> params = new ArrayList<>();
-            params.add(lastSyncTime);
-            doSyncPurchaserDataService(countUpdatedPurchaseSql, queryUpdatedPurchaseSql, params);
-        }
 
     /**
      * 同步采购商参与项目和交易额统计
@@ -174,7 +130,7 @@ public class SyncXieTongPurchaseDataJobHandler extends IJobHandler /*implements 
             appendBidProjectCount(resultFromEs, purchaserIdToString);
 
             batchInsert(resultFromEs);
-            System.out.println("回滚后数据" + resultFromEs);
+
             scrollResp = elasticClient.getTransportClient().prepareSearchScroll(scrollResp.getScrollId())
                     .setScroll(new TimeValue(60000))
                     .execute()
@@ -186,20 +142,17 @@ public class SyncXieTongPurchaseDataJobHandler extends IJobHandler /*implements 
     }
 
     private void syncPurchaserDataService(Timestamp lastSyncTime) {
-        syncCreatePurchaserData(lastSyncTime);
-        syncUpdatedPurchaserData(lastSyncTime);
+        syncCreatePurchaserData();
     }
 
-    private void syncCreatePurchaserData(Timestamp lastSyncTime) {
+    private void syncCreatePurchaserData() {
         String countCreatedPurchaseSql = "SELECT\n"
                 + "   count(1)\n"
                 + "FROM\n"
                 + "   t_reg_company trc\n"
-                + "   left join open_account oa ON trc.ID = oa.COMPANY_ID \n"
                 + "WHERE\n"
                 + "     trc.TYPE = 12\n"
-                + "AND oa.EXAMINE_STATUS = 2\n"
-                + "AND  trc.create_date >= ?";
+                + "\tAND trc.create_date < \"2017-06-27 14:51:13\"";
         String queryCreatedPurchaseSql = "SELECT\n"
                 + "   trc.id,\n"
                 + "   trc.name AS purchaseName,\n"
@@ -214,51 +167,14 @@ public class SyncXieTongPurchaseDataJobHandler extends IJobHandler /*implements 
                 + "   trc.company_site AS companySiteAlias\n"
                 + "FROM\n"
                 + "   t_reg_company trc\n"
-                + "   left join open_account oa ON trc.ID = oa.COMPANY_ID \n"
                 + "WHERE\n"
                 + "     trc.TYPE = 12\n"
-                + "AND oa.EXAMINE_STATUS = 2\n"
-                + "AND  trc.create_date >= ?\n"
+                + "\tAND trc.create_date < \"2017-06-27 14:51:13\""
                 + "LIMIT ?, ?";
         ArrayList<Object> params = new ArrayList<>();
-        params.add(lastSyncTime);
         doSyncPurchaserDataService(countCreatedPurchaseSql, queryCreatedPurchaseSql, params);
     }
 
-    private void syncUpdatedPurchaserData(Timestamp lastSyncTime) {
-        String countUpdatedPurchaseSql = "SELECT\n"
-                + "   count(1)\n"
-                + "FROM\n"
-                + "   t_reg_company trc\n"
-                + "   left join open_account oa ON trc.ID = oa.COMPANY_ID \n"
-                + "WHERE\n"
-                + "     trc.TYPE = 12\n"
-                + "AND oa.EXAMINE_STATUS = 2\n"
-                + "AND  trc.update_time >= ?";
-        String queryUpdatedPurchaseSql = "SELECT\n"
-                + "   trc.id,\n"
-                + "   trc.name AS purchaseName,\n"
-                + "   trc.name AS purchaseNameNotAnalyzed,\n"
-                + "   trc.WWW_STATION AS wwwStationAlias,\n"
-                + "   trc.INDUSTRY_STR AS industryStr,\n"
-                + "   trc.INDUSTRY_STR AS industryStrNotAnalyzed,\n"
-                + "   trc.INDUSTRY AS industry,\n"
-                + "   trc.ZONE_STR AS zoneStr,\n"
-                + "   trc.ZONE_STR AS zoneStrNotAnalyzed,\n"
-                + "   trc.COMP_TYPE_STR AS compTypeStr,\n"
-                + "   trc.company_site AS companySiteAlias\n"
-                + "FROM\n"
-                + "   t_reg_company trc\n"
-                + "   left join open_account oa ON trc.ID = oa.COMPANY_ID \n"
-                + "WHERE\n"
-                + "     trc.TYPE = 12\n"
-                + "AND oa.EXAMINE_STATUS = 2\n"
-                + "AND   trc.update_time >= ?\n"
-                + "LIMIT ?, ?";
-        ArrayList<Object> params = new ArrayList<>();
-        params.add(lastSyncTime);
-        doSyncPurchaserDataService(countUpdatedPurchaseSql, queryUpdatedPurchaseSql, params);
-    }
 
     /**
      * 同步数据到es中
