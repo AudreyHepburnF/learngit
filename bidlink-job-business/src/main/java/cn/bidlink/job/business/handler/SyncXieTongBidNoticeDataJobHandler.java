@@ -52,7 +52,7 @@ public class SyncXieTongBidNoticeDataJobHandler extends IJobHandler /*implements
     private String COMPANY_NAME_ALIAS = "companyNameAlias";
     private String COMPANY_NAME       = "companyName";
     private String PROJECT_NAME_ALIAS = "projectNameAlias";
-    private String PROJECT_NAME       = "PROJECT_NAME";
+    private String PROJECT_NAME       = "projectName";
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
