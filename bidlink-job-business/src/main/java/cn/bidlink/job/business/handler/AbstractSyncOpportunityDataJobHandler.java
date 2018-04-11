@@ -209,7 +209,9 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
         result.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
         // 转换long字段类型，防止前端js精度溢出
         // for fuck js
-        result.put(DIRECTORY_ID, String.valueOf(result.get(DIRECTORY_ID)));
+        if (result.get(DIRECTORY_ID) != null) {
+            result.put(DIRECTORY_ID, String.valueOf(result.get(DIRECTORY_ID)));
+        }
         result.put(PROJECT_ID, String.valueOf(result.get(PROJECT_ID)));
         result.put(PURCHASE_ID, String.valueOf(result.get(PURCHASE_ID)));
     }
