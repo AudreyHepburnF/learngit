@@ -100,7 +100,7 @@ public class SyncXieTongBidTypeOpportunityDataJobHandler extends AbstractSyncOpp
                                  + "      AND update_time > ?\n"
                                  + "      LIMIT ?,?\n"
                                  + "   ) project\n"
-                                 + "JOIN bid_project_item bpi ON project.projectId = bpi.sub_project_id";
+                                 + "LEFT JOIN bid_project_item bpi ON project.projectId = bpi.sub_project_id";
         doSyncProjectDataService(synergyDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList(((Object) lastSyncTime)));
     }
 
