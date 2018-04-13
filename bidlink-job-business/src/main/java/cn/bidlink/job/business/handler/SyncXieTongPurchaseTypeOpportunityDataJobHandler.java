@@ -99,6 +99,7 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
                                  + "         pp.real_quote_stop_time AS realQuoteStopTime,\n"
                                  + "         pp.zone_str AS areaStr,\n"
                                  + "         pp.link_man AS linkMan,\n"
+                                 + "         pp.sys_id AS sourceId,\n"
                                  + "         CASE\n"
                                  + "      WHEN ppc.is_show_mobile = 1 THEN\n"
                                  + "         pp.link_phone\n"

@@ -91,6 +91,7 @@ public class SyncXieTongBidTypeOpportunityDataJobHandler extends AbstractSyncOpp
                                  + "         node,\n"
                                  + "         bid_open_time AS createTime,\n"
                                  + "         bid_endtime AS quoteStopTime,\n"
+                                 + "         sys_id AS sourceId,\n"
                                  + "         update_time AS updateTime\n"
                                  + "      FROM\n"
                                  + "         bid_sub_project\n"
