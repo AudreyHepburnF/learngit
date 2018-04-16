@@ -22,7 +22,10 @@ import org.springframework.util.CollectionUtils;
 
 import javax.sql.DataSource;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:zhihuizhou@ebnew.com">zhouzhihui</a>
@@ -39,8 +42,8 @@ public class SyncXieTongBidNoticeDataJobHandler extends IJobHandler /*implements
     private ElasticClient elasticClient;
 
     @Autowired
-    @Qualifier("synergyDataSource")
-    protected DataSource synergyDataSource;
+    @Qualifier("tenderDataSource")
+    protected DataSource tenderDataSource;
 
     @Value(value = "${pageSize}")
     private Integer pageSize;
@@ -174,12 +177,12 @@ public class SyncXieTongBidNoticeDataJobHandler extends IJobHandler /*implements
     }
 
     private void doSyncBidNoticeService(String countSql, String querySql, ArrayList<Object> params) {
-        long count = DBUtil.count(synergyDataSource, countSql, params);
+        long count = DBUtil.count(tenderDataSource, countSql, params);
         logger.debug("执行countSql: {}, params: {}, 共{}条", countSql, params, count);
         for (long i = 0; i < count; i = i + pageSize) {
             // 添加分页
             ArrayList<Object> paramsToUse = paramsToUse(params, i, pageSize);
-            List<Map<String, Object>> mapList = DBUtil.query(synergyDataSource, querySql, paramsToUse);
+            List<Map<String, Object>> mapList = DBUtil.query(tenderDataSource, querySql, paramsToUse);
             logger.debug("执行querySql: {}, params: {}, 共{}条", querySql, paramsToUse, mapList.size());
             for (Map<String, Object> result : mapList) {
                 refresh(result);

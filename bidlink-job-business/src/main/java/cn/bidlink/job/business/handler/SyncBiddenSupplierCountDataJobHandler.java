@@ -45,8 +45,12 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
     private ElasticClient elasticClient;
 
     @Autowired
-    @Qualifier("synergyDataSource")
-    protected DataSource synergyDataSource;
+    @Qualifier("tenderDataSource")
+    protected DataSource tenderDataSource;
+
+    @Autowired
+    @Qualifier("purchaseDataSource")
+    protected DataSource purchaseDataSource;
 
     @Value("${pageSize}")
     protected int pageSize;
@@ -111,11 +115,11 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
             }
 
             if (purchaseProjectPairs.size() > 0) {
-                syncData(purchaseProjectSource, getPurchaseProjectCountSql(purchaseProjectPairs));
+                syncData(purchaseDataSource, purchaseProjectSource, getPurchaseProjectCountSql(purchaseProjectPairs));
             }
 
             if (bidProjectPairs.size() > 0) {
-                syncData(bidProjectSource, getBidProjectCountSql(bidProjectPairs));
+                syncData(tenderDataSource, bidProjectSource, getBidProjectCountSql(bidProjectPairs));
             }
             scrollResp = elasticClient.getTransportClient().prepareSearchScroll(scrollResp.getScrollId())
                     .setScroll(new TimeValue(60000))
@@ -125,15 +129,15 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
 
     private String getPurchaseProjectCountSql(Set<Pair> projectPairs) {
         String querySqlTemplate = "SELECT\n"
-                                  + "   company_id AS purchaseId,\n"
-                                  + "   project_id AS projectId,\n"
-                                  + "   count(supplier_id) AS biddenSupplierCount\n"
-                                  + "FROM\n"
-                                  + "   (SELECT company_id, project_id, supplier_id FROM purchase_supplier_project WHERE company_id IS NOT NULL AND quote_status > 1 AND (%s)) s\n"
-                                  + "GROUP BY\n"
-                                  + "   company_id,\n"
-                                  + "   project_id;\n"
-                                  + "\n";
+                + "   company_id AS purchaseId,\n"
+                + "   project_id AS projectId,\n"
+                + "   count(supplier_id) AS biddenSupplierCount\n"
+                + "FROM\n"
+                + "   (SELECT company_id, project_id, supplier_id FROM purchase_supplier_project WHERE company_id IS NOT NULL AND quote_status > 1 AND (%s)) s\n"
+                + "GROUP BY\n"
+                + "   company_id,\n"
+                + "   project_id;\n"
+                + "\n";
         int index = 0;
         StringBuilder whereConditionBuilder = new StringBuilder();
         for (Pair projectPair : projectPairs) {
@@ -152,14 +156,14 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
 
     private String getBidProjectCountSql(Set<Pair> projectPairs) {
         String querySqlTemplate = "SELECT\n"
-                                  + "   company_id AS purchaseId,\n"
-                                  + "   sub_project_id AS projectId,\n"
-                                  + "   count(supplier_id) AS biddenSupplierCount\n"
-                                  + "FROM\n"
-                                  + "   (SELECT company_id, sub_project_id, supplier_id FROM bid_supplier WHERE bid_status = 1 AND(%s)) s\n"
-                                  + "GROUP BY\n"
-                                  + "   company_id,\n"
-                                  + "   sub_project_id";
+                + "   company_id AS purchaseId,\n"
+                + "   sub_project_id AS projectId,\n"
+                + "   count(supplier_id) AS biddenSupplierCount\n"
+                + "FROM\n"
+                + "   (SELECT company_id, sub_project_id, supplier_id FROM bid_supplier WHERE bid_status = 1 AND(%s)) s\n"
+                + "GROUP BY\n"
+                + "   company_id,\n"
+                + "   sub_project_id";
         int index = 0;
         StringBuilder whereConditionBuilder = new StringBuilder();
         for (Pair projectPair : projectPairs) {
@@ -181,8 +185,8 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
      *  @param sources
      *
      */
-    private void syncData(List<Map<String, Object>> sources, String querySql) {
-        Map<Pair, Integer> biddenSupplierCountMap = DBUtil.query(synergyDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Pair, Integer>>() {
+    private void syncData(DataSource dataSource, List<Map<String, Object>> sources, String querySql) {
+        Map<Pair, Integer> biddenSupplierCountMap = DBUtil.query(dataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Pair, Integer>>() {
             @Override
             public Map<Pair, Integer> execute(ResultSet resultSet) throws SQLException {
                 Map<Pair, Integer> map = new HashMap<Pair, Integer>();
@@ -218,19 +222,19 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> result : resultsToUpdate) {
                 bulkRequest.add(elasticClient.getTransportClient()
-                                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
-                                                      elasticClient.getProperties().getProperty("cluster.type.supplier_opportunity"),
-                                                      String.valueOf(result.get(ID)))
-                                        .setSource(JSON.toJSONString(result, new ValueFilter() {
-                                            @Override
-                                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                                if (propertyValue instanceof java.util.Date) {
-                                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                                } else {
-                                                    return propertyValue;
-                                                }
-                                            }
-                                        })));
+                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
+                                elasticClient.getProperties().getProperty("cluster.type.supplier_opportunity"),
+                                String.valueOf(result.get(ID)))
+                        .setSource(JSON.toJSONString(result, new ValueFilter() {
+                            @Override
+                            public Object process(Object object, String propertyName, Object propertyValue) {
+                                if (propertyValue instanceof java.util.Date) {
+                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
+                                } else {
+                                    return propertyValue;
+                                }
+                            }
+                        })));
             }
 
             BulkResponse response = bulkRequest.execute().actionGet();

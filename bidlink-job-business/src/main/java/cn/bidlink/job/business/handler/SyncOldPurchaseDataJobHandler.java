@@ -50,12 +50,17 @@ public class SyncOldPurchaseDataJobHandler extends IJobHandler /*implements Init
     private ElasticClient elasticClient;
 
     @Autowired
-    @Qualifier("synergyDataSource")
-    private DataSource synergyDataSource;
+    @Qualifier("purchaseDataSource")
+    private DataSource purchaseDataSource;
+
+    @Autowired
+    @Qualifier("tenderDataSource")
+    private DataSource tenderDataSource;
 
     @Autowired
     @Qualifier("centerDataSource")
     private DataSource centerDataSource;
+
 
     @Value("${pageSize}")
     private int pageSize;
@@ -227,7 +232,7 @@ public class SyncOldPurchaseDataJobHandler extends IJobHandler /*implements Init
         if (!StringUtils.isEmpty(purchaserIdToString)) {
             String queryPurchaseSql = String.format(queryPurchaserSqlTemplate, purchaserIdToString);
             // 根据采购商id查询交易额
-            List<Map<String, Object>> purchaseTradingVolumeList = DBUtil.query(synergyDataSource, queryPurchaseSql, null);
+            List<Map<String, Object>> purchaseTradingVolumeList = DBUtil.query(purchaseDataSource, queryPurchaseSql, null);
             HashMap<String, BigDecimal> purchaseAttributeMap = new HashMap<>();
             // list<Map>转换为map
             if (!CollectionUtils.isEmpty(purchaseTradingVolumeList)) {
@@ -269,7 +274,7 @@ public class SyncOldPurchaseDataJobHandler extends IJobHandler /*implements Init
 
         if (!StringUtils.isEmpty(purchaserIdToString)) {
             String queryBidSql = String.format(queryBidSqlTemplate, purchaserIdToString);
-            List<Map<String, Object>> bidTradingVolumeList = DBUtil.query(synergyDataSource, queryBidSql, null);
+            List<Map<String, Object>> bidTradingVolumeList = DBUtil.query(tenderDataSource, queryBidSql, null);
             HashMap<String, BigDecimal> bidAttributeMap = new HashMap<>();
             if (!CollectionUtils.isEmpty(bidTradingVolumeList)) {
                 for (Map<String, Object> bidTradingVolumeMap : bidTradingVolumeList) {
@@ -312,7 +317,7 @@ public class SyncOldPurchaseDataJobHandler extends IJobHandler /*implements Init
                 "\tpp.company_id";
         if (!StringUtils.isEmpty(purchaserIdToString)) {
             String querySql = String.format(queryPurchaserSqlTemplate, purchaserIdToString);
-            Map<Long, Long> purchaseProjectCountMap = DBUtil.query(synergyDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Long, Long>>() {
+            Map<Long, Long> purchaseProjectCountMap = DBUtil.query(purchaseDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Long, Long>>() {
                 @Override
                 public Map<Long, Long> execute(ResultSet resultSet) throws SQLException {
                     HashMap<Long, Long> projectCountMap = new HashMap<>();
@@ -348,7 +353,7 @@ public class SyncOldPurchaseDataJobHandler extends IJobHandler /*implements Init
 
         if (!StringUtils.isEmpty(purchaserIdToString)) {
             String queryBidSql = String.format(queryBidSqlTemplate, purchaserIdToString);
-            Map<Long, Long> bidProjectCountMap = DBUtil.query(synergyDataSource, queryBidSql, null, new DBUtil.ResultSetCallback<Map<Long, Long>>() {
+            Map<Long, Long> bidProjectCountMap = DBUtil.query(tenderDataSource, queryBidSql, null, new DBUtil.ResultSetCallback<Map<Long, Long>>() {
                 @Override
                 public Map<Long, Long> execute(ResultSet resultSet) throws SQLException {
                     HashMap<Long, Long> projectCountMap = new HashMap<>();

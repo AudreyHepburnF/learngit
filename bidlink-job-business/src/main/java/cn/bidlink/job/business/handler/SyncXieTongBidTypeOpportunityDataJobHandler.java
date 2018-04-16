@@ -36,12 +36,13 @@ import static cn.bidlink.job.business.utils.AreaUtil.queryAreaInfo;
 @Service
 public class SyncXieTongBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunityDataJobHandler /*implements InitializingBean*/ {
     @Autowired
-    @Qualifier("synergyDataSource")
-    protected DataSource synergyDataSource;
+    @Qualifier("tenderDataSource")
+    protected DataSource tenderDataSource;
 
     private String OPEN_RANGE_TYPE = "openRangeType";
     private String NODE            = "node";
 
+    @Override
     public ReturnT<String> execute(String... strings) throws Exception {
         SyncTimeUtil.setCurrentDate();
         logger.info("同步协同招标项目的商机开始");
@@ -102,7 +103,7 @@ public class SyncXieTongBidTypeOpportunityDataJobHandler extends AbstractSyncOpp
                                  + "      LIMIT ?,?\n"
                                  + "   ) project\n"
                                  + "LEFT JOIN bid_project_item bpi ON project.projectId = bpi.sub_project_id";
-        doSyncProjectDataService(synergyDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList(((Object) lastSyncTime)));
+        doSyncProjectDataService(tenderDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList(((Object) lastSyncTime)));
     }
 
 
@@ -137,6 +138,7 @@ public class SyncXieTongBidTypeOpportunityDataJobHandler extends AbstractSyncOpp
         return DigestUtils.md5DigestAsHex((projectId + "_" + purchaseId + "_" + SOURCE_NEW).getBytes());
     }
 
+    @Override
     protected void refresh(Map<String, Object> result, Map<Long, Set<DirectoryEntity>> projectDirectoryMap) {
         super.refresh(result, projectDirectoryMap);
         result.put(QUOTE_STOP_TIME, SyncTimeUtil.toDateString(result.get(QUOTE_STOP_TIME)));
