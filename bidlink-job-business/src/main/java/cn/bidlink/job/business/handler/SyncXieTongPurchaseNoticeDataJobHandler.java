@@ -43,8 +43,8 @@ public class SyncXieTongPurchaseNoticeDataJobHandler extends IJobHandler /*imple
     private ElasticClient elasticClient;
 
     @Autowired
-    @Qualifier(value = "synergyDataSource")
-    private DataSource synergyDataSource;
+    @Qualifier(value = "purchaseDataSource")
+    private DataSource purchaseDataSource;
 
     @Value("${pageSize}")
     private Integer pageSize;
@@ -231,11 +231,11 @@ public class SyncXieTongPurchaseNoticeDataJobHandler extends IJobHandler /*imple
     }
 
     private void doSyncPurchaseNoticeService(String countSql, String querySql, ArrayList<Object> params, Integer noticeType) {
-        long count = DBUtil.count(synergyDataSource, countSql, params);
+        long count = DBUtil.count(purchaseDataSource, countSql, params);
         logger.debug("执行countSql:{} , params:{} , 共{}条", countSql, params, count);
         for (long i = 0; i < count; i = i + pageSize) {
             ArrayList<Object> paramsToUse = paramsToUse(params, i);
-            List<Map<String, Object>> mapList = DBUtil.query(synergyDataSource, querySql, paramsToUse);
+            List<Map<String, Object>> mapList = DBUtil.query(purchaseDataSource, querySql, paramsToUse);
             logger.debug("执行querySql:{} , params:{}, 共{}条", querySql, paramsToUse, mapList.size());
             for (Map<String, Object> map : mapList) {
                 // 公告类型 原始公告和变更公告为:1  结果公告为:2

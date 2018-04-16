@@ -36,13 +36,14 @@ import static cn.bidlink.job.business.utils.AreaUtil.queryAreaInfo;
 @Service
 public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOpportunityDataJobHandler /*implements InitializingBean*/ {
     @Autowired
-    @Qualifier("synergyDataSource")
-    protected DataSource synergyDataSource;
-
+    @Qualifier("purchaseDataSource")
+    protected DataSource purchaseDataSource;
+    
     private String REAL_QUOTE_STOP_TIME = "realQuoteStopTime";
     private String PROVINCE             = "province";
     private String IS_CORE              = "isCore";
 
+    @Override
     public ReturnT<String> execute(String... strings) throws Exception {
         SyncTimeUtil.setCurrentDate();
         logger.info("同步协同采购项目的商机开始");
@@ -120,7 +121,7 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
                                  + "   ) s\n"
                                  + "LEFT JOIN purchase_project_item ppi ON s.projectId = ppi.project_id\n"
                                  + "AND s.purchaseId = ppi.company_id";
-        doSyncProjectDataService(synergyDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList((Object) lastSyncTime));
+        doSyncProjectDataService(purchaseDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList((Object) lastSyncTime));
     }
 
     @Override
@@ -137,6 +138,7 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
         return DigestUtils.md5DigestAsHex((projectId + "_" + purchaseId + "_" + SOURCE_NEW).getBytes());
     }
 
+    @Override
     protected void appendTenantKeyAndAreaStrToResult(List<Map<String, Object>> resultToExecute, Set<Long> purchaseIds) {
         if (purchaseIds.size() > 0) {
             Map<Long, AreaUtil.AreaInfo> areaMap = queryAreaInfo(centerDataSource, purchaseIds);
@@ -160,6 +162,7 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
      * @param resultToExecute 需要更新的数据
      * @param result          从数据库获取的数据
      */
+    @Override
     protected void parseOpportunity(Timestamp currentDate, List<Map<String, Object>> resultToExecute, Map<String, Object> result) {
         int PROJECT_EXECUTING = 1;  // 项目正在进行
         int PROCESS_TO_QUOTE = 20;  // 待截标
@@ -178,6 +181,7 @@ public class SyncXieTongPurchaseTypeOpportunityDataJobHandler extends AbstractSy
         }
     }
 
+    @Override
     protected void refresh(Map<String, Object> result, Map<Long, Set<DirectoryEntity>> projectDirectoryMap) {
         super.refresh(result, projectDirectoryMap);
         // 转换字段类型
