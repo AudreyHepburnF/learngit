@@ -3,32 +3,27 @@
 {
   "purchase_notice": {
     "properties": {
+      "companyId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "companyNameAlias": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "createTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
       "id": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "projectId": {
-        "type": "string",
-        "index": "not_analyzed"
+      "isShowMobile": {
+        "type": "integer"
       },
-      "projectNameAlias": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "projectCode": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "quoteStopTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "publishNoticeTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "projectInfo": {
-        "type": "string"
+      "isShowTel": {
+        "type": "integer"
       },
       "linkMail": {
         "type": "string",
@@ -41,27 +36,34 @@
         "type": "string"
       },
       "linkTel": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "noticeType": {
+        "type": "integer"
+      },
+      "priceOpenRange": {
+        "type": "integer"
+      },
+      "projectCode": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "projectId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "projectInfo": {
         "type": "string"
       },
-      "isShowTel": {
-        "type": "integer"
-      },
-      "isShowMobile": {
-        "type": "integer"
-      },
-      "companyId": {
+      "projectNameAlias": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "companyNameAlias": {
-        "type": "string",
-        "index": "not_analyzed"
+      "project_info": {
+        "type": "string"
       },
-      "syncTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "createTime": {
+      "publishNoticeTime": {
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
@@ -69,8 +71,16 @@
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
-      "noticeType": {
+      "quoteStopTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "resultOpenRange": {
         "type": "integer"
+      },
+      "syncTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       }
     }
   }

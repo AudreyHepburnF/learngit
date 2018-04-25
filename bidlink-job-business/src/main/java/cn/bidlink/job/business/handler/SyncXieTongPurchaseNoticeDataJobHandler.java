@@ -94,32 +94,39 @@ public class SyncXieTongPurchaseNoticeDataJobHandler extends IJobHandler /*imple
         String countSql = "SELECT\n" +
                 "\tcount( 1 ) \n" +
                 "FROM\n" +
-                "\t`purchase_notice_history` \n" +
+                "\t`purchase_notice_history` pnh\n" +
+                "\tLEFT JOIN purchase_project_control ppc ON pnh.project_id = ppc.id \n" +
+                "\tAND pnh.company_id = ppc.company_id \n" +
                 "WHERE\n" +
-                "\tcreate_time > ?";
+                "\tppc.result_open_range = 1 \n" +
+                "\tAND pnh.create_time >?";
         String querySql = "SELECT\n" +
-                "\tid,\n" +
-                "\tproject_id AS projectId,\n" +
-                "\tproject_name AS projectNameAlias,\n" +
-                "\tproject_code AS projectCode,\n" +
-                "\tquote_stop_time AS quoteStopTime,\n" +
-                "\tpublish_notice_time AS publishNoticeTime,\n" +
-                "\tproject_info AS projectInfo,\n" +
-                "\tlink_man AS linkMan,\n" +
-                "\tlink_phone AS linkPhone,\n" +
-                "\tlink_tel AS linkTel,\n" +
-                "\tlink_mail AS linkMail,\n" +
-                "\tis_show_tel AS isShowTel,\n" +
-                "\tis_show_mobile AS isShowMobile,\n" +
-                "\tcompany_id AS companyId,\n" +
-                "\tcreate_time AS createTime,\n" +
-                "\tcompany_name AS companyNameAlias \n" +
+                "\tpnh.id,\n" +
+                "\tpnh.project_id AS projectId,\n" +
+                "\tpnh.project_name AS projectNameAlias,\n" +
+                "\tpnh.project_code AS projectCode,\n" +
+                "\tpnh.quote_stop_time AS quoteStopTime,\n" +
+                "\tpnh.publish_notice_time AS publishNoticeTime,\n" +
+                "\tpnh.project_info AS projectInfo,\n" +
+                "\tpnh.link_man AS linkMan,\n" +
+                "\tpnh.link_phone AS linkPhone,\n" +
+                "\tpnh.link_tel AS linkTel,\n" +
+                "\tpnh.link_mail AS linkMail,\n" +
+                "\tpnh.is_show_tel AS isShowTel,\n" +
+                "\tpnh.is_show_mobile AS isShowMobile,\n" +
+                "\tpnh.company_id AS companyId,\n" +
+                "\tpnh.create_time AS createTime,\n" +
+                "\tpnh.company_name AS companyNameAlias,\n" +
+                "\tppc.result_open_range AS resultOpenRange,\n" +
+                "\tppc.price_open_range AS priceOpenRange \n" +
                 "FROM\n" +
-                "\t`purchase_notice_history`\n" +
-                "\tWHERE\n" +
-                "\tcreate_time > ?\n" +
-                "\torder by id ASC\n" +
-                "\tlimit ?,?";
+                "\t`purchase_notice_history` pnh\n" +
+                "\tLEFT JOIN purchase_project_control ppc ON pnh.project_id = ppc.id \n" +
+                "\tAND pnh.company_id = ppc.company_id \n" +
+                "WHERE\n" +
+                "\tppc.result_open_range = 1 \n" +
+                "\tAND pnh.create_time > ? \n" +
+                "\tLIMIT ?,?";
         ArrayList<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
         doSyncPurchaseNoticeService(countSql, querySql, params, SOURCE_NOTICE);
@@ -129,31 +136,39 @@ public class SyncXieTongPurchaseNoticeDataJobHandler extends IJobHandler /*imple
         String countSql = "SELECT\n" +
                 "\tcount( 1 ) \n" +
                 "FROM\n" +
-                "\t`purchase_notice_history` \n" +
+                "\t`purchase_notice_history` pnh\n" +
+                "\tLEFT JOIN purchase_project_control ppc ON pnh.project_id = ppc.id \n" +
+                "\tAND pnh.company_id = ppc.company_id \n" +
                 "WHERE\n" +
-                "\tupdate_time > ?";
+                "\tppc.result_open_range = 1 \n" +
+                "\tAND pnh.update_time >?";
         String querySql = "SELECT\n" +
-                "\tid,\n" +
-                "\tproject_id AS projectId,\n" +
-                "\tproject_name AS projectNameAlias,\n" +
-                "\tproject_code AS projectCode,\n" +
-                "\tquote_stop_time AS quoteStopTime,\n" +
-                "\tpublish_notice_time AS publishNoticeTime,\n" +
-                "\tproject_info AS projectInfo,\n" +
-                "\tlink_man AS linkMan,\n" +
-                "\tlink_phone AS linkPhone,\n" +
-                "\tlink_tel AS linkTel,\n" +
-                "\tlink_mail AS linkMail,\n" +
-                "\tis_show_tel AS isShowTel,\n" +
-                "\tis_show_mobile AS isShowMobile,\n" +
-                "\tcompany_id AS companyId,\n" +
-                "\tcreate_time AS createTime,\n" +
-                "\tcompany_name AS companyNameAlias \n" +
+                "\tpnh.id,\n" +
+                "\tpnh.project_id AS projectId,\n" +
+                "\tpnh.project_name AS projectNameAlias,\n" +
+                "\tpnh.project_code AS projectCode,\n" +
+                "\tpnh.quote_stop_time AS quoteStopTime,\n" +
+                "\tpnh.publish_notice_time AS publishNoticeTime,\n" +
+                "\tpnh.project_info AS projectInfo,\n" +
+                "\tpnh.link_man AS linkMan,\n" +
+                "\tpnh.link_phone AS linkPhone,\n" +
+                "\tpnh.link_tel AS linkTel,\n" +
+                "\tpnh.link_mail AS linkMail,\n" +
+                "\tpnh.is_show_tel AS isShowTel,\n" +
+                "\tpnh.is_show_mobile AS isShowMobile,\n" +
+                "\tpnh.company_id AS companyId,\n" +
+                "\tpnh.create_time AS createTime,\n" +
+                "\tpnh.company_name AS companyNameAlias,\n" +
+                "\tppc.result_open_range AS resultOpenRange,\n" +
+                "\tppc.price_open_range AS priceOpenRange \n" +
                 "FROM\n" +
-                "\t`purchase_notice_history`\n" +
-                "\tWHERE\n" +
-                "\tupdate_time > ?\n" +
-                "\tlimit ?,?";
+                "\t`purchase_notice_history` pnh\n" +
+                "\tLEFT JOIN purchase_project_control ppc ON pnh.project_id = ppc.id \n" +
+                "\tAND pnh.company_id = ppc.company_id \n" +
+                "WHERE\n" +
+                "\tppc.result_open_range = 1 \n" +
+                "\tAND pnh.update_time > ? \n" +
+                "\tLIMIT ?,?";
         ArrayList<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
         doSyncPurchaseNoticeService(countSql, querySql, params, SOURCE_NOTICE);
@@ -163,32 +178,39 @@ public class SyncXieTongPurchaseNoticeDataJobHandler extends IJobHandler /*imple
         String countSql = "SELECT\n" +
                 "\tcount( 1 ) \n" +
                 "FROM\n" +
-                "\t`purchase_notice_result` \n" +
+                "\t`purchase_notice_result` pnr\n" +
+                "\tLEFT JOIN purchase_project_control ppc ON pnr.project_id = ppc.id \n" +
+                "\tAND pnr.company_id = ppc.company_id \n" +
                 "WHERE\n" +
-                "\tcreate_time > ?";
+                "\tppc.result_open_range = 1\n" +
+                "\tand pnr.create_time > ?";
         String querySql = "SELECT\n" +
-                "\tid,\n" +
-                "\tproject_id AS projectId,\n" +
-                "\tproject_name AS projectNameAlias,\n" +
-                "\tproject_code AS projectCode,\n" +
-                "\tquote_stop_time AS quoteStopTime,\n" +
-                "\tpublish_notice_time AS publishNoticeTime,\n" +
-                "\tpublish_result_time AS publishResultTime,\n" +
-                "\tproject_info AS projectInfo,\n" +
-                "\tlink_man AS linkMan,\n" +
-                "\tlink_phone AS linkPhone,\n" +
-                "\tlink_tel AS linkTel,\n" +
-                "\tlink_mail AS linkMail,\n" +
-                "\tis_show_tel AS isShowTel,\n" +
-                "\tis_show_mobile AS isShowMobile,\n" +
-                "\tcompany_id AS companyId,\n" +
-                "\tcreate_time AS createTime,\n" +
-                "\tcompany_name AS companyNameAlias \n" +
+                "\tpnr.id,\n" +
+                "\tpnr.project_id AS projectId,\n" +
+                "\tpnr.project_name AS projectNameAlias,\n" +
+                "\tpnr.project_code AS projectCode,\n" +
+                "\tpnr.quote_stop_time AS quoteStopTime,\n" +
+                "\tpnr.publish_notice_time AS publishNoticeTime,\n" +
+                "\tpnr.publish_result_time AS publishResultTime,\n" +
+                "\tpnr.project_info AS projectInfo,\n" +
+                "\tpnr.link_man AS linkMan,\n" +
+                "\tpnr.link_phone AS linkPhone,\n" +
+                "\tpnr.link_tel AS linkTel,\n" +
+                "\tpnr.link_mail AS linkMail,\n" +
+                "\tpnr.is_show_tel AS isShowTel,\n" +
+                "\tpnr.is_show_mobile AS isShowMobile,\n" +
+                "\tpnr.company_id AS companyId,\n" +
+                "\tpnr.create_time AS createTime,\n" +
+                "\tpnr.company_name AS companyNameAlias,\n" +
+                "\tppc.result_open_range AS resultOpenRange, \n" +
+                "\tppc.price_open_range AS priceOpenRange\n" +
                 "FROM\n" +
-                "\t`purchase_notice_result`\n" +
-                "\tWHERE\n" +
-                "\tcreate_time > ?\n" +
-                "\tlimit ?,?";
+                "\t`purchase_notice_result` pnr\n" +
+                "\tLEFT JOIN purchase_project_control ppc ON pnr.project_id = ppc.id and pnr.company_id = ppc.company_id\n" +
+                "WHERE\n" +
+                "\tppc.result_open_range = 1\n" +
+                "\tand pnr.create_time > ? \n" +
+                "\tLIMIT ?,?";
         ArrayList<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
         doSyncPurchaseNoticeService(countSql, querySql, params, RESULT_NOTICE);
@@ -198,32 +220,39 @@ public class SyncXieTongPurchaseNoticeDataJobHandler extends IJobHandler /*imple
         String countSql = "SELECT\n" +
                 "\tcount( 1 ) \n" +
                 "FROM\n" +
-                "\t`purchase_notice_result` \n" +
+                "\t`purchase_notice_result` pnr\n" +
+                "\tLEFT JOIN purchase_project_control ppc ON pnr.project_id = ppc.id \n" +
+                "\tAND pnr.company_id = ppc.company_id \n" +
                 "WHERE\n" +
-                "\tupdate_time > ?";
+                "\tppc.result_open_range = 1\n" +
+                "\tand pnr.update_time > ?";
         String querySql = "SELECT\n" +
-                "\tid,\n" +
-                "\tproject_id AS projectId,\n" +
-                "\tproject_name AS projectNameAlias,\n" +
-                "\tproject_code AS projectCode,\n" +
-                "\tquote_stop_time AS quoteStopTime,\n" +
-                "\tpublish_notice_time AS publishNoticeTime,\n" +
-                "\tpublish_result_time AS publishResultTime,\n" +
-                "\tproject_info AS projectInfo,\n" +
-                "\tlink_man AS linkMan,\n" +
-                "\tlink_phone AS linkPhone,\n" +
-                "\tlink_tel AS linkTel,\n" +
-                "\tlink_mail AS linkMail,\n" +
-                "\tis_show_tel AS isShowTel,\n" +
-                "\tis_show_mobile AS isShowMobile,\n" +
-                "\tcompany_id AS companyId,\n" +
-                "\tcreate_time AS createTime,\n" +
-                "\tcompany_name AS companyNameAlias \n" +
+                "\tpnr.id,\n" +
+                "\tpnr.project_id AS projectId,\n" +
+                "\tpnr.project_name AS projectNameAlias,\n" +
+                "\tpnr.project_code AS projectCode,\n" +
+                "\tpnr.quote_stop_time AS quoteStopTime,\n" +
+                "\tpnr.publish_notice_time AS publishNoticeTime,\n" +
+                "\tpnr.publish_result_time AS publishResultTime,\n" +
+                "\tpnr.project_info AS projectInfo,\n" +
+                "\tpnr.link_man AS linkMan,\n" +
+                "\tpnr.link_phone AS linkPhone,\n" +
+                "\tpnr.link_tel AS linkTel,\n" +
+                "\tpnr.link_mail AS linkMail,\n" +
+                "\tpnr.is_show_tel AS isShowTel,\n" +
+                "\tpnr.is_show_mobile AS isShowMobile,\n" +
+                "\tpnr.company_id AS companyId,\n" +
+                "\tpnr.create_time AS createTime,\n" +
+                "\tpnr.company_name AS companyNameAlias,\n" +
+                "\tppc.result_open_range AS resultOpenRange, \n" +
+                "\tppc.price_open_range AS priceOpenRange\n" +
                 "FROM\n" +
-                "\t`purchase_notice_result`\n" +
-                "\tWHERE\n" +
-                "\tupdate_time > ?\n" +
-                "\tlimit ?,?";
+                "\t`purchase_notice_result` pnr\n" +
+                "\tLEFT JOIN purchase_project_control ppc ON pnr.project_id = ppc.id and pnr.company_id = ppc.company_id\n" +
+                "WHERE\n" +
+                "\tppc.result_open_range = 1\n" +
+                "\tand pnr.update_time > ? \n" +
+                "\tLIMIT ?,?";
         ArrayList<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
         doSyncPurchaseNoticeService(countSql, querySql, params, SOURCE_NOTICE);

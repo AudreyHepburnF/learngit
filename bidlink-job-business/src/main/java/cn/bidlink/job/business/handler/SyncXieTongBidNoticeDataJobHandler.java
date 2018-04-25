@@ -56,6 +56,8 @@ public class SyncXieTongBidNoticeDataJobHandler extends IJobHandler /*implements
     private String COMPANY_NAME       = "companyName";
     private String PROJECT_NAME_ALIAS = "projectNameAlias";
     private String PROJECT_NAME       = "projectName";
+    private String NOTICE_TYPE        = "noticeType";
+
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
@@ -70,8 +72,88 @@ public class SyncXieTongBidNoticeDataJobHandler extends IJobHandler /*implements
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.bid_notice", null);
         logger.info("同步新平台招标公告 lastSyncTime:" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n" +
                 ", syncTime" + new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
+        syncBidNoticeService(lastSyncTime);
+        syncBidDecidedNoticeService(lastSyncTime);
+    }
+
+    private void syncBidDecidedNoticeService(Timestamp lastSyncTime) {
+        logger.info("同步协同平台中标公告开始");
+        syncInsertBidDecidedNotice(lastSyncTime);
+        syncUpdateBidDecidedNotice(lastSyncTime);
+        logger.info("同步协同平台中标公告结束");
+    }
+
+    private void syncUpdateBidDecidedNotice(Timestamp lastSyncTime) {
+        String countSql = "SELECT\n" +
+                "\tcount(1) \n" +
+                "FROM\n" +
+                "\tbid_decided_notice \n" +
+                "WHERE\n" +
+                "\tis_publish = 1 \n" +
+                "\tAND update_time > ?";
+        String querySql = "SELECT\n" +
+                "\tid,\n" +
+                "\tproject_id AS projectId,\n" +
+                "\tsub_project_id AS subProjectId,\n" +
+                "\tproject_name AS projectName,\n" +
+                "\tproject_code AS projectCode,\n" +
+                "\ttender_name AS tenderName,\n" +
+                "\tbid_type AS bidType,\n" +
+                "\tis_have_wibider AS isHaveWibider,\n" +
+                "\tsupplier_name AS supplierNameNotAnalyzed,\n" +
+                "\tlink_man AS linkMan,\n" +
+                "\tlink_phone AS linkPhone,\n" +
+                "\tlink_tel AS linkTel,\n" +
+                "\tlink_mail AS linkMail\n" +
+                "FROM\n" +
+                "\t`bid_decided_notice` \n" +
+                "WHERE\n" +
+                "\tis_publish = 1 \n" +
+                "\tAND update_time >?\n" +
+                "\tLIMIT ?,?";
+        ArrayList<Object> params = new ArrayList<>();
+        params.add(lastSyncTime);
+        doSyncBidNoticeService(countSql, querySql, params, 2);
+    }
+
+    private void syncInsertBidDecidedNotice(Timestamp lastSyncTime) {
+        String countSql = "SELECT\n" +
+                "\tcount(1) \n" +
+                "FROM\n" +
+                "\tbid_decided_notice \n" +
+                "WHERE\n" +
+                "\tis_publish = 1 \n" +
+                "\tAND create_time > ?";
+        String querySql = "SELECT\n" +
+                "\tid,\n" +
+                "\tproject_id AS projectId,\n" +
+                "\tsub_project_id AS subProjectId,\n" +
+                "\tproject_name AS projectName,\n" +
+                "\tproject_code AS projectCode,\n" +
+                "\ttender_name AS tenderName,\n" +
+                "\tbid_type AS bidType,\n" +
+                "\tis_have_wibider AS isHaveWibider,\n" +
+                "\tsupplier_name AS supplierNameNotAnalyzed,\n" +
+                "\tlink_man AS linkMan,\n" +
+                "\tlink_phone AS linkPhone,\n" +
+                "\tlink_tel AS linkTel,\n" +
+                "\tlink_mail AS linkMail\n" +
+                "FROM\n" +
+                "\t`bid_decided_notice` \n" +
+                "WHERE\n" +
+                "\tis_publish = 1 \n" +
+                "\tAND create_time >?\n" +
+                "\tLIMIT ?,?";
+        ArrayList<Object> params = new ArrayList<>();
+        params.add(lastSyncTime);
+        doSyncBidNoticeService(countSql, querySql, params, 2);
+    }
+
+    private void syncBidNoticeService(Timestamp lastSyncTime) {
+        logger.info("同步协同平台招标公告开始");
         syncInsertBidNoticeService(lastSyncTime);
         syncUpdateBidNoticeService(lastSyncTime);
+        logger.info("同步协同平台招标公告结束");
     }
 
     private void syncInsertBidNoticeService(Timestamp lastSyncTime) {
@@ -122,7 +204,7 @@ public class SyncXieTongBidNoticeDataJobHandler extends IJobHandler /*implements
                 "\tLIMIT ?,?";
         ArrayList<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
-        doSyncBidNoticeService(countSql, querySql, params);
+        doSyncBidNoticeService(countSql, querySql, params, 1);
     }
 
     private void syncUpdateBidNoticeService(Timestamp lastSyncTime) {
@@ -173,10 +255,10 @@ public class SyncXieTongBidNoticeDataJobHandler extends IJobHandler /*implements
                 "\tLIMIT ?,?";
         ArrayList<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
-        doSyncBidNoticeService(countSql, querySql, params);
+        doSyncBidNoticeService(countSql, querySql, params, 1);
     }
 
-    private void doSyncBidNoticeService(String countSql, String querySql, ArrayList<Object> params) {
+    private void doSyncBidNoticeService(String countSql, String querySql, ArrayList<Object> params, Integer noticeType) {
         long count = DBUtil.count(tenderDataSource, countSql, params);
         logger.debug("执行countSql: {}, params: {}, 共{}条", countSql, params, count);
         for (long i = 0; i < count; i = i + pageSize) {
@@ -185,6 +267,7 @@ public class SyncXieTongBidNoticeDataJobHandler extends IJobHandler /*implements
             List<Map<String, Object>> mapList = DBUtil.query(tenderDataSource, querySql, paramsToUse);
             logger.debug("执行querySql: {}, params: {}, 共{}条", querySql, paramsToUse, mapList.size());
             for (Map<String, Object> result : mapList) {
+                result.put(NOTICE_TYPE, noticeType);
                 refresh(result);
             }
             batchExecute(mapList);
