@@ -56,6 +56,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected String ID                          = "id";
     protected String PURCHASE_ID                 = "purchaseId";
     protected String PROJECT_ID                  = "projectId";
+    protected String SOURCE_ID                   = "sourceId";
     protected String PROJECT_TYPE                = "projectType";
     protected String DIRECTORY_NAME              = "directoryName";
     protected String DIRECTORY_ID                = "directoryId";
@@ -99,7 +100,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected abstract String generateOpportunityId(Map<String, Object> result);
 
     protected class DirectoryEntity {
-        protected Long directoryId;
+        protected Long   directoryId;
         protected String directoryName;
 
         public DirectoryEntity(Long directoryId, String directoryName) {
@@ -214,6 +215,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
         }
         result.put(PROJECT_ID, String.valueOf(result.get(PROJECT_ID)));
         result.put(PURCHASE_ID, String.valueOf(result.get(PURCHASE_ID)));
+        result.put(SOURCE_ID, String.valueOf(result.get(SOURCE_ID)));
     }
 
     /**
@@ -266,19 +268,19 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> result : resultsToUpdate) {
                 bulkRequest.add(elasticClient.getTransportClient()
-                                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
-                                                      elasticClient.getProperties().getProperty("cluster.type.supplier_opportunity"),
-                                                      String.valueOf(result.get(ID)))
-                                        .setSource(JSON.toJSONString(result, new ValueFilter() {
-                                            @Override
-                                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                                if (propertyValue instanceof java.util.Date) {
-                                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                                } else {
-                                                    return propertyValue;
-                                                }
-                                            }
-                                        })));
+                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
+                                elasticClient.getProperties().getProperty("cluster.type.supplier_opportunity"),
+                                String.valueOf(result.get(ID)))
+                        .setSource(JSON.toJSONString(result, new ValueFilter() {
+                            @Override
+                            public Object process(Object object, String propertyName, Object propertyValue) {
+                                if (propertyValue instanceof java.util.Date) {
+                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
+                                } else {
+                                    return propertyValue;
+                                }
+                            }
+                        })));
             }
 
             BulkResponse response = bulkRequest.execute().actionGet();
