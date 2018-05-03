@@ -32,12 +32,17 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected ElasticClient elasticClient;
 
     @Autowired
-    @Qualifier("ycDataSource")
-    protected DataSource ycDataSource;
+    @Qualifier("tenderDataSource")
+    protected DataSource tenderDataSource;
 
     @Autowired
-    @Qualifier("centerDataSource")
-    protected DataSource centerDataSource;
+    @Qualifier("purchaseDataSource")
+    protected DataSource purchaseDataSource;
+
+    @Autowired
+    @Qualifier("uniregDataSource")
+    protected DataSource uniregDataSource;
+
 
     // 有效的商机
     protected int    VALID_OPPORTUNITY_STATUS   = 1;
@@ -67,7 +72,6 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected String PROJECT_NAME                = "projectName";
     protected String PROJECT_NAME_NOT_ANALYZED   = "projectNameNotAnalyzed";
     protected String PROJECT_STATUS              = "projectStatus";
-    protected String TENANT_KEY                  = "tenantKey";
     protected String AREA_STR                    = "areaStr";
     protected String AREA_STR_NOT_ANALYZED       = "areaStrNotAnalyzed";
     protected String REGION                      = "region";
@@ -241,23 +245,6 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
      * @param result
      */
     protected abstract void parseOpportunity(Timestamp currentDate, List<Map<String, Object>> resultToExecute, Map<String, Object> result);
-
-    /**
-     * 查询采购商的tenantKey
-     *
-     * @param purchaseIds
-     * @return
-     */
-    protected Map<Long, Object> queryTenantKey(Set<Long> purchaseIds) {
-        String queryTenantKeySqlTemplate = "SELECT ID AS purchaseId,TENANT_ID AS tenantKey FROM t_reg_company WHERE TYPE = 12 AND TENANT_ID IS NOT NULL AND id in (%s)";
-        String queryTenantKeySql = String.format(queryTenantKeySqlTemplate, StringUtils.collectionToCommaDelimitedString(purchaseIds));
-        List<Map<String, Object>> query = DBUtil.query(centerDataSource, queryTenantKeySql, null);
-        Map<Long, Object> tenantKeyMap = new HashMap<>();
-        for (Map<String, Object> map : query) {
-            tenantKeyMap.put((Long) map.get(PURCHASE_ID), map.get(TENANT_KEY));
-        }
-        return tenantKeyMap;
-    }
 
     protected void batchExecute(List<Map<String, Object>> resultsToUpdate) {
 //        System.out.println("size : " + resultsToUpdate.size());

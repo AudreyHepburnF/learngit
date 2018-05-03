@@ -3,20 +3,16 @@
 {
   "supplier_product": {
     "properties": {
-      "createTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "updateTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "syncTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      "companyLogo": {
+        "type": "string",
+        "index": "not_analyzed"
       },
       "core": {
         "type": "integer"
+      },
+      "createTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "directoryNameAlias": {
         "type": "string",
@@ -41,9 +37,13 @@
         "type": "string",
         "analyzer": "ik"
       },
-      "companyLogo": {
-        "type": "string",
-        "index": "not_analyzed"
+      "syncTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "updateTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       }
     }
   }

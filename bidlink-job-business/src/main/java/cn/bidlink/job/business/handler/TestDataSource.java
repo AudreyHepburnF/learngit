@@ -26,26 +26,6 @@ public class TestDataSource extends IJobHandler {
     private Logger logger = LoggerFactory.getLogger(TestDataSource.class);
 
     @Autowired
-    @Qualifier("proDataSource")
-    private DataSource proDataSource;
-
-    @Autowired
-    @Qualifier("ycDataSource")
-    private DataSource ycDataSource;
-
-//    @Autowired
-//    @Qualifier("synergyDataSource")
-//    private DataSource synergyDataSource;
-
-    @Autowired
-    @Qualifier("centerDataSource")
-    private DataSource centerDataSource;
-
-    @Autowired
-    @Qualifier("creditDataSource")
-    private DataSource creditDataSource;
-
-    @Autowired
     @Qualifier("enterpriseSpaceDataSource")
     private DataSource enterpriseSpaceDataSource;
 
@@ -57,24 +37,9 @@ public class TestDataSource extends IJobHandler {
 
     private void testDataSource() {
         logger.info("测试数据源开始");
-        testYcDataSource();
-        testProDataSource();
-        testCenterDataSource();
-        testCreditDataSource();
         testEnterpriseSpaceDataSource();
-//        testSynergyDataSource();
         logger.info("测试数据源结束");
     }
-
-//    private void testSynergyDataSource() {
-//        logger.info("测试synergyDataSource开始");
-//        String testYcSql = "SELECT\n"
-//                           + "   count(1)\n"
-//                           + " from\n"
-//                           + "   purchase_supplier_project";
-//        List<Map<String, Object>> query = DBUtil.query(synergyDataSource, testYcSql, null);
-//        logger.info("测试synergyDataSourcee结束");
-//    }
 
     private void testEnterpriseSpaceDataSource() {
         logger.info("测试enterpriseSpaceDataSource开始");
@@ -86,37 +51,5 @@ public class TestDataSource extends IJobHandler {
         logger.info("测试enterpriseSpaceDataSource结束");
     }
 
-    private void testCreditDataSource() {
-        logger.info("测试creditDataSource开始");
-        String testYcSql = "SELECT\n"
-                           + "   count(1)\n"
-                           + " from\n"
-                           + "   credit_score";
-        List<Map<String, Object>> query = DBUtil.query(creditDataSource, testYcSql, null);
-        logger.info("测试creditDataSource结束");
-    }
 
-    private void testYcDataSource() {
-        logger.info("测试ycDataSource开始");
-        String testYcSql = "SELECT\n"
-                           + "   count(1)\n"
-                           + " from\n"
-                           + "   bmpfjz_supplier_project_bid\n WHERE supplier_bid_status IN (2, 3, 6, 7)";
-        List<Map<String, Object>> query = DBUtil.query(ycDataSource, testYcSql, null);
-        logger.info("测试ycDataSource结束");
-    }
-
-    private void testProDataSource() {
-        logger.info("测试proDataSource开始");
-        String testYcSql = "SELECT count(1) FROM user_wfirst_use";
-        List<Map<String, Object>> query = DBUtil.query(proDataSource, testYcSql, null);
-        logger.info("测试proDataSource结束");
-    }
-
-    private void testCenterDataSource() {
-        logger.info("测试centerDataSource开始");
-        String testYcSql = "SELECT count(1) FROM t_reg_company WHERE TYPE = 13 AND MAIN_PRODUCT IS NOT NULL";
-        List<Map<String, Object>> query = DBUtil.query(centerDataSource, testYcSql, null);
-        logger.info("测试centerDataSource结束");
-    }
 }

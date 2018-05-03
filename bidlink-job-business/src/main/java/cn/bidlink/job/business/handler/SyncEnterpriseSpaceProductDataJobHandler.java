@@ -19,13 +19,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:zhihuizhou@ebnew.com">zhouzhihui</a>
@@ -43,9 +43,9 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends IJobHandler /*impl
     @Qualifier("enterpriseSpaceDataSource")
     private DataSource enterpriseSpaceDataSource;
 
-    @Autowired
-    @Qualifier("centerDataSource")
-    private DataSource centerDataSource;
+//    @Autowired
+//    @Qualifier("centerDataSource")
+//    private DataSource centerDataSource;
 
     @Autowired
     private ElasticClient elasticClient;
@@ -53,9 +53,14 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends IJobHandler /*impl
     @Value("${pageSize}")
     private Integer pageSize;
 
-    private String ID         = "id";
-    private String CORE       = "core";
-    private String COMPANY_ID = "companyId";
+    private String ID                        = "id";
+    private String CORE                      = "core";
+    private String COMPANY_ID                = "companyId";
+    private String PRODUCT_NAME              = "productName";
+    private String PRODUCT_NAME_NOT_ANALYZED = "productNameNotAnalyzed";
+    private String ZONE_STR                  = "zoneStr";
+    private String ZONE_STR_NOT_ANALYZED     = "zoneStrNotAnalyzed";
+
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
@@ -67,14 +72,14 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends IJobHandler /*impl
     }
 
     private void syncEnterpriseSpaceData() {
-        Timestamp lastTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
+        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
                 "cluster.index",
                 "cluster.type.enterprise_space_product",
                 null);
-        logger.info("企业空间同步lastTime:" + new DateTime(lastTime).toString("yyyy-MM-dd HH:mm:ss") + "\n" +
+        logger.info("企业空间同步lastTime:" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss") + "\n" +
                 ", syncTime:" + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
-        syncCreateEnterpriseSpaceService(lastTime);
-        syncUpdateEnterpriseSpaceService(lastTime);
+        syncCreateEnterpriseSpaceService(lastSyncTime);
+        syncUpdateEnterpriseSpaceService(lastSyncTime);
     }
 
     /**
@@ -93,7 +98,6 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends IJobHandler /*impl
                 "\tCOMPANYID AS companyId,\n" +
                 "\tPICFILE AS picFile,\n" +
                 "\ttitle AS productName,\n" +
-                "\ttitle AS productNameNotAnalyzed,\n" +
                 "\tCOMPANYNAME AS companyName,\n" +
                 "\tSTATE AS state,\n" +
                 "\tZONESTR AS zoneStrNotAnalyzed,\n" +
@@ -125,7 +129,6 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends IJobHandler /*impl
                 "\tCOMPANYID AS companyId,\n" +
                 "\tPICFILE AS picFile,\n" +
                 "\ttitle AS productName,\n" +
-                "\ttitle AS productNameNotAnalyzed,\n" +
                 "\tCOMPANYNAME AS companyName,\n" +
                 "\tSTATE AS state,\n" +
                 "\tZONESTR AS zoneStrNotAnalyzed,\n" +
@@ -148,8 +151,11 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends IJobHandler /*impl
             List<Object> paramsToUse = appendToParams(params, i);
             List<Map<String, Object>> products = DBUtil.query(enterpriseSpaceDataSource, querySql, paramsToUse);
 
-            // 添加供应商状态
-            appendSupplierStatus(products);
+            // 添加供应商状态 FIXME 待设计核心供 默认为核心供
+//            appendSupplierStatus(products);
+            for (Map<String, Object> product : products) {
+                product.put(CORE, 1);
+            }
 
             // 添加同步时间和字段类型转换
             for (Map<String, Object> product : products) {
@@ -165,35 +171,35 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends IJobHandler /*impl
      *
      * @param mapList
      */
-    private void appendSupplierStatus(List<Map<String, Object>> mapList) {
-        HashSet<Long> companyIds = new HashSet<>();
-        for (Map<String, Object> map : mapList) {
-            companyIds.add(((Long) map.get(COMPANY_ID)));
-        }
-
-        String querySqlTemplate = "SELECT\n" +
-                "\tCOMP_ID AS companyId,\n" +
-                "\tCREDIT_MEDAL_STATUS AS core \n" +
-                "FROM\n" +
-                "\t`t_uic_company_status` \n" +
-                "WHERE\n" +
-                "\tCOMP_ID IN (%s)";
-        String querySql = String.format(querySqlTemplate, StringUtils.collectionToCommaDelimitedString(companyIds));
-        Map<Long, Integer> coreMap = DBUtil.query(centerDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Long, Integer>>() {
-            @Override
-            public Map<Long, Integer> execute(ResultSet resultSet) throws SQLException {
-                HashMap<Long, Integer> map = new HashMap<>();
-                while (resultSet.next()) {
-                    map.put(resultSet.getLong(COMPANY_ID), resultSet.getInt(CORE));
-                }
-                return map;
-            }
-        });
-
-        for (Map<String, Object> map : mapList) {
-            map.put(CORE, coreMap.get(map.get(COMPANY_ID)));
-        }
-    }
+//    private void appendSupplierStatus(List<Map<String, Object>> mapList) {
+//        HashSet<Long> companyIds = new HashSet<>();
+//        for (Map<String, Object> map : mapList) {
+//            companyIds.add(((Long) map.get(COMPANY_ID)));
+//        }
+//
+//        String querySqlTemplate = "SELECT\n" +
+//                "\tCOMP_ID AS companyId,\n" +
+//                "\tCREDIT_MEDAL_STATUS AS core \n" +
+//                "FROM\n" +
+//                "\t`t_uic_company_status` \n" +
+//                "WHERE\n" +
+//                "\tCOMP_ID IN (%s)";
+//        String querySql = String.format(querySqlTemplate, StringUtils.collectionToCommaDelimitedString(companyIds));
+//        Map<Long, Integer> coreMap = DBUtil.query(centerDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Long, Integer>>() {
+//            @Override
+//            public Map<Long, Integer> execute(ResultSet resultSet) throws SQLException {
+//                HashMap<Long, Integer> map = new HashMap<>();
+//                while (resultSet.next()) {
+//                    map.put(resultSet.getLong(COMPANY_ID), resultSet.getInt(CORE));
+//                }
+//                return map;
+//            }
+//        });
+//
+//        for (Map<String, Object> map : mapList) {
+//            map.put(CORE, coreMap.get(map.get(COMPANY_ID)));
+//        }
+//    }
 
     /**
      * 添加分页查询
@@ -217,6 +223,8 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends IJobHandler /*impl
     private void refresh(Map<String, Object> product) {
         product.put(ID, String.valueOf(product.get(ID)));
         product.put(COMPANY_ID, String.valueOf(product.get(COMPANY_ID)));
+        product.put(ZONE_STR_NOT_ANALYZED, product.get(ZONE_STR));
+        product.put(PRODUCT_NAME_NOT_ANALYZED, product.get(PRODUCT_NAME));
         product.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
     }
 
@@ -226,6 +234,7 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends IJobHandler /*impl
      * @param products
      */
     private void batchInsert(List<Map<String, Object>> products) {
+        System.out.println(products);
         if (!CollectionUtils.isEmpty(products)) {
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> product : products) {

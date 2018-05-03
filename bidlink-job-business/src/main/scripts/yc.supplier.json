@@ -7,10 +7,6 @@
         "type": "string",
         "analyzer": "ik"
       },
-      "addressEn": {
-        "type": "string",
-        "analyzer": "standard"
-      },
       "areaCode": {
         "type": "string",
         "index": "not_analyzed"
@@ -20,27 +16,6 @@
         "analyzer": "ik"
       },
       "areaStrNotAnalyzed": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "authCodeId": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "authStatus": {
-        "type": "integer"
-      },
-      "authStatus2": {
-        "type": "integer"
-      },
-      "authTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "authType": {
-        "type": "integer"
-      },
-      "authenNumber": {
         "type": "string",
         "index": "not_analyzed"
       },
@@ -59,7 +34,7 @@
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
-      "code": {
+      "companyLogo": {
         "type": "string",
         "index": "not_analyzed"
       },
@@ -93,10 +68,6 @@
         "type": "string",
         "analyzer": "ik"
       },
-      "contactEn": {
-        "type": "string",
-        "analyzer": "standard"
-      },
       "core": {
         "type": "integer"
       },
@@ -117,10 +88,6 @@
       "enterpriseSpaceDetail": {
         "type": "string",
         "index": "not_analyzed"
-      },
-      "foundedDate": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "fund": {
         "type": "string",
@@ -174,10 +141,6 @@
         "type": "string",
         "index": "not_analyzed"
       },
-      "tenantId": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
       "totalBidProject": {
         "type": "long"
       },
@@ -219,10 +182,6 @@
       "zoneStr": {
         "type": "string",
         "analyzer": "ik"
-      },
-      "companyLogo": {
-        "type": "string",
-        "index": "not_analyzed"
       }
     }
   }

@@ -58,17 +58,17 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     @Autowired
     private ElasticClient elasticClient;
 
-    @Autowired
-    @Qualifier("proDataSource")
-    private DataSource proDataSource;
+//    @Autowired
+//    @Qualifier("proDataSource")
+//    private DataSource proDataSource;
+
+//    @Autowired
+//    @Qualifier("ycDataSource")
+//    private DataSource ycDataSource;
 
     @Autowired
-    @Qualifier("ycDataSource")
-    private DataSource ycDataSource;
-
-    @Autowired
-    @Qualifier("centerDataSource")
-    private DataSource centerDataSource;
+    @Qualifier("uniregDataSource")
+    private DataSource uniregDataSource;
 
     @Value("${pageSize:200}")
     private int pageSize;
@@ -103,6 +103,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
         });
     }
 
+    @Override
     public ReturnT<String> execute(String... strings) throws Exception {
         logger.info("供应商产品数据同步开始");
         SyncTimeUtil.setCurrentDate();
@@ -118,7 +119,8 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
                     + ", syncTime : " + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
 //        syncTradeProductDataService(lastSyncTime);
 //        syncTradeBidProductDataService(lastSyncTime);
-        syncProDataService(lastSyncTime);
+        // FIXME 同步标王待沟通
+//        syncProDataService(lastSyncTime);
         syncCenterDataService(lastSyncTime);
     }
 
@@ -129,98 +131,98 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
      *
      * @param lastSyncTime
      */
-    private void syncTradeProductDataService(Timestamp lastSyncTime) {
-        logger.info("同步交易过的采购品开始");
-        String countUpdatedSql = "SELECT\n"
-                                 + "   count(1)\n"
-                                 + " from\n"
-                                 + "   bmpfjz_supplier_project_bid\n"
-                                 + " where\n"
-                                 + "   update_time > ?\n"
-                                 + " AND supplier_bid_status IN (2, 3, 6, 7)";
-        String queryUpdatedSql = "SELECT\n"
-                                 + " bspb.SUPPLIER_ID AS supplierId,\n"
-                                 + " bspb.SUPPLIER_NAME AS supplierName,\n"
-                                 + " cd.`NAME` AS directoryNameAlias,\n"
-                                 + " 1 AS supplierDirectoryRel,\n"
-                                 + " bspb.CREATE_TIME AS createTime\n"
-                                 + "FROM\n"
-                                 + " (\n"
-                                 + "  SELECT\n"
-                                 + "   id,\n"
-                                 + "   comp_id,\n"
-                                 + "   supplier_id,\n"
-                                 + "   supplier_name,\n"
-                                 + "   create_time\n"
-                                 + "  FROM\n"
-                                 + "   bmpfjz_supplier_project_bid\n"
-                                 + "  WHERE\n"
-                                 + "   update_time > ?\n"
-                                 + "  AND supplier_bid_status IN (2, 3, 6, 7)\n"
-                                 + "  LIMIT ?, ?\n"
-                                 + " ) bspb\n"
-                                 + "JOIN bmpfjz_supplier_project_item_bid bspib ON bspb.id = bspib.supplier_project_bid_id\n"
-                                 + "AND bspb.comp_id = bspib.comp_id\n"
-                                 + "JOIN corp_directorys cd ON bspib.directory_id = cd.ID\n"
-                                 + "AND cd.company_id = bspib.comp_id\n";
-        doSyncUpdatedData(ycDataSource, countUpdatedSql, queryUpdatedSql, lastSyncTime);
-        logger.info("同步交易过的采购品结束");
-    }
+//    private void syncTradeProductDataService(Timestamp lastSyncTime) {
+//        logger.info("同步交易过的采购品开始");
+//        String countUpdatedSql = "SELECT\n"
+//                                 + "   count(1)\n"
+//                                 + " from\n"
+//                                 + "   bmpfjz_supplier_project_bid\n"
+//                                 + " where\n"
+//                                 + "   update_time > ?\n"
+//                                 + " AND supplier_bid_status IN (2, 3, 6, 7)";
+//        String queryUpdatedSql = "SELECT\n"
+//                                 + " bspb.SUPPLIER_ID AS supplierId,\n"
+//                                 + " bspb.SUPPLIER_NAME AS supplierName,\n"
+//                                 + " cd.`NAME` AS directoryNameAlias,\n"
+//                                 + " 1 AS supplierDirectoryRel,\n"
+//                                 + " bspb.CREATE_TIME AS createTime\n"
+//                                 + "FROM\n"
+//                                 + " (\n"
+//                                 + "  SELECT\n"
+//                                 + "   id,\n"
+//                                 + "   comp_id,\n"
+//                                 + "   supplier_id,\n"
+//                                 + "   supplier_name,\n"
+//                                 + "   create_time\n"
+//                                 + "  FROM\n"
+//                                 + "   bmpfjz_supplier_project_bid\n"
+//                                 + "  WHERE\n"
+//                                 + "   update_time > ?\n"
+//                                 + "  AND supplier_bid_status IN (2, 3, 6, 7)\n"
+//                                 + "  LIMIT ?, ?\n"
+//                                 + " ) bspb\n"
+//                                 + "JOIN bmpfjz_supplier_project_item_bid bspib ON bspb.id = bspib.supplier_project_bid_id\n"
+//                                 + "AND bspb.comp_id = bspib.comp_id\n"
+//                                 + "JOIN corp_directorys cd ON bspib.directory_id = cd.ID\n"
+//                                 + "AND cd.company_id = bspib.comp_id\n";
+//        doSyncUpdatedData(ycDataSource, countUpdatedSql, queryUpdatedSql, lastSyncTime);
+//        logger.info("同步交易过的采购品结束");
+//    }
 
     /**
      * 同步中标的产品
      *
      * @param lastSyncTime
      */
-    private void syncTradeBidProductDataService(Timestamp lastSyncTime) {
-        logger.info("同步中标的产品开始");
-        String countUpdatedSql = "SELECT\n"
-                                 + "   count(1)\n"
-                                 + "FROM\n"
-                                 + "   bid b\n"
-                                 + "JOIN bid_product bp ON b.ID = bp.BID_ID\n"
-                                 + "WHERE\n"
-                                 + "   bp.PRODUCT_NAME IS NOT NULL\n"
-                                 + "AND b.CREATE_TIME > ?";
-        String queryUpdatedSql = "SELECT\n"
-                                 + "   b.BIDER_ID AS supplierId,\n"
-                                 + "   b.BIDER_NAME AS supplierName,\n"
-                                 + "   bp.PRODUCT_NAME AS directoryNameAlias,\n"
-                                 + "   2 AS supplierDirectoryRel,\n"
-                                 + "   b.CREATE_TIME AS createTime\n"
-                                 + "FROM\n"
-                                 + "   bid b\n"
-                                 + "JOIN bid_product bp ON b.ID = bp.BID_ID\n"
-                                 + "WHERE\n"
-                                 + "   bp.PRODUCT_NAME IS NOT NULL\n"
-                                 + "AND b.CREATE_TIME > ?\n"
-                                 + "LIMIT ?, ?";
-        doSyncUpdatedData(ycDataSource, countUpdatedSql, queryUpdatedSql, lastSyncTime);
-        logger.info("同步中标的产品结束");
-    }
+//    private void syncTradeBidProductDataService(Timestamp lastSyncTime) {
+//        logger.info("同步中标的产品开始");
+//        String countUpdatedSql = "SELECT\n"
+//                                 + "   count(1)\n"
+//                                 + "FROM\n"
+//                                 + "   bid b\n"
+//                                 + "JOIN bid_product bp ON b.ID = bp.BID_ID\n"
+//                                 + "WHERE\n"
+//                                 + "   bp.PRODUCT_NAME IS NOT NULL\n"
+//                                 + "AND b.CREATE_TIME > ?";
+//        String queryUpdatedSql = "SELECT\n"
+//                                 + "   b.BIDER_ID AS supplierId,\n"
+//                                 + "   b.BIDER_NAME AS supplierName,\n"
+//                                 + "   bp.PRODUCT_NAME AS directoryNameAlias,\n"
+//                                 + "   2 AS supplierDirectoryRel,\n"
+//                                 + "   b.CREATE_TIME AS createTime\n"
+//                                 + "FROM\n"
+//                                 + "   bid b\n"
+//                                 + "JOIN bid_product bp ON b.ID = bp.BID_ID\n"
+//                                 + "WHERE\n"
+//                                 + "   bp.PRODUCT_NAME IS NOT NULL\n"
+//                                 + "AND b.CREATE_TIME > ?\n"
+//                                 + "LIMIT ?, ?";
+//        doSyncUpdatedData(ycDataSource, countUpdatedSql, queryUpdatedSql, lastSyncTime);
+//        logger.info("同步中标的产品结束");
+//    }
 
     /**
      * 同步标王关键字
      *
      * @param lastSyncTime
      */
-    private void syncProDataService(Timestamp lastSyncTime) {
-        logger.info("同步标王关键字开始");
-        String countInsertedSql = "SELECT count(1) FROM user_wfirst_use WHERE CREATE_TIME > ? AND ENABLE_DISABLE = 1 AND STATE=1";
-        String queryInsertedSql = "SELECT\n"
-                                  + "   ufu.COMPANY_ID AS supplierId,\n"
-                                  + "   w.KEY_WORD AS directoryNameAlias,\n"
-                                  + "   3 AS supplierDirectoryRel,\n"
-                                  + "   ufu.CREATE_TIME AS createTime,\n"
-                                  + "   ufu.UPDATE_TIME AS updateTime\n"
-                                  + "FROM\n"
-                                  + "   user_wfirst_use ufu\n"
-                                  + "LEFT JOIN wfirst w ON ufu.WFIRST_ID = w.ID\n"
-                                  + "WHERE ufu.CREATE_TIME > ? AND ufu.ENABLE_DISABLE = 1 AND ufu.STATE=1\n"
-                                  + "LIMIT ?, ?";
-        doSyncInsertedData(proDataSource, countInsertedSql, queryInsertedSql, lastSyncTime);
-        logger.info("同步标王关键字结束");
-    }
+//    private void syncProDataService(Timestamp lastSyncTime) {
+//        logger.info("同步标王关键字开始");
+//        String countInsertedSql = "SELECT count(1) FROM user_wfirst_use WHERE CREATE_TIME > ? AND ENABLE_DISABLE = 1 AND STATE=1";
+//        String queryInsertedSql = "SELECT\n"
+//                                  + "   ufu.COMPANY_ID AS supplierId,\n"
+//                                  + "   w.KEY_WORD AS directoryNameAlias,\n"
+//                                  + "   3 AS supplierDirectoryRel,\n"
+//                                  + "   ufu.CREATE_TIME AS createTime,\n"
+//                                  + "   ufu.UPDATE_TIME AS updateTime\n"
+//                                  + "FROM\n"
+//                                  + "   user_wfirst_use ufu\n"
+//                                  + "LEFT JOIN wfirst w ON ufu.WFIRST_ID = w.ID\n"
+//                                  + "WHERE ufu.CREATE_TIME > ? AND ufu.ENABLE_DISABLE = 1 AND ufu.STATE=1\n"
+//                                  + "LIMIT ?, ?";
+//        doSyncInsertedData(proDataSource, countInsertedSql, queryInsertedSql, lastSyncTime);
+//        logger.info("同步标王关键字结束");
+//    }
 
     /**
      * 同步中心库供应商主营产品
@@ -229,22 +231,22 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
      */
     private void syncCenterDataService(Timestamp lastSyncTime) {
         logger.info("同步中心库供应商主营产品开始");
-        String countInsertedSql = "SELECT count(1) FROM t_reg_company WHERE TYPE = 13 AND MAIN_PRODUCT IS NOT NULL AND CREATE_DATE > ?";
+        String countInsertedSql = "SELECT count(1) FROM t_reg_company WHERE TYPE = 13 AND MAIN_PRODUCT IS NOT NULL AND create_time > ?";
         String queryInsertedSql = "SELECT\n"
                                   + "   trc.ID AS supplierId,\n"
                                   + "   trc.NAME AS supplierName,\n"
                                   + "   trc.MAIN_PRODUCT AS directoryNameAlias,\n"
                                   + "   4 AS supplierDirectoryRel,\n"
 //                                  + "   tucs.CORE_SUPPLIER_STATUS AS core,\n"
-                                  + "   trc.CREATE_DATE AS createTime,\n"
+                                  + "   trc.create_time AS createTime,\n"
                                   + "   trc.company_logo AS companyLogo,\n"
                                   + "   trc.UPDATE_TIME AS updateTime\n"
                                   + "FROM\n"
                                   + "   t_reg_company trc\n"
 //                                  + "LEFT JOIN t_uic_company_status tucs ON trc.ID = tucs.COMP_ID\n"
                                   + "WHERE\n"
-                                  + "   trc.TYPE = 13 AND trc.MAIN_PRODUCT IS NOT NULL AND trc.CREATE_DATE > ? LIMIT ?, ?";
-        doSyncInsertedData(centerDataSource, countInsertedSql, queryInsertedSql, lastSyncTime);
+                                  + "   trc.TYPE = 13 AND trc.MAIN_PRODUCT IS NOT NULL AND trc.create_time > ? LIMIT ?, ?";
+        doSyncInsertedData(uniregDataSource, countInsertedSql, queryInsertedSql, lastSyncTime);
 
         String countUpdatedSql = "SELECT count(1) FROM t_reg_company WHERE TYPE = 13 AND MAIN_PRODUCT IS NOT NULL AND UPDATE_TIME > ?";
         String queryUpdatedSql = "SELECT\n"
@@ -261,7 +263,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
 //                                 + "LEFT JOIN t_uic_company_status tucs ON trc.ID = tucs.COMP_ID\n"
                                  + "WHERE\n"
                                  + "   trc.TYPE = 13 AND trc.MAIN_PRODUCT IS NOT NULL AND trc.UPDATE_TIME > ? LIMIT ?, ?";
-        doSyncUpdatedData(centerDataSource, countUpdatedSql, queryUpdatedSql, lastSyncTime);
+        doSyncUpdatedData(uniregDataSource, countUpdatedSql, queryUpdatedSql, lastSyncTime);
         logger.info("同步中心库供应商主营产品结束");
     }
 

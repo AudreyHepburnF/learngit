@@ -101,24 +101,24 @@
                 <pom.log.level>debug</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
                 <!--redis配置-->
-                <pom.framework.redis.conf>10.4.0.137:6379</pom.framework.redis.conf>
+                <pom.framework.redis.conf>10.4.0.44:6379</pom.framework.redis.conf>
                 <pom.framework.redis.took>false</pom.framework.redis.took>
-                <!--悦彩数据源-->
-                <pom.yc.db.url>jdbc:mysql://10.4.0.9:3306/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yc.db.url>
-                <pom.yc.db.username>develop</pom.yc.db.username>
-                <pom.yc.db.password>123123</pom.yc.db.password>
-                <!--pro数据源-->
-                <pom.pro.db.url>jdbc:mysql://10.4.0.20:3306/pro_test?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
-                <pom.pro.db.username>tianyuan</pom.pro.db.username>
-                <pom.pro.db.password>s7GaCUG5</pom.pro.db.password>
-                <!--中心库数据源-->
-                <pom.center.db.url>jdbc:mysql://10.1.1.209:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.center.db.url>
-                <pom.center.db.username>cancal</pom.center.db.username>
-                <pom.center.db.password>unireg!@#</pom.center.db.password>
-                <!--诚信数据源-->
-                <pom.credit.db.url>jdbc:mysql://10.1.1.68:3306/credit_system?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.credit.db.url>
-                <pom.credit.db.username>testdb</pom.credit.db.username>
-                <pom.credit.db.password>NYbICTrtYS#E</pom.credit.db.password>
+                <!--&lt;!&ndash;悦彩数据源&ndash;&gt;-->
+                <!--<pom.yc.db.url>jdbc:mysql://10.4.0.9:3306/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yc.db.url>-->
+                <!--<pom.yc.db.username>develop</pom.yc.db.username>-->
+                <!--<pom.yc.db.password>123123</pom.yc.db.password>-->
+                <!--&lt;!&ndash;pro数据源&ndash;&gt;-->
+                <!--<pom.pro.db.url>jdbc:mysql://10.4.0.20:3306/pro_test?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>-->
+                <!--<pom.pro.db.username>tianyuan</pom.pro.db.username>-->
+                <!--<pom.pro.db.password>s7GaCUG5</pom.pro.db.password>-->
+                <!--&lt;!&ndash;中心库数据源&ndash;&gt;-->
+                <!--<pom.center.db.url>jdbc:mysql://10.1.1.209:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.center.db.url>-->
+                <!--<pom.center.db.username>cancal</pom.center.db.username>-->
+                <!--<pom.center.db.password>unireg!@#</pom.center.db.password>-->
+                <!--&lt;!&ndash;诚信数据源&ndash;&gt;-->
+                <!--<pom.credit.db.url>jdbc:mysql://10.1.1.68:3306/credit_system?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.credit.db.url>-->
+                <!--<pom.credit.db.username>testdb</pom.credit.db.username>-->
+                <!--<pom.credit.db.password>NYbICTrtYS#E</pom.credit.db.password>-->
                 <!--企业空间数据源-->
                 <pom.enterpriseSpace.db.url>jdbc:mysql://10.1.1.68:3306/ebnew?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.enterpriseSpace.db.url>
                 <pom.enterpriseSpace.db.username>testdb</pom.enterpriseSpace.db.username>
@@ -131,6 +131,10 @@
                 <pom.purchase.db.url>jdbc:mysql://10.4.0.43:3306/purchase?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.purchase.db.url>
                 <pom.purchase.db.username>dashuju</pom.purchase.db.username>
                 <pom.purchase.db.password>ixietong!@#$</pom.purchase.db.password>
+                <!--协同平台中心库数据源-->
+                <pom.unireg.db.url>jdbc:mysql://10.4.0.43:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
+                <pom.unireg.db.username>dashuju</pom.unireg.db.username>
+                <pom.unireg.db.password>ixietong!@#$</pom.unireg.db.password>
                 <!--供应商企业空间-->
                 <pom.supplier.enterpriseSpaceFormat>http://{0}.testspace.yuecai.com/enterprise-web/display/home/findCompanyInfo.htm?currMenuId=companyMenu&amp;loginName={1}</pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
@@ -138,7 +142,7 @@
                 <!--es配置-->
                 <pom.cluster.host>10.4.0.69:9300</pom.cluster.host>
                 <pom.cluster.name>dc-test</pom.cluster.name>
-                <pom.cluster.index>yc_test</pom.cluster.index>
+                <pom.cluster.index>ixietong_test</pom.cluster.index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
                 <pom.cluster.type.supplier_product>supplier_product</pom.cluster.type.supplier_product>
                 <pom.cluster.type.supplier_visited_opportunity>supplier_visited_opportunity
@@ -169,24 +173,24 @@
                 <pom.log.level>info</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
                 <!--redis配置-->
-                <pom.framework.redis.conf>10.4.0.137:6379</pom.framework.redis.conf>
+                <pom.framework.redis.conf>10.4.0.44:6379</pom.framework.redis.conf>
                 <pom.framework.redis.took>false</pom.framework.redis.took>
-                <!--悦彩数据源-->
-                <pom.yc.db.url>jdbc:mysql://10.4.0.9:3306/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yc.db.url>
-                <pom.yc.db.username>develop</pom.yc.db.username>
-                <pom.yc.db.password>123123</pom.yc.db.password>
-                <!--pro数据源-->
-                <pom.pro.db.url>jdbc:mysql://10.4.0.20:3306/pro_test?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
-                <pom.pro.db.username>tianyuan</pom.pro.db.username>
-                <pom.pro.db.password>s7GaCUG5</pom.pro.db.password>
-                <!--中心库数据源-->
-                <pom.center.db.url>jdbc:mysql://10.1.1.209:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.center.db.url>
-                <pom.center.db.username>cancal</pom.center.db.username>
-                <pom.center.db.password>unireg!@#</pom.center.db.password>
-                <!--诚信数据源-->
-                <pom.credit.db.url>jdbc:mysql://10.1.1.68:3306/credit_system?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.credit.db.url>
-                <pom.credit.db.username>testdb</pom.credit.db.username>
-                <pom.credit.db.password>NYbICTrtYS#E</pom.credit.db.password>
+                <!--&lt;!&ndash;悦彩数据源&ndash;&gt;-->
+                <!--<pom.yc.db.url>jdbc:mysql://10.4.0.9:3306/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yc.db.url>-->
+                <!--<pom.yc.db.username>develop</pom.yc.db.username>-->
+                <!--<pom.yc.db.password>123123</pom.yc.db.password>-->
+                <!--&lt;!&ndash;pro数据源&ndash;&gt;-->
+                <!--<pom.pro.db.url>jdbc:mysql://10.4.0.20:3306/pro_test?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>-->
+                <!--<pom.pro.db.username>tianyuan</pom.pro.db.username>-->
+                <!--<pom.pro.db.password>s7GaCUG5</pom.pro.db.password>-->
+                <!--&lt;!&ndash;中心库数据源&ndash;&gt;-->
+                <!--<pom.center.db.url>jdbc:mysql://10.1.1.209:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.center.db.url>-->
+                <!--<pom.center.db.username>cancal</pom.center.db.username>-->
+                <!--<pom.center.db.password>unireg!@#</pom.center.db.password>-->
+                <!--&lt;!&ndash;诚信数据源&ndash;&gt;-->
+                <!--<pom.credit.db.url>jdbc:mysql://10.1.1.68:3306/credit_system?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.credit.db.url>-->
+                <!--<pom.credit.db.username>testdb</pom.credit.db.username>-->
+                <!--<pom.credit.db.password>NYbICTrtYS#E</pom.credit.db.password>-->
                 <!--企业空间数据源-->
                 <pom.enterpriseSpace.db.url>jdbc:mysql://10.1.1.68:3306/ebnew?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.enterpriseSpace.db.url>
                 <pom.enterpriseSpace.db.username>testdb</pom.enterpriseSpace.db.username>
@@ -199,6 +203,10 @@
                 <pom.purchase.db.url>jdbc:mysql://10.4.0.43:3306/purchase?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.purchase.db.url>
                 <pom.purchase.db.username>dashuju</pom.purchase.db.username>
                 <pom.purchase.db.password>ixietong!@#$</pom.purchase.db.password>
+                <!--协同平台中心库数据源-->
+                <pom.unireg.db.url>jdbc:mysql://10.4.0.43:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
+                <pom.unireg.db.username>dashuju</pom.unireg.db.username>
+                <pom.unireg.db.password>ixietong!@#$</pom.unireg.db.password>
                 <!--供应商企业空间-->
                 <pom.supplier.enterpriseSpaceFormat>http://{0}.testspace.yuecai.com/display/home/findCompanyInfo.htm?currMenuId=companyMenu&amp;loginName={1}</pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
@@ -206,7 +214,7 @@
                 <!--es配置-->
                 <pom.cluster.host>10.4.0.69:9300</pom.cluster.host>
                 <pom.cluster.name>dc-test</pom.cluster.name>
-                <pom.cluster.index>yc_test</pom.cluster.index>
+                <pom.cluster.index>ixietong_test</pom.cluster.index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
                 <pom.cluster.type.supplier_product>supplier_product</pom.cluster.type.supplier_product>
                 <pom.cluster.type.supplier_visited_opportunity>supplier_visited_opportunity
@@ -264,6 +272,10 @@
                 <pom.purchase.db.url>jdbc:mysql://10.4.0.43:3306/purchase?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.purchase.db.url>
                 <pom.purchase.db.username>dashuju</pom.purchase.db.username>
                 <pom.purchase.db.password>ixietong!@#$</pom.purchase.db.password>
+                <!--协同平台中心库数据源-->
+                <pom.unireg.db.url>jdbc:mysql://10.4.0.43:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
+                <pom.unireg.db.username>dashuju</pom.unireg.db.username>
+                <pom.unireg.db.password>ixietong!@#$</pom.unireg.db.password>
                 <!--供应商企业空间-->
                 <pom.supplier.enterpriseSpaceFormat>http://{0}.space.yuecai.com/display/home/findCompanyInfo.htm?currMenuId=companyMenu&amp;loginName={1}</pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->

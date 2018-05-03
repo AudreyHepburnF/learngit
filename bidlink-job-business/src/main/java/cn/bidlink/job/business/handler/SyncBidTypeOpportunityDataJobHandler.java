@@ -7,13 +7,10 @@ import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
-import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.List;
@@ -25,19 +22,15 @@ import static cn.bidlink.job.business.utils.AreaUtil.queryAreaInfo;
 
 /**
  * 同步协同平台招标商机数据
- * 注意：可以代替{@link SyncBiddingTypeOpportunityDataJobHandler}
  *
  * @author : <a href="mailto:zikaifeng@ebnew.com">冯子恺</a>
  * @version : Ver 1.0
  * @description :
  * @date : 2017/8/7
  */
-@JobHander(value = "syncXieTongBidTypeOpportunityDataJobHandler")
+@JobHander(value = "syncBidTypeOpportunityDataJobHandler")
 @Service
-public class SyncXieTongBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunityDataJobHandler /*implements InitializingBean*/ {
-    @Autowired
-    @Qualifier("tenderDataSource")
-    protected DataSource tenderDataSource;
+public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunityDataJobHandler /*implements InitializingBean*/ {
 
     private String OPEN_RANGE_TYPE = "openRangeType";
     private String NODE            = "node";
@@ -56,11 +49,11 @@ public class SyncXieTongBidTypeOpportunityDataJobHandler extends AbstractSyncOpp
      */
     private void syncOpportunityData() {
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
-                                                                   "cluster.index",
-                                                                   "cluster.type.supplier_opportunity",
-                                                                   QueryBuilders.boolQuery()
-                                                                           .must(QueryBuilders.termQuery("projectType", BIDDING_PROJECT_TYPE))
-                                                                           .must(QueryBuilders.termQuery("source", SOURCE_NEW)));
+                "cluster.index",
+                "cluster.type.supplier_opportunity",
+                QueryBuilders.boolQuery()
+                        .must(QueryBuilders.termQuery("projectType", BIDDING_PROJECT_TYPE))
+                        .must(QueryBuilders.termQuery("source", SOURCE_NEW)));
         logger.info("招标项目商机同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
         syncBiddingProjectDataService(lastSyncTime);
     }
@@ -72,37 +65,37 @@ public class SyncXieTongBidTypeOpportunityDataJobHandler extends AbstractSyncOpp
      */
     private void syncBiddingProjectDataService(Timestamp lastSyncTime) {
         String countUpdatedSql = "SELECT\n"
-                                 + "   count(1)\n"
-                                 + "FROM\n"
-                                 + "   bid_sub_project\n"
-                                 + "WHERE\n"
-                                 + "   is_bid_open = 1 AND node > 1 AND update_time > ?";
+                + "   count(1)\n"
+                + "FROM\n"
+                + "   bid_sub_project\n"
+                + "WHERE\n"
+                + "   is_bid_open = 1 AND node > 1 AND update_time > ?";
         String queryUpdatedSql = "SELECT\n"
-                                 + "   project.*,bpi.id AS directoryId, bpi.`name` AS directoryName\n"
-                                 + "FROM\n"
-                                 + "   (\n"
-                                 + "      SELECT\n"
-                                 + "         id AS projectId,\n"
-                                 + "         project_code AS projectCode,\n"
-                                 + "         project_name AS projectName,\n"
-                                 + "         project_status AS projectStatus,\n"
-                                 + "         company_id AS purchaseId,\n"
-                                 + "         company_name AS purchaseName,\n"
-                                 + "         create_time,\n"
-                                 + "         node,\n"
-                                 + "         bid_open_time AS createTime,\n"
-                                 + "         bid_endtime AS quoteStopTime,\n"
-                                 + "         sys_id AS sourceId,\n"
-                                 + "         update_time AS updateTime\n"
-                                 + "      FROM\n"
-                                 + "         bid_sub_project\n"
-                                 + "      WHERE\n"
-                                 + "         is_bid_open = 1\n"
-                                 + "      AND node > 1\n"
-                                 + "      AND update_time > ?\n"
-                                 + "      LIMIT ?,?\n"
-                                 + "   ) project\n"
-                                 + "LEFT JOIN bid_project_item bpi ON project.projectId = bpi.sub_project_id";
+                + "   project.*,bpi.id AS directoryId, bpi.`name` AS directoryName\n"
+                + "FROM\n"
+                + "   (\n"
+                + "      SELECT\n"
+                + "         id AS projectId,\n"
+                + "         project_code AS projectCode,\n"
+                + "         project_name AS projectName,\n"
+                + "         project_status AS projectStatus,\n"
+                + "         company_id AS purchaseId,\n"
+                + "         company_name AS purchaseName,\n"
+                + "         create_time,\n"
+                + "         node,\n"
+                + "         bid_open_time AS createTime,\n"
+                + "         bid_endtime AS quoteStopTime,\n"
+                + "         sys_id AS sourceId,\n"
+                + "         update_time AS updateTime\n"
+                + "      FROM\n"
+                + "         bid_sub_project\n"
+                + "      WHERE\n"
+                + "         is_bid_open = 1\n"
+                + "      AND node > 1\n"
+                + "      AND update_time > ?\n"
+                + "      LIMIT ?,?\n"
+                + "   ) project\n"
+                + "LEFT JOIN bid_project_item bpi ON project.projectId = bpi.sub_project_id";
         doSyncProjectDataService(tenderDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList(((Object) lastSyncTime)));
     }
 
@@ -110,7 +103,7 @@ public class SyncXieTongBidTypeOpportunityDataJobHandler extends AbstractSyncOpp
     @Override
     protected void appendTenantKeyAndAreaStrToResult(List<Map<String, Object>> resultToExecute, Set<Long> purchaseIds) {
         if (purchaseIds.size() > 0) {
-            Map<Long, AreaUtil.AreaInfo> areaMap = queryAreaInfo(centerDataSource, purchaseIds);
+            Map<Long, AreaUtil.AreaInfo> areaMap = queryAreaInfo(uniregDataSource, purchaseIds);
             for (Map<String, Object> result : resultToExecute) {
                 Long purchaseId = Long.valueOf(String.valueOf(result.get(PURCHASE_ID)));
                 AreaUtil.AreaInfo areaInfo = areaMap.get(purchaseId);
@@ -159,8 +152,8 @@ public class SyncXieTongBidTypeOpportunityDataJobHandler extends AbstractSyncOpp
         Timestamp quoteStopTime = (Timestamp) result.get(QUOTE_STOP_TIME);
         // 小于截止时间且项目正在进行中且节点是投标阶段，则为商机，否则不是商机
         if (currentDate.before(quoteStopTime)
-            && projectStatus == PROJECT_EXECUTING
-            && node == BIDDING) {
+                && projectStatus == PROJECT_EXECUTING
+                && node == BIDDING) {
             result.put(STATUS, VALID_OPPORTUNITY_STATUS);
             resultToExecute.add(appendIdToResult(result));
         } else {

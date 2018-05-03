@@ -60,12 +60,12 @@
         "type": "string",
         "index": "not_analyzed"
       },
+      "gainFileType": {
+        "type": "integer"
+      },
       "id": {
         "type": "string",
         "index": "not_analyzed"
-      },
-      "gainFileType": {
-        "type": "integer"
       },
       "isBailFree": {
         "type": "integer"
@@ -73,10 +73,7 @@
       "isDocFree": {
         "type": "integer"
       },
-      "linkTelIsShow": {
-        "type": "integer"
-      },
-      "linkPhoneIsShow": {
+      "isHaveWibider": {
         "type": "integer"
       },
       "linkMail": {
@@ -97,13 +94,25 @@
         "type": "string",
         "index": "not_analyzed"
       },
+      "linkPhoneIsShow": {
+        "type": "integer"
+      },
       "linkTel": {
         "type": "string",
         "index": "not_analyzed"
       },
+      "linkTelIsShow": {
+        "type": "integer"
+      },
+      "node": {
+        "type": "long"
+      },
       "noticePublishTime": {
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "noticeType": {
+        "type": "integer"
       },
       "openType": {
         "type": "integer"
@@ -136,6 +145,10 @@
         "index": "not_analyzed"
       },
       "subProjectId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "supplierNameNotAnalyzed": {
         "type": "string",
         "index": "not_analyzed"
       },

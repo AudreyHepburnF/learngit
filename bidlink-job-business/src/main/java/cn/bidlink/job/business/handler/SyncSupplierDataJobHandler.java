@@ -55,25 +55,29 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     @Autowired
     private ElasticClient elasticClient;
 
-    @Autowired
-    @Qualifier("creditDataSource")
-    private DataSource creditDataSource;
+//    @Autowired
+//    @Qualifier("creditDataSource")
+//    private DataSource creditDataSource;
 
     @Autowired
     @Qualifier("enterpriseSpaceDataSource")
     private DataSource enterpriseSpaceDataSource;
 
-    @Autowired
-    @Qualifier("centerDataSource")
-    private DataSource centerDataSource;
-
 //    @Autowired
-//    @Qualifier("synergyDataSource")
-//    protected DataSource synergyDataSource;
+//    @Qualifier("centerDataSource")
+//    private DataSource centerDataSource;
 
     @Autowired
-    @Qualifier("ycDataSource")
-    private DataSource ycDataSource;
+    @Qualifier("uniregDataSource")
+    protected DataSource uniregDataSource;
+
+    @Autowired
+    @Qualifier("purchaseDataSource")
+    protected DataSource purchaseDataSource;
+
+    @Autowired
+    @Qualifier("tenderDataSource")
+    protected DataSource tenderDataSource;
 
     @Value("${enterpriseSpaceFormat}")
     private String enterpriseSpaceFormat;
@@ -82,6 +86,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     private String enterpriseSpaceDetailFormat;
 
     private String ID                          = "id";
+    private String USER_ID                     = "userId";
     private String CORE                        = "core";
     private String AREA_STR                    = "areaStr";
     private String AREA_STR_NOT_ANALYZED       = "areaStrNotAnalyzed";
@@ -132,7 +137,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
 
     private Map<String, String> initIndustryCodeMap() {
         String queryIndustrySql = "SELECT code, name_cn, name_en, type from t_reg_code_trade_class";
-        return DBUtil.query(centerDataSource, queryIndustrySql, null, new DBUtil.ResultSetCallback<Map<String, String>>() {
+        return DBUtil.query(uniregDataSource, queryIndustrySql, null, new DBUtil.ResultSetCallback<Map<String, String>>() {
             @Override
             public Map<String, String> execute(ResultSet resultSet) throws SQLException {
                 Map<String, String> map = new HashMap<String, String>();
@@ -164,9 +169,11 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     private void syncSupplierData() {
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.supplier", null);
         logger.info("供应商数据同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss") + "\n"
-                    + ", syncTime : " + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
+                + ", syncTime : " + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
         syncSupplierDataService(lastSyncTime);
-        syncSupplierCompanyStatusService(lastSyncTime);
+        // FIXME 供应商核心供状态更新
+//        syncSupplierCompanyStatusService(lastSyncTime);
+        // FIXME 供应商企业空间是否激活
         syncEnterpriseSpaceDataService(lastSyncTime);
         syncSupplierStatService(lastSyncTime);
     }
@@ -269,74 +276,74 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
      *
      * @param lastSyncTime
      */
-    private void syncSupplierCompanyStatusService(Timestamp lastSyncTime) {
-        if (SyncTimeUtil.GMT_TIME.equals(lastSyncTime)) {
-            logger.info("首次同步，忽略同步供应商状态");
-            return;
-        }
+//    private void syncSupplierCompanyStatusService(Timestamp lastSyncTime) {
+//        if (SyncTimeUtil.GMT_TIME.equals(lastSyncTime)) {
+//            logger.info("首次同步，忽略同步供应商状态");
+//            return;
+//        }
+//
+//        logger.info("同步供应商状态开始");
+//        String countInsertedSql = "SELECT count(1) FROM t_uic_company_status WHERE CREATE_TIME > ?";
+//        String queryInsertedSql = "SELECT COMP_ID AS id, CREDIT_MEDAL_STATUS AS core FROM t_uic_company_status WHERE CREATE_TIME > ? GROUP BY COMP_ID ORDER BY CREATE_TIME LIMIT ?, ?";
+//        doSyncSupplierCompanyStatus(countInsertedSql, queryInsertedSql, lastSyncTime);
+//
+//        String countUpdatedSql = "SELECT count(1) FROM t_uic_company_status WHERE UPDATE_TIME > ?";
+//        String queryUpdatedSql = "SELECT COMP_ID AS id, CREDIT_MEDAL_STATUS AS core FROM t_uic_company_status WHERE UPDATE_TIME > ? GROUP BY COMP_ID ORDER BY UPDATE_TIME LIMIT ?, ?";
+//        doSyncSupplierCompanyStatus(countUpdatedSql, queryUpdatedSql, lastSyncTime);
+//        logger.info("同步供应商状态结束");
+//    }
 
-        logger.info("同步供应商状态开始");
-        String countInsertedSql = "SELECT count(1) FROM t_uic_company_status WHERE CREATE_TIME > ?";
-        String queryInsertedSql = "SELECT COMP_ID AS id, CREDIT_MEDAL_STATUS AS core FROM t_uic_company_status WHERE CREATE_TIME > ? GROUP BY COMP_ID ORDER BY CREATE_TIME LIMIT ?, ?";
-        doSyncSupplierCompanyStatus(countInsertedSql, queryInsertedSql, lastSyncTime);
+//    private void doSyncSupplierCompanyStatus(String countSql, String querySql, Timestamp lastSyncTime) {
+//        List<Object> params = new ArrayList<>();
+//        params.add(lastSyncTime);
+//        long count = DBUtil.count(centerDataSource, countSql, params);
+//        logger.debug("执行countSql : {}, params : {}，共{}条", countSql, params, count);
+//        if (count > 0) {
+//            for (long i = 0; i < count; i += pageSize) {
+//                List<Object> paramsToUse = appendToParams(params, i);
+//                // 查出符合条件的供应商
+//                Map<String, Object> supplierCoreStatusMap = query(centerDataSource, querySql, paramsToUse, new DBUtil.ResultSetCallback<Map<String, Object>>() {
+//                    @Override
+//                    public Map<String, Object> execute(ResultSet resultSet) throws SQLException {
+//                        Map<String, Object> map = new HashMap<>();
+//                        while (resultSet.next()) {
+//                            map.put(String.valueOf(resultSet.getLong(ID)), resultSet.getInt(CORE));
+//                        }
+//                        return map;
+//                    }
+//                });
+//                logger.debug("执行querySql : {}, params : {}，共{}条", querySql, paramsToUse, supplierCoreStatusMap.size());
+//                List<Map<String, Object>> resultFromEs = updateSupplierCoreStatus(supplierCoreStatusMap);
+//                // 保存到es
+//                batchExecute(resultFromEs);
+//            }
+//        }
+//    }
 
-        String countUpdatedSql = "SELECT count(1) FROM t_uic_company_status WHERE UPDATE_TIME > ?";
-        String queryUpdatedSql = "SELECT COMP_ID AS id, CREDIT_MEDAL_STATUS AS core FROM t_uic_company_status WHERE UPDATE_TIME > ? GROUP BY COMP_ID ORDER BY UPDATE_TIME LIMIT ?, ?";
-        doSyncSupplierCompanyStatus(countUpdatedSql, queryUpdatedSql, lastSyncTime);
-        logger.info("同步供应商状态结束");
-    }
-
-    private void doSyncSupplierCompanyStatus(String countSql, String querySql, Timestamp lastSyncTime) {
-        List<Object> params = new ArrayList<>();
-        params.add(lastSyncTime);
-        long count = DBUtil.count(centerDataSource, countSql, params);
-        logger.debug("执行countSql : {}, params : {}，共{}条", countSql, params, count);
-        if (count > 0) {
-            for (long i = 0; i < count; i += pageSize) {
-                List<Object> paramsToUse = appendToParams(params, i);
-                // 查出符合条件的供应商
-                Map<String, Object> supplierCoreStatusMap = query(centerDataSource, querySql, paramsToUse, new DBUtil.ResultSetCallback<Map<String, Object>>() {
-                    @Override
-                    public Map<String, Object> execute(ResultSet resultSet) throws SQLException {
-                        Map<String, Object> map = new HashMap<>();
-                        while (resultSet.next()) {
-                            map.put(String.valueOf(resultSet.getLong(ID)), resultSet.getInt(CORE));
-                        }
-                        return map;
-                    }
-                });
-                logger.debug("执行querySql : {}, params : {}，共{}条", querySql, paramsToUse, supplierCoreStatusMap.size());
-                List<Map<String, Object>> resultFromEs = updateSupplierCoreStatus(supplierCoreStatusMap);
-                // 保存到es
-                batchExecute(resultFromEs);
-            }
-        }
-    }
-
-    private List<Map<String, Object>> updateSupplierCoreStatus(Map<String, Object> supplierCoreStatusMap) {
-        Properties properties = elasticClient.getProperties();
-        SearchResponse searchResponse = elasticClient.getTransportClient()
-                .prepareSearch(properties.getProperty("cluster.index"))
-                .setTypes(properties.getProperty("cluster.type.supplier"))
-                .setQuery(QueryBuilders.termsQuery(ID, supplierCoreStatusMap.keySet()))
-                .setFrom(0)
-                .setSize(supplierCoreStatusMap.size())
-                .execute()
-                .actionGet();
-
-        SearchHits hits = searchResponse.getHits();
-        List<Map<String, Object>> suppliers = new ArrayList<>();
-        long totalHits = hits.getTotalHits();
-        if (totalHits > 0) {
-            for (SearchHit searchHit : hits.hits()) {
-                Map<String, Object> source = searchHit.getSource();
-                source.put(CORE, supplierCoreStatusMap.get(source.get(ID)));
-                refresh(source);
-                suppliers.add(source);
-            }
-        }
-        return suppliers;
-    }
+//    private List<Map<String, Object>> updateSupplierCoreStatus(Map<String, Object> supplierCoreStatusMap) {
+//        Properties properties = elasticClient.getProperties();
+//        SearchResponse searchResponse = elasticClient.getTransportClient()
+//                .prepareSearch(properties.getProperty("cluster.index"))
+//                .setTypes(properties.getProperty("cluster.type.supplier"))
+//                .setQuery(QueryBuilders.termsQuery(ID, supplierCoreStatusMap.keySet()))
+//                .setFrom(0)
+//                .setSize(supplierCoreStatusMap.size())
+//                .execute()
+//                .actionGet();
+//
+//        SearchHits hits = searchResponse.getHits();
+//        List<Map<String, Object>> suppliers = new ArrayList<>();
+//        long totalHits = hits.getTotalHits();
+//        if (totalHits > 0) {
+//            for (SearchHit searchHit : hits.hits()) {
+//                Map<String, Object> source = searchHit.getSource();
+//                source.put(CORE, supplierCoreStatusMap.get(source.get(ID)));
+//                refresh(source);
+//                suppliers.add(source);
+//            }
+//        }
+//        return suppliers;
+//    }
 
     /**
      * 同步供应商的基本信息
@@ -351,125 +358,107 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     }
 
     private void doInsertedSupplierData(Timestamp lastSyncTime) {
-        String countInsertedSql = "SELECT count(1) FROM t_reg_company trc JOIN t_reg_user tru ON trc.id = tru.COMPANY_ID and trc.type = 13 WHERE trc.CREATE_DATE > ?";
-        String queryInsertedSql = "SELECT\n"
-                                  + "trc.id,\n"
-                                  + "   trc.`NAME` AS companyName,\n"
-                                  + "   trc.NAME_ENGLISH AS companyNameEn,\n"
-                                  + "   trc.AREA AS area,\n"
-                                  + "   trc.ZONE_STR AS zoneStr,\n"
-                                  + "   trc.ADDRESS AS address,\n"
-                                  + "   trc.ADDRESS_EN AS addressEn,\n"
-                                  + "   trc.AUTH_STATUS AS authStatus,\n"
-                                  + "   trc.AUTH_STATUS2 AS authStatus2,\n"
-                                  + "   trc.AUTH_TYPE AS authType,\n"
-                                  + "   trc.AUTH_CODE_ID AS authCodeId,\n"
-                                  + "   trc.AUTH_TIME AS authTime,\n"
-                                  + "   trc.AUTHEN_NUMBER AS authenNumber,\n"
-                                  + "   trc.`CODE` AS code,\n"
-                                  + "   trc.BIDAUTH_EXPIRES AS bidAuthExpires,\n"
-                                  + "   trc.BIDAUTH_FTIME AS bidAuthFtime,\n"
-                                  + "   trc.BIDAUTH_STATUS AS bidAuthStatus,\n"
-                                  + "   trc.BIDAUTH_TIME AS bidAuthTime,\n"
-                                  + "   trc.company_site AS companySite,\n"
-                                  + "   trc.WWW_STATION AS wwwStation,\n"
-                                  + "   trc.COMP_TYPE AS companyType,\n"
-                                  + "   trcct.`NAME` AS companyTypStr,\n"
-                                  + "   trc.FOUNDED_DATE AS foundedDate,\n"
-                                  + "   trc.FUND AS fund,\n"
-                                  + "   trc.FUNDUNIT AS fundUnit,\n"
-                                  + "   trc.INDUSTRY AS industryCode,\n"
-//                                  + "   trc.INDUSTRY_STR AS industryStr,\n"
-                                  + "   trc.company_logo AS companyLogo,\n"
-                                  + "   trc.MAIN_PRODUCT AS mainProduct,\n"
-                                  + "   trc.WORKPATTERN AS workPattern,\n"
-                                  + "   trc.TEL AS tel,\n"
-                                  + "   trc.CONTACT AS contact,\n"
-                                  + "   trc.CONTACT_EN AS contactEn,\n"
-                                  + "   trc.CREATE_DATE AS createTime,\n"
-                                  + "   trc.UPDATE_TIME AS updateTime,\n"
-                                  + "   trc.WEB_TYPE AS webType,\n"
-                                  + "   trc.TENANT_ID AS tenantId,\n"
-                                  + "   tru.LOGIN_NAME AS loginName,\n"
-                                  + "   tru.`NAME` AS supplierName,\n"
-                                  + "   tru.MOBILE AS mobile,\n"
-                                  + "   IFNULL(tucs.CREDIT_MEDAL_STATUS,0) AS core\n"
-                                  + "FROM\n"
-                                  + "   t_reg_company trc\n"
-                                  + "JOIN t_reg_user tru ON trc.id = tru.COMPANY_ID and trc.type = 13 \n"
-                                  + "LEFT JOIN t_uic_company_status tucs ON trc.id = tucs.COMP_ID\n"
-                                  + "LEFT JOIN t_reg_code_comp_type trcct ON trc.COMP_TYPE = trcct.ID\n"
-                                  + "WHERE trc.CREATE_DATE > ?\n"
-                                  + "GROUP BY trc.ID\n"
-                                  + "LIMIT ?,?";
+        String countInsertedSql = "SELECT count(1) FROM t_reg_company trc JOIN t_reg_user tru ON trc.id = tru.COMPANY_ID and trc.type = 13 WHERE trc.CREATE_TIME > ?";
+        String queryInsertedSql = "SELECT\n" +
+                "\ttrc.id,\n" +
+                "\ttrc.`NAME` AS companyName,\n" +
+                "\ttrc.NAME_ENGLISH AS companyNameEn,\n" +
+                "\ttrc.AREA AS area,\n" +
+                "\ttrc.ZONE_STR AS zoneStr,\n" +
+                "\ttrc.ADDRESS AS address,\n" +
+                "\ttrc.BIDAUTH_EXPIRES AS bidAuthExpires,\n" +
+                "\ttrc.BIDAUTH_FTIME AS bidAuthFtime,\n" +
+                "\ttrc.BIDAUTH_STATUS AS bidAuthStatus,\n" +
+                "\ttrc.BIDAUTH_TIME AS bidAuthTime,\n" +
+                "\ttrc.company_site AS companySite,\n" +
+                "\ttrc.WWW_STATION AS wwwStation,\n" +
+                "\ttrc.COMP_TYPE AS companyType,\n" +
+                "\ttrcct.`NAME` AS companyTypStr,\n" +
+                "\ttrc.FUND AS fund,\n" +
+                "\ttrc.FUNDUNIT AS fundUnit,\n" +
+                "\ttrc.INDUSTRY AS industryCode,\n" +
+                "\ttrc.company_logo AS companyLogo,\n" +
+                "\ttrc.MAIN_PRODUCT AS mainProduct,\n" +
+                "\ttrc.WORKPATTERN AS workPattern,\n" +
+                "\ttrc.TEL AS tel,\n" +
+                "\ttrc.CONTACT AS contact,\n" +
+                "\ttrc.CREATE_TIME AS createTime,\n" +
+                "\ttrc.UPDATE_TIME AS updateTime,\n" +
+                "\ttrc.WEB_TYPE AS webType,\n" +
+                "\ttru.LOGIN_NAME AS loginName,\n" +
+                "\ttru.`NAME` AS supplierName,\n" +
+                "\ttru.MOBILE AS mobile,\n" +
+                "\ttru.ID AS userId,\n" +
+                "\t1 AS core \n" +
+                "FROM\n" +
+                "\tt_reg_company trc\n" +
+                "\tJOIN t_reg_user tru ON trc.id = tru.COMPANY_ID \n" +
+                "\tAND trc.type = 13\n" +
+                "\tLEFT JOIN t_reg_code_comp_type trcct ON trc.COMP_TYPE = trcct.ID \n" +
+                "WHERE\n" +
+                "\ttrc.CREATE_TIME > ? \n" +
+                "GROUP BY\n" +
+                "\ttrc.ID \n" +
+                "\tLIMIT ?,?";
         doSyncSupplierData(countInsertedSql, queryInsertedSql, lastSyncTime);
     }
 
     private void doUpdatedSupplierData(Timestamp lastSyncTime) {
         String countUpdatedSql = "SELECT count(1) FROM t_reg_company trc JOIN t_reg_user tru ON trc.id = tru.COMPANY_ID and trc.type = 13 WHERE trc.UPDATE_TIME > ?";
         String queryUpdatedSql = "SELECT\n"
-                                 + "   trc.id,\n"
-                                 + "   trc.`NAME` AS companyName,\n"
-                                 + "   trc.NAME_ENGLISH AS companyNameEn,\n"
-                                 + "   trc.AREA AS area,\n"
-                                 + "   trc.ZONE_STR AS zoneStr,\n"
-                                 + "   trc.ADDRESS AS address,\n"
-                                 + "   trc.ADDRESS_EN AS addressEn,\n"
-                                 + "   trc.AUTH_STATUS AS authStatus,\n"
-                                 + "   trc.AUTH_STATUS2 AS authStatus2,\n"
-                                 + "   trc.AUTH_TYPE AS authType,\n"
-                                 + "   trc.AUTH_CODE_ID AS authCodeId,\n"
-                                 + "   trc.AUTH_TIME AS authTime,\n"
-                                 + "   trc.AUTHEN_NUMBER AS authenNumber,\n"
-                                 + "   trc.`CODE` AS code,\n"
-                                 + "   trc.BIDAUTH_EXPIRES AS bidAuthExpires,\n"
-                                 + "   trc.BIDAUTH_FTIME AS bidAuthFtime,\n"
-                                 + "   trc.BIDAUTH_STATUS AS bidAuthStatus,\n"
-                                 + "   trc.BIDAUTH_TIME AS bidAuthTime,\n"
-                                 + "   trc.company_site AS companySite,\n"
-                                 + "   trc.WWW_STATION AS wwwStation,\n"
-                                 + "   trc.COMP_TYPE AS companyType,\n"
-                                 + "   trcct.`NAME` AS companyTypStr,\n"
-                                 + "   trc.FOUNDED_DATE AS foundedDate,\n"
-                                 + "   trc.FUND AS fund,\n"
-                                 + "   trc.FUNDUNIT AS fundUnit,\n"
-                                 + "   trc.INDUSTRY AS industryCode,\n"
-//                                 + "   trc.INDUSTRY_STR AS industryStr,\n"
-                                 + "   trc.company_logo AS companyLogo,\n"
-                                 + "   trc.MAIN_PRODUCT AS mainProduct,\n"
-                                 + "   trc.WORKPATTERN AS workPattern,\n"
-                                 + "   trc.TEL AS tel,\n"
-                                 + "   trc.CONTACT AS contact,\n"
-                                 + "   trc.CONTACT_EN AS contactEn,\n"
-                                 + "   trc.CREATE_DATE AS createTime,\n"
-                                 + "   trc.UPDATE_TIME AS updateTime,\n"
-                                 + "   trc.WEB_TYPE AS webType,\n"
-                                 + "   trc.TENANT_ID AS tenantId,\n"
-                                 + "   tru.LOGIN_NAME AS loginName,\n"
-                                 + "   tru.`NAME` AS supplierName,\n"
-                                 + "   tru.MOBILE AS mobile,\n"
-                                 + "   IFNULL(tucs.CREDIT_MEDAL_STATUS,0) AS core\n"
-                                 + "FROM\n"
-                                 + "   t_reg_company trc\n"
-                                 + "JOIN t_reg_user tru ON trc.id = tru.COMPANY_ID and trc.type = 13\n"
-                                 + "LEFT JOIN t_uic_company_status tucs ON trc.id = tucs.COMP_ID\n"
-                                 + "LEFT JOIN t_reg_code_comp_type trcct ON trc.COMP_TYPE = trcct.ID\n"
-                                 + "WHERE trc.UPDATE_TIME > ?\n"
-                                 + "GROUP BY trc.ID\n"
-                                 + "LIMIT ?,?";
+                + "   trc.id,\n"
+                + "   trc.`NAME` AS companyName,\n"
+                + "   trc.NAME_ENGLISH AS companyNameEn,\n"
+                + "   trc.AREA AS area,\n"
+                + "   trc.ZONE_STR AS zoneStr,\n"
+                + "   trc.ADDRESS AS address,\n"
+                + "   trc.BIDAUTH_EXPIRES AS bidAuthExpires,\n"
+                + "   trc.BIDAUTH_FTIME AS bidAuthFtime,\n"
+                + "   trc.BIDAUTH_STATUS AS bidAuthStatus,\n"
+                + "   trc.BIDAUTH_TIME AS bidAuthTime,\n"
+                + "   trc.company_site AS companySite,\n"
+                + "   trc.WWW_STATION AS wwwStation,\n"
+                + "   trc.COMP_TYPE AS companyType,\n"
+                + "   trcct.`NAME` AS companyTypStr,\n"
+                + "   trc.FUND AS fund,\n"
+                + "   trc.FUNDUNIT AS fundUnit,\n"
+                + "   trc.INDUSTRY AS industryCode,\n"
+                + "   trc.company_logo AS companyLogo,\n"
+                + "   trc.MAIN_PRODUCT AS mainProduct,\n"
+                + "   trc.WORKPATTERN AS workPattern,\n"
+                + "   trc.TEL AS tel,\n"
+                + "   trc.CONTACT AS contact,\n"
+                + "   trc.CREATE_TIME AS createTime,\n"
+                + "   trc.UPDATE_TIME AS updateTime,\n"
+                + "   trc.WEB_TYPE AS webType,\n"
+                + "   tru.LOGIN_NAME AS loginName,\n"
+                + "   tru.`NAME` AS supplierName,\n"
+                + "   tru.MOBILE AS mobile,\n"
+                + "   tru.id AS userId,\n"
+                //  FIXME 待设计核心供,默认为核心供
+//                                 + "   IFNULL(tucs.CREDIT_MEDAL_STATUS,0) AS core\n"
+                + "\t1 AS core \n"
+                + "FROM\n"
+                + "   t_reg_company trc\n"
+                + "JOIN t_reg_user tru ON trc.id = tru.COMPANY_ID and trc.type = 13\n"
+//                                 + "LEFT JOIN t_uic_company_status tucs ON trc.id = tucs.COMP_ID\n"
+                + "LEFT JOIN t_reg_code_comp_type trcct ON trc.COMP_TYPE = trcct.ID\n"
+                + "WHERE trc.UPDATE_TIME > ?\n"
+                + "GROUP BY trc.ID\n"
+                + "LIMIT ?,?";
         doSyncSupplierData(countUpdatedSql, queryUpdatedSql, lastSyncTime);
     }
 
     private void doSyncSupplierData(String countSql, String querySql, Timestamp createTime) {
         List<Object> params = new ArrayList<>();
         params.add(createTime);
-        long count = DBUtil.count(centerDataSource, countSql, params);
+        long count = DBUtil.count(uniregDataSource, countSql, params);
         logger.debug("执行countSql : {}, params : {}，共{}条", countSql, params, count);
         if (count > 0) {
             for (long i = 0; i < count; i += pageSize) {
                 List<Object> paramsToUse = appendToParams(params, i);
                 // 查出符合条件的供应商
-                List<Map<String, Object>> resultToExecute = query(centerDataSource, querySql, paramsToUse);
+                List<Map<String, Object>> resultToExecute = query(uniregDataSource, querySql, paramsToUse);
                 logger.debug("执行querySql : {}, params : {}，共{}条", querySql, paramsToUse, resultToExecute.size());
                 Set<Long> supplierIds = new HashSet<>();
                 for (Map<String, Object> result : resultToExecute) {
@@ -481,9 +470,9 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
 
                 // 添加区域
                 appendAreaStrToResult(resultToExecute, supplierIds);
-                // 添加诚信等级
+                // 添加诚信等级 FIXME 诚信值表(目前默认为38)
                 appendCreditToResult(resultToExecute, supplierIds);
-                // 添加企业空间
+                // 添加企业空间 FIXME 企业空间待更换数据源
                 appendEnterpriseSpaceToResult(resultToExecute, supplierIds);
                 // 保存到es
                 batchExecute(resultToExecute);
@@ -519,6 +508,9 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
         resultToUse.put(TEL, convertToString(resultToUse.get(TEL)));
         resultToUse.put(ID, convertToString(resultToUse.get(ID)));
         resultToUse.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
+        resultToUse.put(USER_ID, convertToString(resultToUse.get(USER_ID)));
+        // FIXME 默认为核心供
+        resultToUse.put(CORE, 1);
     }
 
     private String convertToString(Object value) {
@@ -552,32 +544,42 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
         return enterpriseSpaceInfoMap;
     }
 
+
+    /**
+     * FIXME 诚信值默认为38
+     *
+     * @param resultToExecute
+     * @param supplierIds
+     */
     private void appendCreditToResult(List<Map<String, Object>> resultToExecute, Set<Long> supplierIds) {
         if (supplierIds.size() > 0) {
-            Map<Long, Object> creditMap = queryCredit(supplierIds);
+//            Map<Long, Object> creditMap = queryCredit(supplierIds);
+//            for (Map<String, Object> result : resultToExecute) {
+//                Long supplierId = Long.valueOf(String.valueOf(result.get(ID)));
+//                Object creditRating = creditMap.get(supplierId);
+//                // 如果没有诚信等级，就置为0
+//                result.put(CREDIT_RATING, (creditRating == null ? 0 : creditRating));
+//            }
             for (Map<String, Object> result : resultToExecute) {
-                Long supplierId = Long.valueOf(String.valueOf(result.get(ID)));
-                Object creditRating = creditMap.get(supplierId);
-                // 如果没有诚信等级，就置为0
-                result.put(CREDIT_RATING, (creditRating == null ? 0 : creditRating));
+                result.put(CREDIT_RATING, 38);
             }
         }
     }
 
-    private Map<Long, Object> queryCredit(Set<Long> supplierIds) {
-        String queryCreditTemplate = "SELECT COMPANY_ID as id, RATING as creditRating FROM credit_score WHERE COMPANY_ID in (%s)";
-        String queryCreditSql = String.format(queryCreditTemplate, StringUtils.collectionToCommaDelimitedString(supplierIds));
-        List<Map<String, Object>> query = query(creditDataSource, queryCreditSql, null);
-        Map<Long, Object> creditMap = new HashMap<>();
-        for (Map<String, Object> map : query) {
-            creditMap.put((Long) map.get(ID), map.get(CREDIT_RATING));
-        }
-        return creditMap;
-    }
+//    private Map<Long, Object> queryCredit(Set<Long> supplierIds) {
+//        String queryCreditTemplate = "SELECT COMPANY_ID as id, RATING as creditRating FROM credit_score WHERE COMPANY_ID in (%s)";
+//        String queryCreditSql = String.format(queryCreditTemplate, StringUtils.collectionToCommaDelimitedString(supplierIds));
+//        List<Map<String, Object>> query = query(creditDataSource, queryCreditSql, null);
+//        Map<Long, Object> creditMap = new HashMap<>();
+//        for (Map<String, Object> map : query) {
+//            creditMap.put((Long) map.get(ID), map.get(CREDIT_RATING));
+//        }
+//        return creditMap;
+//    }
 
     private void appendAreaStrToResult(List<Map<String, Object>> resultToExecute, Set<Long> supplierIds) {
         if (supplierIds.size() > 0) {
-            Map<Long, AreaUtil.AreaInfo> areaInfoMap = AreaUtil.queryAreaInfo(centerDataSource, supplierIds);
+            Map<Long, AreaUtil.AreaInfo> areaInfoMap = AreaUtil.queryAreaInfo(uniregDataSource, supplierIds);
             for (Map<String, Object> result : resultToExecute) {
                 Long supplierId = Long.valueOf(String.valueOf(result.get(ID)));
                 AreaUtil.AreaInfo areaInfo = areaInfoMap.get(supplierId);
@@ -647,13 +649,13 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     private void appendSupplierProjectStat(List<Map<String, Object>> resultFromEs, String supplierIds) {
         // 采购项目
         String queryPurchaseProjectSqlTemplate = "SELECT\n"
-                                                 + "   COUNT(1),\n"
-                                                 + "   supplier_id\n"
-                                                 + "FROM\n"
-                                                 + "   bmpfjz_supplier_project_bid where supplier_bid_status in (2,3,6,7) AND supplier_id in (%s)\n"
-                                                 + "GROUP BY\n"
-                                                 + "   supplier_id";
-        Map<String, Long> purchaseProjectStat = getSupplierStatMap(ycDataSource, queryPurchaseProjectSqlTemplate, supplierIds);
+                + "   COUNT(1),\n"
+                + "   supplier_id\n"
+                + "FROM\n"
+                + "   purchase_supplier_project where quote_status in (2,3) AND supplier_id in (%s)\n"
+                + "GROUP BY\n"
+                + "   supplier_id";
+        Map<String, Long> purchaseProjectStat = getSupplierStatMap(purchaseDataSource, queryPurchaseProjectSqlTemplate, supplierIds);
         for (Map<String, Object> source : resultFromEs) {
             Object value = purchaseProjectStat.get(source.get(ID));
             source.put(TOTAL_PURCHASE_PROJECT, (value == null ? 0 : value));
@@ -661,14 +663,14 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
 
         // 招标项目
         String queryBidProjectSqlTemplate = "select\n"
-                                            + "    count(1),\n"
-                                            + "    BIDER_ID AS supplierId\n"
-                                            + " from\n"
-                                            + "    bid\n"
-                                            + "    where IS_WITHDRAWBID = 0 AND bider_id in (%s)\n"
-                                            + " GROUP BY\n"
-                                            + "    BIDER_ID";
-        Map<String, Long> bidProjectStat = getSupplierStatMap(ycDataSource, queryBidProjectSqlTemplate, supplierIds);
+                + "    count(1),\n"
+                + "    supplier_id AS supplierId\n"
+                + " from\n"
+                + "    bid_supplier\n"
+                + "    where bid_status = 1 AND supplier_id in (%s)\n"
+                + " GROUP BY\n"
+                + "    supplier_id";
+        Map<String, Long> bidProjectStat = getSupplierStatMap(tenderDataSource, queryBidProjectSqlTemplate, supplierIds);
         for (Map<String, Object> source : resultFromEs) {
             Object value = bidProjectStat.get(source.get(ID));
             source.put(TOTAL_BID_PROJECT, (value == null ? 0 : value));
@@ -684,13 +686,13 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     private void appendSupplierDealProjectStat(List<Map<String, Object>> resultFromEs, String supplierIds) {
         // 采购项目
         String queryPurchaseProjectSqlTemplate = "SELECT\n"
-                                                 + "   COUNT(1),\n"
-                                                 + "   supplier_id\n"
-                                                 + "FROM\n"
-                                                 + "   bmpfjz_supplier_project_bid where supplier_bid_status = 6 AND supplier_id in (%s)\n"
-                                                 + "GROUP BY\n"
-                                                 + "   supplier_id";
-        Map<String, Long> purchaseProjectStat = getSupplierStatMap(ycDataSource, queryPurchaseProjectSqlTemplate, supplierIds);
+                + "   COUNT(1),\n"
+                + "   supplier_id\n"
+                + "FROM\n"
+                + "   purchase_supplier_project where deal_status = 2 AND supplier_id in (%s)\n"
+                + "GROUP BY\n"
+                + "   supplier_id";
+        Map<String, Long> purchaseProjectStat = getSupplierStatMap(purchaseDataSource, queryPurchaseProjectSqlTemplate, supplierIds);
         for (Map<String, Object> source : resultFromEs) {
             Object value = purchaseProjectStat.get(source.get(ID));
             source.put(TOTAL_DEAL_PURCHASE_PROJECT, (value == null ? 0 : value));
@@ -698,15 +700,15 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
 
         // 招标项目
         String queryBidProjectSqlTemplate = "select\n"
-                                            + "    count(1),\n"
-                                            + "    BIDER_ID AS supplierId\n"
-                                            + " from\n"
-                                            + "    bid\n"
-                                            + "      WHERE\n"
-                                            + "         IS_BID_SUCCESS = 1 AND bider_id in (%s)\n"
-                                            + " GROUP BY\n"
-                                            + "    BIDER_ID";
-        Map<String, Long> bidProjectStat = getSupplierStatMap(ycDataSource, queryBidProjectSqlTemplate, supplierIds);
+                + "    count(1),\n"
+                + "    supplier_id AS supplierId\n"
+                + " from\n"
+                + "    bid_supplier\n"
+                + "      WHERE\n"
+                + "         win_bid_status = 1 AND supplier_id in (%s)\n"
+                + " GROUP BY\n"
+                + "    supplier_id";
+        Map<String, Long> bidProjectStat = getSupplierStatMap(tenderDataSource, queryBidProjectSqlTemplate, supplierIds);
         for (Map<String, Object> source : resultFromEs) {
             Object value = bidProjectStat.get(source.get(ID));
             source.put(TOTAL_DEAL_BID_PROJECT, (value == null ? 0 : value));
@@ -721,14 +723,14 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
      */
     private void appendCooperatedPurchaserState(List<Map<String, Object>> resultFromEs, String supplierIds) {
         String queryCooperatedPurchaserSqlTemplate = "select\n"
-                                                     + "   count(1) AS totalCooperatedPurchaser,\n"
-                                                     + "   supplier_id AS supplierId\n"
-                                                     + "from\n"
-                                                     + "   bsm_company_supplier_apply\n"
-                                                     + "   WHERE supplier_status in (2,3,4) AND supplier_id in (%s)\n"
-                                                     + "GROUP BY\n"
-                                                     + "   supplier_id\n";
-        Map<String, Long> supplierStat = getSupplierStatMap(ycDataSource, queryCooperatedPurchaserSqlTemplate, supplierIds);
+                + "   count(1) AS totalCooperatedPurchaser,\n"
+                + "   supplier_id AS supplierId\n"
+                + "from\n"
+                + "   supplier\n"
+                + "   WHERE symbiosis_status in (1,2) AND supplier_id in (%s)\n"
+                + "GROUP BY\n"
+                + "   supplier_id\n";
+        Map<String, Long> supplierStat = getSupplierStatMap(uniregDataSource, queryCooperatedPurchaserSqlTemplate, supplierIds);
         for (Map<String, Object> source : resultFromEs) {
             Object value = supplierStat.get(source.get(ID));
             source.put(TOTAL_COOPERATED_PURCHASER, (value == null ? 0 : value));
@@ -736,21 +738,21 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     }
 
     /**
-     * 添加发布产品统计
+     * 添加发布产品统计 FIXME 待修改为新平台的产品信息
      *
      * @param resultFromEs
      * @param supplierIds
      */
     private void appendSupplierProductStat(List<Map<String, Object>> resultFromEs, String supplierIds) {
         String querySupplierProductSqlTemplate = "SELECT\n"
-                                                 + "   count(1),\n"
-                                                 + "   COMPANYID\n"
-                                                 + "FROM\n"
-                                                 + "   space_product\n"
-                                                 + "WHERE\n"
-                                                 + "   STATE = 1 AND  COMPANYID in (%s)\n"
-                                                 + "GROUP BY\n"
-                                                 + "   COMPANYID";
+                + "   count(1),\n"
+                + "   COMPANYID\n"
+                + "FROM\n"
+                + "   space_product\n"
+                + "WHERE\n"
+                + "   STATE = 1 AND  COMPANYID in (%s)\n"
+                + "GROUP BY\n"
+                + "   COMPANYID";
         Map<String, Long> supplierStat = getSupplierStatMap(enterpriseSpaceDataSource, querySupplierProductSqlTemplate, supplierIds);
         for (Map<String, Object> source : resultFromEs) {
             Object value = supplierStat.get(source.get(ID));
@@ -836,19 +838,19 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> result : resultsToUpdate) {
                 bulkRequest.add(elasticClient.getTransportClient()
-                                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
-                                                      elasticClient.getProperties().getProperty("cluster.type.supplier"),
-                                                      String.valueOf(result.get(ID)))
-                                        .setSource(JSON.toJSONString(result, new ValueFilter() {
-                                            @Override
-                                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                                if (propertyValue instanceof java.util.Date) {
-                                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                                } else {
-                                                    return propertyValue;
-                                                }
-                                            }
-                                        })));
+                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
+                                elasticClient.getProperties().getProperty("cluster.type.supplier"),
+                                String.valueOf(result.get(ID)))
+                        .setSource(JSON.toJSONString(result, new ValueFilter() {
+                            @Override
+                            public Object process(Object object, String propertyName, Object propertyValue) {
+                                if (propertyValue instanceof java.util.Date) {
+                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
+                                } else {
+                                    return propertyValue;
+                                }
+                            }
+                        })));
             }
 
             BulkResponse response = bulkRequest.execute().actionGet();

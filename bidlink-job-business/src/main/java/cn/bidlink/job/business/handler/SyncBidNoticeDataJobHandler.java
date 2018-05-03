@@ -34,10 +34,10 @@ import java.util.Map;
  * @Date 2018/3/15
  */
 @Service
-@JobHander("syncXieTongBidNoticeDataJobHandler")
-public class SyncXieTongBidNoticeDataJobHandler extends IJobHandler /*implements InitializingBean*/ {
+@JobHander("syncBidNoticeDataJobHandler")
+public class SyncBidNoticeDataJobHandler extends IJobHandler /*implements InitializingBean*/ {
 
-    private Logger logger = LoggerFactory.getLogger(SyncXieTongBidNoticeDataJobHandler.class);
+    private Logger logger = LoggerFactory.getLogger(SyncBidNoticeDataJobHandler.class);
     @Autowired
     private ElasticClient elasticClient;
 
