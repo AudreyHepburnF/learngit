@@ -98,7 +98,7 @@ public class SyncPurchaseNoticeDataJobHandler extends IJobHandler /*implements I
                 "\tLEFT JOIN purchase_project_control ppc ON pnh.project_id = ppc.id \n" +
                 "\tAND pnh.company_id = ppc.company_id \n" +
                 "WHERE\n" +
-                "\tppc.result_open_range = 1 \n" +
+                "\tppc.project_open_range = 1 \n" +
                 "\tAND pnh.create_time >?";
         String querySql = "SELECT\n" +
                 "\tpnh.id,\n" +
@@ -124,7 +124,7 @@ public class SyncPurchaseNoticeDataJobHandler extends IJobHandler /*implements I
                 "\tLEFT JOIN purchase_project_control ppc ON pnh.project_id = ppc.id \n" +
                 "\tAND pnh.company_id = ppc.company_id \n" +
                 "WHERE\n" +
-                "\tppc.result_open_range = 1 \n" +
+                "\tppc.project_open_range = 1 \n" +
                 "\tAND pnh.create_time > ? \n" +
                 "\tLIMIT ?,?";
         ArrayList<Object> params = new ArrayList<>();
@@ -224,7 +224,7 @@ public class SyncPurchaseNoticeDataJobHandler extends IJobHandler /*implements I
                 "\tLEFT JOIN purchase_project_control ppc ON pnr.project_id = ppc.id \n" +
                 "\tAND pnr.company_id = ppc.company_id \n" +
                 "WHERE\n" +
-                "\tppc.result_open_range = 1\n" +
+                "\tppc.project_open_range = 1\n" +
                 "\tand pnr.update_time > ?";
         String querySql = "SELECT\n" +
                 "\tpnr.id,\n" +
@@ -250,7 +250,7 @@ public class SyncPurchaseNoticeDataJobHandler extends IJobHandler /*implements I
                 "\t`purchase_notice_result` pnr\n" +
                 "\tLEFT JOIN purchase_project_control ppc ON pnr.project_id = ppc.id and pnr.company_id = ppc.company_id\n" +
                 "WHERE\n" +
-                "\tppc.result_open_range = 1\n" +
+                "\tppc.project_open_range = 1\n" +
                 "\tand pnr.update_time > ? \n" +
                 "\tLIMIT ?,?";
         ArrayList<Object> params = new ArrayList<>();
