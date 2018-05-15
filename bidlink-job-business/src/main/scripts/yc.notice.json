@@ -1,0 +1,203 @@
+// 方式1：直接在head界面操作，yc_test/purchase_notice/_mapping POST
+// 方式2：curl -XPOST http://dcsearch.api.yuecai.com/yc_test/purchase_notice/_mapping -d'
+{
+  "notice": {
+    "properties": {
+      "companyId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "companyNameAlias": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "createTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "id": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "isShowMobile": {
+        "type": "integer"
+      },
+      "isShowTel": {
+        "type": "integer"
+      },
+      "linkMail": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "linkMan": {
+        "type": "string"
+      },
+      "linkPhone": {
+        "type": "string"
+      },
+      "linkTel": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "noticeType": {
+        "type": "integer"
+      },
+      "priceOpenRange": {
+        "type": "integer"
+      },
+      "projectCode": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "projectId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "projectInfo": {
+        "type": "string"
+      },
+      "projectNameAlias": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "project_info": {
+        "type": "string"
+      },
+      "publishNoticeTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "publishResultTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "quoteStopTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "resultOpenRange": {
+        "type": "integer"
+      },
+      "syncTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "bailFree": {
+        "type": "long"
+      },
+      "bidBail": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "bidDescribe": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "bidDocMoney": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "bidDocOverTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "bidDocStartTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "bidEndTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "bidOpenAddress": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "bidOpenTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "bidType": {
+        "type": "integer"
+      },
+      "companyName": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "docFree": {
+        "type": "long"
+      },
+      "fileGainAddress": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "gainFileType": {
+        "type": "integer"
+      },
+      "isBailFree": {
+        "type": "integer"
+      },
+      "isDocFree": {
+        "type": "integer"
+      },
+      "isHaveWibider": {
+        "type": "integer"
+      },
+      "linkManAlias": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "linkPhoneAlias": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "linkPhoneIsShow": {
+        "type": "integer"
+      },
+      "linkTelIsShow": {
+        "type": "integer"
+      },
+      "node": {
+        "type": "long"
+      },
+      "noticePublishTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "openType": {
+        "type": "integer"
+      },
+      "projectName": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "putFileType": {
+        "type": "integer"
+      },
+      "qualification": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "remarks": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "subProjectId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "supplierNameNotAnalyzed": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "tenderName": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "unit": {
+        "type": "string",
+        "index": "not_analyzed"
+      }
+    }
+  }
+}

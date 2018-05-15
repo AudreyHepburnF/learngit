@@ -1,13 +1,9 @@
 package cn.bidlink.job.business.handler;
 
+import cn.bidlink.job.business.utils.RegionUtil;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.ValueFilter;
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.action.bulk.BulkResponse;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,6 +80,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected String CODE                        = "code";
     protected String CITY                        = "city";
     protected String COUNTY                      = "county";
+    protected String PROVINCE                    = "province";
     // 数据来源，new表示新平台，old表示老平台
     protected String SOURCE                      = "source";
 
@@ -167,8 +164,8 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
                     refresh(result, projectDirectoryMap);
                 }
 
-                // 添加tenantKey，以及区域
-                appendTenantKeyAndAreaStrToResult(resultToExecute, purchaseIds);
+                // 添加tenantKey，以及区域 TODO 采购项目和招标项目取项目对应项目表中的
+//                appendTenantKeyAndAreaStrToResult(resultToExecute, purchaseIds);
                 // 处理商机的状态
                 batchExecute(resultToExecute);
                 i += pageSize;
@@ -220,6 +217,13 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
         result.put(PROJECT_ID, String.valueOf(result.get(PROJECT_ID)));
         result.put(PURCHASE_ID, String.valueOf(result.get(PURCHASE_ID)));
         result.put(SOURCE_ID, String.valueOf(result.get(SOURCE_ID)));
+        result.put(AREA_STR_NOT_ANALYZED, result.get(AREA_STR));
+        // 区域处理
+        String province = String.valueOf(result.get(PROVINCE));
+        if (province != null && province.length() > 2) {
+            String region = RegionUtil.regionMap.get(province.substring(0, 2));
+            result.put(REGION, region);
+        }
     }
 
     /**
@@ -247,34 +251,35 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected abstract void parseOpportunity(Timestamp currentDate, List<Map<String, Object>> resultToExecute, Map<String, Object> result);
 
     protected void batchExecute(List<Map<String, Object>> resultsToUpdate) {
+        System.out.println(resultsToUpdate);
 //        System.out.println("size : " + resultsToUpdate.size());
 //        for (Map<String, Object> map : resultsToUpdate) {
 //            System.out.println(map);
 //        }
-        if (!CollectionUtils.isEmpty(resultsToUpdate)) {
-            BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
-            for (Map<String, Object> result : resultsToUpdate) {
-                bulkRequest.add(elasticClient.getTransportClient()
-                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
-                                elasticClient.getProperties().getProperty("cluster.type.supplier_opportunity"),
-                                String.valueOf(result.get(ID)))
-                        .setSource(JSON.toJSONString(result, new ValueFilter() {
-                            @Override
-                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof java.util.Date) {
-                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                } else {
-                                    return propertyValue;
-                                }
-                            }
-                        })));
-            }
-
-            BulkResponse response = bulkRequest.execute().actionGet();
-            if (response.hasFailures()) {
-                logger.error(response.buildFailureMessage());
-            }
-        }
+//        if (!CollectionUtils.isEmpty(resultsToUpdate)) {
+//            BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
+//            for (Map<String, Object> result : resultsToUpdate) {
+//                bulkRequest.add(elasticClient.getTransportClient()
+//                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
+//                                elasticClient.getProperties().getProperty("cluster.type.supplier_opportunity"),
+//                                String.valueOf(result.get(ID)))
+//                        .setSource(JSON.toJSONString(result, new ValueFilter() {
+//                            @Override
+//                            public Object process(Object object, String propertyName, Object propertyValue) {
+//                                if (propertyValue instanceof java.util.Date) {
+//                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
+//                                } else {
+//                                    return propertyValue;
+//                                }
+//                            }
+//                        })));
+//            }
+//
+//            BulkResponse response = bulkRequest.execute().actionGet();
+//            if (response.hasFailures()) {
+//                logger.error(response.buildFailureMessage());
+//            }
+//        }
     }
 }
 

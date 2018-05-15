@@ -1,30 +1,15 @@
 package cn.bidlink.job.business.handler;
 
-import cn.bidlink.job.common.es.ElasticClient;
-import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
-import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.handler.annotation.JobHander;
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
-import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,29 +20,7 @@ import java.util.Map;
  */
 @Service
 @JobHander("syncBidNoticeDataJobHandler")
-public class SyncBidNoticeDataJobHandler extends IJobHandler /*implements InitializingBean*/ {
-
-    private Logger logger = LoggerFactory.getLogger(SyncBidNoticeDataJobHandler.class);
-    @Autowired
-    private ElasticClient elasticClient;
-
-    @Autowired
-    @Qualifier("tenderDataSource")
-    protected DataSource tenderDataSource;
-
-    @Value(value = "${pageSize}")
-    private Integer pageSize;
-
-    private String ID                 = "id";
-    private String COMPANY_ID         = "companyId";
-    private String PROJECT_ID         = "projectId";
-    private String SYNC_TIME          = "syncTime";
-    private String COMPANY_NAME_ALIAS = "companyNameAlias";
-    private String COMPANY_NAME       = "companyName";
-    private String PROJECT_NAME_ALIAS = "projectNameAlias";
-    private String PROJECT_NAME       = "projectName";
-    private String NOTICE_TYPE        = "noticeType";
-
+public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandler /*implements InitializingBean*/ {
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
@@ -69,10 +32,11 @@ public class SyncBidNoticeDataJobHandler extends IJobHandler /*implements Initia
     }
 
     private void syncBidNoticeData() {
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.bid_notice", null);
+        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.notice",
+                QueryBuilders.termQuery(PROJECT_TYPE, BID_NOTICE_TYPE));
         logger.info("同步新平台招标公告 lastSyncTime:" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n" +
                 ", syncTime" + new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
-        syncBidNoticeService(lastSyncTime);
+        syncUnderWayBidNoticeService(lastSyncTime);
         syncBidDecidedNoticeService(lastSyncTime);
     }
 
@@ -104,7 +68,8 @@ public class SyncBidNoticeDataJobHandler extends IJobHandler /*implements Initia
                 "\tlink_man AS linkMan,\n" +
                 "\tlink_phone AS linkPhone,\n" +
                 "\tlink_tel AS linkTel,\n" +
-                "\tlink_mail AS linkMail\n" +
+                "\tlink_mail AS linkMail,\n" +
+                "\tcreate_time AS createTime\n" +
                 "FROM\n" +
                 "\t`bid_decided_notice` \n" +
                 "WHERE\n" +
@@ -113,7 +78,7 @@ public class SyncBidNoticeDataJobHandler extends IJobHandler /*implements Initia
                 "\tLIMIT ?,?";
         ArrayList<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
-        doSyncBidNoticeService(countSql, querySql, params, 2);
+        doSyncNoticeService(tenderDataSource, countSql, querySql, params, RESULT_NOTICE);
     }
 
     private void syncInsertBidDecidedNotice(Timestamp lastSyncTime) {
@@ -137,7 +102,8 @@ public class SyncBidNoticeDataJobHandler extends IJobHandler /*implements Initia
                 "\tlink_man AS linkMan,\n" +
                 "\tlink_phone AS linkPhone,\n" +
                 "\tlink_tel AS linkTel,\n" +
-                "\tlink_mail AS linkMail\n" +
+                "\tlink_mail AS linkMail,\n" +
+                "\tcreate_time AS createTime\n" +
                 "FROM\n" +
                 "\t`bid_decided_notice` \n" +
                 "WHERE\n" +
@@ -146,10 +112,10 @@ public class SyncBidNoticeDataJobHandler extends IJobHandler /*implements Initia
                 "\tLIMIT ?,?";
         ArrayList<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
-        doSyncBidNoticeService(countSql, querySql, params, 2);
+        doSyncNoticeService(tenderDataSource, countSql, querySql, params, RESULT_NOTICE);
     }
 
-    private void syncBidNoticeService(Timestamp lastSyncTime) {
+    private void syncUnderWayBidNoticeService(Timestamp lastSyncTime) {
         logger.info("同步协同平台招标公告开始");
         syncInsertBidNoticeService(lastSyncTime);
         syncUpdateBidNoticeService(lastSyncTime);
@@ -196,7 +162,8 @@ public class SyncBidNoticeDataJobHandler extends IJobHandler /*implements Initia
                 "\tnotice_publish_time AS noticePublishTime,\n" +
                 "\tsub_project_id AS subProjectId,\n" +
                 "\tgain_file_type AS gainFileType,\n" +
-                "\tfile_gain_address AS fileGainAddress \n" +
+                "\tfile_gain_address AS fileGainAddress, \n" +
+                "\tcreate_time AS createTime \n" +
                 "FROM\n" +
                 "\tbid_notice \n" +
                 "WHERE\n" +
@@ -204,7 +171,7 @@ public class SyncBidNoticeDataJobHandler extends IJobHandler /*implements Initia
                 "\tLIMIT ?,?";
         ArrayList<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
-        doSyncBidNoticeService(countSql, querySql, params, 1);
+        doSyncNoticeService(tenderDataSource, countSql, querySql, params, SOURCE_NOTICE);
     }
 
     private void syncUpdateBidNoticeService(Timestamp lastSyncTime) {
@@ -247,7 +214,8 @@ public class SyncBidNoticeDataJobHandler extends IJobHandler /*implements Initia
                 "\tnotice_publish_time AS noticePublishTime,\n" +
                 "\tsub_project_id AS subProjectId,\n" +
                 "\tgain_file_type AS gainFileType,\n" +
-                "\tfile_gain_address AS fileGainAddress \n" +
+                "\tfile_gain_address AS fileGainAddress, \n" +
+                "\tcreate_time AS createTime \n" +
                 "FROM\n" +
                 "\tbid_notice \n" +
                 "WHERE\n" +
@@ -255,69 +223,14 @@ public class SyncBidNoticeDataJobHandler extends IJobHandler /*implements Initia
                 "\tLIMIT ?,?";
         ArrayList<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
-        doSyncBidNoticeService(countSql, querySql, params, 1);
+        doSyncNoticeService(tenderDataSource, countSql, querySql, params, SOURCE_NOTICE);
     }
 
-    private void doSyncBidNoticeService(String countSql, String querySql, ArrayList<Object> params, Integer noticeType) {
-        long count = DBUtil.count(tenderDataSource, countSql, params);
-        logger.debug("执行countSql: {}, params: {}, 共{}条", countSql, params, count);
-        for (long i = 0; i < count; i = i + pageSize) {
-            // 添加分页
-            ArrayList<Object> paramsToUse = paramsToUse(params, i, pageSize);
-            List<Map<String, Object>> mapList = DBUtil.query(tenderDataSource, querySql, paramsToUse);
-            logger.debug("执行querySql: {}, params: {}, 共{}条", querySql, paramsToUse, mapList.size());
-            for (Map<String, Object> result : mapList) {
-                result.put(NOTICE_TYPE, noticeType);
-                refresh(result);
-            }
-            batchExecute(mapList);
-        }
-    }
-
-    private void batchExecute(List<Map<String, Object>> mapList) {
-//        System.out.println(mapList);
-        if (!CollectionUtils.isEmpty(mapList)) {
-            BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
-            for (Map<String, Object> map : mapList) {
-                bulkRequest.add(elasticClient.getTransportClient()
-                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
-                                elasticClient.getProperties().getProperty("cluster.type.bid_notice"),
-                                String.valueOf(map.get(ID)))
-                        .setSource(JSON.toJSONString(map, new ValueFilter() {
-                            @Override
-                            public Object process(Object o, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof Date) {
-                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                } else {
-                                    return propertyValue;
-                                }
-                            }
-                        })));
-            }
-            BulkResponse responses = bulkRequest.execute().actionGet();
-            if (responses.hasFailures()) {
-                logger.error(responses.buildFailureMessage());
-            }
-        }
-    }
-
-    private void refresh(Map<String, Object> result) {
-        // 处理 id projectId companyId为String类型
-        result.put(ID, String.valueOf(result.get(ID)));
-        result.put(COMPANY_ID, String.valueOf(result.get(COMPANY_ID)));
-        result.put(PROJECT_ID, String.valueOf(result.get(PROJECT_ID)));
-        result.put(PROJECT_NAME_ALIAS, result.get(PROJECT_NAME));
-        result.put(COMPANY_NAME_ALIAS, result.get(COMPANY_NAME));
-
-        // 添加同步时间字段
-        result.put(SYNC_TIME, SyncTimeUtil.getCurrentDate());
-    }
-
-    private ArrayList<Object> paramsToUse(ArrayList<Object> params, long i, Integer pageSize) {
-        ArrayList<Object> paramsToUse = new ArrayList<>(params);
-        paramsToUse.add(i);
-        paramsToUse.add(pageSize);
-        return paramsToUse;
+    @Override
+    protected void refresh(Map<String, Object> result) {
+        super.refresh(result);
+        // 公告类型为招标公告
+        result.put(PROJECT_TYPE, BID_NOTICE_TYPE);
     }
 
 //    @Override

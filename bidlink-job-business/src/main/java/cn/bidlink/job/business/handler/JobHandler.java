@@ -13,7 +13,7 @@ import java.util.List;
  * @date : 2017/11/27
  */
 public abstract class JobHandler extends IJobHandler {
-    @Value("${pageSize:200}")
+    @Value("${pageSize:2000}")
     protected int pageSize;
 
     protected List<Object> appendToParams(List<Object> params, long pageNumber) {

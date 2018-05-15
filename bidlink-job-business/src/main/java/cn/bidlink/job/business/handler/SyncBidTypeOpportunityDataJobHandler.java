@@ -55,6 +55,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                         .must(QueryBuilders.termQuery("projectType", BIDDING_PROJECT_TYPE))
                         .must(QueryBuilders.termQuery("source", SOURCE_NEW)));
         logger.info("招标项目商机同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
+//        Timestamp lastSyncTime = SyncTimeUtil.GMT_TIME;
         syncBiddingProjectDataService(lastSyncTime);
     }
 
@@ -70,32 +71,39 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                 + "   bid_sub_project\n"
                 + "WHERE\n"
                 + "   is_bid_open = 1 AND node > 1 AND update_time > ?";
-        String queryUpdatedSql = "SELECT\n"
-                + "   project.*,bpi.id AS directoryId, bpi.`name` AS directoryName\n"
-                + "FROM\n"
-                + "   (\n"
-                + "      SELECT\n"
-                + "         id AS projectId,\n"
-                + "         project_code AS projectCode,\n"
-                + "         project_name AS projectName,\n"
-                + "         project_status AS projectStatus,\n"
-                + "         company_id AS purchaseId,\n"
-                + "         company_name AS purchaseName,\n"
-                + "         create_time,\n"
-                + "         node,\n"
-                + "         bid_open_time AS createTime,\n"
-                + "         bid_endtime AS quoteStopTime,\n"
-                + "         sys_id AS sourceId,\n"
-                + "         update_time AS updateTime\n"
-                + "      FROM\n"
-                + "         bid_sub_project\n"
-                + "      WHERE\n"
-                + "         is_bid_open = 1\n"
-                + "      AND node > 1\n"
-                + "      AND update_time > ?\n"
-                + "      LIMIT ?,?\n"
-                + "   ) project\n"
-                + "LEFT JOIN bid_project_item bpi ON project.projectId = bpi.sub_project_id";
+        String queryUpdatedSql = "SELECT\n" +
+                "\tproject.*,\n" +
+                "\tbpi.id AS directoryId,\n" +
+                "\tbpi.`name` AS directoryName \n" +
+                "FROM\n" +
+                "\t(\n" +
+                    "SELECT\n" +
+                        "\tbsp.id AS projectId,\n" +
+                        "\tbsp.project_code AS projectCode,\n" +
+                        "\tbsp.project_name AS projectName,\n" +
+                        "\tbsp.project_status AS projectStatus,\n" +
+                        "\tbsp.company_id AS purchaseId,\n" +
+                        "\tbsp.company_name AS purchaseName,\n" +
+                        "\tbsp.create_time,\n" +
+                        "\tbsp.node,\n" +
+                        "\tbsp.bid_open_time AS createTime,\n" +
+                        "\tbsp.bid_endtime AS quoteStopTime,\n" +
+                        "\tbsp.sys_id AS sourceId,\n" +
+                        "\tbsp.update_time AS updateTime,\n" +
+                        "\tbp.province,\n" +
+                // FIXME 待招标修改字段region_name和存储地区方式为-
+                        "\tbp.region_name AS areaStr \n" +
+                    "FROM\n" +
+                    "\tbid_sub_project bsp\n" +
+                    "\tLEFT JOIN bid_project bp ON bsp.project_id = bp.id \n" +
+                    "\tAND bsp.company_id = bp.company_id \n" +
+                    "WHERE\n" +
+                    "\tis_bid_open = 1 \n" +
+                    "\tAND node > 1 \n" +
+                    "\tAND bsp.update_time > ? \n" +
+                    "\tLIMIT ?,? \n" +
+                "\t) project\n" +
+                "\tLEFT JOIN bid_project_item bpi ON project.projectId = bpi.sub_project_id";
         doSyncProjectDataService(tenderDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList(((Object) lastSyncTime)));
     }
 
