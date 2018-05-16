@@ -4,6 +4,11 @@ import cn.bidlink.job.business.utils.RegionUtil;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.ValueFilter;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.bulk.BulkResponse;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -251,35 +256,35 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected abstract void parseOpportunity(Timestamp currentDate, List<Map<String, Object>> resultToExecute, Map<String, Object> result);
 
     protected void batchExecute(List<Map<String, Object>> resultsToUpdate) {
-        System.out.println(resultsToUpdate);
-//        System.out.println("size : " + resultsToUpdate.size());
-//        for (Map<String, Object> map : resultsToUpdate) {
-//            System.out.println(map);
-//        }
-//        if (!CollectionUtils.isEmpty(resultsToUpdate)) {
-//            BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
-//            for (Map<String, Object> result : resultsToUpdate) {
-//                bulkRequest.add(elasticClient.getTransportClient()
-//                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
-//                                elasticClient.getProperties().getProperty("cluster.type.supplier_opportunity"),
-//                                String.valueOf(result.get(ID)))
-//                        .setSource(JSON.toJSONString(result, new ValueFilter() {
-//                            @Override
-//                            public Object process(Object object, String propertyName, Object propertyValue) {
-//                                if (propertyValue instanceof java.util.Date) {
-//                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-//                                } else {
-//                                    return propertyValue;
-//                                }
-//                            }
-//                        })));
-//            }
-//
-//            BulkResponse response = bulkRequest.execute().actionGet();
-//            if (response.hasFailures()) {
-//                logger.error(response.buildFailureMessage());
-//            }
-//        }
+//        System.out.println(resultsToUpdate);
+        System.out.println("size : " + resultsToUpdate.size());
+        for (Map<String, Object> map : resultsToUpdate) {
+            System.out.println(map);
+        }
+        if (!CollectionUtils.isEmpty(resultsToUpdate)) {
+            BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
+            for (Map<String, Object> result : resultsToUpdate) {
+                bulkRequest.add(elasticClient.getTransportClient()
+                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
+                                elasticClient.getProperties().getProperty("cluster.type.supplier_opportunity"),
+                                String.valueOf(result.get(ID)))
+                        .setSource(JSON.toJSONString(result, new ValueFilter() {
+                            @Override
+                            public Object process(Object object, String propertyName, Object propertyValue) {
+                                if (propertyValue instanceof java.util.Date) {
+                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
+                                } else {
+                                    return propertyValue;
+                                }
+                            }
+                        })));
+            }
+
+            BulkResponse response = bulkRequest.execute().actionGet();
+            if (response.hasFailures()) {
+                logger.error(response.buildFailureMessage());
+            }
+        }
     }
 }
 

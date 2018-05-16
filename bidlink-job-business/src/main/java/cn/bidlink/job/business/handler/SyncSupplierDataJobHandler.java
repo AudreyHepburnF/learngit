@@ -115,6 +115,10 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
     private String TOTAL_BID_PROJECT           = "totalBidProject";
     private String TOTAL_DEAL_PURCHASE_PROJECT = "totalDealPurchaseProject";
     private String TOTAL_DEAL_BID_PROJECT      = "totalDealBidProject";
+    private String TOTAL_DEAL_PROJECT          = "totalDealProject";
+    private String TOTAL_DEAL_PURCHASE_PRICE   = "totalDealPurchasePrice";
+    private String TOTAL_DEAL_BID_PRICE        = "totalDealBidPrice";
+    private String TOTAL_DEAL_PRICE            = "totalDealPrice";
     private String TOTAL_PRODUCT               = "totalProduct";
     private String TOTAL_COOPERATED_PURCHASER  = "totalCooperatedPurchaser";
     private String REGION                      = "region";
@@ -546,7 +550,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
 
 
     /**
-     * FIXME 诚信值默认为38
+     * FIXME 诚信值默认为14
      *
      * @param resultToExecute
      * @param supplierIds
@@ -561,7 +565,7 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
 //                result.put(CREDIT_RATING, (creditRating == null ? 0 : creditRating));
 //            }
             for (Map<String, Object> result : resultToExecute) {
-                result.put(CREDIT_RATING, 38);
+                result.put(CREDIT_RATING, 14);
             }
         }
     }
@@ -625,6 +629,8 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
             appendSupplierProjectStat(resultFromEs, supplierIdToString);
             // 添加成交项目统计
             appendSupplierDealProjectStat(resultFromEs, supplierIdToString);
+            //  添加成交额统计
+            appendSupplierDealPriceStat(resultFromEs, supplierIdToString);
             // 添加合作采购商统计
             appendCooperatedPurchaserState(resultFromEs, supplierIdToString);
             // 添加发布产品
@@ -638,6 +644,63 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
             pageNumberToUse++;
         } while (scrollResp.getHits().getHits().length != 0);
         logger.info("同步供应商参与的项目统计结束");
+    }
+
+    private void appendSupplierDealPriceStat(List<Map<String, Object>> resultFromEs, String supplierIds) {
+        // 采购项目
+        String queryPurchaseDealPriceSqlTemplate = "SELECT\n" +
+                "\tsupplier_id,\n" +
+                "\tsum( deal_total_price ) \n" +
+                "FROM\n" +
+                "\t`purchase_supplier_project` \n" +
+                "WHERE\n" +
+                "\tdeal_status = 2 \n" +
+                "\tAND supplier_id IN (%s) \n" +
+                "GROUP BY\n" +
+                "\tsupplier_id";
+        Map<String, Long> purchaseDealPriceStat = getSupplierPriceStatMap(purchaseDataSource, queryPurchaseDealPriceSqlTemplate, supplierIds);
+        for (Map<String, Object> source : resultFromEs) {
+            Object value = purchaseDealPriceStat.get(source.get(ID));
+            source.put(TOTAL_DEAL_PURCHASE_PRICE, value == null ? 0 : value);
+        }
+
+        // 招标项目
+        String queryBidDealPriceSqlTemplate = "SELECT\n" +
+                "\tsupplier_id,\n" +
+                "\tsum( win_bid_total_price ) \n" +
+                "FROM\n" +
+                "\t`bid_supplier` \n" +
+                "WHERE\n" +
+                "\twin_bid_status = 1 \n" +
+                "\tAND supplier_id IN (%s) \n" +
+                "GROUP BY\n" +
+                "\tsupplier_id";
+        Map<String, Long> bidDealPriceStat = getSupplierPriceStatMap(tenderDataSource, queryBidDealPriceSqlTemplate, supplierIds);
+        for (Map<String, Object> source : resultFromEs) {
+            Object value = bidDealPriceStat.get(source.get(ID));
+            source.put(TOTAL_DEAL_BID_PRICE, value == null ? 0 : value);
+            if (value == null) {
+                source.put(TOTAL_DEAL_PRICE, source.get(TOTAL_DEAL_PURCHASE_PRICE));
+            } else {
+                source.put(TOTAL_DEAL_PRICE, Double.valueOf(value.toString()) + Double.valueOf(source.get(TOTAL_DEAL_PURCHASE_PRICE).toString()));
+            }
+        }
+    }
+
+    private Map<String, Long> getSupplierPriceStatMap(DataSource dataSource, String querySqlTemplate, String supplierIds) {
+        String querySql = String.format(querySqlTemplate, supplierIds);
+        return DBUtil.query(dataSource, querySql, null, new DBUtil.ResultSetCallback<Map<String, Long>>() {
+            @Override
+            public Map<String, Long> execute(ResultSet resultSet) throws SQLException {
+                Map<String, Long> map = new HashMap<>();
+                while (resultSet.next()) {
+                    long supplierId = resultSet.getLong(1);
+                    long totalDealPrice = resultSet.getLong(2);
+                    map.put(String.valueOf(supplierId), totalDealPrice);
+                }
+                return map;
+            }
+        });
     }
 
     /**
@@ -712,7 +775,16 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
         for (Map<String, Object> source : resultFromEs) {
             Object value = bidProjectStat.get(source.get(ID));
             source.put(TOTAL_DEAL_BID_PROJECT, (value == null ? 0 : value));
+            // 总成交项目数量
+            if (value == null) {
+                source.put(TOTAL_DEAL_PROJECT, source.get(TOTAL_DEAL_PURCHASE_PROJECT));
+            } else {
+                double totalDealPurchaseProject = Double.valueOf(source.get(TOTAL_DEAL_PURCHASE_PROJECT).toString());
+                source.put(TOTAL_DEAL_PROJECT, totalDealPurchaseProject + Double.valueOf(value.toString()));
+            }
         }
+
+
     }
 
     /**

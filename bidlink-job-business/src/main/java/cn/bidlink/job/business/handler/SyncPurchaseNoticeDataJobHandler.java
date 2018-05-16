@@ -80,7 +80,7 @@ public class SyncPurchaseNoticeDataJobHandler extends AbstractSyncNoticeDataJobH
                 "\tpnh.is_show_mobile AS isShowMobile,\n" +
                 "\tpnh.company_id AS companyId,\n" +
                 "\tpnh.create_time AS createTime,\n" +
-                "\tpnh.company_name AS companyNameAlias,\n" +
+                "\tpnh.company_name AS companyName,\n" +
                 "\tppc.result_open_range AS resultOpenRange,\n" +
                 "\tppc.price_open_range AS priceOpenRange \n" +
                 "FROM\n" +
@@ -122,7 +122,7 @@ public class SyncPurchaseNoticeDataJobHandler extends AbstractSyncNoticeDataJobH
                 "\tpnh.is_show_mobile AS isShowMobile,\n" +
                 "\tpnh.company_id AS companyId,\n" +
                 "\tpnh.create_time AS createTime,\n" +
-                "\tpnh.company_name AS companyNameAlias,\n" +
+                "\tpnh.company_name AS companyName,\n" +
                 "\tppc.result_open_range AS resultOpenRange,\n" +
                 "\tppc.price_open_range AS priceOpenRange \n" +
                 "FROM\n" +
@@ -165,7 +165,7 @@ public class SyncPurchaseNoticeDataJobHandler extends AbstractSyncNoticeDataJobH
                 "\tpnr.is_show_mobile AS isShowMobile,\n" +
                 "\tpnr.company_id AS companyId,\n" +
                 "\tpnr.create_time AS createTime,\n" +
-                "\tpnr.company_name AS companyNameAlias,\n" +
+                "\tpnr.company_name AS companyName,\n" +
                 "\tppc.result_open_range AS resultOpenRange, \n" +
                 "\tppc.price_open_range AS priceOpenRange\n" +
                 "FROM\n" +
@@ -207,7 +207,7 @@ public class SyncPurchaseNoticeDataJobHandler extends AbstractSyncNoticeDataJobH
                 "\tpnr.is_show_mobile AS isShowMobile,\n" +
                 "\tpnr.company_id AS companyId,\n" +
                 "\tpnr.create_time AS createTime,\n" +
-                "\tpnr.company_name AS companyNameAlias,\n" +
+                "\tpnr.company_name AS companyName,\n" +
                 "\tppc.result_open_range AS resultOpenRange, \n" +
                 "\tppc.price_open_range AS priceOpenRange\n" +
                 "FROM\n" +

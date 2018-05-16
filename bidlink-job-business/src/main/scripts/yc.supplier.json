@@ -153,6 +153,18 @@
       "totalDealPurchaseProject": {
         "type": "long"
       },
+      "totalDealProject": {
+        "type": "long"
+      },
+      "totalDealBidPrice": {
+        "type": "long"
+      },
+      "totalDealPurchasePrice": {
+        "type": "long"
+      },
+      "totalDealPrice": {
+        "type": "long"
+      },
       "totalProduct": {
         "type": "long"
       },
