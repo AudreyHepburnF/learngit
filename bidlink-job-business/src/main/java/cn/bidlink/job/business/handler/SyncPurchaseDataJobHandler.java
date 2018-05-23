@@ -40,7 +40,7 @@ import java.util.*;
  */
 @Service
 @JobHander(value = "syncPurchaseDataJobHandler")
-public class SyncPurchaseDataJobHandler extends IJobHandler/* implements InitializingBean*/ {
+public class SyncPurchaseDataJobHandler extends IJobHandler /*implements InitializingBean*/ {
 
     private Logger logger = LoggerFactory.getLogger(SyncPurchaseDataJobHandler.class);
 
@@ -81,6 +81,9 @@ public class SyncPurchaseDataJobHandler extends IJobHandler/* implements Initial
     private String ZONE_STR_NOT_ANALYZED      = "zoneStrNotAnalyzed";
     private String PURCHASE_NAME              = "purchaseName";
     private String PURCHASE_NAME_NOT_ANALYZED = "purchaseNameNotAnalyzed";
+    private String COOPERATE_SUPPLIER_COUNT   = "cooperateSupplierCount";
+    private String AUCTION_PROJECT_COUNT      = "auctionProjectCount";
+    private String AUCTION_TRADING_VOLUME     = "auctionTradingVolume";
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
@@ -176,11 +179,20 @@ public class SyncPurchaseDataJobHandler extends IJobHandler/* implements Initial
             // 添加招标交易额
             appendBidTradingVolume(resultFromEs, purchaserIdToString);
 
+            // 添加竞价交易额
+            appendAuctionTradingVolume(resultFromEs, purchaserIdToString);
+
             // 添加采购项目数量
             appendPurchaseProjectCount(resultFromEs, purchaserIdToString);
 
             // 添加招标项目数量
             appendBidProjectCount(resultFromEs, purchaserIdToString);
+
+            // 添加竞价项目数量
+            appendAuctionProjectCount(resultFromEs, purchaserIdToString);
+
+            // 添加合同供应商数量
+            appendCooperateSupplierCount(resultFromEs, purchaserIdToString);
 
             batchInsert(resultFromEs);
             System.out.println("回滚后数据" + resultFromEs);
@@ -193,6 +205,21 @@ public class SyncPurchaseDataJobHandler extends IJobHandler/* implements Initial
         logger.info("同步采购商参与项目和交易统计结束");
 
     }
+
+    private void appendAuctionProjectCount(ArrayList<Map<String, Object>> resultFromEs, String purchaserIdToString) {
+        // FIXME 待竞价项目开发后统计
+        for (Map<String, Object> result : resultFromEs) {
+            result.put(AUCTION_PROJECT_COUNT, 0);
+        }
+    }
+
+    private void appendAuctionTradingVolume(ArrayList<Map<String, Object>> resultFromEs, String purchaserIdToString) {
+        // FIXME 待竞价项目开发后统计
+        for (Map<String, Object> result : resultFromEs) {
+            result.put(AUCTION_TRADING_VOLUME, 0);
+        }
+    }
+
 
     private void syncPurchaserDataService(Timestamp lastSyncTime) {
         syncCreatePurchaserData(lastSyncTime);
@@ -327,9 +354,7 @@ public class SyncPurchaseDataJobHandler extends IJobHandler/* implements Initial
                 } else {
                     purchase.put(PURCHASE_TRADING_VOLUME, purchaseTradingVolume);
                 }
-
             }
-
         }
     }
 
@@ -441,7 +466,7 @@ public class SyncPurchaseDataJobHandler extends IJobHandler/* implements Initial
                     return projectCountMap;
                 }
             });
-            // 计算总的交易额
+            // 计算总的交易额 FIXME 总项目数量暂时没加竞价项目数量
             for (Map<String, Object> purchaser : purchasers) {
                 // 采购商招标项目个数
                 Long bidProjectCount = bidProjectCountMap.get(Long.parseLong(((String) purchaser.get(ID))));
@@ -457,6 +482,32 @@ public class SyncPurchaseDataJobHandler extends IJobHandler/* implements Initial
                 }
             }
 
+        }
+    }
+
+    private void appendCooperateSupplierCount(List<Map<String, Object>> resultFromEs, String purchaserIdToString) {
+        String querySqlTemplate = "SELECT\n" +
+                "\tcount(1),\n" +
+                "\tcompany_id\n" +
+                "FROM\n" +
+                "\t`supplier` \n" +
+                "WHERE\n" +
+                "\tsymbiosis_status = 2 AND company_id in (%s)\n" +
+                "GROUP BY\n" +
+                "\tcompany_id";
+        String querySql = String.format(querySqlTemplate, purchaserIdToString);
+        Map<Long, Long> cooperateSupplierMap = DBUtil.query(uniregDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Long, Long>>() {
+            @Override
+            public Map<Long, Long> execute(ResultSet resultSet) throws SQLException {
+                Map<Long, Long> map = new HashMap<>();
+                while (resultSet.next()) {
+                    map.put(resultSet.getLong(2), resultSet.getLong(1));
+                }
+                return map;
+            }
+        });
+        for (Map<String, Object> result : resultFromEs) {
+            result.put(COOPERATE_SUPPLIER_COUNT, cooperateSupplierMap.get(result.get(ID)) == null ? 0 : cooperateSupplierMap.get(result.get(ID)));
         }
     }
 
@@ -477,7 +528,7 @@ public class SyncPurchaseDataJobHandler extends IJobHandler/* implements Initial
     }
 
     private void batchInsert(List<Map<String, Object>> purchases) {
-        System.out.println("=============" + purchases);
+//        System.out.println("=============" + purchases);
         if (!CollectionUtils.isEmpty(purchases)) {
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> purchase : purchases) {

@@ -86,6 +86,15 @@
       "zoneStrNotAnalyzed": {
         "type": "string",
         "index": "not_analyzed"
+      },
+      "cooperateSupplierCount": {
+        "type": "long"
+      }
+      ,"auctionTradingVolume": {
+        "type": "long"
+      },
+      "auctionProjectCount": {
+        "type": "long"
       }
     }
   }

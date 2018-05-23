@@ -84,15 +84,14 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                         "\tbsp.project_status AS projectStatus,\n" +
                         "\tbsp.company_id AS purchaseId,\n" +
                         "\tbsp.company_name AS purchaseName,\n" +
-                        "\tbsp.create_time,\n" +
+                        "\tbsp.createTime,\n" +
                         "\tbsp.node,\n" +
-                        "\tbsp.bid_open_time AS createTime,\n" +
+                        "\tbsp.bid_open_time AS bidOpenTime,\n" +
                         "\tbsp.bid_endtime AS quoteStopTime,\n" +
                         "\tbsp.sys_id AS sourceId,\n" +
                         "\tbsp.update_time AS updateTime,\n" +
                         "\tbp.province,\n" +
-                // FIXME 待招标修改字段region_name和存储地区方式为-
-                        "\tbp.region_name AS areaStr \n" +
+                        "\tbp.zone_str AS areaStr \n" +
                     "FROM\n" +
                     "\tbid_sub_project bsp\n" +
                     "\tLEFT JOIN bid_project bp ON bsp.project_id = bp.id \n" +
