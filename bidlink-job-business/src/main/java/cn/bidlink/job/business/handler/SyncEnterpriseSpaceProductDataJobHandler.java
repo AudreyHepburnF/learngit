@@ -7,7 +7,6 @@ import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
-import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -16,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -35,7 +33,7 @@ import java.util.Map;
  */
 @JobHander(value = "syncEnterpriseSpaceDataJobHandler")
 @Service
-public class SyncEnterpriseSpaceProductDataJobHandler extends IJobHandler /*implements InitializingBean*/ {
+public class SyncEnterpriseSpaceProductDataJobHandler extends JobHandler /*implements InitializingBean*/ {
 
     private Logger logger = LoggerFactory.getLogger(SyncEnterpriseSpaceProductDataJobHandler.class);
 
@@ -43,15 +41,8 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends IJobHandler /*impl
     @Qualifier("enterpriseSpaceDataSource")
     private DataSource enterpriseSpaceDataSource;
 
-//    @Autowired
-//    @Qualifier("centerDataSource")
-//    private DataSource centerDataSource;
-
     @Autowired
     private ElasticClient elasticClient;
-
-    @Value("${pageSize}")
-    private Integer pageSize;
 
     private String ID                        = "id";
     private String CORE                      = "core";
@@ -200,20 +191,6 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends IJobHandler /*impl
 //            map.put(CORE, coreMap.get(map.get(COMPANY_ID)));
 //        }
 //    }
-
-    /**
-     * 添加分页查询
-     *
-     * @param params
-     * @param i
-     * @return
-     */
-    private List<Object> appendToParams(ArrayList<Object> params, long i) {
-        ArrayList<Object> paramsToUse = new ArrayList<>(params);
-        paramsToUse.add(i);
-        paramsToUse.add(pageSize);
-        return paramsToUse;
-    }
 
     /**
      * 添加同步时间字段

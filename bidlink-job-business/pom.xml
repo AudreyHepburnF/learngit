@@ -104,9 +104,9 @@
                 <pom.framework.redis.conf>10.4.0.44:6379</pom.framework.redis.conf>
                 <pom.framework.redis.took>false</pom.framework.redis.took>
                 <!--企业空间数据源-->
-                <pom.enterpriseSpace.db.url>jdbc:mysql://10.1.1.68:3306/ebnew?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.enterpriseSpace.db.url>
-                <pom.enterpriseSpace.db.username>testdb</pom.enterpriseSpace.db.username>
-                <pom.enterpriseSpace.db.password>NYbICTrtYS#E</pom.enterpriseSpace.db.password>
+                <pom.enterpriseSpace.db.url>jdbc:mysql://10.4.0.43:3306/space?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.enterpriseSpace.db.url>
+                <pom.enterpriseSpace.db.username>dashuju</pom.enterpriseSpace.db.username>
+                <pom.enterpriseSpace.db.password>ixietong!@#$</pom.enterpriseSpace.db.password>
                 <!--协同平台招标数据源-->
                 <pom.tender.db.url>jdbc:mysql://10.4.0.43:3306/tender?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.tender.db.url>
                 <pom.tender.db.username>dashuju</pom.tender.db.username>
@@ -120,7 +120,7 @@
                 <pom.unireg.db.username>dashuju</pom.unireg.db.username>
                 <pom.unireg.db.password>ixietong!@#$</pom.unireg.db.password>
                 <!--供应商企业空间-->
-                <pom.supplier.enterpriseSpaceFormat>http://{0}.testspace.yuecai.com/enterprise-web/display/home/findCompanyInfo.htm?currMenuId=companyMenu&amp;loginName={1}</pom.supplier.enterpriseSpaceFormat>
+                <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
                 <pom.supplier.enterpriseSpaceDetailFormat>http://{0}.testspace.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}</pom.supplier.enterpriseSpaceDetailFormat>
                 <!--es配置-->
@@ -159,9 +159,9 @@
                 <pom.framework.redis.conf>10.4.0.44:6379</pom.framework.redis.conf>
                 <pom.framework.redis.took>false</pom.framework.redis.took>
                 <!--企业空间数据源-->
-                <pom.enterpriseSpace.db.url>jdbc:mysql://10.1.1.68:3306/ebnew?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.enterpriseSpace.db.url>
-                <pom.enterpriseSpace.db.username>testdb</pom.enterpriseSpace.db.username>
-                <pom.enterpriseSpace.db.password>NYbICTrtYS#E</pom.enterpriseSpace.db.password>
+                <pom.enterpriseSpace.db.url>jdbc:mysql://10.4.0.43:3306/space?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.enterpriseSpace.db.url>
+                <pom.enterpriseSpace.db.username>dashuju</pom.enterpriseSpace.db.username>
+                <pom.enterpriseSpace.db.password>ixietong!@#$</pom.enterpriseSpace.db.password>
                 <!--协同平台招标数据源-->
                 <pom.tender.db.url>jdbc:mysql://10.4.0.43:3306/tender?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.tender.db.url>
                 <pom.tender.db.username>dashuju</pom.tender.db.username>
@@ -175,7 +175,7 @@
                 <pom.unireg.db.username>dashuju</pom.unireg.db.username>
                 <pom.unireg.db.password>ixietong!@#$</pom.unireg.db.password>
                 <!--供应商企业空间-->
-                <pom.supplier.enterpriseSpaceFormat>http://{0}.testspace.yuecai.com/display/home/findCompanyInfo.htm?currMenuId=companyMenu&amp;loginName={1}</pom.supplier.enterpriseSpaceFormat>
+                <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
                 <pom.supplier.enterpriseSpaceDetailFormat>http://{0}.testspace.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}</pom.supplier.enterpriseSpaceDetailFormat>
                 <!--es配置-->
@@ -210,26 +210,10 @@
                 <!--redis配置-->
                 <pom.framework.redis.conf>192.168.2.192:6380:bid!@#$link,92.168.2.193:6380:bid!@#$link</pom.framework.redis.conf>
                 <pom.framework.redis.took>false</pom.framework.redis.took>
-                <!--悦彩数据源-->
-                <pom.yc.db.url>jdbc:mysql://192.168.1.86:3306/nyc?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yc.db.url>
-                <pom.yc.db.username>shujuzhx</pom.yc.db.username>
-                <pom.yc.db.password>BzUS3GsL1l</pom.yc.db.password>
-                <!--pro数据源-->
-                <pom.pro.db.url>jdbc:mysql://192.168.1.168:3306/yc_pro?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
-                <pom.pro.db.username>fengzikai</pom.pro.db.username>
-                <pom.pro.db.password>bid6link!@#$</pom.pro.db.password>
-                <!--中心库数据源-->
-                <pom.center.db.url>jdbc:mysql://192.168.1.82:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.center.db.url>
-                <pom.center.db.username>fengzikai</pom.center.db.username>
-                <pom.center.db.password>bid6link!@#$</pom.center.db.password>
-                <!--诚信数据源-->
-                <pom.credit.db.url>jdbc:mysql://192.168.1.204:3306/credit_system?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.credit.db.url>
-                <pom.credit.db.username>zikaifeng</pom.credit.db.username>
-                <pom.credit.db.password>zikaifeng!@#$</pom.credit.db.password>
                 <!--企业空间数据源-->
-                <pom.enterpriseSpace.db.url>jdbc:mysql://192.168.1.79:3306/ebnew?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.enterpriseSpace.db.url>
-                <pom.enterpriseSpace.db.username>testdb</pom.enterpriseSpace.db.username>
-                <pom.enterpriseSpace.db.password>NYbICTrtYS#E</pom.enterpriseSpace.db.password>
+                <pom.enterpriseSpace.db.url>jdbc:mysql://10.4.0.43:3306/space?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.enterpriseSpace.db.url>
+                <pom.enterpriseSpace.db.username>dashuju</pom.enterpriseSpace.db.username>
+                <pom.enterpriseSpace.db.password>ixietong!@#$</pom.enterpriseSpace.db.password>
                 <!--协同平台招标数据源-->
                 <pom.tender.db.url>jdbc:mysql://10.4.0.43:3306/tender?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.tender.db.url>
                 <pom.tender.db.username>dashuju</pom.tender.db.username>
@@ -243,7 +227,7 @@
                 <pom.unireg.db.username>dashuju</pom.unireg.db.username>
                 <pom.unireg.db.password>ixietong!@#$</pom.unireg.db.password>
                 <!--供应商企业空间-->
-                <pom.supplier.enterpriseSpaceFormat>http://{0}.space.yuecai.com/display/home/findCompanyInfo.htm?currMenuId=companyMenu&amp;loginName={1}</pom.supplier.enterpriseSpaceFormat>
+                <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
                 <pom.supplier.enterpriseSpaceDetailFormat>http://{0}.space.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}</pom.supplier.enterpriseSpaceDetailFormat>
                 <!--es配置-->

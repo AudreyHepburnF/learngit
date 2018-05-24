@@ -1,42 +1,27 @@
 package cn.bidlink.job.business.handler;
 
 import cn.bidlink.job.business.utils.AreaUtil;
-import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static cn.bidlink.job.common.utils.DBUtil.query;
 
@@ -44,94 +29,12 @@ import static cn.bidlink.job.common.utils.DBUtil.query;
 /**
  * @author : <a href="mailto:zikaifeng@ebnew.com">冯子恺</a>
  * @version : Ver 1.0
- * @description :
+ * @description :供应商基本信息 {@link SyncSupplierProjectDataJobHandler 供应商项目数据}
  * @date : 2017/11/27
  */
 @JobHander(value = "syncSupplierDataJobHandler")
 @Service
-public class SyncSupplierDataJobHandler extends JobHandler implements InitializingBean {
-    private Logger logger = LoggerFactory.getLogger(SyncSupplierDataJobHandler.class);
-
-    @Autowired
-    private ElasticClient elasticClient;
-
-//    @Autowired
-//    @Qualifier("creditDataSource")
-//    private DataSource creditDataSource;
-
-    @Autowired
-    @Qualifier("enterpriseSpaceDataSource")
-    private DataSource enterpriseSpaceDataSource;
-
-//    @Autowired
-//    @Qualifier("centerDataSource")
-//    private DataSource centerDataSource;
-
-    @Autowired
-    @Qualifier("uniregDataSource")
-    protected DataSource uniregDataSource;
-
-    @Autowired
-    @Qualifier("purchaseDataSource")
-    protected DataSource purchaseDataSource;
-
-    @Autowired
-    @Qualifier("tenderDataSource")
-    protected DataSource tenderDataSource;
-
-    @Value("${enterpriseSpaceFormat}")
-    private String enterpriseSpaceFormat;
-
-    @Value("${enterpriseSpaceDetailFormat}")
-    private String enterpriseSpaceDetailFormat;
-
-    private String ID                          = "id";
-    private String USER_ID                     = "userId";
-    private String CORE                        = "core";
-    private String AREA_STR                    = "areaStr";
-    private String AREA_STR_NOT_ANALYZED       = "areaStrNotAnalyzed";
-    private String ZONE_STR                    = "zoneStr";
-    private String AREA                        = "area";
-    private String CITY                        = "city";
-    private String COUNTY                      = "county";
-    private String CREDIT_RATING               = "creditRating";
-    private String AUTH_CODE_ID                = "authCodeId";
-    private String AUTHEN_NUMBER               = "authenNumber";
-    private String CODE                        = "code";
-    private String AREA_CODE                   = "areaCode";
-    private String FUND                        = "fund";
-    private String TENANT_ID                   = "tenantId";
-    private String MOBILE                      = "mobile";
-    private String TEL                         = "tel";
-    private String MAIN_PRODUCT                = "mainProduct";
-    private String MAIN_PRODUCT_NOT_ANALYZED   = "mainProductNotAnalyzed";
-    private String LOGIN_NAME                  = "loginName";
-    private String ENTERPRISE_SPACE            = "enterpriseSpace";
-    private String ENTERPRISE_SPACE_DETAIL     = "enterpriseSpaceDetail";
-    private String ENTERPRISE_SPACE_ACTIVE     = "enterpriseSpaceActive";
-    private String INDUSTRY_CODE               = "industryCode";
-    private String INDUSTRY_STR                = "industryStr";
-    private String TOTAL_PURCHASE_PROJECT      = "totalPurchaseProject";
-    private String TOTAL_BID_PROJECT           = "totalBidProject";
-    private String TOTAL_DEAL_PURCHASE_PROJECT = "totalDealPurchaseProject";
-    private String TOTAL_DEAL_BID_PROJECT      = "totalDealBidProject";
-    private String TOTAL_DEAL_PROJECT          = "totalDealProject";
-    private String TOTAL_DEAL_PURCHASE_PRICE   = "totalDealPurchasePrice";
-    private String TOTAL_DEAL_BID_PRICE        = "totalDealBidPrice";
-    private String TOTAL_DEAL_PRICE            = "totalDealPrice";
-    private String TOTAL_PRODUCT               = "totalProduct";
-    private String TOTAL_COOPERATED_PURCHASER  = "totalCooperatedPurchaser";
-    private String REGION                      = "region";
-    private String COMPANY_NAME                = "companyName";
-    private String COMPANY_NAME_NOT_ANALYZED   = "companyNameNotAnalyzed";
-
-    // 两位有效数字，四舍五入
-    private final DecimalFormat format = new DecimalFormat("0.00");
-
-    // 行业编号正则
-    private final Pattern number = Pattern.compile("\\d+");
-
-    private Map<String, String> industryCodeMap = new HashMap<>();
+public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandler implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -179,7 +82,6 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
 //        syncSupplierCompanyStatusService(lastSyncTime);
         // FIXME 供应商企业空间是否激活
         syncEnterpriseSpaceDataService(lastSyncTime);
-        syncSupplierStatService(lastSyncTime);
     }
 
     /**
@@ -597,338 +499,4 @@ public class SyncSupplierDataJobHandler extends JobHandler implements Initializi
         }
     }
 
-    /**
-     * 同步供应商参与的项目统计
-     * <p>
-     * 注意：每次统计需要覆盖之前的统计
-     *
-     * @param lastSyncTime
-     */
-    private void syncSupplierStatService(Timestamp lastSyncTime) {
-        logger.info("同步供应商参与的项目统计开始");
-        Properties properties = elasticClient.getProperties();
-        int pageSizeToUse = 2 * pageSize;
-        SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
-                .setTypes(properties.getProperty("cluster.type.supplier"))
-                .setScroll(new TimeValue(60000))
-                .setSize(pageSizeToUse)
-                .get();
-
-        int pageNumberToUse = 0;
-        do {
-            SearchHit[] searchHits = scrollResp.getHits().hits();
-            Set<String> supplierIds = new HashSet<>();
-            List<Map<String, Object>> resultFromEs = new ArrayList<>();
-            for (SearchHit searchHit : searchHits) {
-                supplierIds.add(searchHit.getId());
-                resultFromEs.add(searchHit.getSource());
-            }
-
-            String supplierIdToString = StringUtils.collectionToCommaDelimitedString(supplierIds);
-            // 添加已参与项目统计
-            appendSupplierProjectStat(resultFromEs, supplierIdToString);
-            // 添加成交项目统计
-            appendSupplierDealProjectStat(resultFromEs, supplierIdToString);
-            //  添加成交额统计
-            appendSupplierDealPriceStat(resultFromEs, supplierIdToString);
-            // 添加合作采购商统计
-            appendCooperatedPurchaserState(resultFromEs, supplierIdToString);
-            // 添加发布产品
-            appendSupplierProductStat(resultFromEs, supplierIdToString);
-
-            // 保存到es
-            batchExecute(resultFromEs);
-            scrollResp = elasticClient.getTransportClient().prepareSearchScroll(scrollResp.getScrollId())
-                    .setScroll(new TimeValue(60000))
-                    .execute().actionGet();
-            pageNumberToUse++;
-        } while (scrollResp.getHits().getHits().length != 0);
-        logger.info("同步供应商参与的项目统计结束");
-    }
-
-    private void appendSupplierDealPriceStat(List<Map<String, Object>> resultFromEs, String supplierIds) {
-        // 采购项目
-        String queryPurchaseDealPriceSqlTemplate = "SELECT\n" +
-                "\tsupplier_id,\n" +
-                "\tsum( deal_total_price ) \n" +
-                "FROM\n" +
-                "\t`purchase_supplier_project` \n" +
-                "WHERE\n" +
-                "\tdeal_status = 2 \n" +
-                "\tAND supplier_id IN (%s) \n" +
-                "GROUP BY\n" +
-                "\tsupplier_id";
-        Map<String, Long> purchaseDealPriceStat = getSupplierPriceStatMap(purchaseDataSource, queryPurchaseDealPriceSqlTemplate, supplierIds);
-        for (Map<String, Object> source : resultFromEs) {
-            Object value = purchaseDealPriceStat.get(source.get(ID));
-            source.put(TOTAL_DEAL_PURCHASE_PRICE, value == null ? 0 : value);
-        }
-
-        // 招标项目
-        String queryBidDealPriceSqlTemplate = "SELECT\n" +
-                "\tsupplier_id,\n" +
-                "\tsum( win_bid_total_price ) \n" +
-                "FROM\n" +
-                "\t`bid_supplier` \n" +
-                "WHERE\n" +
-                "\twin_bid_status = 1 \n" +
-                "\tAND supplier_id IN (%s) \n" +
-                "GROUP BY\n" +
-                "\tsupplier_id";
-        Map<String, Long> bidDealPriceStat = getSupplierPriceStatMap(tenderDataSource, queryBidDealPriceSqlTemplate, supplierIds);
-        for (Map<String, Object> source : resultFromEs) {
-            Object value = bidDealPriceStat.get(source.get(ID));
-            source.put(TOTAL_DEAL_BID_PRICE, value == null ? 0 : value);
-            if (value == null) {
-                source.put(TOTAL_DEAL_PRICE, source.get(TOTAL_DEAL_PURCHASE_PRICE));
-            } else {
-                source.put(TOTAL_DEAL_PRICE, Double.valueOf(value.toString()) + Double.valueOf(source.get(TOTAL_DEAL_PURCHASE_PRICE).toString()));
-            }
-        }
-    }
-
-    private Map<String, Long> getSupplierPriceStatMap(DataSource dataSource, String querySqlTemplate, String supplierIds) {
-        String querySql = String.format(querySqlTemplate, supplierIds);
-        return DBUtil.query(dataSource, querySql, null, new DBUtil.ResultSetCallback<Map<String, Long>>() {
-            @Override
-            public Map<String, Long> execute(ResultSet resultSet) throws SQLException {
-                Map<String, Long> map = new HashMap<>();
-                while (resultSet.next()) {
-                    long supplierId = resultSet.getLong(1);
-                    long totalDealPrice = resultSet.getLong(2);
-                    map.put(String.valueOf(supplierId), totalDealPrice);
-                }
-                return map;
-            }
-        });
-    }
-
-    /**
-     * 添加已参与项目统计
-     *
-     * @param resultFromEs
-     * @param supplierIds
-     */
-    private void appendSupplierProjectStat(List<Map<String, Object>> resultFromEs, String supplierIds) {
-        // 采购项目
-        String queryPurchaseProjectSqlTemplate = "SELECT\n"
-                + "   COUNT(1),\n"
-                + "   supplier_id\n"
-                + "FROM\n"
-                + "   purchase_supplier_project where quote_status in (2,3) AND supplier_id in (%s)\n"
-                + "GROUP BY\n"
-                + "   supplier_id";
-        Map<String, Long> purchaseProjectStat = getSupplierStatMap(purchaseDataSource, queryPurchaseProjectSqlTemplate, supplierIds);
-        for (Map<String, Object> source : resultFromEs) {
-            Object value = purchaseProjectStat.get(source.get(ID));
-            source.put(TOTAL_PURCHASE_PROJECT, (value == null ? 0 : value));
-        }
-
-        // 招标项目
-        String queryBidProjectSqlTemplate = "select\n"
-                + "    count(1),\n"
-                + "    supplier_id AS supplierId\n"
-                + " from\n"
-                + "    bid_supplier\n"
-                + "    where bid_status = 1 AND supplier_id in (%s)\n"
-                + " GROUP BY\n"
-                + "    supplier_id";
-        Map<String, Long> bidProjectStat = getSupplierStatMap(tenderDataSource, queryBidProjectSqlTemplate, supplierIds);
-        for (Map<String, Object> source : resultFromEs) {
-            Object value = bidProjectStat.get(source.get(ID));
-            source.put(TOTAL_BID_PROJECT, (value == null ? 0 : value));
-        }
-    }
-
-    /**
-     * 添加已成交项目统计
-     *
-     * @param resultFromEs
-     * @param supplierIds
-     */
-    private void appendSupplierDealProjectStat(List<Map<String, Object>> resultFromEs, String supplierIds) {
-        // 采购项目
-        String queryPurchaseProjectSqlTemplate = "SELECT\n"
-                + "   COUNT(1),\n"
-                + "   supplier_id\n"
-                + "FROM\n"
-                + "   purchase_supplier_project where deal_status = 2 AND supplier_id in (%s)\n"
-                + "GROUP BY\n"
-                + "   supplier_id";
-        Map<String, Long> purchaseProjectStat = getSupplierStatMap(purchaseDataSource, queryPurchaseProjectSqlTemplate, supplierIds);
-        for (Map<String, Object> source : resultFromEs) {
-            Object value = purchaseProjectStat.get(source.get(ID));
-            source.put(TOTAL_DEAL_PURCHASE_PROJECT, (value == null ? 0 : value));
-        }
-
-        // 招标项目
-        String queryBidProjectSqlTemplate = "select\n"
-                + "    count(1),\n"
-                + "    supplier_id AS supplierId\n"
-                + " from\n"
-                + "    bid_supplier\n"
-                + "      WHERE\n"
-                + "         win_bid_status = 1 AND supplier_id in (%s)\n"
-                + " GROUP BY\n"
-                + "    supplier_id";
-        Map<String, Long> bidProjectStat = getSupplierStatMap(tenderDataSource, queryBidProjectSqlTemplate, supplierIds);
-        for (Map<String, Object> source : resultFromEs) {
-            Object value = bidProjectStat.get(source.get(ID));
-            source.put(TOTAL_DEAL_BID_PROJECT, (value == null ? 0 : value));
-            // 总成交项目数量
-            if (value == null) {
-                source.put(TOTAL_DEAL_PROJECT, source.get(TOTAL_DEAL_PURCHASE_PROJECT));
-            } else {
-                double totalDealPurchaseProject = Double.valueOf(source.get(TOTAL_DEAL_PURCHASE_PROJECT).toString());
-                source.put(TOTAL_DEAL_PROJECT, totalDealPurchaseProject + Double.valueOf(value.toString()));
-            }
-        }
-
-
-    }
-
-    /**
-     * 添加合作采购商统计
-     *
-     * @param resultFromEs
-     * @param supplierIds
-     */
-    private void appendCooperatedPurchaserState(List<Map<String, Object>> resultFromEs, String supplierIds) {
-        String queryCooperatedPurchaserSqlTemplate = "select\n"
-                + "   count(1) AS totalCooperatedPurchaser,\n"
-                + "   supplier_id AS supplierId\n"
-                + "from\n"
-                + "   supplier\n"
-                + "   WHERE symbiosis_status in (1,2) AND supplier_id in (%s)\n"
-                + "GROUP BY\n"
-                + "   supplier_id\n";
-        Map<String, Long> supplierStat = getSupplierStatMap(uniregDataSource, queryCooperatedPurchaserSqlTemplate, supplierIds);
-        for (Map<String, Object> source : resultFromEs) {
-            Object value = supplierStat.get(source.get(ID));
-            source.put(TOTAL_COOPERATED_PURCHASER, (value == null ? 0 : value));
-        }
-    }
-
-    /**
-     * 添加发布产品统计 FIXME 待修改为新平台的产品信息
-     *
-     * @param resultFromEs
-     * @param supplierIds
-     */
-    private void appendSupplierProductStat(List<Map<String, Object>> resultFromEs, String supplierIds) {
-        String querySupplierProductSqlTemplate = "SELECT\n"
-                + "   count(1),\n"
-                + "   COMPANYID\n"
-                + "FROM\n"
-                + "   space_product\n"
-                + "WHERE\n"
-                + "   STATE = 1 AND  COMPANYID in (%s)\n"
-                + "GROUP BY\n"
-                + "   COMPANYID";
-        Map<String, Long> supplierStat = getSupplierStatMap(enterpriseSpaceDataSource, querySupplierProductSqlTemplate, supplierIds);
-        for (Map<String, Object> source : resultFromEs) {
-            Object value = supplierStat.get(source.get(ID));
-            source.put(TOTAL_PRODUCT, (value == null ? 0 : value));
-        }
-    }
-
-    private Map<String, Long> getSupplierStatMap(DataSource dataSource, String querySqlTemplate, String supplierIds) {
-        String querySql = String.format(querySqlTemplate, supplierIds);
-        return DBUtil.query(dataSource, querySql, null, new DBUtil.ResultSetCallback<Map<String, Long>>() {
-            @Override
-            public Map<String, Long> execute(ResultSet resultSet) throws SQLException {
-                Map<String, Long> map = new HashMap<>();
-                while (resultSet.next()) {
-                    long totalProject = resultSet.getLong(1);
-                    long supplierId = resultSet.getLong(2);
-                    map.put(String.valueOf(supplierId), totalProject);
-                }
-                return map;
-            }
-        });
-    }
-
-    /**
-     * 统计供应商已交易的项目
-     */
-    private void syncSupplierDealProjectStat() {
-//        String queryDealPurchaseProjectSql = "SELECT count(1) AS totalPurchaseProject,supplier_id AS supplierId FROM purchase_supplier_project WHERE deal_status = 1 GROUP BY supplier_id LIMIT ?,?";
-//        String countDealPurchaseProjectSql = "SELECT\n"
-//                                             + "   count(1)\n"
-//                                             + "FROM\n"
-//                                             + "   (\n"
-//                                             + "SELECT\n"
-//                                             + "   count(1),\n"
-//                                             + "   supplier_id AS supplierId\n"
-//                                             + "FROM\n"
-//                                             + "   purchase_supplier_project\n"
-//                                             + "WHERE deal_status = 1\n"
-//                                             + "GROUP BY\n"
-//                                             + "   supplier_id\n"
-//                                             + "   ) S";
-//        doSyncSupplierStat(synergyDataSource, countDealPurchaseProjectSql, queryDealPurchaseProjectSql, new SupplierStatCallback() {
-//            @Override
-//            public void execute(Map<String, Object> source, Map supplierStat) {
-//                source.put(TOTAL_DEAL_PURCHASE_PROJECT, supplierStat.get(source.get(ID)));
-//            }
-//        });
-
-    }
-
-    /**
-     * 统计供应商参与的项目
-     */
-    private void syncSupplierProjectStat() {
-//        String queryPurchaseProjectSql = "SELECT count(1) AS totalPurchaseProject,supplier_id AS supplierId FROM purchase_supplier_project GROUP BY supplier_id LIMIT ?,?";
-//        String countPurchaseProjectSql = "SELECT\n"
-//                                         + "   count(1)\n"
-//                                         + "FROM\n"
-//                                         + "   (\n"
-//                                         + "SELECT\n"
-//                                         + "   count(1),\n"
-//                                         + "   supplier_id AS supplierId\n"
-//                                         + "FROM\n"
-//                                         + "   purchase_supplier_project\n"
-//                                         + "GROUP BY\n"
-//                                         + "   supplier_id\n"
-//                                         + "LIMIT ?,?"
-//                                         + "   ) S";
-//        doSyncSupplierStat(synergyDataSource, countPurchaseProjectSql, queryPurchaseProjectSql, new SupplierStatCallback() {
-//            @Override
-//            public void execute(Map<String, Object> source, Map supplierStat) {
-//                source.put(TOTAL_PURCHASE_PROJECT, supplierStat.get(source.get(ID)));
-//            }
-//        });
-    }
-
-    protected void batchExecute(List<Map<String, Object>> resultsToUpdate) {
-//        System.out.println("size : " + resultsToUpdate.size());
-//        for (Map<String, Object> map : resultsToUpdate) {
-//            System.out.println(map);
-//        }
-        if (!CollectionUtils.isEmpty(resultsToUpdate)) {
-            BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
-            for (Map<String, Object> result : resultsToUpdate) {
-                bulkRequest.add(elasticClient.getTransportClient()
-                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
-                                elasticClient.getProperties().getProperty("cluster.type.supplier"),
-                                String.valueOf(result.get(ID)))
-                        .setSource(JSON.toJSONString(result, new ValueFilter() {
-                            @Override
-                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof java.util.Date) {
-                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                } else {
-                                    return propertyValue;
-                                }
-                            }
-                        })));
-            }
-
-            BulkResponse response = bulkRequest.execute().actionGet();
-            if (response.hasFailures()) {
-                logger.error(response.buildFailureMessage());
-            }
-        }
-    }
 }
