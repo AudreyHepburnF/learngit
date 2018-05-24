@@ -84,7 +84,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                         "\tbsp.project_status AS projectStatus,\n" +
                         "\tbsp.company_id AS purchaseId,\n" +
                         "\tbsp.company_name AS purchaseName,\n" +
-                        "\tbsp.createTime,\n" +
+                        "\tbsp.create_time AS createTime,\n" +
                         "\tbsp.node,\n" +
                         "\tbsp.bid_open_time AS bidOpenTime,\n" +
                         "\tbsp.bid_endtime AS quoteStopTime,\n" +

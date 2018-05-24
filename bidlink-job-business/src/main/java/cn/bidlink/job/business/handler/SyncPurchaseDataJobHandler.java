@@ -495,19 +495,21 @@ public class SyncPurchaseDataJobHandler extends IJobHandler /*implements Initial
                 "\tsymbiosis_status = 2 AND company_id in (%s)\n" +
                 "GROUP BY\n" +
                 "\tcompany_id";
-        String querySql = String.format(querySqlTemplate, purchaserIdToString);
-        Map<Long, Long> cooperateSupplierMap = DBUtil.query(uniregDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Long, Long>>() {
-            @Override
-            public Map<Long, Long> execute(ResultSet resultSet) throws SQLException {
-                Map<Long, Long> map = new HashMap<>();
-                while (resultSet.next()) {
-                    map.put(resultSet.getLong(2), resultSet.getLong(1));
+        if (!StringUtils.isEmpty(purchaserIdToString)) {
+            String querySql = String.format(querySqlTemplate, purchaserIdToString);
+            Map<Long, Long> cooperateSupplierMap = DBUtil.query(uniregDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Long, Long>>() {
+                @Override
+                public Map<Long, Long> execute(ResultSet resultSet) throws SQLException {
+                    Map<Long, Long> map = new HashMap<>();
+                    while (resultSet.next()) {
+                        map.put(resultSet.getLong(2), resultSet.getLong(1));
+                    }
+                    return map;
                 }
-                return map;
+            });
+            for (Map<String, Object> result : resultFromEs) {
+                result.put(COOPERATE_SUPPLIER_COUNT, cooperateSupplierMap.get(result.get(ID)) == null ? 0 : cooperateSupplierMap.get(result.get(ID)));
             }
-        });
-        for (Map<String, Object> result : resultFromEs) {
-            result.put(COOPERATE_SUPPLIER_COUNT, cooperateSupplierMap.get(result.get(ID)) == null ? 0 : cooperateSupplierMap.get(result.get(ID)));
         }
     }
 
