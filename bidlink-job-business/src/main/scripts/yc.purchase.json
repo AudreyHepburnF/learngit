@@ -89,12 +89,16 @@
       },
       "cooperateSupplierCount": {
         "type": "long"
-      }
-      ,"auctionTradingVolume": {
+      },
+      "auctionTradingVolume": {
         "type": "long"
       },
       "auctionProjectCount": {
         "type": "long"
+      },
+      "companyLogo": {
+        "type": "string",
+        "index": "not_analyzed"
       }
     }
   }

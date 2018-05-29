@@ -34,6 +34,7 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
     private void syncBidNoticeData() {
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.notice",
                 QueryBuilders.termQuery(PROJECT_TYPE, BID_NOTICE_TYPE));
+//        Timestamp lastSyncTime = SyncTimeUtil.GMT_TIME;
         logger.info("同步新平台招标公告 lastSyncTime:" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n" +
                 ", syncTime" + new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
         syncUnderWayBidNoticeService(lastSyncTime);
@@ -69,7 +70,8 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
                 "\tlink_phone AS linkPhone,\n" +
                 "\tlink_tel AS linkTel,\n" +
                 "\tlink_mail AS linkMail,\n" +
-                "\tcreate_time AS createTime\n" +
+                "\tcreate_time AS createTime,\n" +
+                "\tcompany_id AS companyId\n" +
                 "FROM\n" +
                 "\t`bid_decided_notice` \n" +
                 "WHERE\n" +
@@ -103,7 +105,8 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
                 "\tlink_phone AS linkPhone,\n" +
                 "\tlink_tel AS linkTel,\n" +
                 "\tlink_mail AS linkMail,\n" +
-                "\tcreate_time AS createTime\n" +
+                "\tcreate_time AS createTime,\n" +
+                "\tcompany_id AS companyId\n" +
                 "FROM\n" +
                 "\t`bid_decided_notice` \n" +
                 "WHERE\n" +
@@ -116,17 +119,17 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
     }
 
     private void syncUnderWayBidNoticeService(Timestamp lastSyncTime) {
-        logger.info("同步协同平台招标公告开始");
+        logger.info("同步协同平台初始公告和变更公告开始");
         syncInsertBidNoticeService(lastSyncTime);
         syncUpdateBidNoticeService(lastSyncTime);
-        logger.info("同步协同平台招标公告结束");
+        logger.info("同步协同平台初始公告和变更公告结束");
     }
 
     private void syncInsertBidNoticeService(Timestamp lastSyncTime) {
         String countSql = "SELECT\n" +
                 "\tcount(1) \n" +
                 "FROM\n" +
-                "\tbid_notice \n" +
+                "\tbid_notice_history \n" +
                 "WHERE\n" +
                 "\tcreate_time > ?";
         String querySql = "SELECT\n" +
@@ -165,7 +168,7 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
                 "\tfile_gain_address AS fileGainAddress, \n" +
                 "\tcreate_time AS createTime \n" +
                 "FROM\n" +
-                "\tbid_notice \n" +
+                "\tbid_notice_history \n" +
                 "WHERE\n" +
                 "\tcreate_time >? \n" +
                 "\tLIMIT ?,?";
@@ -178,7 +181,7 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
         String countSql = "SELECT\n" +
                 "\tcount(1) \n" +
                 "FROM\n" +
-                "\tbid_notice \n" +
+                "\tbid_notice_history \n" +
                 "WHERE\n" +
                 "\tupdate_time > ?";
         String querySql = "SELECT\n" +
@@ -217,7 +220,7 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
                 "\tfile_gain_address AS fileGainAddress, \n" +
                 "\tcreate_time AS createTime \n" +
                 "FROM\n" +
-                "\tbid_notice \n" +
+                "\tbid_notice_history \n" +
                 "WHERE\n" +
                 "\tupdate_time >? \n" +
                 "\tLIMIT ?,?";
