@@ -8,14 +8,17 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:zhihuizhou@ebnew.com">zhouzhihui</a>
@@ -25,7 +28,7 @@ import java.util.*;
  */
 @Service
 @JobHander(value = "syncPurchaseProjectDataJobHandler")
-public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJobHandler /*implements InitializingBean*/{
+public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJobHandler /*implements InitializingBean*/ {
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
@@ -40,7 +43,6 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
      * 同步采购商参与项目和交易额统计
      * <p>
      * 每次统计覆盖之前的数据
-     *
      */
     private void syncPurchaseProjectData() {
         logger.info("同步采购商项目和交易额统计开始");
@@ -56,7 +58,7 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
         do {
             SearchHits hits = scrollResp.getHits();
             ArrayList<String> purchaserIds = new ArrayList<>();
-            ArrayList<Map<String, Object>> resultFromEs = new ArrayList<>();
+            List<Map<String, Object>> resultFromEs = new ArrayList<>();
             for (SearchHit hit : hits.getHits()) {
                 purchaserIds.add(((String) hit.getSource().get(ID)));
                 resultFromEs.add(hit.getSource());
@@ -81,6 +83,8 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
             // 添加合同供应商数量
             appendCooperateSupplierCount(resultFromEs, purchaserIdToString);
 
+            // 添加热门采购品
+            appendDemandManyProjectItem(resultFromEs, purchaserIdToString);
             batchInsert(resultFromEs);
             scrollResp = elasticClient.getTransportClient().prepareSearchScroll(scrollResp.getScrollId())
                     .setScroll(new TimeValue(60000))
@@ -91,14 +95,114 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
         logger.info("同步采购商参与项目和交易统计结束");
     }
 
-    private void appendAuctionProjectCount(ArrayList<Map<String, Object>> resultFromEs, String purchaserIdToString) {
+    private void appendDemandManyProjectItem(List<Map<String, Object>> resultFromEs, String purchaserIdToString) {
+        String queryPurchaseProjectSqlTemplate = "SELECT\n" +
+                "\tcompany_id AS companyId,\n" +
+                "\tsum( deal_amount ) AS amount,\n" +
+                "\tdirectory_id AS directoryId,\n" +
+                "\tNAME AS directoryName \n" +
+                "FROM\n" +
+                "\tpurchase_supplier_project_item_origin \n" +
+                "WHERE\n" +
+                "\tdeal_status = 3 and company_id in (%s)\n" +
+                "GROUP BY\n" +
+                "\tcompany_id,\n" +
+                "\tdirectory_id \n" +
+                "ORDER BY company_id,amount desc";
+
+        String queryBidProjectSqlTemplate = "\n" +
+                "SELECT\n" +
+                "\tcompany_id AS companyId,\n" +
+                "\tsum( deal_number ) AS amount,\n" +
+                "\tdirectory_id AS directoryId,\n" +
+                "\tNAME AS directoryName \n" +
+                "FROM\n" +
+                "\tbid_supplier_project_item_origin \n" +
+                "WHERE\n" +
+                "\tdeal_status = 1 \n" +
+                "GROUP BY\n" +
+                "\tcompany_id,\n" +
+                "\tdirectory_id \n" +
+                "ORDER BY company_id,amount desc";
+
+        if (!StringUtils.isEmpty(purchaserIdToString)) {
+            Map<Long, List<ProjectItem>> purchaseProjectItemMap = queryProjectItemMap(purchaserIdToString, queryPurchaseProjectSqlTemplate, purchaseDataSource);
+
+            Map<Long, List<ProjectItem>> bidProjectItemMap = queryProjectItemMap(purchaserIdToString, queryBidProjectSqlTemplate, tenderDataSource);
+
+            // 合并招标项目和采购项目采购品集合
+            Map<Long, List<ProjectItem>> map = new HashMap<>();
+            if (!(Objects.isNull(purchaseProjectItemMap) || purchaseProjectItemMap.isEmpty())) {
+                // 采购项目有采购品成交
+                for (Map.Entry<Long, List<ProjectItem>> purchaseProjectItem : purchaseProjectItemMap.entrySet()) {
+                    Long companyId = purchaseProjectItem.getKey();
+                    List<ProjectItem> projectItemList = purchaseProjectItem.getValue();
+                    if (!CollectionUtils.isEmpty(bidProjectItemMap.get(companyId))) {
+                        // 有采购采购品 无招标采购品
+                        projectItemList.addAll(bidProjectItemMap.get(companyId));
+                    }
+                    map.put(companyId, projectItemList);
+                }
+            } else if (!(Objects.isNull(bidProjectItemMap) || bidProjectItemMap.isEmpty())) {
+                BeanUtils.copyProperties(bidProjectItemMap, map);
+            }
+
+            if (!(Objects.isNull(map) || map.isEmpty())) {
+                HashMap<Long, String> resultMap = new HashMap<>();
+                for (Map.Entry<Long, List<ProjectItem>> projectItemEntry : map.entrySet()) {
+                    Long companyId = projectItemEntry.getKey();
+                    List<ProjectItem> projectItemList = projectItemEntry.getValue();
+                    // 按照成交数量排序 取集合前6个元素
+                    List<ProjectItem> collect = projectItemList.stream().distinct().sorted(Comparator.comparingLong(ProjectItem::getAmount).reversed())
+                            .limit(6).collect(Collectors.toList());
+                    // 集合中采购品名称
+                    List<String> directoryNameList = collect.stream().map(projectItem -> {
+                                return projectItem.getDirectoryName();
+                            }
+                    ).collect(Collectors.toList());
+                    // 转为string类型,放入map中
+                    resultMap.put(companyId, StringUtils.collectionToDelimitedString(directoryNameList, ","));
+                }
+
+                for (Map<String, Object> esMap : resultFromEs) {
+                    esMap.put("directoryName", resultMap.get(Long.valueOf(esMap.get(ID).toString())));
+                }
+            }
+        }
+    }
+
+    private Map<Long, List<ProjectItem>> queryProjectItemMap(String purchaserIdToString, String queryBidProjectSqlTemplate, DataSource dataSource) {
+        String queryBidSql = String.format(queryBidProjectSqlTemplate, purchaserIdToString);
+        Map<Long, List<ProjectItem>> projectItemMap = DBUtil.query(dataSource, queryBidSql, null, new DBUtil.ResultSetCallback<Map<Long, List<ProjectItem>>>() {
+            @Override
+            public Map<Long, List<ProjectItem>> execute(ResultSet resultSet) throws SQLException {
+                Map<Long, List<ProjectItem>> bidProjectItem = new HashMap<>();
+                while (resultSet.next()) {
+                    ProjectItem projectItem = new ProjectItem(resultSet.getLong(2), resultSet.getString(4));
+                    long companyId = resultSet.getLong(1);
+                    if (CollectionUtils.isEmpty(bidProjectItem.get(companyId))) {
+                        // 判断map 中key为 companyId 采购商是否存在,不存在往map中put,存在往value中add 最多添加6个采购品
+                        ArrayList<ProjectItem> projectItems = new ArrayList<>();
+                        projectItems.add(projectItem);
+                        bidProjectItem.put(companyId, projectItems);
+                    } else if (bidProjectItem.get(companyId).size() < 6) {
+                        bidProjectItem.get(companyId).add(projectItem);
+                    }
+                }
+                return bidProjectItem;
+            }
+        });
+        return projectItemMap;
+    }
+
+    private void appendAuctionProjectCount(List<Map<String, Object>> resultFromEs, String purchaserIdToString) {
         // FIXME 待竞价项目开发后统计
         for (Map<String, Object> result : resultFromEs) {
             result.put(AUCTION_PROJECT_COUNT, 0);
         }
     }
 
-    private void appendAuctionTradingVolume(ArrayList<Map<String, Object>> resultFromEs, String purchaserIdToString) {
+    private void appendAuctionTradingVolume(List<Map<String, Object>> resultFromEs, String purchaserIdToString) {
         // FIXME 待竞价项目开发后统计
         for (Map<String, Object> result : resultFromEs) {
             result.put(AUCTION_TRADING_VOLUME, 0);
@@ -304,4 +408,55 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
 //    public void afterPropertiesSet() throws Exception {
 //        execute();
 //    }
+
+    class ProjectItem {
+        /**
+         * 采购品成交总数量
+         */
+        private Long   amount;
+        /**
+         * 采购品名称
+         */
+        private String directoryName;
+
+        public Long getAmount() {
+            return amount;
+        }
+
+        public void setAmount(Long amount) {
+            this.amount = amount;
+        }
+
+        public String getDirectoryName() {
+            return directoryName;
+        }
+
+        public void setDirectoryName(String directoryName) {
+            this.directoryName = directoryName;
+        }
+
+        public ProjectItem() {
+        }
+
+        public ProjectItem(Long amount, String directoryName) {
+            this.amount = amount;
+            this.directoryName = directoryName;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            ProjectItem that = (ProjectItem) o;
+
+            return directoryName != null ? directoryName.equals(that.directoryName) : that.directoryName == null;
+        }
+
+        @Override
+        public int hashCode() {
+            return directoryName != null ? directoryName.hashCode() : 0;
+        }
+    }
+
 }

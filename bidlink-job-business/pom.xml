@@ -87,6 +87,14 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -135,6 +143,7 @@
                 <pom.cluster.type.enterprise_space_product>enterprise_space_product</pom.cluster.type.enterprise_space_product>
                 <pom.cluster.type.purchase>purchase</pom.cluster.type.purchase>
                 <pom.cluster.type.notice>notice</pom.cluster.type.notice>
+                <pom.cluster.type.directory>directory</pom.cluster.type.directory>
                 <pom.path.conf>D:/es/config/</pom.path.conf>
                 <pom.searchguard.enable>true</pom.searchguard.enable>
                 <pom.searchguard.ssl.transport.keystore_filepath>admin-keystore.jks</pom.searchguard.ssl.transport.keystore_filepath>
@@ -190,6 +199,7 @@
                 <pom.cluster.type.enterprise_space_product>enterprise_space_product</pom.cluster.type.enterprise_space_product>
                 <pom.cluster.type.purchase>purchase</pom.cluster.type.purchase>
                 <pom.cluster.type.notice>notice</pom.cluster.type.notice>
+                <pom.cluster.type.directory>directory</pom.cluster.type.directory>
                 <pom.path.conf>/app/programs/${pom.application.name}/conf/es/</pom.path.conf>
                 <pom.searchguard.enable>true</pom.searchguard.enable>
                 <pom.searchguard.ssl.transport.keystore_filepath>admin-keystore.jks</pom.searchguard.ssl.transport.keystore_filepath>
@@ -242,6 +252,7 @@
                 <pom.cluster.type.enterprise_space_product>enterprise_space_product</pom.cluster.type.enterprise_space_product>
                 <pom.cluster.type.purchase>purchase</pom.cluster.type.purchase>
                 <pom.cluster.type.notice>notice</pom.cluster.type.notice>
+                <pom.cluster.type.directory>directory</pom.cluster.type.directory>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
