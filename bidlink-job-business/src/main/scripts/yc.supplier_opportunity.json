@@ -83,8 +83,7 @@
         "type": "long"
       },
       "projectType": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "integer"
       },
       "purchaseId": {
         "type": "string",

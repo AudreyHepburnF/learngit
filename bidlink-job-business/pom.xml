@@ -143,7 +143,7 @@
                 <pom.cluster.type.enterprise_space_product>enterprise_space_product</pom.cluster.type.enterprise_space_product>
                 <pom.cluster.type.purchase>purchase</pom.cluster.type.purchase>
                 <pom.cluster.type.notice>notice</pom.cluster.type.notice>
-                <pom.cluster.type.directory>directory</pom.cluster.type.directory>
+                <pom.cluster.type.project>project</pom.cluster.type.project>
                 <pom.path.conf>D:/es/config/</pom.path.conf>
                 <pom.searchguard.enable>true</pom.searchguard.enable>
                 <pom.searchguard.ssl.transport.keystore_filepath>admin-keystore.jks</pom.searchguard.ssl.transport.keystore_filepath>
@@ -199,7 +199,7 @@
                 <pom.cluster.type.enterprise_space_product>enterprise_space_product</pom.cluster.type.enterprise_space_product>
                 <pom.cluster.type.purchase>purchase</pom.cluster.type.purchase>
                 <pom.cluster.type.notice>notice</pom.cluster.type.notice>
-                <pom.cluster.type.directory>directory</pom.cluster.type.directory>
+                <pom.cluster.type.project>project</pom.cluster.type.project>
                 <pom.path.conf>/app/programs/${pom.application.name}/conf/es/</pom.path.conf>
                 <pom.searchguard.enable>true</pom.searchguard.enable>
                 <pom.searchguard.ssl.transport.keystore_filepath>admin-keystore.jks</pom.searchguard.ssl.transport.keystore_filepath>
@@ -246,13 +246,12 @@
                 <pom.cluster.index>yc_opportunity</pom.cluster.index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
                 <pom.cluster.type.supplier_product>supplier_product</pom.cluster.type.supplier_product>
-                <pom.cluster.type.supplier_visited_opportunity>supplier_visited_opportunity
-                </pom.cluster.type.supplier_visited_opportunity>
+                <pom.cluster.type.supplier_visited_opportunity>supplier_visited_opportunity</pom.cluster.type.supplier_visited_opportunity>
                 <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
                 <pom.cluster.type.enterprise_space_product>enterprise_space_product</pom.cluster.type.enterprise_space_product>
                 <pom.cluster.type.purchase>purchase</pom.cluster.type.purchase>
                 <pom.cluster.type.notice>notice</pom.cluster.type.notice>
-                <pom.cluster.type.directory>directory</pom.cluster.type.directory>
+                <pom.cluster.type.project>project</pom.cluster.type.project>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>

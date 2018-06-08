@@ -41,19 +41,19 @@ public abstract class AbstractSyncNoticeDataJobHandler extends JobHandler {
     @Qualifier("tenderDataSource")
     protected DataSource tenderDataSource;
 
-    protected String ID                 = "id";
-    protected String PROJECT_ID         = "projectId";
-    protected String COMPANY_ID         = "companyId";
-    protected String SYNC_TIME          = "syncTime";
-    protected String IS_SHOW_TEL        = "isShowTel";
-    protected String IS_SHOW_MOBILE     = "isShowMobile";
-    protected String PROJECT_TYPE       = "projectType";
-    protected String COMPANY_NAME_ALIAS = "companyNameAlias";
-    protected String COMPANY_NAME       = "companyName";
-    protected String PROJECT_NAME_ALIAS = "projectNameAlias";
-    protected String PROJECT_NAME       = "projectName";
-    protected String NOTICE_TYPE        = "noticeType";
-    protected String SUB_PROJECT_ID     = "subProjectId";
+    protected String ID                        = "id";
+    protected String PROJECT_ID                = "projectId";
+    protected String COMPANY_ID                = "companyId";
+    protected String SYNC_TIME                 = "syncTime";
+    protected String IS_SHOW_TEL               = "isShowTel";
+    protected String IS_SHOW_MOBILE            = "isShowMobile";
+    protected String PROJECT_TYPE              = "projectType";
+    protected String COMPANY_NAME_NOT_ANALYZED = "companyNameNotAnalyzed";
+    protected String COMPANY_NAME              = "companyName";
+    protected String PROJECT_NAME_NOT_ANALYZED = "projectNameNotAnalyzed";
+    protected String PROJECT_NAME              = "projectName";
+    protected String NOTICE_TYPE               = "noticeType";
+    protected String SUB_PROJECT_ID            = "subProjectId";
 
     protected Integer SOURCE_NOTICE        = 1; // 原始公告和变更公告
     protected Integer RESULT_NOTICE        = 2; // 结果公告
@@ -83,8 +83,8 @@ public abstract class AbstractSyncNoticeDataJobHandler extends JobHandler {
         result.put(COMPANY_ID, String.valueOf(result.get(COMPANY_ID)));
         result.put(PROJECT_ID, String.valueOf(result.get(PROJECT_ID)));
         result.put(SUB_PROJECT_ID, String.valueOf(result.get(SUB_PROJECT_ID)));
-        result.put(PROJECT_NAME_ALIAS, result.get(PROJECT_NAME));
-        result.put(COMPANY_NAME_ALIAS, result.get(COMPANY_NAME));
+        result.put(PROJECT_NAME_NOT_ANALYZED, result.get(PROJECT_NAME));
+        result.put(COMPANY_NAME_NOT_ANALYZED, result.get(COMPANY_NAME));
 
         // 添加同步时间字段
         result.put(SYNC_TIME, SyncTimeUtil.getCurrentDate());

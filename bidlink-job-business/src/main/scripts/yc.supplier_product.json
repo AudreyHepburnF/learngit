@@ -14,11 +14,11 @@
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
-      "directoryNameAlias": {
+      "directoryName": {
         "type": "string",
         "analyzer": "ik"
       },
-      "directoryNameAliasNotAnalyzed": {
+      "directoryNameNotAnalyzed": {
         "type": "string",
         "index": "not_analyzed"
       },

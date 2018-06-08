@@ -77,8 +77,8 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     private int threadNum;
 
     private String ID                           = "id";
-    private String DIRECTORY_NAME               = "directoryNameAlias";
-    private String DIRECTORY_NAME_NOT_ANALYZED  = "directoryNameAliasNotAnalyzed";
+    private String DIRECTORY_NAME               = "directoryName";
+    private String DIRECTORY_NAME_NOT_ANALYZED  = "directoryNameNotAnalyzed";
     private String SUPPLIER_ID                  = "supplierId";
     private String SUPPLIER_DIRECTORY_REL       = "supplierDirectoryRel";
 
