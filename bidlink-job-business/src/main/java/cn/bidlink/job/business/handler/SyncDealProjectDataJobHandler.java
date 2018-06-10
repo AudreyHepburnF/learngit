@@ -13,6 +13,7 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,7 @@ import java.util.Map;
  */
 @Service
 @JobHander("syncDealProjectDataJobHandler")
-public class SyncDealProjectDataJobHandler extends JobHandler /*implements InitializingBean*/ {
+public class SyncDealProjectDataJobHandler extends JobHandler implements InitializingBean {
 
     private Logger logger = LoggerFactory.getLogger(SyncDealProjectDataJobHandler.class);
     @Autowired
@@ -88,7 +89,8 @@ public class SyncDealProjectDataJobHandler extends JobHandler /*implements Initi
                 "\tbsp.id,\n" +
                 "\tbsp.project_name AS name,\n" +
                 "\tbsp.company_id AS companyId,\n" +
-                "\tsum( bs.bid_total_price ) AS totalPrice \n" +
+                "\tsum( bs.bid_total_price ) AS totalPrice, \n" +
+                "\tbsp.create_time AS createTime \n" +
                 "FROM\n" +
                 "\tbid_supplier bs\n" +
                 "\tLEFT JOIN bid_sub_project bsp ON bsp.project_id = bs.project_id \n" +
@@ -118,7 +120,8 @@ public class SyncDealProjectDataJobHandler extends JobHandler /*implements Initi
                 "\tpp.id,\n" +
                 "\tppe.deal_total_price AS totalPrice,\n" +
                 "\tpp.company_id AS companyId,\n" +
-                "\tpp.NAME \n" +
+                "\tpp.NAME ,\n" +
+                "\tpp.create_time AS createTime \n" +
                 "FROM\n" +
                 "\tpurchase_project pp\n" +
                 "\tINNER JOIN purchase_project_ext ppe ON pp.id = ppe.id \n" +
@@ -184,8 +187,8 @@ public class SyncDealProjectDataJobHandler extends JobHandler /*implements Initi
         }
     }
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }
 }
