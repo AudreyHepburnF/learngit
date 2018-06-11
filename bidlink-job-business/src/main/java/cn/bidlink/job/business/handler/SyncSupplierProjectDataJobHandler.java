@@ -138,7 +138,7 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
         Map<String, Long> purchaseProjectStat = getSupplierStatMap(purchaseDataSource, queryPurchaseProjectSqlTemplate, supplierIds);
         for (Map<String, Object> source : resultFromEs) {
             Object value = purchaseProjectStat.get(source.get(ID));
-            source.put(TOTAL_DEAL_PURCHASE_PROJECT, (value == null ? 0 : value));
+            source.put(TOTAL_DEAL_PURCHASE_PROJECT, (value == null ? 0 : value);
         }
 
         // 招标项目
@@ -154,15 +154,15 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
         Map<String, Long> bidProjectStat = getSupplierStatMap(tenderDataSource, queryBidProjectSqlTemplate, supplierIds);
         for (Map<String, Object> source : resultFromEs) {
             Object value = bidProjectStat.get(source.get(ID));
-            source.put(TOTAL_DEAL_BID_PROJECT, (value == null ? 0 : value));
-            // 总成交项目数量
-            if (value == null) {
-                source.put(TOTAL_DEAL_PROJECT, source.get(TOTAL_DEAL_PURCHASE_PROJECT));
-            } else {
-                double totalDealPurchaseProject = Double.valueOf(source.get(TOTAL_DEAL_PURCHASE_PROJECT).toString());
-                source.put(TOTAL_DEAL_PROJECT, totalDealPurchaseProject + Double.valueOf(value.toString()));
-            }
+            source.put(TOTAL_DEAL_BID_PROJECT, (value == null ? 0 : value);
         }
+
+        // 总成交项目数量
+        resultFromEs.forEach(map -> {
+            Long totalDealPurchaseProject = Long.valueOf(map.get(TOTAL_DEAL_PURCHASE_PROJECT).toString());
+            Long totalDealBidProject = Long.valueOf(map.get(TOTAL_DEAL_BID_PROJECT).toString());
+            map.put(TOTAL_DEAL_PROJECT, totalDealPurchaseProject + totalDealBidProject);
+        });
     }
 
     private void appendSupplierDealPriceStat(List<Map<String, Object>> resultFromEs, String supplierIds) {
