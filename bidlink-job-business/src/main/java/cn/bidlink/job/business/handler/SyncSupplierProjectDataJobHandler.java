@@ -138,7 +138,7 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
         Map<String, Long> purchaseProjectStat = getSupplierStatMap(purchaseDataSource, queryPurchaseProjectSqlTemplate, supplierIds);
         for (Map<String, Object> source : resultFromEs) {
             Object value = purchaseProjectStat.get(source.get(ID));
-            source.put(TOTAL_DEAL_PURCHASE_PROJECT, (value == null ? 0 : value);
+            source.put(TOTAL_DEAL_PURCHASE_PROJECT, value == null ? 0 : value);
         }
 
         // 招标项目
@@ -154,7 +154,7 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
         Map<String, Long> bidProjectStat = getSupplierStatMap(tenderDataSource, queryBidProjectSqlTemplate, supplierIds);
         for (Map<String, Object> source : resultFromEs) {
             Object value = bidProjectStat.get(source.get(ID));
-            source.put(TOTAL_DEAL_BID_PROJECT, (value == null ? 0 : value);
+            source.put(TOTAL_DEAL_BID_PROJECT, value == null ? 0 : value);
         }
 
         // 总成交项目数量
