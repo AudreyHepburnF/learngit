@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  * @description:供应商数据
  * @Date 2018/5/24
  */
-public abstract class AbstractSyncSupplierDataJobHandler extends JobHandler{
+public abstract class AbstractSyncSupplierDataJobHandler extends JobHandler {
 
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
@@ -35,7 +35,7 @@ public abstract class AbstractSyncSupplierDataJobHandler extends JobHandler{
 
     @Autowired
     @Qualifier("enterpriseSpaceDataSource")
-    protected   DataSource enterpriseSpaceDataSource;
+    protected DataSource enterpriseSpaceDataSource;
     @Autowired
     @Qualifier("uniregDataSource")
     protected DataSource uniregDataSource;
@@ -83,6 +83,7 @@ public abstract class AbstractSyncSupplierDataJobHandler extends JobHandler{
     protected String INDUSTRY_STR                = "industryStr";
     protected String TOTAL_PURCHASE_PROJECT      = "totalPurchaseProject";
     protected String TOTAL_BID_PROJECT           = "totalBidProject";
+    protected String TOTAL_PROJECT               = "totalProject";
     protected String TOTAL_DEAL_PURCHASE_PROJECT = "totalDealPurchaseProject";
     protected String TOTAL_DEAL_BID_PROJECT      = "totalDealBidProject";
     protected String TOTAL_DEAL_PROJECT          = "totalDealProject";

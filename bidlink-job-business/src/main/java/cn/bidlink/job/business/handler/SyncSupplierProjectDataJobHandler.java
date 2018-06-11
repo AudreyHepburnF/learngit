@@ -111,6 +111,13 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
             Object value = bidProjectStat.get(source.get(ID));
             source.put(TOTAL_BID_PROJECT, (value == null ? 0 : value));
         }
+
+        // 已参与总项目个数
+        resultFromEs.forEach(map -> {
+            Long totalPurchaseProject = Long.valueOf(map.get(TOTAL_PURCHASE_PROJECT).toString());
+            Long totalBidProject = Long.valueOf(map.get(TOTAL_BID_PROJECT).toString());
+            map.put(TOTAL_PROJECT, totalPurchaseProject + totalBidProject);
+        });
     }
 
     /**
