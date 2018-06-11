@@ -94,6 +94,7 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends JobHandler /*imple
                 "\tZONESTR AS zoneStrNotAnalyzed,\n" +
                 "\tcreate_time AS createTime,\n" +
                 "\tNOTICESTATE AS noticeState,\n" +
+                "\tis_del AS isDel,\n" +
                 "\tZONESTR AS zoneStr\n" +
                 "FROM\n" +
                 "\tspace_product \n" +
@@ -125,6 +126,7 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends JobHandler /*imple
                 "\tZONESTR AS zoneStrNotAnalyzed,\n" +
                 "\tcreate_time AS createTime,\n" +
                 "\tNOTICESTATE AS noticeState,\n" +
+                "\tis_del AS isDel,\n" +
                 "\tZONESTR AS zoneStr\n" +
                 "FROM\n" +
                 "\tspace_product \n" +
