@@ -19,12 +19,6 @@
             <artifactId>bidlink-job-common</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <!--redis-->
-        <dependency>
-            <groupId>cn.bidlink.framework</groupId>
-            <artifactId>framework-redis</artifactId>
-            <version>1.0.2-SNAPSHOT</version>
-        </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjrt</artifactId>
@@ -108,9 +102,6 @@
                 <pom.log.rootLogger>CONSOLE</pom.log.rootLogger>
                 <pom.log.level>debug</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
-                <!--redis配置-->
-                <pom.framework.redis.conf>10.4.0.44:6379</pom.framework.redis.conf>
-                <pom.framework.redis.took>false</pom.framework.redis.took>
                 <!--企业空间数据源-->
                 <pom.enterpriseSpace.db.url>jdbc:mysql://10.4.0.43:3306/space?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.enterpriseSpace.db.url>
                 <pom.enterpriseSpace.db.username>dashuju</pom.enterpriseSpace.db.username>
@@ -137,8 +128,6 @@
                 <pom.cluster.index>ixietong_test</pom.cluster.index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
                 <pom.cluster.type.supplier_product>supplier_product</pom.cluster.type.supplier_product>
-                <pom.cluster.type.supplier_visited_opportunity>supplier_visited_opportunity
-                </pom.cluster.type.supplier_visited_opportunity>
                 <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
                 <pom.cluster.type.enterprise_space_product>enterprise_space_product</pom.cluster.type.enterprise_space_product>
                 <pom.cluster.type.purchase>purchase</pom.cluster.type.purchase>
@@ -164,9 +153,6 @@
                 <pom.log.rootLogger>FILE</pom.log.rootLogger>
                 <pom.log.level>info</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
-                <!--redis配置-->
-                <pom.framework.redis.conf>10.4.0.44:6379</pom.framework.redis.conf>
-                <pom.framework.redis.took>false</pom.framework.redis.took>
                 <!--企业空间数据源-->
                 <pom.enterpriseSpace.db.url>jdbc:mysql://10.4.0.43:3306/space?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.enterpriseSpace.db.url>
                 <pom.enterpriseSpace.db.username>dashuju</pom.enterpriseSpace.db.username>
@@ -193,8 +179,6 @@
                 <pom.cluster.index>ixietong_test</pom.cluster.index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
                 <pom.cluster.type.supplier_product>supplier_product</pom.cluster.type.supplier_product>
-                <pom.cluster.type.supplier_visited_opportunity>supplier_visited_opportunity
-                </pom.cluster.type.supplier_visited_opportunity>
                 <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
                 <pom.cluster.type.enterprise_space_product>enterprise_space_product</pom.cluster.type.enterprise_space_product>
                 <pom.cluster.type.purchase>purchase</pom.cluster.type.purchase>
@@ -212,41 +196,37 @@
             <id>product</id>
             <properties>
                 <pom.application.name>bidlink-job-business</pom.application.name>
-                <pom.xxl.job.admin.addresses>http://10.0.0.199:8080/xxl-job</pom.xxl.job.admin.addresses>
+                <pom.xxl.job.admin.addresses>http://192.168.3.34:8080/xxl-job</pom.xxl.job.admin.addresses>
                 <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
                 <pom.log.rootLogger>FILE</pom.log.rootLogger>
                 <pom.log.level>INFO</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
-                <!--redis配置-->
-                <pom.framework.redis.conf>192.168.2.192:6380:bid!@#$link,92.168.2.193:6380:bid!@#$link</pom.framework.redis.conf>
-                <pom.framework.redis.took>false</pom.framework.redis.took>
                 <!--企业空间数据源-->
-                <pom.enterpriseSpace.db.url>jdbc:mysql://10.4.0.43:3306/space?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.enterpriseSpace.db.url>
-                <pom.enterpriseSpace.db.username>dashuju</pom.enterpriseSpace.db.username>
-                <pom.enterpriseSpace.db.password>ixietong!@#$</pom.enterpriseSpace.db.password>
+                <pom.enterpriseSpace.db.url>>jdbc:mariadb:://web-mariadb.internal.cg-xt.com:3311/space?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.enterpriseSpace.db.url>
+                <pom.enterpriseSpace.db.username>space</pom.enterpriseSpace.db.username>
+                <pom.enterpriseSpace.db.password>space!@#$4321</pom.enterpriseSpace.db.password>
                 <!--协同平台招标数据源-->
-                <pom.tender.db.url>jdbc:mysql://10.4.0.43:3306/tender?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.tender.db.url>
-                <pom.tender.db.username>dashuju</pom.tender.db.username>
-                <pom.tender.db.password>ixietong!@#$</pom.tender.db.password>
+                <pom.tender.db.url>jdbc:mariadb://web-mariadb.internal.cg-xt.com:3307/tender?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.tender.db.url>
+                <pom.tender.db.username>tender</pom.tender.db.username>
+                <pom.tender.db.password>tender!@#$4321</pom.tender.db.password>
                 <!--协同平台采购数据源-->
-                <pom.purchase.db.url>jdbc:mysql://10.4.0.43:3306/purchase?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.purchase.db.url>
-                <pom.purchase.db.username>dashuju</pom.purchase.db.username>
-                <pom.purchase.db.password>ixietong!@#$</pom.purchase.db.password>
+                <pom.purchase.db.url>jdbc:mariadb://web-mariadb.internal.cg-xt.com:3306/purchase?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.purchase.db.url>
+                <pom.purchase.db.username>purchase</pom.purchase.db.username>
+                <pom.purchase.db.password>purchase!@#$4321</pom.purchase.db.password>
                 <!--协同平台中心库数据源-->
-                <pom.unireg.db.url>jdbc:mysql://10.4.0.43:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
-                <pom.unireg.db.username>dashuju</pom.unireg.db.username>
-                <pom.unireg.db.password>ixietong!@#$</pom.unireg.db.password>
+                <pom.unireg.db.url>jdbc:mariadb://usercenter.mariadb.internal.cg-xt.com:3312/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
+                <pom.unireg.db.username>appaccount</pom.unireg.db.username>
+                <pom.unireg.db.password>app!@#$4321</pom.unireg.db.password>
                 <!--供应商企业空间-->
                 <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
                 <pom.supplier.enterpriseSpaceDetailFormat>http://{0}.space.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}</pom.supplier.enterpriseSpaceDetailFormat>
-                <!--es配置-->
+                <!--es配置 FIXME 待修改-->
                 <pom.cluster.host>192.168.2.249:9300,192.168.2.250:9300,192.168.2.251:9300</pom.cluster.host>
                 <pom.cluster.name>dc</pom.cluster.name>
-                <pom.cluster.index>yc_opportunity</pom.cluster.index>
+                <pom.cluster.index>ixietong_opportunity</pom.cluster.index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
                 <pom.cluster.type.supplier_product>supplier_product</pom.cluster.type.supplier_product>
-                <pom.cluster.type.supplier_visited_opportunity>supplier_visited_opportunity</pom.cluster.type.supplier_visited_opportunity>
                 <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
                 <pom.cluster.type.enterprise_space_product>enterprise_space_product</pom.cluster.type.enterprise_space_product>
                 <pom.cluster.type.purchase>purchase</pom.cluster.type.purchase>
