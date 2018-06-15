@@ -38,7 +38,7 @@
     <bean id="elasticClient" class="cn.bidlink.job.common.es.ElasticClient"></bean>
 
     <bean id="enterpriseSpaceDataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
-        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="driverClassName" value="org.mariadb.jdbc.Driver"/>
         <property name="useUnfairLock" value="true"/>
         <property name="url" value="${enterpriseSpace.db.url}"/>
         <property name="username" value="${enterpriseSpace.db.username}"/>
@@ -55,7 +55,7 @@
     </bean>
 
     <bean id="tenderDataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
-        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="driverClassName" value="org.mariadb.jdbc.Driver"/>
         <property name="useUnfairLock" value="true"/>
         <property name="url" value="${tender.db.url}"/>
         <property name="username" value="${tender.db.username}"/>
@@ -72,7 +72,7 @@
     </bean>
 
     <bean id="purchaseDataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
-        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="driverClassName" value="org.mariadb.jdbc.Driver"/>
         <property name="useUnfairLock" value="true"/>
         <property name="url" value="${purchase.db.url}"/>
         <property name="username" value="${purchase.db.username}"/>
@@ -89,7 +89,7 @@
     </bean>
 
     <bean id="uniregDataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
-        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="driverClassName" value="org.mariadb.jdbc.Driver"/>
         <property name="useUnfairLock" value="true"/>
         <property name="url" value="${unireg.db.url}"/>
         <property name="username" value="${unireg.db.username}"/>
