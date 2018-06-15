@@ -214,7 +214,7 @@
                 <pom.purchase.db.username>purchase</pom.purchase.db.username>
                 <pom.purchase.db.password>purchase!@#$4321</pom.purchase.db.password>
                 <!--协同平台中心库数据源-->
-                <pom.unireg.db.url>jdbc:mariadb://usercenter-mariadb.internal.cg-xt.com:3312/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
+                <pom.unireg.db.url>jdbc:mariadb://usercenter-mariadb.internal.cg-xt.com:3312/usercenter?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
                 <pom.unireg.db.username>appaccount</pom.unireg.db.username>
                 <pom.unireg.db.password>app!@#$4321</pom.unireg.db.password>
                 <!--供应商企业空间-->
