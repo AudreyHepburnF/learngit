@@ -202,7 +202,7 @@
                 <pom.log.level>INFO</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
                 <!--企业空间数据源-->
-                <pom.enterpriseSpace.db.url>>jdbc:mariadb:://web-mariadb.internal.cg-xt.com:3311/space?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.enterpriseSpace.db.url>
+                <pom.enterpriseSpace.db.url>jdbc:mariadb://web-mariadb.internal.cg-xt.com:3311/space?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.enterpriseSpace.db.url>
                 <pom.enterpriseSpace.db.username>space</pom.enterpriseSpace.db.username>
                 <pom.enterpriseSpace.db.password>space!@#$4321</pom.enterpriseSpace.db.password>
                 <!--协同平台招标数据源-->
