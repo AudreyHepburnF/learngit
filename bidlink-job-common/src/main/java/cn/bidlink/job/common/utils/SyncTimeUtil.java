@@ -16,6 +16,8 @@ public class SyncTimeUtil {
 
     public static String SYNC_TIME = "syncTime";
 
+    public static Timestamp GMT_TIME = new Timestamp(0);
+
     private static ThreadLocal<Timestamp> currentDate = new InheritableThreadLocal<>();
 
     public static void setCurrentDate() {
@@ -39,7 +41,7 @@ public class SyncTimeUtil {
         if (propertyValue instanceof java.util.Date) {
             return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
         } else {
-            return null;
+            return String.valueOf(propertyValue);
         }
     }
 }

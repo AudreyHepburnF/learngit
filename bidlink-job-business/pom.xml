@@ -11,12 +11,23 @@
     <packaging>jar</packaging>
 
     <artifactId>bidlink-job-business</artifactId>
+    <description>同步商机数据</description>
 
     <dependencies>
         <dependency>
             <groupId>cn.bidlink.job</groupId>
             <artifactId>bidlink-job-common</artifactId>
             <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>1.7.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.7.4</version>
         </dependency>
     </dependencies>
 
@@ -70,6 +81,14 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -83,27 +102,38 @@
                 <pom.log.rootLogger>CONSOLE</pom.log.rootLogger>
                 <pom.log.level>debug</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
-                <!--悦彩数据源-->
-                <pom.yc.db.url>jdbc:mysql://10.4.0.45:3306/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yc.db.url>
-                <pom.yc.db.username>develop</pom.yc.db.username>
-                <pom.yc.db.password>123123</pom.yc.db.password>
-                <!--pro数据源-->
-                <pom.pro.db.url>jdbc:mysql://10.4.0.20:3306/pro_test?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
-                <pom.pro.db.username>tianyuan</pom.pro.db.username>
-                <pom.pro.db.password>s7GaCUG5</pom.pro.db.password>
-                <!--中心库数据源-->
-                <pom.center.db.url>jdbc:mysql://10.1.1.209:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.center.db.url>
-                <pom.center.db.username>cancal</pom.center.db.username>
-                <pom.center.db.password>unireg!@#</pom.center.db.password>
+                <!--企业空间数据源-->
+                <pom.enterpriseSpace.db.url>jdbc:mysql://10.4.0.43:3306/space?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.enterpriseSpace.db.url>
+                <pom.enterpriseSpace.db.username>dashuju</pom.enterpriseSpace.db.username>
+                <pom.enterpriseSpace.db.password>ixietong!@#$</pom.enterpriseSpace.db.password>
+                <!--协同平台招标数据源-->
+                <pom.tender.db.url>jdbc:mysql://10.4.0.43:3306/tender?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.tender.db.url>
+                <pom.tender.db.username>dashuju</pom.tender.db.username>
+                <pom.tender.db.password>ixietong!@#$</pom.tender.db.password>
+                <!--协同平台采购数据源-->
+                <pom.purchase.db.url>jdbc:mysql://10.4.0.43:3306/purchase?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.purchase.db.url>
+                <pom.purchase.db.username>dashuju</pom.purchase.db.username>
+                <pom.purchase.db.password>ixietong!@#$</pom.purchase.db.password>
+                <!--协同平台中心库数据源-->
+                <pom.unireg.db.url>jdbc:mysql://10.4.0.43:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
+                <pom.unireg.db.username>dashuju</pom.unireg.db.username>
+                <pom.unireg.db.password>ixietong!@#$</pom.unireg.db.password>
+                <!--供应商企业空间-->
+                <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
+                <!--供应商诚信等级空间-->
+                <pom.supplier.enterpriseSpaceDetailFormat>http://{0}.testspace.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}</pom.supplier.enterpriseSpaceDetailFormat>
                 <!--es配置-->
                 <pom.cluster.host>10.4.0.69:9300</pom.cluster.host>
                 <pom.cluster.name>dc-test</pom.cluster.name>
-                <pom.cluster.index>yc_test</pom.cluster.index>
+                <pom.cluster.index>ixietong_test</pom.cluster.index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
                 <pom.cluster.type.supplier_product>supplier_product</pom.cluster.type.supplier_product>
-                <pom.cluster.type.supplier_visited_opportunity>supplier_visited_opportunity
-                </pom.cluster.type.supplier_visited_opportunity>
-                <pom.path.conf>F:/es/config/</pom.path.conf>
+                <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
+                <pom.cluster.type.enterprise_space_product>enterprise_space_product</pom.cluster.type.enterprise_space_product>
+                <pom.cluster.type.purchase>purchase</pom.cluster.type.purchase>
+                <pom.cluster.type.notice>notice</pom.cluster.type.notice>
+                <pom.cluster.type.project>project</pom.cluster.type.project>
+                <pom.path.conf>D:/es/config/</pom.path.conf>
                 <pom.searchguard.enable>true</pom.searchguard.enable>
                 <pom.searchguard.ssl.transport.keystore_filepath>admin-keystore.jks</pom.searchguard.ssl.transport.keystore_filepath>
                 <pom.searchguard.ssl.transport.truststore_filepath>truststore.jks</pom.searchguard.ssl.transport.truststore_filepath>
@@ -115,43 +145,6 @@
             </activation>
         </profile>
         <profile>
-            <id>product</id>
-            <properties>
-                <pom.application.name>bidlink-job-business</pom.application.name>
-                <pom.xxl.job.admin.addresses>http://10.0.0.199:8080/xxl-job</pom.xxl.job.admin.addresses>
-                <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
-                <pom.log.rootLogger>FILE</pom.log.rootLogger>
-                <pom.log.level>INFO</pom.log.level>
-                <pom.log.dir>logs</pom.log.dir>
-                <!--悦彩数据源-->
-                <pom.yc.db.url>jdbc:mysql://192.168.1.86:3306/nyc?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yc.db.url>
-                <pom.yc.db.username>shujuzhx</pom.yc.db.username>
-                <pom.yc.db.password>BzUS3GsL1l</pom.yc.db.password>
-                <!--pro数据源-->
-                <pom.pro.db.url>jdbc:mysql://192.168.1.168:3306/yc_pro?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
-                <pom.pro.db.username>fengzikai</pom.pro.db.username>
-                <pom.pro.db.password>bid6link!@#$</pom.pro.db.password>
-                <!--中心库数据源-->
-                <pom.center.db.url>jdbc:mysql://192.168.1.82:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.center.db.url>
-                <pom.center.db.username>fengzikai</pom.center.db.username>
-                <pom.center.db.password>bid6link!@#$</pom.center.db.password>
-                <!--es配置-->
-                <pom.cluster.host>192.168.2.249:9300,192.168.2.250:9300,192.168.2.251:9300</pom.cluster.host>
-                <pom.cluster.name>dc</pom.cluster.name>
-                <pom.cluster.index>yc_opportunity</pom.cluster.index>
-                <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
-                <pom.cluster.type.supplier_product>supplier_product</pom.cluster.type.supplier_product>
-                <pom.cluster.type.supplier_visited_opportunity>supplier_visited_opportunity
-                </pom.cluster.type.supplier_visited_opportunity>
-                <pom.searchguard.enable>false</pom.searchguard.enable>
-                <pom.path.conf></pom.path.conf>
-                <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
-                <pom.searchguard.ssl.transport.truststore_filepath></pom.searchguard.ssl.transport.truststore_filepath>
-                <pom.searchguard.ssl.transport.keystore_password></pom.searchguard.ssl.transport.keystore_password>
-                <pom.searchguard.ssl.transport.truststore_password></pom.searchguard.ssl.transport.truststore_password>
-            </properties>
-        </profile>
-        <profile>
             <id>test</id>
             <properties>
                 <pom.application.name>bidlink-job-business</pom.application.name>
@@ -160,36 +153,91 @@
                 <pom.log.rootLogger>FILE</pom.log.rootLogger>
                 <pom.log.level>info</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
-                <!--悦彩数据源-->
-                <pom.yc.db.url>jdbc:mysql://10.4.0.45:3306/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yc.db.url>
-                <pom.yc.db.username>develop</pom.yc.db.username>
-                <pom.yc.db.password>123123</pom.yc.db.password>
-                <!--pro数据源-->
-                <pom.pro.db.url>jdbc:mysql://10.4.0.20:3306/pro_test?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
-                <pom.pro.db.username>tianyuan</pom.pro.db.username>
-                <pom.pro.db.password>s7GaCUG5</pom.pro.db.password>
-                <!--中心库数据源-->
-                <pom.center.db.url>jdbc:mysql://10.1.1.209:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.center.db.url>
-                <pom.center.db.username>cancal</pom.center.db.username>
-                <pom.center.db.password>unireg!@#</pom.center.db.password>
-                <!--数据数据源-->
-                <pom.output.db.url></pom.output.db.url>
-                <pom.output.db.username></pom.output.db.username>
-                <pom.output.db.password></pom.output.db.password>
+                <!--企业空间数据源-->
+                <pom.enterpriseSpace.db.url>jdbc:mysql://10.4.0.43:3306/space?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.enterpriseSpace.db.url>
+                <pom.enterpriseSpace.db.username>dashuju</pom.enterpriseSpace.db.username>
+                <pom.enterpriseSpace.db.password>ixietong!@#$</pom.enterpriseSpace.db.password>
+                <!--协同平台招标数据源-->
+                <pom.tender.db.url>jdbc:mysql://10.4.0.43:3306/tender?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.tender.db.url>
+                <pom.tender.db.username>dashuju</pom.tender.db.username>
+                <pom.tender.db.password>ixietong!@#$</pom.tender.db.password>
+                <!--协同平台采购数据源-->
+                <pom.purchase.db.url>jdbc:mysql://10.4.0.43:3306/purchase?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.purchase.db.url>
+                <pom.purchase.db.username>dashuju</pom.purchase.db.username>
+                <pom.purchase.db.password>ixietong!@#$</pom.purchase.db.password>
+                <!--协同平台中心库数据源-->
+                <pom.unireg.db.url>jdbc:mysql://10.4.0.43:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
+                <pom.unireg.db.username>dashuju</pom.unireg.db.username>
+                <pom.unireg.db.password>ixietong!@#$</pom.unireg.db.password>
+                <!--供应商企业空间-->
+                <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
+                <!--供应商诚信等级空间-->
+                <pom.supplier.enterpriseSpaceDetailFormat>http://{0}.testspace.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}</pom.supplier.enterpriseSpaceDetailFormat>
                 <!--es配置-->
                 <pom.cluster.host>10.4.0.69:9300</pom.cluster.host>
                 <pom.cluster.name>dc-test</pom.cluster.name>
-                <pom.cluster.index>yc_test</pom.cluster.index>
+                <pom.cluster.index>ixietong_test</pom.cluster.index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
                 <pom.cluster.type.supplier_product>supplier_product</pom.cluster.type.supplier_product>
-                <pom.cluster.type.supplier_visited_opportunity>supplier_visited_opportunity
-                </pom.cluster.type.supplier_visited_opportunity>
+                <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
+                <pom.cluster.type.enterprise_space_product>enterprise_space_product</pom.cluster.type.enterprise_space_product>
+                <pom.cluster.type.purchase>purchase</pom.cluster.type.purchase>
+                <pom.cluster.type.notice>notice</pom.cluster.type.notice>
+                <pom.cluster.type.project>project</pom.cluster.type.project>
                 <pom.path.conf>/app/programs/${pom.application.name}/conf/es/</pom.path.conf>
                 <pom.searchguard.enable>true</pom.searchguard.enable>
                 <pom.searchguard.ssl.transport.keystore_filepath>admin-keystore.jks</pom.searchguard.ssl.transport.keystore_filepath>
                 <pom.searchguard.ssl.transport.truststore_filepath>truststore.jks</pom.searchguard.ssl.transport.truststore_filepath>
                 <pom.searchguard.ssl.transport.keystore_password>49e68ad53ae7483da17e</pom.searchguard.ssl.transport.keystore_password>
                 <pom.searchguard.ssl.transport.truststore_password>49e68ad53ae7483da17e</pom.searchguard.ssl.transport.truststore_password>
+            </properties>
+        </profile>
+        <profile>
+            <id>product</id>
+            <properties>
+                <pom.application.name>bidlink-job-business</pom.application.name>
+                <pom.xxl.job.admin.addresses>http://192.168.3.34:8080/xxl-job</pom.xxl.job.admin.addresses>
+                <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
+                <pom.log.rootLogger>FILE</pom.log.rootLogger>
+                <pom.log.level>INFO</pom.log.level>
+                <pom.log.dir>logs</pom.log.dir>
+                <!--企业空间数据源-->
+                <pom.enterpriseSpace.db.url>>jdbc:mariadb:://web-mariadb.internal.cg-xt.com:3311/space?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.enterpriseSpace.db.url>
+                <pom.enterpriseSpace.db.username>space</pom.enterpriseSpace.db.username>
+                <pom.enterpriseSpace.db.password>space!@#$4321</pom.enterpriseSpace.db.password>
+                <!--协同平台招标数据源-->
+                <pom.tender.db.url>jdbc:mariadb://web-mariadb.internal.cg-xt.com:3307/tender?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.tender.db.url>
+                <pom.tender.db.username>tender</pom.tender.db.username>
+                <pom.tender.db.password>tender!@#$4321</pom.tender.db.password>
+                <!--协同平台采购数据源-->
+                <pom.purchase.db.url>jdbc:mariadb://web-mariadb.internal.cg-xt.com:3306/purchase?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.purchase.db.url>
+                <pom.purchase.db.username>purchase</pom.purchase.db.username>
+                <pom.purchase.db.password>purchase!@#$4321</pom.purchase.db.password>
+                <!--协同平台中心库数据源-->
+                <pom.unireg.db.url>jdbc:mariadb://usercenter.mariadb.internal.cg-xt.com:3312/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
+                <pom.unireg.db.username>appaccount</pom.unireg.db.username>
+                <pom.unireg.db.password>app!@#$4321</pom.unireg.db.password>
+                <!--供应商企业空间-->
+                <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
+                <!--供应商诚信等级空间-->
+                <pom.supplier.enterpriseSpaceDetailFormat>http://{0}.space.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}</pom.supplier.enterpriseSpaceDetailFormat>
+                <!--es配置 FIXME 待修改-->
+                <pom.cluster.host>192.168.2.249:9300,192.168.2.250:9300,192.168.2.251:9300</pom.cluster.host>
+                <pom.cluster.name>dc</pom.cluster.name>
+                <pom.cluster.index>ixietong_opportunity</pom.cluster.index>
+                <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
+                <pom.cluster.type.supplier_product>supplier_product</pom.cluster.type.supplier_product>
+                <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
+                <pom.cluster.type.enterprise_space_product>enterprise_space_product</pom.cluster.type.enterprise_space_product>
+                <pom.cluster.type.purchase>purchase</pom.cluster.type.purchase>
+                <pom.cluster.type.notice>notice</pom.cluster.type.notice>
+                <pom.cluster.type.project>project</pom.cluster.type.project>
+                <pom.searchguard.enable>false</pom.searchguard.enable>
+                <pom.path.conf></pom.path.conf>
+                <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
+                <pom.searchguard.ssl.transport.truststore_filepath></pom.searchguard.ssl.transport.truststore_filepath>
+                <pom.searchguard.ssl.transport.keystore_password></pom.searchguard.ssl.transport.keystore_password>
+                <pom.searchguard.ssl.transport.truststore_password></pom.searchguard.ssl.transport.truststore_password>
             </properties>
         </profile>
     </profiles>

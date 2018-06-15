@@ -37,12 +37,12 @@
 
     <bean id="elasticClient" class="cn.bidlink.job.common.es.ElasticClient"></bean>
 
-    <bean id="ycDataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
+    <bean id="enterpriseSpaceDataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
         <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
         <property name="useUnfairLock" value="true"/>
-        <property name="url" value="${yc.db.url}"/>
-        <property name="username" value="${yc.db.username}"/>
-        <property name="password" value="${yc.db.password}"/>
+        <property name="url" value="${enterpriseSpace.db.url}"/>
+        <property name="username" value="${enterpriseSpace.db.username}"/>
+        <property name="password" value="${enterpriseSpace.db.password}"/>
         <property name="notFullTimeoutRetryCount" value="2"/>
         <property name="initialSize" value="0"/>
         <property name="minIdle" value="0"/>
@@ -54,12 +54,12 @@
                   value="com.alibaba.druid.pool.vendor.MySqlValidConnectionChecker"/>
     </bean>
 
-    <bean id="proDataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
+    <bean id="tenderDataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
         <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
         <property name="useUnfairLock" value="true"/>
-        <property name="url" value="${pro.db.url}"/>
-        <property name="username" value="${pro.db.username}"/>
-        <property name="password" value="${pro.db.password}"/>
+        <property name="url" value="${tender.db.url}"/>
+        <property name="username" value="${tender.db.username}"/>
+        <property name="password" value="${tender.db.password}"/>
         <property name="notFullTimeoutRetryCount" value="2"/>
         <property name="initialSize" value="0"/>
         <property name="minIdle" value="0"/>
@@ -71,12 +71,29 @@
                   value="com.alibaba.druid.pool.vendor.MySqlValidConnectionChecker"/>
     </bean>
 
-    <bean id="centerDataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
+    <bean id="purchaseDataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
         <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
         <property name="useUnfairLock" value="true"/>
-        <property name="url" value="${center.db.url}"/>
-        <property name="username" value="${center.db.username}"/>
-        <property name="password" value="${center.db.password}"/>
+        <property name="url" value="${purchase.db.url}"/>
+        <property name="username" value="${purchase.db.username}"/>
+        <property name="password" value="${purchase.db.password}"/>
+        <property name="notFullTimeoutRetryCount" value="2"/>
+        <property name="initialSize" value="0"/>
+        <property name="minIdle" value="0"/>
+        <property name="maxActive" value="32"/>
+        <property name="maxWait" value="5000"/>
+        <property name="validationQuery" value="SELECT 1"/>
+        <property name="exceptionSorterClassName" value="com.alibaba.druid.pool.vendor.MySqlExceptionSorter"/>
+        <property name="validConnectionCheckerClassName"
+                  value="com.alibaba.druid.pool.vendor.MySqlValidConnectionChecker"/>
+    </bean>
+
+    <bean id="uniregDataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="useUnfairLock" value="true"/>
+        <property name="url" value="${unireg.db.url}"/>
+        <property name="username" value="${unireg.db.username}"/>
+        <property name="password" value="${unireg.db.password}"/>
         <property name="notFullTimeoutRetryCount" value="2"/>
         <property name="initialSize" value="0"/>
         <property name="minIdle" value="0"/>

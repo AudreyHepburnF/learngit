@@ -11,6 +11,9 @@ import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.deletebyquery.DeleteByQueryAction;
+import org.elasticsearch.action.deletebyquery.DeleteByQueryRequestBuilder;
+import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -55,17 +58,17 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     @Autowired
     private ElasticClient elasticClient;
 
-    @Autowired
-    @Qualifier("proDataSource")
-    private DataSource proDataSource;
+//    @Autowired
+//    @Qualifier("proDataSource")
+//    private DataSource proDataSource;
+
+//    @Autowired
+//    @Qualifier("ycDataSource")
+//    private DataSource ycDataSource;
 
     @Autowired
-    @Qualifier("ycDataSource")
-    private DataSource ycDataSource;
-
-    @Autowired
-    @Qualifier("centerDataSource")
-    private DataSource centerDataSource;
+    @Qualifier("uniregDataSource")
+    private DataSource uniregDataSource;
 
     @Value("${pageSize:200}")
     private int pageSize;
@@ -73,10 +76,14 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     @Value("${supplierProduct.threadNum:10}")
     private int threadNum;
 
-    private String ID                     = "id";
-    private String DIRECTORY_NAME         = "directoryNameAlias";
-    private String SUPPLIER_ID            = "supplierId";
-    private String SUPPLIER_DIRECTORY_REL = "supplierDirectoryRel";
+    private String ID                           = "id";
+    private String DIRECTORY_NAME               = "directoryName";
+    private String DIRECTORY_NAME_NOT_ANALYZED  = "directoryNameNotAnalyzed";
+    private String SUPPLIER_ID                  = "supplierId";
+    private String SUPPLIER_DIRECTORY_REL       = "supplierDirectoryRel";
+
+    // 主营产品类型
+    private static final int MAIN_PRODUCT_DIRECTORY_REL = 4;
 
     private Semaphore       semaphore;
     private AtomicLong      atomicLong;
@@ -96,9 +103,10 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
         });
     }
 
+    @Override
     public ReturnT<String> execute(String... strings) throws Exception {
-        SyncTimeUtil.setCurrentDate();
         logger.info("供应商产品数据同步开始");
+        SyncTimeUtil.setCurrentDate();
         syncProductData();
         logger.info("供应商产品数据同步结束");
         return ReturnT.SUCCESS;
@@ -108,10 +116,11 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     private void syncProductData() {
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.supplier_product", null);
         logger.info("供应商产品数据同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss") + "\n"
-            + ", syncTime : " + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
-        syncTradeProductDataService(lastSyncTime);
-        syncTradeBidProductDataService(lastSyncTime);
-        syncProDataService(lastSyncTime);
+                    + ", syncTime : " + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
+//        syncTradeProductDataService(lastSyncTime);
+//        syncTradeBidProductDataService(lastSyncTime);
+        // FIXME 同步标王待沟通
+//        syncProDataService(lastSyncTime);
         syncCenterDataService(lastSyncTime);
     }
 
@@ -122,98 +131,98 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
      *
      * @param lastSyncTime
      */
-    private void syncTradeProductDataService(Timestamp lastSyncTime) {
-        logger.info("同步交易过的采购品开始");
-        String countUpdatedSql = "SELECT\n"
-                                 + "   count(1)\n"
-                                 + " from\n"
-                                 + "   bmpfjz_supplier_project_bid\n"
-                                 + " where\n"
-                                 + "   update_time > ?\n"
-                                 + " AND supplier_bid_status IN (2, 3, 6, 7)";
-        String queryUpdatedSql = "SELECT\n"
-                                 + " bspb.SUPPLIER_ID AS supplierId,\n"
-                                 + " bspb.SUPPLIER_NAME AS supplierName,\n"
-                                 + " cd.`NAME` AS directoryNameAlias,\n"
-                                 + " 1 AS supplierDirectoryRel,\n"
-                                 + " bspb.CREATE_TIME AS createTime\n"
-                                 + "FROM\n"
-                                 + " (\n"
-                                 + "  SELECT\n"
-                                 + "   id,\n"
-                                 + "   comp_id,\n"
-                                 + "   supplier_id,\n"
-                                 + "   supplier_name,\n"
-                                 + "   create_time\n"
-                                 + "  FROM\n"
-                                 + "   bmpfjz_supplier_project_bid\n"
-                                 + "  WHERE\n"
-                                 + "   update_time > ?\n"
-                                 + "  AND supplier_bid_status IN (2, 3, 6, 7)\n"
-                                 + "  LIMIT ?, ?\n"
-                                 + " ) bspb\n"
-                                 + "JOIN bmpfjz_supplier_project_item_bid bspib ON bspb.id = bspib.supplier_project_bid_id\n"
-                                 + "AND bspb.comp_id = bspib.comp_id\n"
-                                 + "JOIN corp_directorys cd ON bspib.directory_id = cd.ID\n"
-                                 + "AND cd.company_id = bspib.comp_id\n";
-        doSyncUpdatedData(ycDataSource, countUpdatedSql, queryUpdatedSql, lastSyncTime);
-        logger.info("同步交易过的采购品结束");
-    }
+//    private void syncTradeProductDataService(Timestamp lastSyncTime) {
+//        logger.info("同步交易过的采购品开始");
+//        String countUpdatedSql = "SELECT\n"
+//                                 + "   count(1)\n"
+//                                 + " from\n"
+//                                 + "   bmpfjz_supplier_project_bid\n"
+//                                 + " where\n"
+//                                 + "   update_time > ?\n"
+//                                 + " AND supplier_bid_status IN (2, 3, 6, 7)";
+//        String queryUpdatedSql = "SELECT\n"
+//                                 + " bspb.SUPPLIER_ID AS supplierId,\n"
+//                                 + " bspb.SUPPLIER_NAME AS supplierName,\n"
+//                                 + " cd.`NAME` AS directoryNameAlias,\n"
+//                                 + " 1 AS supplierDirectoryRel,\n"
+//                                 + " bspb.CREATE_TIME AS createTime\n"
+//                                 + "FROM\n"
+//                                 + " (\n"
+//                                 + "  SELECT\n"
+//                                 + "   id,\n"
+//                                 + "   comp_id,\n"
+//                                 + "   supplier_id,\n"
+//                                 + "   supplier_name,\n"
+//                                 + "   create_time\n"
+//                                 + "  FROM\n"
+//                                 + "   bmpfjz_supplier_project_bid\n"
+//                                 + "  WHERE\n"
+//                                 + "   update_time > ?\n"
+//                                 + "  AND supplier_bid_status IN (2, 3, 6, 7)\n"
+//                                 + "  LIMIT ?, ?\n"
+//                                 + " ) bspb\n"
+//                                 + "JOIN bmpfjz_supplier_project_item_bid bspib ON bspb.id = bspib.supplier_project_bid_id\n"
+//                                 + "AND bspb.comp_id = bspib.comp_id\n"
+//                                 + "JOIN corp_directorys cd ON bspib.directory_id = cd.ID\n"
+//                                 + "AND cd.company_id = bspib.comp_id\n";
+//        doSyncUpdatedData(ycDataSource, countUpdatedSql, queryUpdatedSql, lastSyncTime);
+//        logger.info("同步交易过的采购品结束");
+//    }
 
     /**
      * 同步中标的产品
      *
      * @param lastSyncTime
      */
-    private void syncTradeBidProductDataService(Timestamp lastSyncTime) {
-        logger.info("同步中标的产品开始");
-        String countUpdatedSql = "SELECT\n"
-                                 + "   count(1)\n"
-                                 + "FROM\n"
-                                 + "   bid b\n"
-                                 + "JOIN bid_product bp ON b.ID = bp.BID_ID\n"
-                                 + "WHERE\n"
-                                 + "   bp.PRODUCT_NAME IS NOT NULL\n"
-                                 + "AND b.CREATE_TIME > ?";
-        String queryUpdatedSql = "SELECT\n"
-                                 + "   b.BIDER_ID AS supplierId,\n"
-                                 + "   b.BIDER_NAME AS supplierName,\n"
-                                 + "   bp.PRODUCT_NAME AS directoryNameAlias,\n"
-                                 + "   2 AS supplierDirectoryRel,\n"
-                                 + "   b.CREATE_TIME AS createTime\n"
-                                 + "FROM\n"
-                                 + "   bid b\n"
-                                 + "JOIN bid_product bp ON b.ID = bp.BID_ID\n"
-                                 + "WHERE\n"
-                                 + "   bp.PRODUCT_NAME IS NOT NULL\n"
-                                 + "AND b.CREATE_TIME > ?\n"
-                                 + "LIMIT ?, ?";
-        doSyncUpdatedData(ycDataSource, countUpdatedSql, queryUpdatedSql, lastSyncTime);
-        logger.info("同步中标的产品结束");
-    }
+//    private void syncTradeBidProductDataService(Timestamp lastSyncTime) {
+//        logger.info("同步中标的产品开始");
+//        String countUpdatedSql = "SELECT\n"
+//                                 + "   count(1)\n"
+//                                 + "FROM\n"
+//                                 + "   bid b\n"
+//                                 + "JOIN bid_product bp ON b.ID = bp.BID_ID\n"
+//                                 + "WHERE\n"
+//                                 + "   bp.PRODUCT_NAME IS NOT NULL\n"
+//                                 + "AND b.CREATE_TIME > ?";
+//        String queryUpdatedSql = "SELECT\n"
+//                                 + "   b.BIDER_ID AS supplierId,\n"
+//                                 + "   b.BIDER_NAME AS supplierName,\n"
+//                                 + "   bp.PRODUCT_NAME AS directoryNameAlias,\n"
+//                                 + "   2 AS supplierDirectoryRel,\n"
+//                                 + "   b.CREATE_TIME AS createTime\n"
+//                                 + "FROM\n"
+//                                 + "   bid b\n"
+//                                 + "JOIN bid_product bp ON b.ID = bp.BID_ID\n"
+//                                 + "WHERE\n"
+//                                 + "   bp.PRODUCT_NAME IS NOT NULL\n"
+//                                 + "AND b.CREATE_TIME > ?\n"
+//                                 + "LIMIT ?, ?";
+//        doSyncUpdatedData(ycDataSource, countUpdatedSql, queryUpdatedSql, lastSyncTime);
+//        logger.info("同步中标的产品结束");
+//    }
 
     /**
      * 同步标王关键字
      *
      * @param lastSyncTime
      */
-    private void syncProDataService(Timestamp lastSyncTime) {
-        logger.info("同步标王关键字开始");
-        String countInsertedSql = "SELECT count(1) FROM user_wfirst_use WHERE CREATE_TIME > ? AND ENABLE_DISABLE = 1 AND STATE=1";
-        String queryInsertedSql = "SELECT\n"
-                                  + "   ufu.COMPANY_ID AS supplierId,\n"
-                                  + "   w.KEY_WORD AS directoryNameAlias,\n"
-                                  + "   3 AS supplierDirectoryRel,\n"
-                                  + "   ufu.CREATE_TIME AS createTime,\n"
-                                  + "   ufu.UPDATE_TIME AS updateTime\n"
-                                  + "FROM\n"
-                                  + "   user_wfirst_use ufu\n"
-                                  + "LEFT JOIN wfirst w ON ufu.WFIRST_ID = w.ID\n"
-                                  + "WHERE ufu.CREATE_TIME > ? AND ufu.ENABLE_DISABLE = 1 AND ufu.STATE=1\n"
-                                  + "LIMIT ?, ?";
-        doSyncInsertedData(proDataSource, countInsertedSql, queryInsertedSql, lastSyncTime);
-        logger.info("同步标王关键字结束");
-    }
+//    private void syncProDataService(Timestamp lastSyncTime) {
+//        logger.info("同步标王关键字开始");
+//        String countInsertedSql = "SELECT count(1) FROM user_wfirst_use WHERE CREATE_TIME > ? AND ENABLE_DISABLE = 1 AND STATE=1";
+//        String queryInsertedSql = "SELECT\n"
+//                                  + "   ufu.COMPANY_ID AS supplierId,\n"
+//                                  + "   w.KEY_WORD AS directoryNameAlias,\n"
+//                                  + "   3 AS supplierDirectoryRel,\n"
+//                                  + "   ufu.CREATE_TIME AS createTime,\n"
+//                                  + "   ufu.UPDATE_TIME AS updateTime\n"
+//                                  + "FROM\n"
+//                                  + "   user_wfirst_use ufu\n"
+//                                  + "LEFT JOIN wfirst w ON ufu.WFIRST_ID = w.ID\n"
+//                                  + "WHERE ufu.CREATE_TIME > ? AND ufu.ENABLE_DISABLE = 1 AND ufu.STATE=1\n"
+//                                  + "LIMIT ?, ?";
+//        doSyncInsertedData(proDataSource, countInsertedSql, queryInsertedSql, lastSyncTime);
+//        logger.info("同步标王关键字结束");
+//    }
 
     /**
      * 同步中心库供应商主营产品
@@ -222,37 +231,39 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
      */
     private void syncCenterDataService(Timestamp lastSyncTime) {
         logger.info("同步中心库供应商主营产品开始");
-        String countInsertedSql = "SELECT count(1) FROM t_reg_company WHERE TYPE = 13 AND MAIN_PRODUCT IS NOT NULL AND CREATE_DATE > ?";
+        String countInsertedSql = "SELECT count(1) FROM t_reg_company WHERE TYPE = 13 AND MAIN_PRODUCT IS NOT NULL AND create_time > ?";
         String queryInsertedSql = "SELECT\n"
                                   + "   trc.ID AS supplierId,\n"
                                   + "   trc.NAME AS supplierName,\n"
-                                  + "   trc.MAIN_PRODUCT AS directoryNameAlias,\n"
+                                  + "   trc.MAIN_PRODUCT AS directoryName,\n"
                                   + "   4 AS supplierDirectoryRel,\n"
 //                                  + "   tucs.CORE_SUPPLIER_STATUS AS core,\n"
-                                  + "   trc.CREATE_DATE AS createTime,\n"
+                                  + "   trc.create_time AS createTime,\n"
+                                  + "   trc.company_logo AS companyLogo,\n"
                                   + "   trc.UPDATE_TIME AS updateTime\n"
                                   + "FROM\n"
                                   + "   t_reg_company trc\n"
 //                                  + "LEFT JOIN t_uic_company_status tucs ON trc.ID = tucs.COMP_ID\n"
                                   + "WHERE\n"
-                                  + "   trc.TYPE = 13 AND trc.MAIN_PRODUCT IS NOT NULL AND trc.CREATE_DATE > ? LIMIT ?, ?";
-        doSyncInsertedData(centerDataSource, countInsertedSql, queryInsertedSql, lastSyncTime);
+                                  + "   trc.TYPE = 13 AND trc.MAIN_PRODUCT IS NOT NULL AND trc.create_time > ? LIMIT ?, ?";
+        doSyncInsertedData(uniregDataSource, countInsertedSql, queryInsertedSql, lastSyncTime);
 
         String countUpdatedSql = "SELECT count(1) FROM t_reg_company WHERE TYPE = 13 AND MAIN_PRODUCT IS NOT NULL AND UPDATE_TIME > ?";
         String queryUpdatedSql = "SELECT\n"
                                  + "   trc.ID AS supplierId,\n"
                                  + "   trc.NAME AS supplierName,\n"
-                                 + "   trc.MAIN_PRODUCT AS directoryNameAlias,\n"
+                                 + "   trc.MAIN_PRODUCT AS directoryName,\n"
                                  + "   4 AS supplierDirectoryRel,\n"
 //                                 + "   tucs.CORE_SUPPLIER_STATUS AS core,\n"
                                  + "   trc.CREATE_DATE AS createTime,\n"
+                                 + "   trc.company_logo AS companyLogo,\n"
                                  + "   trc.UPDATE_TIME AS updateTime\n"
                                  + "FROM\n"
                                  + "   t_reg_company trc\n"
 //                                 + "LEFT JOIN t_uic_company_status tucs ON trc.ID = tucs.COMP_ID\n"
                                  + "WHERE\n"
                                  + "   trc.TYPE = 13 AND trc.MAIN_PRODUCT IS NOT NULL AND trc.UPDATE_TIME > ? LIMIT ?, ?";
-        doSyncUpdatedData(centerDataSource, countUpdatedSql, queryUpdatedSql, lastSyncTime);
+        doSyncUpdatedData(uniregDataSource, countUpdatedSql, queryUpdatedSql, lastSyncTime);
         logger.info("同步中心库供应商主营产品结束");
     }
 
@@ -274,6 +285,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
         long count = DBUtil.count(inputDataSource, countSql, params);
         logger.debug("执行countSql : {}, params : {}，共{}条", countSql, params, count);
         if (count > 0) {
+            final Timestamp currentDate = SyncTimeUtil.getCurrentDate();
             for (long i = 0; i < count; ) {
                 final long finalI = i;
                 try {
@@ -281,7 +293,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
                     executorService.execute(new Runnable() {
                         @Override
                         public void run() {
-                            doBatchSyncData(inputDataSource, querySql, params, finalI);
+                            doBatchSyncData(inputDataSource, querySql, params, finalI, currentDate);
                         }
                     });
                     i += pageSize;
@@ -292,7 +304,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
         }
     }
 
-    private void doBatchSyncData(DataSource inputDataSource, String querySql, List<Object> params, long i) {
+    private void doBatchSyncData(DataSource inputDataSource, String querySql, List<Object> params, long i, Timestamp currentDate) {
         try {
             List<Object> paramsToUse = appendToParams(params, i);
             List<Map<String, Object>> results = DBUtil.query(inputDataSource, querySql, paramsToUse);
@@ -300,11 +312,16 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
             List<Map<String, Object>> resultsToExecute = new ArrayList<>();
 
             for (Map<String, Object> result : results) {
-                // note:将供应商的产品转换为小写处理es查询时大小写敏感问题
-                String directoryName = String.valueOf(result.get(DIRECTORY_NAME)).toLowerCase();
-                String[] changedDirectoryNames = splitDirectoryName(directoryName);
+                // 如果是主营产品，则删除以前的老数据
+                Integer supplierDirectoryRel = ((Long) result.get(SUPPLIER_DIRECTORY_REL)).intValue();
+                if (supplierDirectoryRel != null && supplierDirectoryRel == MAIN_PRODUCT_DIRECTORY_REL) {
+                    deleteOldMainProduct(String.valueOf(result.get(SUPPLIER_ID)));
+                }
+
+                String[] changedDirectoryNames = splitDirectoryName(String.valueOf(result.get(DIRECTORY_NAME)));
                 for (String name : changedDirectoryNames) {
                     if (!StringUtils.isEmpty(name)) {
+                        result.put(SyncTimeUtil.SYNC_TIME, currentDate);
                         resultsToExecute.add(refresh(result, name));
                     }
                 }
@@ -313,6 +330,26 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
             batchExecute(resultsToExecute);
         } finally {
             semaphore.release();
+        }
+    }
+
+    /**
+     * 删除主营产品老数据
+     *
+     * @param supplierId
+     */
+    private void deleteOldMainProduct(String supplierId) {
+        DeleteByQueryResponse deleteByQueryResponse = new DeleteByQueryRequestBuilder(elasticClient.getTransportClient(), DeleteByQueryAction.INSTANCE)
+                .setIndices(elasticClient.getProperties().getProperty("cluster.index"))
+                .setTypes(elasticClient.getProperties().getProperty("cluster.type.supplier_product"))
+                .setQuery(QueryBuilders.boolQuery()
+                                  .must(QueryBuilders.termQuery(SUPPLIER_DIRECTORY_REL, MAIN_PRODUCT_DIRECTORY_REL))
+                                  .must(QueryBuilders.termQuery(SUPPLIER_ID, supplierId))
+                )
+                .execute()
+                .actionGet();
+        if (deleteByQueryResponse.getTotalFailed() > 0) {
+            logger.error("清理主营产品历史数据失败！");
         }
     }
 
@@ -341,11 +378,12 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
         // 将多个拼接在一起的采购品分割为单个采购品
         resultToUse.remove(DIRECTORY_NAME);
         resultToUse.put(DIRECTORY_NAME, directoryName.trim());
+        // add by zhihuizhou 添加directoryNameAliasNotAnalyzed字段
+        resultToUse.put(DIRECTORY_NAME_NOT_ANALYZED, resultToUse.get(DIRECTORY_NAME));
         // 生成Id
         resultToUse.put(ID, generateSupplierProductId(resultToUse));
         // 将supplierId转为string
         resultToUse.put(SUPPLIER_ID, String.valueOf(resultToUse.get(SUPPLIER_ID)));
-        resultToUse.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
         return resultToUse;
     }
 
@@ -378,7 +416,8 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     }
 
     private String[] splitDirectoryName(String directoryName) {
-        return directoryName.replaceAll("[,;.，。、\\s\\t]", ",").split(",");
+        // note:将供应商的产品转换为小写处理es查询时大小写敏感问题
+        return directoryName.toLowerCase().replaceAll("[,;.，。、\\s\\t]", ",").split(",");
     }
 
     private List<Object> appendToParams(List<Object> params, long i) {
@@ -389,6 +428,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     }
 
     private void batchExecute(List<Map<String, Object>> resultsToUpdate) {
+//        System.out.println(resultsToUpdate);
         if (!CollectionUtils.isEmpty(resultsToUpdate)) {
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> result : resultsToUpdate) {
@@ -415,8 +455,4 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     }
 
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
 }

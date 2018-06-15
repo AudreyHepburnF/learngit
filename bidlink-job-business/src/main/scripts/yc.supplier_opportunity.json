@@ -3,81 +3,138 @@
 {
   "supplier_opportunity": {
     "properties": {
-      "id": {
+      "areaStr": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "areaStrNotAnalyzed": {
         "type": "string",
         "index": "not_analyzed"
+      },
+      "biddenSupplierCount": {
+        "type": "integer"
       },
       "createTime": {
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
-      "updateTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "syncTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "quoteStopTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "purchaseId": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "purchaseName": {
-        "analyzer": "ik",
+      "create_time": {
         "type": "string"
       },
-      "projectId": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "projectCode": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "projectName": {
-        "analyzer": "ik",
-        "type": "string"
-      },
-      "isCore": {
-        "type": "integer",
-        "index": "not_analyzed"
-      },
-      "tenantKey": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "projectType": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "openRangeType": {
+      "directoryId": {
         "type": "string",
         "index": "not_analyzed"
       },
       "directoryName": {
-        "analyzer": "ik",
-        "type": "string"
+        "type": "string",
+        "analyzer": "ik"
       },
-      "firstDirectoryName" : {
-        "type" : "string",
+      "directoryNameCount": {
+        "type": "integer"
+      },
+      "directoryNameNotAnalyzed": {
+        "type": "string",
         "index": "not_analyzed"
       },
-      "directoryNameCount" : {
-        "type" : "integer"
+      "firstDirectoryName": {
+        "type": "string",
+        "index": "not_analyzed"
       },
-      "areaStr": {
-        "type": "string"
+      "id": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "isCore": {
+        "type": "integer"
       },
       "linkMan": {
         "type": "string"
       },
       "linkPhone": {
         "type": "string"
+      },
+      "node": {
+        "type": "long"
+      },
+      "openRangeType": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "processStatus": {
+        "type": "long"
+      },
+      "projectCode": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "projectId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "projectName": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "projectNameNotAnalyzed": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "projectStatus": {
+        "type": "long"
+      },
+      "projectType": {
+        "type": "integer"
+      },
+      "purchaseId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "purchaseName": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "purchaseNameNotAnalyzed": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "quoteStopTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "region": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "source": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "sourceId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "status": {
+        "type": "long"
+      },
+      "syncTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "tenantKey": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "updateTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "bidOpenTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "industryStr": {
+        "type": "string",
+        "analyzer": "ik"
       }
     }
   }

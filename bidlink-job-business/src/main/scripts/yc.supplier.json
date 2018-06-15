@@ -1,0 +1,203 @@
+// 方式1：直接在head界面操作，yc_v1/supplier/_mapping POST
+// 方式2：curl -XPOST http://dcsearch.api.yuecai.com/yc_v1/supplier/_mapping -d'
+{
+  "supplier": {
+    "properties": {
+      "address": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "areaCode": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "areaStr": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "areaStrNotAnalyzed": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "bidAuthExpires": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "bidAuthFtime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "bidAuthStatus": {
+        "type": "integer"
+      },
+      "bidAuthTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "companyLogo": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "companyName": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "companyNameEn": {
+        "type": "string",
+        "analyzer": "standard"
+      },
+      "companyNameNotAnalyzed": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "companySite": {
+        "type": "string",
+        "analyzer": "standard"
+      },
+      "companyTypStr": {
+        "type": "string"
+      },
+      "companyType": {
+        "type": "integer"
+      },
+      "companyTypeStr": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "contact": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "core": {
+        "type": "integer"
+      },
+      "createTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "creditRating": {
+        "type": "integer"
+      },
+      "enterpriseSpace": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "enterpriseSpaceActive": {
+        "type": "integer"
+      },
+      "enterpriseSpaceDetail": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "fund": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "fundUnit": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "id": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "industryCode": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "industryStr": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "loginName": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "mainProduct": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "mainProductNotAnalyzed": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "mobile": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "region": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "supplierName": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "syncTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "tel": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "totalBidProject": {
+        "type": "long"
+      },
+      "totalCooperatedPurchaser": {
+        "type": "long"
+      },
+      "totalDealBidProject": {
+        "type": "long"
+      },
+      "totalDealPurchaseProject": {
+        "type": "long"
+      },
+      "totalDealProject": {
+        "type": "long"
+      },
+      "totalDealBidPrice": {
+        "type": "long"
+      },
+      "totalDealPurchasePrice": {
+        "type": "long"
+      },
+      "totalDealPrice": {
+        "type": "long"
+      },
+      "totalProduct": {
+        "type": "long"
+      },
+      "totalPurchaseProject": {
+        "type": "long"
+      },
+      "totalProject": {
+        "type": "long"
+      },
+      "updateTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "webType": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "workPattern": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "wwwStation": {
+        "type": "string",
+        "analyzer": "standard"
+      },
+      "zoneCode": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "zoneStr": {
+        "type": "string",
+        "analyzer": "ik"
+      }
+    }
+  }
+}
