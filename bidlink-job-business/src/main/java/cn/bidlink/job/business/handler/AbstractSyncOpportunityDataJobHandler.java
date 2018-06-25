@@ -86,6 +86,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected String CITY                        = "city";
     protected String COUNTY                      = "county";
     protected String PROVINCE                    = "province";
+    protected String APPROVE_STATUS              = "approveStatus";
     // 数据来源，new表示新平台，old表示老平台
     protected String SOURCE                      = "source";
 

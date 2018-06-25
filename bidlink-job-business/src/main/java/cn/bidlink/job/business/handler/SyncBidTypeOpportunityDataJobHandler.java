@@ -12,10 +12,7 @@ import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static cn.bidlink.job.business.utils.AreaUtil.queryAreaInfo;
 
@@ -78,21 +75,22 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                 "FROM\n" +
                 "\t(\n" +
                     "SELECT\n" +
-                        "\tbsp.id AS projectId,\n" +
-                        "\tbsp.project_code AS projectCode,\n" +
-                        "\tbsp.project_name AS projectName,\n" +
-                        "\tbsp.project_status AS projectStatus,\n" +
-                        "\tbsp.company_id AS purchaseId,\n" +
-                        "\tbsp.company_name AS purchaseName,\n" +
-                        "\tbsp.create_time AS createTime,\n" +
-                        "\tbsp.node,\n" +
-                        "\tbsp.bid_open_time AS bidOpenTime,\n" +
-                        "\tbsp.bid_endtime AS quoteStopTime,\n" +
-                        "\tbsp.sys_id AS sourceId,\n" +
-                        "\tbsp.update_time AS updateTime,\n" +
-                        "\tbp.province,\n" +
-                        "\tbp.zone_str AS areaStr, \n" +
-                        "\tbp.industry_name AS industryStr \n" +
+                    "\tbsp.id AS projectId,\n" +
+                    "\tbsp.project_code AS projectCode,\n" +
+                    "\tbsp.project_name AS projectName,\n" +
+                    "\tbsp.project_status AS projectStatus,\n" +
+                    "\tbsp.company_id AS purchaseId,\n" +
+                    "\tbsp.company_name AS purchaseName,\n" +
+                    "\tbsp.create_time AS createTime,\n" +
+                    "\tbsp.node,\n" +
+                    "\tbsp.bid_open_time AS bidOpenTime,\n" +
+                    "\tbsp.bid_endtime AS quoteStopTime,\n" +
+                    "\tbsp.sys_id AS sourceId,\n" +
+                    "\tbsp.approve_status AS approveStatus,\n" +
+                    "\tbsp.update_time AS updateTime,\n" +
+                    "\tbp.province,\n" +
+                    "\tbp.zone_str AS areaStr, \n" +
+                    "\tbp.industry_name AS industryStr \n" +
                     "FROM\n" +
                     "\tbid_sub_project bsp\n" +
                     "\tLEFT JOIN bid_project bp ON bsp.project_id = bp.id \n" +
@@ -167,6 +165,14 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
         } else {
             result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
             resultToExecute.add(appendIdToResult(result));
+        }
+
+        // 审批状态 null或2审批通过
+        Object approveStatus = result.get(APPROVE_STATUS);
+        if (Objects.isNull(approveStatus) || Integer.valueOf(approveStatus.toString()) == 2) {
+            result.put(APPROVE_STATUS, 1);
+        } else {
+            result.put(APPROVE_STATUS, -1);
         }
     }
 
