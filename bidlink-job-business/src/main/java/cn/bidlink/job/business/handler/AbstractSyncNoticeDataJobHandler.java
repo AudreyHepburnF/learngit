@@ -15,10 +15,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.CollectionUtils;
 
 import javax.sql.DataSource;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author <a href="mailto:zhihuizhou@ebnew.com">zhouzhihui</a>
@@ -54,11 +51,13 @@ public abstract class AbstractSyncNoticeDataJobHandler extends JobHandler {
     protected String PROJECT_NAME              = "projectName";
     protected String NOTICE_TYPE               = "noticeType";
     protected String SUB_PROJECT_ID            = "subProjectId";
+    protected String APPROVE_STATUS            = "approveStatus";
 
     protected Integer SOURCE_NOTICE        = 1; // 原始公告和变更公告
     protected Integer RESULT_NOTICE        = 2; // 结果公告
     protected Integer BID_NOTICE_TYPE      = 1; // 招标公告
     protected Integer PURCHASE_NOTICE_TYPE = 2; // 采购公告
+
 
     protected void doSyncNoticeService(DataSource dataSource, String countSql, String querySql, ArrayList<Object> params, Integer noticeType) {
         long count = DBUtil.count(dataSource, countSql, params);
@@ -85,7 +84,14 @@ public abstract class AbstractSyncNoticeDataJobHandler extends JobHandler {
         result.put(SUB_PROJECT_ID, String.valueOf(result.get(SUB_PROJECT_ID)));
         result.put(PROJECT_NAME_NOT_ANALYZED, result.get(PROJECT_NAME));
         result.put(COMPANY_NAME_NOT_ANALYZED, result.get(COMPANY_NAME));
-
+        // 处理公告审批状态 approve_status为null或2 代表审批通过
+        Integer approveStatus = Integer.valueOf(result.get(APPROVE_STATUS).toString());
+        if (Objects.isNull(approveStatus) || approveStatus == 2) {
+            result.put(APPROVE_STATUS, 1);
+        } else {
+            // 审批中或审批不通过
+            result.put(APPROVE_STATUS, -1);
+        }
         // 添加同步时间字段
         result.put(SYNC_TIME, SyncTimeUtil.getCurrentDate());
     }

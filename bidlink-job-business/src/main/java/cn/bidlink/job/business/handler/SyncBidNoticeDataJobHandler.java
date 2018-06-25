@@ -71,6 +71,7 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
                 "\tlink_tel AS linkTel,\n" +
                 "\tlink_mail AS linkMail,\n" +
                 "\tcreate_time AS createTime,\n" +
+                "\tapprove_status AS approveStatus,\n" +
                 "\tcompany_id AS companyId\n" +
                 "FROM\n" +
                 "\t`bid_decided_notice` \n" +
@@ -106,6 +107,7 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
                 "\tlink_tel AS linkTel,\n" +
                 "\tlink_mail AS linkMail,\n" +
                 "\tcreate_time AS createTime,\n" +
+                "\tapprove_status AS approveStatus,\n" +
                 "\tcompany_id AS companyId\n" +
                 "FROM\n" +
                 "\t`bid_decided_notice` \n" +
@@ -166,6 +168,7 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
                 "\tsub_project_id AS subProjectId,\n" +
                 "\tgain_file_type AS gainFileType,\n" +
                 "\tfile_gain_address AS fileGainAddress, \n" +
+                "\tapprove_status AS approveStatus,\n" +
                 "\tcreate_time AS createTime \n" +
                 "FROM\n" +
                 "\tbid_notice_history \n" +
@@ -218,6 +221,7 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
                 "\tsub_project_id AS subProjectId,\n" +
                 "\tgain_file_type AS gainFileType,\n" +
                 "\tfile_gain_address AS fileGainAddress, \n" +
+                "\tapprove_status AS approveStatus,\n" +
                 "\tcreate_time AS createTime \n" +
                 "FROM\n" +
                 "\tbid_notice_history \n" +
