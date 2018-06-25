@@ -164,6 +164,9 @@
       "putFileType": {
         "type": "integer"
       },
+      "approveStatus": {
+        "type": "integer"
+      },
       "qualification": {
         "type": "string",
         "index": "not_analyzed"

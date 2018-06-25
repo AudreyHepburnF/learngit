@@ -1,4 +1,4 @@
-// 方式1：直接在head界面操作，yc_test/enterprise_space_product/_mapping POST
+// 方式1：直接在head界面操作，ixietong_opportunity/enterprise_space_product/_mapping POST
 // 方式2：curl -XPOST http://dcsearch.api.yuecai.com/yc_test/enterprise_space_product/_mapping -d'
 {
   "enterprise_space_product": {

@@ -196,33 +196,33 @@
             <id>product</id>
             <properties>
                 <pom.application.name>bidlink-job-business</pom.application.name>
-                <pom.xxl.job.admin.addresses>http://192.168.3.34:8080/xxl-job</pom.xxl.job.admin.addresses>
+                <pom.xxl.job.admin.addresses>http://xxl-dashboard.internal.cg-xt.com:8080/xxl-job</pom.xxl.job.admin.addresses>
                 <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
                 <pom.log.rootLogger>FILE</pom.log.rootLogger>
                 <pom.log.level>INFO</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
                 <!--企业空间数据源-->
-                <pom.enterpriseSpace.db.url>>jdbc:mariadb:://web-mariadb.internal.cg-xt.com:3311/space?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.enterpriseSpace.db.url>
+                <pom.enterpriseSpace.db.url>jdbc:mariadb://web-mariadb.internal.cg-xt.com:3311/space?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.enterpriseSpace.db.url>
                 <pom.enterpriseSpace.db.username>space</pom.enterpriseSpace.db.username>
                 <pom.enterpriseSpace.db.password>space!@#$4321</pom.enterpriseSpace.db.password>
                 <!--协同平台招标数据源-->
-                <pom.tender.db.url>jdbc:mariadb://web-mariadb.internal.cg-xt.com:3307/tender?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.tender.db.url>
+                <pom.tender.db.url>jdbc:mariadb://tender-mariadb.internal.cg-xt.com:3307/tender?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.tender.db.url>
                 <pom.tender.db.username>tender</pom.tender.db.username>
                 <pom.tender.db.password>tender!@#$4321</pom.tender.db.password>
                 <!--协同平台采购数据源-->
-                <pom.purchase.db.url>jdbc:mariadb://web-mariadb.internal.cg-xt.com:3306/purchase?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.purchase.db.url>
+                <pom.purchase.db.url>jdbc:mariadb://purchase-mariadb.internal.cg-xt.com:3306/purchase?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.purchase.db.url>
                 <pom.purchase.db.username>purchase</pom.purchase.db.username>
                 <pom.purchase.db.password>purchase!@#$4321</pom.purchase.db.password>
                 <!--协同平台中心库数据源-->
-                <pom.unireg.db.url>jdbc:mariadb://usercenter.mariadb.internal.cg-xt.com:3312/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
+                <pom.unireg.db.url>jdbc:mariadb://usercenter-mariadb.internal.cg-xt.com:3312/usercenter?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
                 <pom.unireg.db.username>appaccount</pom.unireg.db.username>
                 <pom.unireg.db.password>app!@#$4321</pom.unireg.db.password>
                 <!--供应商企业空间-->
                 <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
                 <pom.supplier.enterpriseSpaceDetailFormat>http://{0}.space.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}</pom.supplier.enterpriseSpaceDetailFormat>
-                <!--es配置 FIXME 待修改-->
-                <pom.cluster.host>192.168.2.249:9300,192.168.2.250:9300,192.168.2.251:9300</pom.cluster.host>
+                <!--es配置-->
+                <pom.cluster.host>es-cloud-01.internal.cg-xt.com:9300,es-cloud-02.internal.cg-xt.com:9300,es-cloud-03.internal.cg-xt.com:9300</pom.cluster.host>
                 <pom.cluster.name>dc</pom.cluster.name>
                 <pom.cluster.index>ixietong_opportunity</pom.cluster.index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
