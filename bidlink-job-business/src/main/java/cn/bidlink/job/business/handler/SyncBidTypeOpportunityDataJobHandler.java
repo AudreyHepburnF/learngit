@@ -70,7 +70,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                 + "FROM\n"
                 + "   bid_sub_project\n"
                 + "WHERE\n"
-                + "   is_bid_open = 1 AND node > 1 AND bsp.approve_status = 2 AND update_time > ?";
+                + "   is_bid_open = 1 AND node > 1 AND approve_status = 2 AND update_time > ?";
         String queryUpdatedSql = "SELECT\n" +
                 "\tproject.*,\n" +
                 "\tbpi.id AS directoryId,\n" +
