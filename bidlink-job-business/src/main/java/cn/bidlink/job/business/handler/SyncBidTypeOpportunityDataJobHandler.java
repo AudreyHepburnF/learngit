@@ -30,7 +30,7 @@ import static cn.bidlink.job.business.utils.AreaUtil.queryAreaInfo;
  */
 @JobHander(value = "syncBidTypeOpportunityDataJobHandler")
 @Service
-public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunityDataJobHandler /*implements InitializingBean*/ {
+public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunityDataJobHandler /*implements InitializingBean */{
 
     private String OPEN_RANGE_TYPE = "openRangeType";
     private String NODE            = "node";
@@ -70,7 +70,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                 + "FROM\n"
                 + "   bid_sub_project\n"
                 + "WHERE\n"
-                + "   is_bid_open = 1 AND node > 1 AND update_time > ?";
+                + "   is_bid_open = 1 AND node > 1 AND approve_status = 2 AND update_time > ?";
         String queryUpdatedSql = "SELECT\n" +
                 "\tproject.*,\n" +
                 "\tbpi.id AS directoryId,\n" +
@@ -78,21 +78,21 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                 "FROM\n" +
                 "\t(\n" +
                     "SELECT\n" +
-                        "\tbsp.id AS projectId,\n" +
-                        "\tbsp.project_code AS projectCode,\n" +
-                        "\tbsp.project_name AS projectName,\n" +
-                        "\tbsp.project_status AS projectStatus,\n" +
-                        "\tbsp.company_id AS purchaseId,\n" +
-                        "\tbsp.company_name AS purchaseName,\n" +
-                        "\tbsp.create_time AS createTime,\n" +
-                        "\tbsp.node,\n" +
-                        "\tbsp.bid_open_time AS bidOpenTime,\n" +
-                        "\tbsp.bid_endtime AS quoteStopTime,\n" +
-                        "\tbsp.sys_id AS sourceId,\n" +
-                        "\tbsp.update_time AS updateTime,\n" +
-                        "\tbp.province,\n" +
-                        "\tbp.zone_str AS areaStr, \n" +
-                        "\tbp.industry_name AS industryStr \n" +
+                    "\tbsp.id AS projectId,\n" +
+                    "\tbsp.project_code AS projectCode,\n" +
+                    "\tbsp.project_name AS projectName,\n" +
+                    "\tbsp.project_status AS projectStatus,\n" +
+                    "\tbsp.company_id AS purchaseId,\n" +
+                    "\tbsp.company_name AS purchaseName,\n" +
+                    "\tbsp.create_time AS createTime,\n" +
+                    "\tbsp.node,\n" +
+                    "\tbsp.bid_open_time AS bidOpenTime,\n" +
+                    "\tbsp.bid_endtime AS quoteStopTime,\n" +
+                    "\tbsp.sys_id AS sourceId,\n" +
+                    "\tbsp.update_time AS updateTime,\n" +
+                    "\tbp.province,\n" +
+                    "\tbp.zone_str AS areaStr, \n" +
+                    "\tbp.industry_name AS industryStr \n" +
                     "FROM\n" +
                     "\tbid_sub_project bsp\n" +
                     "\tLEFT JOIN bid_project bp ON bsp.project_id = bp.id \n" +
@@ -100,6 +100,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                     "WHERE\n" +
                     "\tis_bid_open = 1 \n" +
                     "\tAND node > 1 \n" +
+                    "\tAND bsp.approve_status = 2\n" +
                     "\tAND bsp.update_time > ? \n" +
                     "\tLIMIT ?,? \n" +
                 "\t) project\n" +

@@ -84,14 +84,6 @@ public abstract class AbstractSyncNoticeDataJobHandler extends JobHandler {
         result.put(SUB_PROJECT_ID, String.valueOf(result.get(SUB_PROJECT_ID)));
         result.put(PROJECT_NAME_NOT_ANALYZED, result.get(PROJECT_NAME));
         result.put(COMPANY_NAME_NOT_ANALYZED, result.get(COMPANY_NAME));
-        // 处理公告审批状态 approve_status为null或2 代表审批通过
-        Object approveStatus = result.get(APPROVE_STATUS);
-        if (Objects.isNull(approveStatus) || Integer.valueOf(approveStatus.toString()) == 2) {
-            result.put(APPROVE_STATUS, 1);
-        } else {
-            // 审批中或审批不通过
-            result.put(APPROVE_STATUS, -1);
-        }
         // 添加同步时间字段
         result.put(SYNC_TIME, SyncTimeUtil.getCurrentDate());
     }
