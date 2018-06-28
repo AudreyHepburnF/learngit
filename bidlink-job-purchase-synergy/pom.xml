@@ -146,6 +146,8 @@
 				<pom.purchase.synergy.old.port>8047</pom.purchase.synergy.old.port>
 				<pom.purchase.synergy.new.ip>http://10.4.1.23</pom.purchase.synergy.new.ip>
 				<pom.purchase.synergy.new.port>8048</pom.purchase.synergy.new.port>
+				<pom.purchase.message.new.ip>http://10.4.0.183</pom.purchase.message.new.ip>
+				<pom.purchase.message.new.port>8047</pom.purchase.message.new.port>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -166,6 +168,8 @@
 				<pom.purchase.synergy.old.port>8047</pom.purchase.synergy.old.port>
 				<pom.purchase.synergy.new.ip>http://127.0.0.1</pom.purchase.synergy.new.ip>
 				<pom.purchase.synergy.new.port>8048</pom.purchase.synergy.new.port>
+				<pom.purchase.message.new.ip>http://purchase-cloud-01.internal.cg-xt.com,http://purchase-cloud-02.internal.cg-xt.com</pom.purchase.message.new.ip>
+				<pom.purchase.message.new.port>8047</pom.purchase.message.new.port>
 			</properties>
 		</profile>
 		<profile>
@@ -183,6 +187,8 @@
 				<pom.purchase.synergy.old.port>8047</pom.purchase.synergy.old.port>
 				<pom.purchase.synergy.new.ip>http://10.4.1.23</pom.purchase.synergy.new.ip>
 				<pom.purchase.synergy.new.port>8048</pom.purchase.synergy.new.port>
+				<pom.purchase.message.new.ip>http://10.4.0.183</pom.purchase.message.new.ip>
+				<pom.purchase.message.new.port>8047</pom.purchase.message.new.port>
 			</properties>
 		</profile>
 	</profiles>
