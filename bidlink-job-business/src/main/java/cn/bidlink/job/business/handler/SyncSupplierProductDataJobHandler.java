@@ -255,7 +255,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
                                  + "   trc.MAIN_PRODUCT AS directoryName,\n"
                                  + "   4 AS supplierDirectoryRel,\n"
 //                                 + "   tucs.CORE_SUPPLIER_STATUS AS core,\n"
-                                 + "   trc.CREATE_DATE AS createTime,\n"
+                                 + "   trc.CREATE_TIME AS createTime,\n"
                                  + "   trc.company_logo AS companyLogo,\n"
                                  + "   trc.UPDATE_TIME AS updateTime\n"
                                  + "FROM\n"
