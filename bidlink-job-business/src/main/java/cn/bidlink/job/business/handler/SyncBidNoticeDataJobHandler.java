@@ -55,6 +55,7 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
                 "\tbid_decided_notice \n" +
                 "WHERE\n" +
                 "\tis_publish = 1 \n" +
+                "\tAND approve_status = 2 \n" +
                 "\tAND update_time > ?";
         String querySql = "SELECT\n" +
                 "\tid,\n" +
@@ -71,12 +72,12 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
                 "\tlink_tel AS linkTel,\n" +
                 "\tlink_mail AS linkMail,\n" +
                 "\tcreate_time AS createTime,\n" +
-                "\tapprove_status AS approveStatus,\n" +
                 "\tcompany_id AS companyId\n" +
                 "FROM\n" +
                 "\t`bid_decided_notice` \n" +
                 "WHERE\n" +
                 "\tis_publish = 1 \n" +
+                "\tAND approve_status = 2 \n" +
                 "\tAND update_time >?\n" +
                 "\tLIMIT ?,?";
         ArrayList<Object> params = new ArrayList<>();
@@ -91,6 +92,7 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
                 "\tbid_decided_notice \n" +
                 "WHERE\n" +
                 "\tis_publish = 1 \n" +
+                "\tAND approve_status= 2 \n" +
                 "\tAND create_time > ?";
         String querySql = "SELECT\n" +
                 "\tid,\n" +
@@ -107,12 +109,12 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
                 "\tlink_tel AS linkTel,\n" +
                 "\tlink_mail AS linkMail,\n" +
                 "\tcreate_time AS createTime,\n" +
-                "\tapprove_status AS approveStatus,\n" +
                 "\tcompany_id AS companyId\n" +
                 "FROM\n" +
                 "\t`bid_decided_notice` \n" +
                 "WHERE\n" +
                 "\tis_publish = 1 \n" +
+                "\tAND approve_status= 2 \n" +
                 "\tAND create_time >?\n" +
                 "\tLIMIT ?,?";
         ArrayList<Object> params = new ArrayList<>();
@@ -133,6 +135,7 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
                 "FROM\n" +
                 "\tbid_notice_history \n" +
                 "WHERE\n" +
+                "\tapprove_status=2 and \n" +
                 "\tcreate_time > ?";
         String querySql = "SELECT\n" +
                 "\tid AS id,\n" +
@@ -168,11 +171,11 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
                 "\tsub_project_id AS subProjectId,\n" +
                 "\tgain_file_type AS gainFileType,\n" +
                 "\tfile_gain_address AS fileGainAddress, \n" +
-                "\tapprove_status AS approveStatus,\n" +
                 "\tcreate_time AS createTime \n" +
                 "FROM\n" +
                 "\tbid_notice_history \n" +
                 "WHERE\n" +
+                "\tapprove_status=2 and \n" +
                 "\tcreate_time >? \n" +
                 "\tLIMIT ?,?";
         ArrayList<Object> params = new ArrayList<>();
@@ -186,6 +189,7 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
                 "FROM\n" +
                 "\tbid_notice_history \n" +
                 "WHERE\n" +
+                "\tapprove_status=2 and \n" +
                 "\tupdate_time > ?";
         String querySql = "SELECT\n" +
                 "\tid AS id,\n" +
@@ -221,11 +225,11 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
                 "\tsub_project_id AS subProjectId,\n" +
                 "\tgain_file_type AS gainFileType,\n" +
                 "\tfile_gain_address AS fileGainAddress, \n" +
-                "\tapprove_status AS approveStatus,\n" +
                 "\tcreate_time AS createTime \n" +
                 "FROM\n" +
                 "\tbid_notice_history \n" +
                 "WHERE\n" +
+                "\tapprove_status=2 and \n" +
                 "\tupdate_time >? \n" +
                 "\tLIMIT ?,?";
         ArrayList<Object> params = new ArrayList<>();

@@ -12,7 +12,10 @@ import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static cn.bidlink.job.business.utils.AreaUtil.queryAreaInfo;
 
@@ -27,7 +30,7 @@ import static cn.bidlink.job.business.utils.AreaUtil.queryAreaInfo;
  */
 @JobHander(value = "syncBidTypeOpportunityDataJobHandler")
 @Service
-public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunityDataJobHandler /*implements InitializingBean*/ {
+public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunityDataJobHandler /*implements InitializingBean */{
 
     private String OPEN_RANGE_TYPE = "openRangeType";
     private String NODE            = "node";
@@ -67,7 +70,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                 + "FROM\n"
                 + "   bid_sub_project\n"
                 + "WHERE\n"
-                + "   is_bid_open = 1 AND node > 1 AND update_time > ?";
+                + "   is_bid_open = 1 AND node > 1 AND approve_status = 2 AND update_time > ?";
         String queryUpdatedSql = "SELECT\n" +
                 "\tproject.*,\n" +
                 "\tbpi.id AS directoryId,\n" +
@@ -86,7 +89,6 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                     "\tbsp.bid_open_time AS bidOpenTime,\n" +
                     "\tbsp.bid_endtime AS quoteStopTime,\n" +
                     "\tbsp.sys_id AS sourceId,\n" +
-                    "\tbsp.approve_status AS approveStatus,\n" +
                     "\tbsp.update_time AS updateTime,\n" +
                     "\tbp.province,\n" +
                     "\tbp.zone_str AS areaStr, \n" +
@@ -98,6 +100,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                     "WHERE\n" +
                     "\tis_bid_open = 1 \n" +
                     "\tAND node > 1 \n" +
+                    "\tAND bsp.approve_status = 2\n" +
                     "\tAND bsp.update_time > ? \n" +
                     "\tLIMIT ?,? \n" +
                 "\t) project\n" +
@@ -165,14 +168,6 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
         } else {
             result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
             resultToExecute.add(appendIdToResult(result));
-        }
-
-        // 审批状态 null或2审批通过
-        Object approveStatus = result.get(APPROVE_STATUS);
-        if (Objects.isNull(approveStatus) || Integer.valueOf(approveStatus.toString()) == 2) {
-            result.put(APPROVE_STATUS, 1);
-        } else {
-            result.put(APPROVE_STATUS, -1);
         }
     }
 
