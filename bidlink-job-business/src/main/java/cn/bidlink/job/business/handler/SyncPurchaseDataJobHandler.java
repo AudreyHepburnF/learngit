@@ -1,25 +1,14 @@
 package cn.bidlink.job.business.handler;
 
 import cn.bidlink.job.business.utils.AreaUtil;
-import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.action.bulk.BulkResponse;
 import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
-import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -30,29 +19,8 @@ import java.util.*;
  */
 @Service
 @JobHander(value = "syncPurchaseDataJobHandler")
-public class SyncPurchaseDataJobHandler extends JobHandler /*implements InitializingBean*/ {
+public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandler /*implements InitializingBean*/ {
 
-
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private String ID                         = "id";
-    private String COMPANY_SITE_ALIAS         = "companySiteAlias";
-    private String REGION                     = "region";
-    private String AREA_STR                   = "areaStr";
-    private String AREA_STR_NOT_ANALYZED      = "areaStrNotAnalyzed";
-    private String INDUSTRY_STR               = "industryStr";
-    private String INDUSTRY_STR_NOT_ANALYZED  = "industryStrNotAnalyzed";
-    private String ZONE_STR                   = "zoneStr";
-    private String ZONE_STR_NOT_ANALYZED      = "zoneStrNotAnalyzed";
-    private String PURCHASE_NAME              = "purchaseName";
-    private String PURCHASE_NAME_NOT_ANALYZED = "purchaseNameNotAnalyzed";
-
-    @Autowired
-    private ElasticClient elasticClient;
-
-    @Autowired
-    @Qualifier("uniregDataSource")
-    private DataSource uniregDataSource;
-    
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
         SyncTimeUtil.setCurrentDate();
@@ -243,35 +211,6 @@ public class SyncPurchaseDataJobHandler extends JobHandler /*implements Initiali
         result.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
     }
 
-    private void batchInsert(List<Map<String, Object>> purchases) {
-//        System.out.println("=============" + purchases);
-        if (!CollectionUtils.isEmpty(purchases)) {
-            BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
-            for (Map<String, Object> purchase : purchases) {
-                bulkRequest.add(elasticClient.getTransportClient()
-                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
-                                elasticClient.getProperties().getProperty("cluster.type.purchase"),
-                                String.valueOf(purchase.get(ID)))
-                        .setSource(JSON.toJSONString(purchase, new ValueFilter() {
-                            @Override
-                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof Date) {
-                                    //是date类型按指定日期格式转换
-                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                } else {
-
-                                    return propertyValue;
-                                }
-                            }
-                        })));
-            }
-            BulkResponse response = bulkRequest.execute().actionGet();
-            //是否失败
-            if (response.hasFailures()) {
-                logger.error(response.buildFailureMessage());
-            }
-        }
-    }
 //    @Override
 //    public void afterPropertiesSet() throws Exception {
 //        execute();
