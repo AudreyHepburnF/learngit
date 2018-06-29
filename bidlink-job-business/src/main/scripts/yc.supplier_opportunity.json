@@ -82,6 +82,9 @@
       "projectStatus": {
         "type": "long"
       },
+      "processStatus": {
+        "type": "long"
+      },
       "projectType": {
         "type": "integer"
       },
