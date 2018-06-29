@@ -157,7 +157,7 @@
 			<id>product</id>
 			<properties>
 				<pom.application.name>bidlink-job-purchase-synergy</pom.application.name>
-				<pom.xxl.job.admin.addresses>http://10.0.0.199:8080/xxl-job</pom.xxl.job.admin.addresses>
+				<pom.xxl.job.admin.addresses>http://xxl-dashboard.internal.cg-xt.com:8080/xxl-job</pom.xxl.job.admin.addresses>
 				<pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
 				<pom.log.rootLogger>FILE</pom.log.rootLogger>
 				<pom.log.level>INFO</pom.log.level>
