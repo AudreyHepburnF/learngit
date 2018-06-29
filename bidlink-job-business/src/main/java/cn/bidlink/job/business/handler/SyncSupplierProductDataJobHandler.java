@@ -76,11 +76,11 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     @Value("${supplierProduct.threadNum:10}")
     private int threadNum;
 
-    private String ID                           = "id";
-    private String DIRECTORY_NAME               = "directoryName";
-    private String DIRECTORY_NAME_NOT_ANALYZED  = "directoryNameNotAnalyzed";
-    private String SUPPLIER_ID                  = "supplierId";
-    private String SUPPLIER_DIRECTORY_REL       = "supplierDirectoryRel";
+    private String ID                          = "id";
+    private String DIRECTORY_NAME              = "directoryName";
+    private String DIRECTORY_NAME_NOT_ANALYZED = "directoryNameNotAnalyzed";
+    private String SUPPLIER_ID                 = "supplierId";
+    private String SUPPLIER_DIRECTORY_REL      = "supplierDirectoryRel";
 
     // 主营产品类型
     private static final int MAIN_PRODUCT_DIRECTORY_REL = 4;
@@ -116,7 +116,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     private void syncProductData() {
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.supplier_product", null);
         logger.info("供应商产品数据同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss") + "\n"
-                    + ", syncTime : " + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
+                + ", syncTime : " + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
 //        syncTradeProductDataService(lastSyncTime);
 //        syncTradeBidProductDataService(lastSyncTime);
         // FIXME 同步标王待沟通
@@ -233,36 +233,36 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
         logger.info("同步中心库供应商主营产品开始");
         String countInsertedSql = "SELECT count(1) FROM t_reg_company WHERE TYPE = 13 AND MAIN_PRODUCT IS NOT NULL AND create_time > ?";
         String queryInsertedSql = "SELECT\n"
-                                  + "   trc.ID AS supplierId,\n"
-                                  + "   trc.NAME AS supplierName,\n"
-                                  + "   trc.MAIN_PRODUCT AS directoryName,\n"
-                                  + "   4 AS supplierDirectoryRel,\n"
+                + "   trc.ID AS supplierId,\n"
+                + "   trc.NAME AS supplierName,\n"
+                + "   trc.MAIN_PRODUCT AS directoryName,\n"
+                + "   4 AS supplierDirectoryRel,\n"
 //                                  + "   tucs.CORE_SUPPLIER_STATUS AS core,\n"
-                                  + "   trc.create_time AS createTime,\n"
-                                  + "   trc.company_logo AS companyLogo,\n"
-                                  + "   trc.UPDATE_TIME AS updateTime\n"
-                                  + "FROM\n"
-                                  + "   t_reg_company trc\n"
+                + "   trc.create_time AS createTime,\n"
+                + "   trc.company_logo AS companyLogo,\n"
+                + "   trc.UPDATE_TIME AS updateTime\n"
+                + "FROM\n"
+                + "   t_reg_company trc\n"
 //                                  + "LEFT JOIN t_uic_company_status tucs ON trc.ID = tucs.COMP_ID\n"
-                                  + "WHERE\n"
-                                  + "   trc.TYPE = 13 AND trc.MAIN_PRODUCT IS NOT NULL AND trc.create_time > ? LIMIT ?, ?";
+                + "WHERE\n"
+                + "   trc.TYPE = 13 AND trc.MAIN_PRODUCT IS NOT NULL AND trc.create_time > ? LIMIT ?, ?";
         doSyncInsertedData(uniregDataSource, countInsertedSql, queryInsertedSql, lastSyncTime);
 
         String countUpdatedSql = "SELECT count(1) FROM t_reg_company WHERE TYPE = 13 AND MAIN_PRODUCT IS NOT NULL AND UPDATE_TIME > ?";
         String queryUpdatedSql = "SELECT\n"
-                                 + "   trc.ID AS supplierId,\n"
-                                 + "   trc.NAME AS supplierName,\n"
-                                 + "   trc.MAIN_PRODUCT AS directoryName,\n"
-                                 + "   4 AS supplierDirectoryRel,\n"
+                + "   trc.ID AS supplierId,\n"
+                + "   trc.NAME AS supplierName,\n"
+                + "   trc.MAIN_PRODUCT AS directoryName,\n"
+                + "   4 AS supplierDirectoryRel,\n"
 //                                 + "   tucs.CORE_SUPPLIER_STATUS AS core,\n"
-                                 + "   trc.CREATE_DATE AS createTime,\n"
-                                 + "   trc.company_logo AS companyLogo,\n"
-                                 + "   trc.UPDATE_TIME AS updateTime\n"
-                                 + "FROM\n"
-                                 + "   t_reg_company trc\n"
+                + "   trc.CREATE_TIME AS createTime,\n"
+                + "   trc.company_logo AS companyLogo,\n"
+                + "   trc.UPDATE_TIME AS updateTime\n"
+                + "FROM\n"
+                + "   t_reg_company trc\n"
 //                                 + "LEFT JOIN t_uic_company_status tucs ON trc.ID = tucs.COMP_ID\n"
-                                 + "WHERE\n"
-                                 + "   trc.TYPE = 13 AND trc.MAIN_PRODUCT IS NOT NULL AND trc.UPDATE_TIME > ? LIMIT ?, ?";
+                + "WHERE\n"
+                + "   trc.TYPE = 13 AND trc.MAIN_PRODUCT IS NOT NULL AND trc.UPDATE_TIME > ? LIMIT ?, ?";
         doSyncUpdatedData(uniregDataSource, countUpdatedSql, queryUpdatedSql, lastSyncTime);
         logger.info("同步中心库供应商主营产品结束");
     }
@@ -313,7 +313,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
 
             for (Map<String, Object> result : results) {
                 // 如果是主营产品，则删除以前的老数据
-                Integer supplierDirectoryRel = ((Long) result.get(SUPPLIER_DIRECTORY_REL)).intValue();
+                Integer supplierDirectoryRel = Integer.valueOf(result.get(SUPPLIER_DIRECTORY_REL).toString());
                 if (supplierDirectoryRel != null && supplierDirectoryRel == MAIN_PRODUCT_DIRECTORY_REL) {
                     deleteOldMainProduct(String.valueOf(result.get(SUPPLIER_ID)));
                 }
@@ -328,6 +328,8 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
             }
 
             batchExecute(resultsToExecute);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         } finally {
             semaphore.release();
         }
@@ -343,8 +345,8 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
                 .setIndices(elasticClient.getProperties().getProperty("cluster.index"))
                 .setTypes(elasticClient.getProperties().getProperty("cluster.type.supplier_product"))
                 .setQuery(QueryBuilders.boolQuery()
-                                  .must(QueryBuilders.termQuery(SUPPLIER_DIRECTORY_REL, MAIN_PRODUCT_DIRECTORY_REL))
-                                  .must(QueryBuilders.termQuery(SUPPLIER_ID, supplierId))
+                        .must(QueryBuilders.termQuery(SUPPLIER_DIRECTORY_REL, MAIN_PRODUCT_DIRECTORY_REL))
+                        .must(QueryBuilders.termQuery(SUPPLIER_ID, supplierId))
                 )
                 .execute()
                 .actionGet();
@@ -433,19 +435,19 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> result : resultsToUpdate) {
                 bulkRequest.add(elasticClient.getTransportClient()
-                                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
-                                                      elasticClient.getProperties().getProperty("cluster.type.supplier_product"),
-                                                      String.valueOf(result.get(ID)))
-                                        .setSource(JSON.toJSONString(result, new ValueFilter() {
-                                            @Override
-                                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                                if (propertyValue instanceof java.util.Date) {
-                                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                                } else {
-                                                    return propertyValue;
-                                                }
-                                            }
-                                        })));
+                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
+                                elasticClient.getProperties().getProperty("cluster.type.supplier_product"),
+                                String.valueOf(result.get(ID)))
+                        .setSource(JSON.toJSONString(result, new ValueFilter() {
+                            @Override
+                            public Object process(Object object, String propertyName, Object propertyValue) {
+                                if (propertyValue instanceof java.util.Date) {
+                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
+                                } else {
+                                    return propertyValue;
+                                }
+                            }
+                        })));
             }
             BulkResponse response = bulkRequest.execute().actionGet();
             if (response.hasFailures()) {
