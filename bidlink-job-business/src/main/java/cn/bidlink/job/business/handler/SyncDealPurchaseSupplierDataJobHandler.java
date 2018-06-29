@@ -13,10 +13,12 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.DigestUtils;
 
 import javax.sql.DataSource;
 import java.sql.Timestamp;
@@ -33,7 +35,7 @@ import java.util.Map;
  */
 @Service
 @JobHander("syncDealPurchaseSupplierDataJobHandler")
-public class SyncDealPurchaseSupplierDataJobHandler extends JobHandler /*implements InitializingBean*/ {
+public class SyncDealPurchaseSupplierDataJobHandler extends JobHandler implements InitializingBean {
 
     @Autowired
     private ElasticClient elasticClient;
@@ -89,7 +91,6 @@ public class SyncDealPurchaseSupplierDataJobHandler extends JobHandler /*impleme
                 "\tAND update_time >?";
 
         String querySql = "SELECT\n" +
-                "\tid,\n" +
                 "\tcompany_id as companyId,\n" +
                 "\tsupplier_id as supplierId,\n" +
                 "\tsupplier_name as supplierName,\n" +
@@ -121,7 +122,6 @@ public class SyncDealPurchaseSupplierDataJobHandler extends JobHandler /*impleme
                 "\tAND update_time > ?";
 
         String querySql = "SELECT\n" +
-                "\tid,\n" +
                 "\tcompany_id as companyId,\n" +
                 "\tsupplier_id as supplierId,\n" +
                 "\tsupplier_name as supplierName,\n" +
@@ -179,7 +179,7 @@ public class SyncDealPurchaseSupplierDataJobHandler extends JobHandler /*impleme
 
     private void refresh(List<Map<String, Object>> mapList, int projectType) {
         mapList.forEach(map -> {
-            map.put(ID, String.valueOf(map.get(ID).toString()));
+            map.put(ID, generateDealSupplierId(map));
             map.put(COMPANY_ID, String.valueOf(map.get(COMPANY_ID).toString()));
             map.put(SUPPLIER_ID, String.valueOf(map.get(SUPPLIER_ID).toString()));
             map.put(PROJECT_TYPE, projectType);
@@ -188,8 +188,19 @@ public class SyncDealPurchaseSupplierDataJobHandler extends JobHandler /*impleme
         });
     }
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+    private String generateDealSupplierId(Map<String, Object> result) {
+        String companyId = String.valueOf(result.get(COMPANY_ID));
+        Long supplierId = (Long) result.get(SUPPLIER_ID);
+        if (supplierId == null) {
+            throw new RuntimeException("采购商成交供应商ID生成失败，原因：供应商ID为空!");
+        }
+        if (companyId == null) {
+            throw new RuntimeException("采购商成交供应商ID生成失败，原因：采购商ID为空!");
+        }
+        return DigestUtils.md5DigestAsHex((companyId + "_" + supplierId).getBytes());
+    }
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }
 }
