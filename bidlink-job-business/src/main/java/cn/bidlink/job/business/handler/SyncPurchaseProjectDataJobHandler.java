@@ -1,14 +1,24 @@
 package cn.bidlink.job.business.handler;
 
+import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -28,7 +38,39 @@ import java.util.stream.Collectors;
  */
 @Service
 @JobHander(value = "syncPurchaseProjectDataJobHandler")
-public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJobHandler /*implements InitializingBean*/ {
+public class SyncPurchaseProjectDataJobHandler extends JobHandler /*implements InitializingBean*/ {
+
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    @Autowired
+    private ElasticClient elasticClient;
+
+    @Autowired
+    @Qualifier("purchaseDataSource")
+    private DataSource purchaseDataSource;
+
+    @Autowired
+    @Qualifier("tenderDataSource")
+    private DataSource tenderDataSource;
+
+    @Autowired
+    @Qualifier("uniregDataSource")
+    private DataSource uniregDataSource;
+
+    private String ID                         = "id";
+    private String COMPANY_ID                 = "companyId";
+    private String PURCHASE_TRADING_VOLUME    = "purchaseTradingVolume";
+    private String BID_TRADING_VOLUME         = "bidTradingVolume";
+    private String TRADING_VOLUME             = "tradingVolume";
+    private String LONG_TRADING_VOLUME        = "longTradingVolume";
+    private String PURCHASE_PROJECT_COUNT     = "purchaseProjectCount";
+    private String BID_PROJECT_COUNT          = "bidProjectCount";
+    private String PROJECT_COUNT              = "projectCount";
+    private String COOPERATE_SUPPLIER_COUNT   = "cooperateSupplierCount";
+    private String AUCTION_PROJECT_COUNT      = "auctionProjectCount";
+    private String AUCTION_TRADING_VOLUME     = "auctionTradingVolume";
+    
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
@@ -456,6 +498,29 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
         @Override
         public int hashCode() {
             return directoryName != null ? directoryName.hashCode() : 0;
+        }
+    }
+
+
+    private void batchInsert(List<Map<String, Object>> mapList) {
+//        System.out.println(mapList);
+        if (!CollectionUtils.isEmpty(mapList)) {
+            BulkRequestBuilder requestBuilder = elasticClient.getTransportClient().prepareBulk();
+            mapList.forEach(map -> requestBuilder.add(elasticClient.getTransportClient().prepareIndex(
+                    elasticClient.getProperties().getProperty("cluster.index"),
+                    elasticClient.getProperties().getProperty("cluster.type.deal_supplier")
+                    , String.valueOf(map.get(ID))
+            ).setSource(JSON.toJSONString(map, (ValueFilter) (object, propertyKey, propertyValue) -> {
+                if (propertyValue instanceof Date) {
+                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
+                }
+                return propertyValue;
+            }))));
+
+            BulkResponse bulkResponse = requestBuilder.execute().actionGet();
+            if (bulkResponse.hasFailures()) {
+                logger.error(bulkResponse.buildFailureMessage());
+            }
         }
     }
 
