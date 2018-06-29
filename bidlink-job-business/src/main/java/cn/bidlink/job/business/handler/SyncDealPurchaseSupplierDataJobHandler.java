@@ -13,7 +13,6 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -35,7 +34,7 @@ import java.util.Map;
  */
 @Service
 @JobHander("syncDealPurchaseSupplierDataJobHandler")
-public class SyncDealPurchaseSupplierDataJobHandler extends JobHandler implements InitializingBean {
+public class SyncDealPurchaseSupplierDataJobHandler extends JobHandler /*implements InitializingBean*/ {
 
     @Autowired
     private ElasticClient elasticClient;
@@ -199,8 +198,8 @@ public class SyncDealPurchaseSupplierDataJobHandler extends JobHandler implement
         }
         return DigestUtils.md5DigestAsHex((companyId + "_" + supplierId).getBytes());
     }
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        execute();
-    }
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+//        execute();
+//    }
 }
