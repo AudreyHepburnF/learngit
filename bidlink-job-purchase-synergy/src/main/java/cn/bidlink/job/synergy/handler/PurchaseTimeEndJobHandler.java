@@ -64,11 +64,11 @@ public class PurchaseTimeEndJobHandler extends IJobHandler {
                 String nowTimeStr = dateFormat.format(nowTime);
                 nvps.add(new BasicNameValuePair("nowTime",nowTimeStr));
                 post.setEntity(new UrlEncodedFormEntity(nvps,"utf-8"));
-                bidRedis.setObject(key,nowTime);
                 logger.info("1.开始调用报价时间截止定时任务 ip:{} lastTime:{} nowTime:{}",ip,lastTimeStr,nowTimeStr);
                 response = client.execute(post);
                 logger.info("2.报价时间截止定时任务返回 ip:{}",ip);
                 if (response != null && response.getStatusLine().getStatusCode() == 200) {
+                    bidRedis.setObject(key,nowTime);
                     String jsonResponse = EntityUtils.toString(response.getEntity(), "UTF-8");
                     JSONObject json = JSONObject.fromObject(jsonResponse);
                     boolean status = json.getBoolean("success");
