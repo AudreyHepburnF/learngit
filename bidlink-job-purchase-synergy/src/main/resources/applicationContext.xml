@@ -16,7 +16,7 @@
         </property>
     </bean>
 
-    <!--<import resource="classpath:applicationContext-redis.xml" />-->
+    <import resource="classpath:applicationContext-redis.xml" />
 
     <!-- ********************************* 基础配置 ********************************* -->
 
