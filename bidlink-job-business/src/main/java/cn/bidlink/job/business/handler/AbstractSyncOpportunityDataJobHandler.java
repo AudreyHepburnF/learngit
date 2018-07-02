@@ -210,7 +210,8 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
         // 添加不分词字段
         result.put(PROJECT_NAME_NOT_ANALYZED, result.get(PROJECT_NAME));
         result.put(PURCHASE_NAME_NOT_ANALYZED, result.get(PURCHASE_NAME));
-
+        // 移除项目状态
+        result.remove(PROJECT_STATUS);
         // 同步时间
         result.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
         // 转换long字段类型，防止前端js精度溢出
