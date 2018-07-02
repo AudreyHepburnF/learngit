@@ -141,6 +141,9 @@
 				<pom.log.level>debug</pom.log.level>
 				<pom.log.dir>logs</pom.log.dir>
 
+				<pom.framework.redis.host>10.4.0.44</pom.framework.redis.host>
+				<pom.framework.redis.port>6379</pom.framework.redis.port>
+
 				<!--同步配置-->
 				<pom.purchase.synergy.old.ip>http://10.4.1.23</pom.purchase.synergy.old.ip>
 				<pom.purchase.synergy.old.port>8047</pom.purchase.synergy.old.port>
@@ -163,6 +166,9 @@
 				<pom.log.level>INFO</pom.log.level>
 				<pom.log.dir>logs</pom.log.dir>
 
+				<pom.framework.redis.host>redis-02.internal.cg-xt.com</pom.framework.redis.host>
+				<pom.framework.redis.port>6379</pom.framework.redis.port>
+
 				<!--同步配置-->
 				<pom.purchase.synergy.old.ip>http://127.0.0.1</pom.purchase.synergy.old.ip>
 				<pom.purchase.synergy.old.port>8047</pom.purchase.synergy.old.port>
@@ -181,6 +187,9 @@
 				<pom.log.rootLogger>FILE</pom.log.rootLogger>
 				<pom.log.level>info</pom.log.level>
 				<pom.log.dir>logs</pom.log.dir>
+
+				<pom.framework.redis.host>10.4.0.44</pom.framework.redis.host>
+				<pom.framework.redis.port>6379</pom.framework.redis.port>
 
 				<!--同步配置-->
 				<pom.purchase.synergy.old.ip>http://10.4.1.23</pom.purchase.synergy.old.ip>
