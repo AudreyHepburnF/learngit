@@ -80,7 +80,7 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
             // 添加竞价交易额
             appendAuctionTradingVolume(resultFromEs, purchaserIdToString);
 
-            // 添加合同供应商数量
+            // 添加合作供应商数量
             appendCooperateSupplierCount(resultFromEs, purchaserIdToString);
 
             // 添加热门采购品
@@ -119,7 +119,7 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
                 "FROM\n" +
                 "\tbid_supplier_project_item_origin \n" +
                 "WHERE\n" +
-                "\tdeal_status = 1 \n" +
+                "\tdeal_status = 1 and company_id in (%s)\n" +
                 "GROUP BY\n" +
                 "\tcompany_id,\n" +
                 "\tdirectory_id \n" +
@@ -388,12 +388,12 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
                 "\tcompany_id";
         if (!StringUtils.isEmpty(purchaserIdToString)) {
             String querySql = String.format(querySqlTemplate, purchaserIdToString);
-            Map<Long, Long> cooperateSupplierMap = DBUtil.query(uniregDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Long, Long>>() {
+            Map<String, Long> cooperateSupplierMap = DBUtil.query(uniregDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<String, Long>>() {
                 @Override
-                public Map<Long, Long> execute(ResultSet resultSet) throws SQLException {
-                    Map<Long, Long> map = new HashMap<>();
+                public Map<String, Long> execute(ResultSet resultSet) throws SQLException {
+                    Map<String, Long> map = new HashMap<>();
                     while (resultSet.next()) {
-                        map.put(resultSet.getLong(2), resultSet.getLong(1));
+                        map.put(String.valueOf(((Long) resultSet.getLong(2))), resultSet.getLong(1));
                     }
                     return map;
                 }
