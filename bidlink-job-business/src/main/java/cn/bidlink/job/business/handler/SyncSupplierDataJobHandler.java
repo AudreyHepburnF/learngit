@@ -22,6 +22,7 @@ import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
 
 import static cn.bidlink.job.common.utils.DBUtil.query;
 
@@ -36,10 +37,14 @@ import static cn.bidlink.job.common.utils.DBUtil.query;
 @Service
 public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandler implements InitializingBean {
 
+    private Integer SYNC_WAY_CREATE = 1;
+    private Integer SYNC_WAY_UPDATE = 2;
+
     @Override
     public void afterPropertiesSet() throws Exception {
         pageSize = 1000;
         industryCodeMap = initIndustryCodeMap();
+//        execute();
     }
 
     private Map<String, String> initIndustryCodeMap() {
@@ -306,7 +311,7 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
                 "GROUP BY\n" +
                 "\ttrc.ID \n" +
                 "\tLIMIT ?,?";
-        doSyncSupplierData(countInsertedSql, queryInsertedSql, lastSyncTime);
+        doSyncSupplierData(countInsertedSql, queryInsertedSql, lastSyncTime, SYNC_WAY_CREATE);
     }
 
     private void doUpdatedSupplierData(Timestamp lastSyncTime) {
@@ -352,10 +357,10 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
                 + "WHERE trc.UPDATE_TIME > ?\n"
                 + "GROUP BY trc.ID\n"
                 + "LIMIT ?,?";
-        doSyncSupplierData(countUpdatedSql, queryUpdatedSql, lastSyncTime);
+        doSyncSupplierData(countUpdatedSql, queryUpdatedSql, lastSyncTime, SYNC_WAY_UPDATE);
     }
 
-    private void doSyncSupplierData(String countSql, String querySql, Timestamp createTime) {
+    private void doSyncSupplierData(String countSql, String querySql, Timestamp createTime, Integer syncWay) {
         List<Object> params = new ArrayList<>();
         params.add(createTime);
         long count = DBUtil.count(uniregDataSource, countSql, params);
@@ -380,9 +385,36 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
                 appendCreditToResult(resultToExecute, supplierIds);
                 // 添加企业空间 FIXME 企业空间待更换数据源
                 appendEnterpriseSpaceToResult(resultToExecute, supplierIds);
-                // 保存到es
-                batchExecute(resultToExecute);
+                // 插入数据保存,更新数据获取供应商交易信息
+                appendSupplierTradingInfo(resultToExecute, supplierIds, syncWay);
             }
+        }
+    }
+
+    private void appendSupplierTradingInfo(List<Map<String, Object>> resultToExecute, Set<Long> supplierIds, Integer syncWay) {
+        if (Objects.equals(SYNC_WAY_UPDATE, syncWay)) {
+            SearchResponse response = elasticClient.getTransportClient().prepareSearch(elasticClient.getProperties().getProperty("cluster.index"))
+                    .setTypes(elasticClient.getProperties().getProperty("cluster.type.supplier"))
+                    .setQuery(QueryBuilders.termsQuery("id", supplierIds))
+                    .setSize(supplierIds.size())
+                    .execute().actionGet();
+            List<Map<String, Object>> resultFromEs = new ArrayList<>();
+            for (SearchHit hit : response.getHits().getHits()) {
+                resultFromEs.add(hit.getSource());
+            }
+
+            // 拷贝企业最新数据
+            List<Map<String, Object>> mapList = resultFromEs.stream()
+                    .map(esMap -> resultToExecute.stream()
+                            .filter(map -> Objects.equals(map.get(ID), esMap.get(ID)))
+                            .findFirst().map(map -> {
+                                esMap.putAll(map);
+                                return esMap;
+                            }).orElse(null)
+                    ).filter(Objects::nonNull).collect(Collectors.toList());
+            batchExecute(mapList);
+        } else {
+            batchExecute(resultToExecute);
         }
     }
 

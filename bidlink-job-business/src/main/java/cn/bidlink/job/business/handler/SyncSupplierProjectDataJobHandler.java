@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -177,10 +178,10 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
                 "\tAND supplier_id IN (%s) \n" +
                 "GROUP BY\n" +
                 "\tsupplier_id";
-        Map<String, Long> purchaseDealPriceStat = getSupplierPriceStatMap(purchaseDataSource, queryPurchaseDealPriceSqlTemplate, supplierIds);
+        Map<String, BigDecimal> purchaseDealPriceStat = getSupplierPriceStatMap(purchaseDataSource, queryPurchaseDealPriceSqlTemplate, supplierIds);
         for (Map<String, Object> source : resultFromEs) {
-            Object value = purchaseDealPriceStat.get(source.get(ID));
-            source.put(TOTAL_DEAL_PURCHASE_PRICE, value == null ? 0 : value);
+            BigDecimal bigDecimal = purchaseDealPriceStat.get(source.get(ID));
+            source.put(TOTAL_DEAL_PURCHASE_PRICE, bigDecimal == null ? BigDecimal.ZERO.longValue() : bigDecimal.longValue());
         }
 
         // 招标项目
@@ -194,14 +195,14 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
                 "\tAND supplier_id IN (%s) \n" +
                 "GROUP BY\n" +
                 "\tsupplier_id";
-        Map<String, Long> bidDealPriceStat = getSupplierPriceStatMap(tenderDataSource, queryBidDealPriceSqlTemplate, supplierIds);
+        Map<String, BigDecimal> bidDealPriceStat = getSupplierPriceStatMap(tenderDataSource, queryBidDealPriceSqlTemplate, supplierIds);
         for (Map<String, Object> source : resultFromEs) {
-            Object value = bidDealPriceStat.get(source.get(ID));
-            source.put(TOTAL_DEAL_BID_PRICE, value == null ? 0 : value);
-            if (value == null) {
+            BigDecimal bigDecimal = bidDealPriceStat.get(source.get(ID));
+            source.put(TOTAL_DEAL_BID_PRICE, bigDecimal == null ? BigDecimal.ZERO.longValue() : bigDecimal.longValue());
+            if (bigDecimal == null) {
                 source.put(TOTAL_DEAL_PRICE, source.get(TOTAL_DEAL_PURCHASE_PRICE));
             } else {
-                source.put(TOTAL_DEAL_PRICE, Double.valueOf(value.toString()) + Double.valueOf(source.get(TOTAL_DEAL_PURCHASE_PRICE).toString()));
+                source.put(TOTAL_DEAL_PRICE, bigDecimal.longValue() + Long.valueOf(source.get(TOTAL_DEAL_PURCHASE_PRICE).toString()));
             }
         }
     }
@@ -265,15 +266,15 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
         });
     }
 
-    private Map<String, Long> getSupplierPriceStatMap(DataSource dataSource, String querySqlTemplate, String supplierIds) {
+    private Map<String, BigDecimal> getSupplierPriceStatMap(DataSource dataSource, String querySqlTemplate, String supplierIds) {
         String querySql = String.format(querySqlTemplate, supplierIds);
-        return DBUtil.query(dataSource, querySql, null, new DBUtil.ResultSetCallback<Map<String, Long>>() {
+        return DBUtil.query(dataSource, querySql, null, new DBUtil.ResultSetCallback<Map<String, BigDecimal>>() {
             @Override
-            public Map<String, Long> execute(ResultSet resultSet) throws SQLException {
-                Map<String, Long> map = new HashMap<>();
+            public Map<String, BigDecimal> execute(ResultSet resultSet) throws SQLException {
+                Map<String, BigDecimal> map = new HashMap<>();
                 while (resultSet.next()) {
                     long supplierId = resultSet.getLong(1);
-                    long totalDealPrice = resultSet.getLong(2);
+                    BigDecimal totalDealPrice = resultSet.getBigDecimal(2);
                     map.put(String.valueOf(supplierId), totalDealPrice);
                 }
                 return map;

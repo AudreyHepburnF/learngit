@@ -6,11 +6,15 @@ import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:zhihuizhou@ebnew.com">zhouzhihui</a>
@@ -19,7 +23,10 @@ import java.util.*;
  */
 @Service
 @JobHander(value = "syncPurchaseDataJobHandler")
-public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandler /*implements InitializingBean*/ {
+public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandler/* implements InitializingBean */{
+
+    private Integer SYNC_WAY_CREATE = 1;
+    private Integer SYNC_WAY_UPDATE = 2;
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
@@ -76,7 +83,7 @@ public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandl
                 "LIMIT ?, ?";
         ArrayList<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
-        doSyncPurchaserDataService(countUpdatedPurchaseSql, queryUpdatedPurchaseSql, params);
+        doSyncPurchaserDataService(countUpdatedPurchaseSql, queryUpdatedPurchaseSql, params, SYNC_WAY_CREATE);
     }
 
     private void syncPurchaserDataService(Timestamp lastSyncTime) {
@@ -101,7 +108,7 @@ public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandl
                 + "   trc.INDUSTRY AS industry,\n"
                 + "   trc.ZONE_STR AS zoneStr,\n"
                 + "   trc.COMP_TYPE_STR AS compTypeStr,\n"
-                +"    trc.company_logo AS companyLogo,\n"
+                + "    trc.company_logo AS companyLogo,\n"
                 + "   trc.company_site AS companySiteAlias\n"
                 + "FROM\n"
                 + "   t_reg_company trc\n"
@@ -112,7 +119,7 @@ public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandl
                 + "LIMIT ?, ?";
         ArrayList<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
-        doSyncPurchaserDataService(countCreatedPurchaseSql, queryCreatedPurchaseSql, params);
+        doSyncPurchaserDataService(countCreatedPurchaseSql, queryCreatedPurchaseSql, params, SYNC_WAY_CREATE);
     }
 
     private void syncUpdatedPurchaserData(Timestamp lastSyncTime) {
@@ -132,7 +139,7 @@ public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandl
                 + "   trc.INDUSTRY AS industry,\n"
                 + "   trc.ZONE_STR AS zoneStr,\n"
                 + "   trc.COMP_TYPE_STR AS compTypeStr,\n"
-                +"    trc.company_logo AS companyLogo,\n"
+                + "    trc.company_logo AS companyLogo,\n"
                 + "   trc.company_site AS companySiteAlias\n"
                 + "FROM\n"
                 + "   t_reg_company trc\n"
@@ -143,7 +150,7 @@ public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandl
                 + "LIMIT ?, ?";
         ArrayList<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
-        doSyncPurchaserDataService(countUpdatedPurchaseSql, queryUpdatedPurchaseSql, params);
+        doSyncPurchaserDataService(countUpdatedPurchaseSql, queryUpdatedPurchaseSql, params, SYNC_WAY_UPDATE);
     }
 
     /**
@@ -152,8 +159,9 @@ public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandl
      * @param countSql 查询总条数sql
      * @param querySql 查询结果集sql
      * @param params   参数 lastSyncTime es中最后同步时间
+     * @param syncWay  同步方式 1:插入 2:更新
      */
-    private void doSyncPurchaserDataService(String countSql, String querySql, ArrayList<Object> params) {
+    private void doSyncPurchaserDataService(String countSql, String querySql, ArrayList<Object> params, Integer syncWay) {
         long count = DBUtil.count(uniregDataSource, countSql, params);
         logger.debug("执行countSql: {}, params: {}, 共{}条", countSql, params, count);
         if (count > 0) {
@@ -172,11 +180,49 @@ public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandl
                 }
                 // 添加采购商区域信息
                 appendPurchaseRegion(purchasers, purchaserIds);
-                // 批量插入es中
-                batchInsert(purchasers);
+
+                // 添加采购商交易量信息,从es中查询
+                appendPurchaseTradingInfo(purchasers, purchaserIds, syncWay);
             }
         }
     }
+
+    /**
+     * 当更新企业数据时
+     *
+     * @param purchasers
+     * @param purchaserIds
+     * @param syncWay      2:更新企业数据
+     */
+    private void appendPurchaseTradingInfo(List<Map<String, Object>> purchasers, HashSet<Long> purchaserIds, Integer syncWay) {
+        if (SYNC_WAY_UPDATE.equals(syncWay)) {
+            SearchResponse response = elasticClient.getTransportClient().prepareSearch(elasticClient.getProperties().getProperty("cluster.index"))
+                    .setTypes(elasticClient.getProperties().getProperty("cluster.type.purchase"))
+                    .setQuery(QueryBuilders.termsQuery("id", purchaserIds))
+                    .setSize(purchaserIds.size())
+                    .execute().actionGet();
+            List<Map<String, Object>> resultFromEs = new ArrayList<>();
+            for (SearchHit hit : response.getHits().getHits()) {
+                resultFromEs.add(hit.getSource());
+            }
+
+            // 拷贝最新的企业数据
+            List<Map<String, Object>> mapList = resultFromEs.stream()
+                    .map(esMap -> purchasers.stream()
+                            .filter(m -> Objects.equals(m.get("id"), esMap.get("id")))
+                            .findFirst().map(m -> {
+                                esMap.putAll(m);
+                                return esMap;
+                            }).orElse(null))
+                    .filter(Objects::nonNull).collect(Collectors.toList());
+            batchInsert(mapList);
+
+        } else {
+            batchInsert(purchasers);
+        }
+
+    }
+
 
     private void appendPurchaseRegion(List<Map<String, Object>> purchasers, Set<Long> purchaseIds) {
         Map<Long, AreaUtil.AreaInfo> areaInfoMap = AreaUtil.queryAreaInfo(uniregDataSource, purchaseIds);
