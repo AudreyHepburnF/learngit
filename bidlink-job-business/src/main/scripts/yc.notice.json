@@ -190,6 +190,12 @@
       "unit": {
         "type": "string",
         "index": "not_analyzed"
+      },
+      "fileName": {
+        "type": "string"
+      },
+      "md5": {
+        "type": "string"
       }
     }
   }
