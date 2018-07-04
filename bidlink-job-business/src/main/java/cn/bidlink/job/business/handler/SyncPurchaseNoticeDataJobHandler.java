@@ -82,11 +82,14 @@ public class SyncPurchaseNoticeDataJobHandler extends AbstractSyncNoticeDataJobH
                 "\tpnh.create_time AS createTime,\n" +
                 "\tpnh.company_name AS companyName,\n" +
                 "\tppc.result_open_range AS resultOpenRange,\n" +
-                "\tppc.price_open_range AS priceOpenRange \n" +
+                "\tppc.price_open_range AS priceOpenRange, \n" +
+                "\tpnhf.file_name AS fileName,\n" +
+                "\tpnhf.md5 \n" +
                 "FROM\n" +
                 "\t`purchase_notice_history` pnh\n" +
                 "\tLEFT JOIN purchase_project_control ppc ON pnh.project_id = ppc.id \n" +
                 "\tAND pnh.company_id = ppc.company_id \n" +
+                "\tLEFT JOIN purchase_notice_history_file pnhf ON pnh.id = pnhf.notice_history_id  \n" +
                 "WHERE\n" +
                 "\tppc.project_open_range = 1 \n" +
                 "\tAND pnh.create_time > ? \n" +
@@ -124,11 +127,14 @@ public class SyncPurchaseNoticeDataJobHandler extends AbstractSyncNoticeDataJobH
                 "\tpnh.create_time AS createTime,\n" +
                 "\tpnh.company_name AS companyName,\n" +
                 "\tppc.result_open_range AS resultOpenRange,\n" +
-                "\tppc.price_open_range AS priceOpenRange \n" +
+                "\tppc.price_open_range AS priceOpenRange, \n" +
+                "\tpnhf.file_name AS fileName,\n" +
+                "\tpnhf.md5 \n" +
                 "FROM\n" +
                 "\t`purchase_notice_history` pnh\n" +
                 "\tLEFT JOIN purchase_project_control ppc ON pnh.project_id = ppc.id \n" +
                 "\tAND pnh.company_id = ppc.company_id \n" +
+                "\tLEFT JOIN purchase_notice_history_file pnhf ON pnh.id = pnhf.notice_history_id \n" +
                 "WHERE\n" +
                 "\tppc.result_open_range = 1 \n" +
                 "\tAND pnh.update_time > ? \n" +
@@ -167,10 +173,13 @@ public class SyncPurchaseNoticeDataJobHandler extends AbstractSyncNoticeDataJobH
                 "\tpnr.create_time AS createTime,\n" +
                 "\tpnr.company_name AS companyName,\n" +
                 "\tppc.result_open_range AS resultOpenRange, \n" +
-                "\tppc.price_open_range AS priceOpenRange\n" +
+                "\tppc.price_open_range AS priceOpenRange,\n" +
+                "\tppf.file_name AS fileName,\n" +
+                "\tppf.md5\n" +
                 "FROM\n" +
                 "\t`purchase_notice_result` pnr\n" +
                 "\tLEFT JOIN purchase_project_control ppc ON pnr.project_id = ppc.id and pnr.company_id = ppc.company_id\n" +
+                "\tLEFT JOIN purchase_project_file ppf ON ppf.project_id = ppc.id AND ppf.company_id = ppc.company_id \n" +
                 "WHERE\n" +
                 "\tppc.result_open_range = 1\n" +
                 "\tand pnr.create_time > ? \n" +
@@ -209,10 +218,13 @@ public class SyncPurchaseNoticeDataJobHandler extends AbstractSyncNoticeDataJobH
                 "\tpnr.create_time AS createTime,\n" +
                 "\tpnr.company_name AS companyName,\n" +
                 "\tppc.result_open_range AS resultOpenRange, \n" +
-                "\tppc.price_open_range AS priceOpenRange\n" +
+                "\tppc.price_open_range AS priceOpenRange,\n" +
+                "\tppf.file_name AS fileName,\n" +
+                "\tppf.md5\n" +
                 "FROM\n" +
                 "\t`purchase_notice_result` pnr\n" +
                 "\tLEFT JOIN purchase_project_control ppc ON pnr.project_id = ppc.id and pnr.company_id = ppc.company_id\n" +
+                "\tLEFT JOIN purchase_project_file ppf ON ppf.project_id = ppc.id AND ppf.company_id = ppc.company_id \n" +
                 "WHERE\n" +
                 "\tppc.project_open_range = 1\n" +
                 "\tand pnr.update_time > ? \n" +
