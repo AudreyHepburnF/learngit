@@ -178,7 +178,7 @@
 				<pom.purchase.synergy.new.port>8048</pom.purchase.synergy.new.port>
 				<pom.purchase.message.new.ip>http://purchase-cloud-01.internal.cg-xt.com,http://purchase-cloud-02.internal.cg-xt.com</pom.purchase.message.new.ip>
 				<pom.purchase.message.new.port>8047</pom.purchase.message.new.port>
-				<pom.contract.message.new.ip>http://contract-cloud-01-01.internal.cg-xt.com,http://contract-cloud-01-02.internal.cg-xt.com</pom.contract.message.new.ip>
+				<pom.contract.message.new.ip>http://contract-cloud-01.internal.cg-xt.com,http://contract-cloud-02.internal.cg-xt.com</pom.contract.message.new.ip>
 				<pom.contract.message.new.port>8047</pom.contract.message.new.port>
 			</properties>
 		</profile>
