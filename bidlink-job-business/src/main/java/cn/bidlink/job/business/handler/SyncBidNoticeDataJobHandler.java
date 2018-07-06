@@ -202,9 +202,9 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
                 "\tbid_type AS bidType,\n" +
                 "\tbid_describe AS bidDescribe,\n" +
                 "\tqualification,\n" +
-                "\t\tis_doc_free AS isDocFree,\n" +
+                "\t\tis_doc_free AS docFree,\n" +
                 "\tbid_doc_money AS bidDocMoney,\n" +
-                "\tis_bail_free AS isBailFree,\n" +
+                "\tis_bail_free AS bailFree,\n" +
                 "\tbid_bail AS bidBail,\n" +
                 "\tput_file_type AS putFileType,\n" +
                 "\tbid_open_time AS bidOpenTime,\n" +
