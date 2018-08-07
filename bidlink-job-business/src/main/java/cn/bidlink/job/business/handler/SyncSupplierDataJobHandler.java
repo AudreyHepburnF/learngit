@@ -83,8 +83,6 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
         logger.info("供应商数据同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss") + "\n"
                 + ", syncTime : " + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
         syncSupplierDataService(lastSyncTime);
-        // FIXME 供应商核心供状态更新
-//        syncSupplierCompanyStatusService(lastSyncTime);
         // FIXME 供应商企业空间是否激活
         syncEnterpriseSpaceDataService(lastSyncTime);
     }
@@ -300,7 +298,7 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
                 "\ttru.`NAME` AS supplierName,\n" +
                 "\ttru.MOBILE AS mobile,\n" +
                 "\ttru.ID AS userId,\n" +
-                "\t1 AS core \n" +
+                "\ttrc.core_status AS coreStatus \n" +
                 "FROM\n" +
                 "\tt_reg_company trc\n" +
                 "\tJOIN t_reg_user tru ON trc.id = tru.COMPANY_ID \n" +
@@ -346,13 +344,10 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
                 + "   tru.`NAME` AS supplierName,\n"
                 + "   tru.MOBILE AS mobile,\n"
                 + "   tru.id AS userId,\n"
-                //  FIXME 待设计核心供,默认为核心供
-//                                 + "   IFNULL(tucs.CREDIT_MEDAL_STATUS,0) AS core\n"
-                + "\t1 AS core \n"
+                + "\ttrc.core_status AS coreStatus \n"
                 + "FROM\n"
                 + "   t_reg_company trc\n"
                 + "JOIN t_reg_user tru ON trc.id = tru.COMPANY_ID and trc.type = 13\n"
-//                                 + "LEFT JOIN t_uic_company_status tucs ON trc.id = tucs.COMP_ID\n"
                 + "LEFT JOIN t_reg_code_comp_type trcct ON trc.COMP_TYPE = trcct.ID\n"
                 + "WHERE trc.UPDATE_TIME > ?\n"
                 + "GROUP BY trc.ID\n"
@@ -447,8 +442,9 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
         resultToUse.put(ID, convertToString(resultToUse.get(ID)));
         resultToUse.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
         resultToUse.put(USER_ID, convertToString(resultToUse.get(USER_ID)));
-        // FIXME 默认为核心供
-        resultToUse.put(CORE, 1);
+        // 核心供状态
+        Object coreStatus = resultToUse.get("coreStatus");
+        resultToUse.put(CORE, coreStatus == null ? 0 :Integer.valueOf(String.valueOf(coreStatus).substring(0,1)));
     }
 
     private String convertToString(Object value) {

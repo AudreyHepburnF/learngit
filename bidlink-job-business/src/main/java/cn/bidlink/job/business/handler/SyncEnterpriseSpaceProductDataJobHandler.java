@@ -17,13 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author <a href="mailto:zhihuizhou@ebnew.com">zhouzhihui</a>
@@ -42,10 +42,15 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends JobHandler /*imple
     private DataSource enterpriseSpaceDataSource;
 
     @Autowired
+    @Qualifier("uniregDataSource")
+    protected DataSource uniregDataSource;
+
+    @Autowired
     private ElasticClient elasticClient;
 
     private String ID                        = "id";
     private String CORE                      = "core";
+    private String CORE_STATUS               = "coreStatus";
     private String COMPANY_ID                = "companyId";
     private String PRODUCT_NAME              = "productName";
     private String PRODUCT_NAME_NOT_ANALYZED = "productNameNotAnalyzed";
@@ -144,11 +149,8 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends JobHandler /*imple
             List<Object> paramsToUse = appendToParams(params, i);
             List<Map<String, Object>> products = DBUtil.query(enterpriseSpaceDataSource, querySql, paramsToUse);
 
-            // 添加供应商状态 FIXME 待设计核心供 默认为核心供
-//            appendSupplierStatus(products);
-            for (Map<String, Object> product : products) {
-                product.put(CORE, 1);
-            }
+            // 添加供应商状态 t_reg_company中core_status字段
+            appendSupplierStatus(products);
 
             // 添加同步时间和字段类型转换
             for (Map<String, Object> product : products) {
@@ -164,35 +166,36 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends JobHandler /*imple
      *
      * @param mapList
      */
-//    private void appendSupplierStatus(List<Map<String, Object>> mapList) {
-//        HashSet<Long> companyIds = new HashSet<>();
-//        for (Map<String, Object> map : mapList) {
-//            companyIds.add(((Long) map.get(COMPANY_ID)));
-//        }
-//
-//        String querySqlTemplate = "SELECT\n" +
-//                "\tCOMP_ID AS companyId,\n" +
-//                "\tCREDIT_MEDAL_STATUS AS core \n" +
-//                "FROM\n" +
-//                "\t`t_uic_company_status` \n" +
-//                "WHERE\n" +
-//                "\tCOMP_ID IN (%s)";
-//        String querySql = String.format(querySqlTemplate, StringUtils.collectionToCommaDelimitedString(companyIds));
-//        Map<Long, Integer> coreMap = DBUtil.query(centerDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Long, Integer>>() {
-//            @Override
-//            public Map<Long, Integer> execute(ResultSet resultSet) throws SQLException {
-//                HashMap<Long, Integer> map = new HashMap<>();
-//                while (resultSet.next()) {
-//                    map.put(resultSet.getLong(COMPANY_ID), resultSet.getInt(CORE));
-//                }
-//                return map;
-//            }
-//        });
-//
-//        for (Map<String, Object> map : mapList) {
-//            map.put(CORE, coreMap.get(map.get(COMPANY_ID)));
-//        }
-//    }
+    private void appendSupplierStatus(List<Map<String, Object>> mapList) {
+        HashSet<Long> companyIds = new HashSet<>();
+        for (Map<String, Object> map : mapList) {
+            companyIds.add(((Long) map.get(COMPANY_ID)));
+        }
+
+        String querySqlTemplate = "SELECT\n" +
+                "\tid AS companyId,\n" +
+                "\tcore_status AS coreStatus \n" +
+                "FROM\n" +
+                "\t`t_reg_company` \n" +
+                "WHERE\n" +
+                "\tid IN (%s)";
+        String querySql = String.format(querySqlTemplate, StringUtils.collectionToCommaDelimitedString(companyIds));
+        Map<Long, Integer> coreMap = DBUtil.query(uniregDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Long, Integer>>() {
+            @Override
+            public Map<Long, Integer> execute(ResultSet resultSet) throws SQLException {
+                HashMap<Long, Integer> map = new HashMap<>();
+                while (resultSet.next()) {
+                    String coreStatus = resultSet.getString(CORE_STATUS);
+                    map.put(resultSet.getLong(COMPANY_ID), coreStatus == null ? 0 : Integer.valueOf(coreStatus.substring(0,1)));
+                }
+                return map;
+            }
+        });
+
+        for (Map<String, Object> map : mapList) {
+            map.put(CORE, coreMap.get(map.get(COMPANY_ID)));
+        }
+    }
 
     /**
      * 添加同步时间字段
@@ -213,7 +216,7 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends JobHandler /*imple
      * @param products
      */
     private void batchInsert(List<Map<String, Object>> products) {
-        System.out.println(products);
+//        System.out.println(products);
         if (!CollectionUtils.isEmpty(products)) {
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> product : products) {
