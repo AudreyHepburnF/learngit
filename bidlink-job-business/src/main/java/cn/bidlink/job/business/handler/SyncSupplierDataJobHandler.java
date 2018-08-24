@@ -80,7 +80,7 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
 
     private void syncSupplierData() {
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.supplier", null);
-        logger.info("供应商数据同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss") + "\n"
+        logger.info("供应商数据同步时间lastSyncTime：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss") + "\n"
                 + ", syncTime : " + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
         syncSupplierDataService(lastSyncTime);
         // FIXME 供应商企业空间是否激活
@@ -359,13 +359,13 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
         List<Object> params = new ArrayList<>();
         params.add(createTime);
         long count = DBUtil.count(uniregDataSource, countSql, params);
-        logger.debug("执行countSql : {}, params : {}，共{}条", countSql, params, count);
+        logger.info("执行countSql : {}, params : {}，共{}条", countSql, params, count);
         if (count > 0) {
             for (long i = 0; i < count; i += pageSize) {
                 List<Object> paramsToUse = appendToParams(params, i);
                 // 查出符合条件的供应商
                 List<Map<String, Object>> resultToExecute = query(uniregDataSource, querySql, paramsToUse);
-                logger.debug("执行querySql : {}, params : {}，共{}条", querySql, paramsToUse, resultToExecute.size());
+                logger.info("执行querySql : {}, params : {}，共{}条", querySql, paramsToUse, resultToExecute.size());
                 Set<Long> supplierIds = new HashSet<>();
                 for (Map<String, Object> result : resultToExecute) {
                     if (!StringUtils.isEmpty(result.get(AREA))) {
