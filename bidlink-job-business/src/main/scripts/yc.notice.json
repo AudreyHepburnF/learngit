@@ -196,6 +196,9 @@
       },
       "md5": {
         "type": "string"
+      },
+      "platformSource": {
+        "type": "integer"
       }
     }
   }

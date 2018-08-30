@@ -197,6 +197,9 @@
       "zoneStr": {
         "type": "string",
         "analyzer": "ik"
+      },
+      "platformSource": {
+        "type": "integer"
       }
     }
   }

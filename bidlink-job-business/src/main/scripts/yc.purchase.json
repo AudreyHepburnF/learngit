@@ -103,6 +103,9 @@
       "directoryName": {
         "type": "string",
         "analyzer": "ik"
+      },
+      "platformSource": {
+        "type": "integer"
       }
     }
   }
