@@ -1,5 +1,6 @@
 package cn.bidlink.job.business.handler;
 
+import cn.bidlink.job.business.constant.BusinessConstant;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
@@ -86,6 +87,8 @@ public abstract class AbstractSyncNoticeDataJobHandler extends JobHandler {
         result.put(COMPANY_NAME_NOT_ANALYZED, result.get(COMPANY_NAME));
         // 添加同步时间字段
         result.put(SYNC_TIME, SyncTimeUtil.getCurrentDate());
+        //添加平台来源
+        result.put(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.IXIETONG_SOURCE);
     }
 
     protected void batchExecute(List<Map<String, Object>> mapList) {

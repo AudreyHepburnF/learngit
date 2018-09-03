@@ -1,5 +1,6 @@
 package cn.bidlink.job.business.handler;
 
+import cn.bidlink.job.business.constant.BusinessConstant;
 import cn.bidlink.job.business.utils.AreaUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
@@ -150,6 +151,8 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
         result.put(OPEN_RANGE_TYPE, 1);
         // 新平台
         result.put(SOURCE, SOURCE_NEW);
+        //添加平台来源
+        result.put(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.IXIETONG_SOURCE);
     }
 
     @Override

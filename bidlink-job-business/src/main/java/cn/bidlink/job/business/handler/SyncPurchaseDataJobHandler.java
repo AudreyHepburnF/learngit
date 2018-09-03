@@ -1,5 +1,6 @@
 package cn.bidlink.job.business.handler;
 
+import cn.bidlink.job.business.constant.BusinessConstant;
 import cn.bidlink.job.business.utils.AreaUtil;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
@@ -255,6 +256,9 @@ public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandl
             result.put(COMPANY_SITE_ALIAS, companySite);
         }
         result.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
+
+        //添加平台来源
+        result.put(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.IXIETONG_SOURCE);
     }
 
 //    @Override
