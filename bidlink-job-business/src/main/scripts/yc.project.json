@@ -32,6 +32,9 @@
       },
       "projectType": {
         "type": "integer"
+      },
+      "platformSource": {
+        "type": "integer"
       }
     }
   }

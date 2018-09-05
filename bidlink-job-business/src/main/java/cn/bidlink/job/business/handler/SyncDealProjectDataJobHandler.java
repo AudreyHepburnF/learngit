@@ -1,5 +1,6 @@
 package cn.bidlink.job.business.handler;
 
+import cn.bidlink.job.business.constant.BusinessConstant;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
@@ -183,6 +184,8 @@ public class SyncDealProjectDataJobHandler extends JobHandler /*implements Initi
             map.put(LONG_TOTAL_PRICE, bigDecimal == null ? 0 : bigDecimal.longValue());
             map.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
             map.put(PROJECT_TYPE, projectType);
+            //添加平台来源
+            map.put(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.IXIETONG_SOURCE);
         }
     }
 

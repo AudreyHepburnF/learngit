@@ -1,5 +1,6 @@
 package cn.bidlink.job.business.handler;
 
+import cn.bidlink.job.business.constant.BusinessConstant;
 import cn.bidlink.job.common.utils.AreaUtil;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
@@ -445,6 +446,9 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
         // 核心供状态
         Object coreStatus = resultToUse.get("coreStatus");
         resultToUse.put(CORE, coreStatus == null ? 0 :Integer.valueOf(String.valueOf(coreStatus).substring(0,1)));
+
+        //添加平台来源
+        resultToUse.put(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.IXIETONG_SOURCE);
     }
 
     private String convertToString(Object value) {

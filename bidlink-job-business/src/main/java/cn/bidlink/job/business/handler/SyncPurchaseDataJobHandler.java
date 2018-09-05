@@ -255,6 +255,9 @@ public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandl
             result.put(COMPANY_SITE_ALIAS, companySite);
         }
         result.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
+
+        //添加平台来源
+        result.put(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.IXIETONG_SOURCE);
     }
 
 //    @Override

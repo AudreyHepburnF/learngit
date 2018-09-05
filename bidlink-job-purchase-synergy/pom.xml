@@ -145,10 +145,6 @@
 				<pom.framework.redis.port>6379</pom.framework.redis.port>
 
 				<!--同步配置-->
-				<pom.purchase.synergy.old.ip>http://10.4.1.23</pom.purchase.synergy.old.ip>
-				<pom.purchase.synergy.old.port>8047</pom.purchase.synergy.old.port>
-				<pom.purchase.synergy.new.ip>http://10.4.1.23</pom.purchase.synergy.new.ip>
-				<pom.purchase.synergy.new.port>8048</pom.purchase.synergy.new.port>
 				<pom.purchase.message.new.ip>http://10.4.0.183</pom.purchase.message.new.ip>
 				<pom.purchase.message.new.port>8047</pom.purchase.message.new.port>
 				<pom.contract.message.new.ip>http://10.9.2.154</pom.contract.message.new.ip>
@@ -172,10 +168,6 @@
 				<pom.framework.redis.port>6379</pom.framework.redis.port>
 
 				<!--同步配置-->
-				<pom.purchase.synergy.old.ip>http://127.0.0.1</pom.purchase.synergy.old.ip>
-				<pom.purchase.synergy.old.port>8047</pom.purchase.synergy.old.port>
-				<pom.purchase.synergy.new.ip>http://127.0.0.1</pom.purchase.synergy.new.ip>
-				<pom.purchase.synergy.new.port>8048</pom.purchase.synergy.new.port>
 				<pom.purchase.message.new.ip>http://purchase-cloud-01.internal.cg-xt.com,http://purchase-cloud-02.internal.cg-xt.com</pom.purchase.message.new.ip>
 				<pom.purchase.message.new.port>8047</pom.purchase.message.new.port>
 				<pom.contract.message.new.ip>http://contract-cloud-01.internal.cg-xt.com,http://contract-cloud-02.internal.cg-xt.com</pom.contract.message.new.ip>
@@ -186,23 +178,19 @@
 			<id>test</id>
 			<properties>
 				<pom.application.name>bidlink-job-purchase-synergy</pom.application.name>
-				<pom.xxl.job.admin.addresses>http://10.4.0.98:8080/xxl-job</pom.xxl.job.admin.addresses>
+				<pom.xxl.job.admin.addresses>http://testxxl-dashboard:8080/xxl-job</pom.xxl.job.admin.addresses>
 				<pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
 				<pom.log.rootLogger>FILE</pom.log.rootLogger>
 				<pom.log.level>info</pom.log.level>
 				<pom.log.dir>logs</pom.log.dir>
 
-				<pom.framework.redis.host>10.4.0.44</pom.framework.redis.host>
+				<pom.framework.redis.host>testredis</pom.framework.redis.host>
 				<pom.framework.redis.port>6379</pom.framework.redis.port>
 
 				<!--同步配置-->
-				<pom.purchase.synergy.old.ip>http://10.4.1.23</pom.purchase.synergy.old.ip>
-				<pom.purchase.synergy.old.port>8047</pom.purchase.synergy.old.port>
-				<pom.purchase.synergy.new.ip>http://10.4.1.23</pom.purchase.synergy.new.ip>
-				<pom.purchase.synergy.new.port>8048</pom.purchase.synergy.new.port>
-				<pom.purchase.message.new.ip>http://10.4.0.183</pom.purchase.message.new.ip>
+				<pom.purchase.message.new.ip>http://testpurchase-cloud</pom.purchase.message.new.ip>
 				<pom.purchase.message.new.port>8047</pom.purchase.message.new.port>
-				<pom.contract.message.new.ip>http://10.4.0.114</pom.contract.message.new.ip>
+				<pom.contract.message.new.ip>http://testcontract-cloud</pom.contract.message.new.ip>
 				<pom.contract.message.new.port>8047</pom.contract.message.new.port>
 			</properties>
 		</profile>
