@@ -1,6 +1,6 @@
 package cn.bidlink.job.business.handler;
 
-import cn.bidlink.job.business.utils.AreaUtil;
+import cn.bidlink.job.common.utils.AreaUtil;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;

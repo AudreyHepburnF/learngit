@@ -1,6 +1,5 @@
-package cn.bidlink.job.business.utils;
+package cn.bidlink.job.common.utils;
 
-import cn.bidlink.job.common.utils.DBUtil;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;

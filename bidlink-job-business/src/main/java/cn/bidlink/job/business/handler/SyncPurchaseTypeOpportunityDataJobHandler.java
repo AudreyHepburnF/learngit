@@ -1,6 +1,6 @@
 package cn.bidlink.job.business.handler;
 
-import cn.bidlink.job.business.utils.AreaUtil;
+import cn.bidlink.job.common.utils.AreaUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static cn.bidlink.job.business.utils.AreaUtil.queryAreaInfo;
+import static cn.bidlink.job.common.utils.AreaUtil.queryAreaInfo;
 
 
 /**

@@ -1,4 +1,4 @@
-package cn.bidlink.job.business.utils;
+package cn.bidlink.job.common.utils;
 
 import java.util.Collections;
 import java.util.HashMap;
