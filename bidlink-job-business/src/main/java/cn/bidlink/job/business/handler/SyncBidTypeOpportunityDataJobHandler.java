@@ -1,7 +1,6 @@
 package cn.bidlink.job.business.handler;
 
 import cn.bidlink.job.common.constant.BusinessConstant;
-import cn.bidlink.job.common.utils.AreaUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
@@ -17,8 +16,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static cn.bidlink.job.common.utils.AreaUtil.queryAreaInfo;
 
 
 /**
@@ -107,24 +104,6 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                 "\t) project\n" +
                 "\tLEFT JOIN bid_project_item bpi ON project.projectId = bpi.sub_project_id";
         doSyncProjectDataService(tenderDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList(((Object) lastSyncTime)));
-    }
-
-
-    @Override
-    protected void appendTenantKeyAndAreaStrToResult(List<Map<String, Object>> resultToExecute, Set<Long> purchaseIds) {
-        if (purchaseIds.size() > 0) {
-            Map<Long, AreaUtil.AreaInfo> areaMap = queryAreaInfo(uniregDataSource, purchaseIds);
-            for (Map<String, Object> result : resultToExecute) {
-                Long purchaseId = Long.valueOf(String.valueOf(result.get(PURCHASE_ID)));
-                AreaUtil.AreaInfo areaInfo = areaMap.get(purchaseId);
-                if (areaInfo != null) {
-                    result.put(AREA_STR, areaInfo.getAreaStr());
-                    // 添加不分词的areaStr
-                    result.put(AREA_STR_NOT_ANALYZED, result.get(AREA_STR));
-                    result.put(REGION, areaInfo.getRegion());
-                }
-            }
-        }
     }
 
     @Override

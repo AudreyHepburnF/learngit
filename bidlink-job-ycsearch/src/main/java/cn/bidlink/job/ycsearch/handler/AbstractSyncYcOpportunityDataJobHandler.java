@@ -1,4 +1,4 @@
-package cn.bidlink.job.business.handler;
+package cn.bidlink.job.ycsearch.handler;
 
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
@@ -21,30 +21,25 @@ import java.sql.Timestamp;
 import java.util.*;
 
 /**
- * @author : <a href="mailto:zikaifeng@ebnew.com">冯子恺</a>
- * @version : Ver 1.0
- * @description :
- * @date : 2017/8/25
+ * @author <a href="mailto:zhihuizhou@ebnew.com">zhouzhihui</a>
+ * @version Ver 1.0
+ * @description:
+ * @Date 2018/9/5
  */
-public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
+public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler {
+
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     protected ElasticClient elasticClient;
 
     @Autowired
-    @Qualifier("tenderDataSource")
-    protected DataSource tenderDataSource;
-
-    @Autowired
-    @Qualifier("purchaseDataSource")
-    protected DataSource purchaseDataSource;
-
-    @Autowired
     @Qualifier("uniregDataSource")
     protected DataSource uniregDataSource;
 
-
+    @Autowired
+    @Qualifier("ycDataSource")
+    protected DataSource ycDataSource;
     // 有效的商机
     protected int    VALID_OPPORTUNITY_STATUS   = 1;
     // 无效的商机
@@ -104,6 +99,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
      * @return
      */
     protected abstract String generateOpportunityId(Map<String, Object> result);
+
 
     protected class DirectoryEntity {
         protected Long   directoryId;
@@ -169,6 +165,8 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
                     refresh(result, projectDirectoryMap);
                 }
 
+                // 添加区域
+                appendAreaStrToResult(resultToExecute, purchaseIds);
                 // 处理商机的状态
                 batchExecute(resultToExecute);
                 i += pageSize;
@@ -176,6 +174,13 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
         }
     }
 
+    /**
+     * 添加租户key tenantKey和区域 areaStr
+     *
+     * @param resultToExecute
+     * @param purchaseIds
+     */
+    protected abstract void appendAreaStrToResult(List<Map<String, Object>> resultToExecute, Set<Long> purchaseIds);
 
     /**
      * 刷新字段
@@ -246,7 +251,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected abstract void parseOpportunity(Timestamp currentDate, List<Map<String, Object>> resultToExecute, Map<String, Object> result);
 
     protected void batchExecute(List<Map<String, Object>> resultsToUpdate) {
-////        System.out.println(resultsToUpdate);
+//        System.out.println(resultsToUpdate);
 //        System.out.println("size : " + resultsToUpdate.size());
 //        for (Map<String, Object> map : resultsToUpdate) {
 //            System.out.println(map);
@@ -277,4 +282,3 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
         }
     }
 }
-
