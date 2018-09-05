@@ -1,7 +1,7 @@
 package cn.bidlink.job.business.handler;
 
 import cn.bidlink.job.common.utils.AreaUtil;
-import cn.bidlink.job.business.constant.BusinessConstant;
+import cn.bidlink.job.common.constant.BusinessConstant;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;

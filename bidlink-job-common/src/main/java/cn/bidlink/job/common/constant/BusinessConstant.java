@@ -1,4 +1,4 @@
-package cn.bidlink.job.business.constant;
+package cn.bidlink.job.common.constant;
 
 public class BusinessConstant {
 
