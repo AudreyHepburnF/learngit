@@ -1,0 +1,107 @@
+<a href="http://testcgs301.app.bidlink.cn/contract/contract/maintenance/contissave.htm?id=3536">进入</a>
+testcgs301 企业ID：1113172702
+
+
+<th width="12%"><font class="cRed">*</font>甲方名称：</th>
+<td width="" colspan="5">${tail.purchaserCompanySignName}</td>
+<th width="12%"><font class="cRed">*</font>项目类型：</th>
+<td width="" colspan="5">${conContract.projectInsdustryName }</td>
+
+<c:choose>
+	<c:when test="${companyId eq 1113172702}">
+		需方名称：
+	</c:when>
+	<c:otherwise>
+		甲方名称：
+	</c:otherwise>
+</c:choose>
+
+
+<th width="4%">序号</th>
+<th width="15%">采购品编码</th>
+<th width="15%">采购品名称</th>
+<th width="8%">规格型号</th>
+
+<th width="6%">技术参数/材质</th>
+
+<th width="8%">计量单位</th>
+
+<th width="6%">使用单位</th>
+<th width="6%">用途</th>
+
+<th width="9%">申报单位</th>
+<th width="9%">申报人、电话</th>
+<th width="8%">需求日期</th>
+
+<th width="8%">单价</th>
+<th width="8%">货单数量</th>
+<th width="8%">签收数量</th>
+<th width="8%">发货数量</th>
+<!-- <th width="8%">运费</th>
+<th width="8%">税率</th>
+<th width="8%">折扣</th> -->
+<th width="12%">备注</th>
+
+
+padding: 15px 25px 15px 100px;
+
+<a href="#" class="tcan_tb" onclick="openDivPos(${orderGoodsList.id},${orderManage.id})">发  货</a>
+
+<th width="3%">序号</th>
+						<th width="12%">采购品编码</th>
+						<th width="8%">采购品名称</th>
+						<th width="5%">规格型号</th>
+
+						<th width="6%">技术参数/材质</th>
+
+						<th width="5%">计量单位</th>
+
+						<th width="6%">使用单位</th>
+						<th width="4%">用途</th>
+
+						<th width="6%">申报单位</th>
+						<th width="7%">申报人、电话</th>
+						<th width="6%">需求日期</th>
+
+						<th width="4%">单价</th>
+						<th width="5%">货单数量</th>
+						<th width="5%">签收数量</th>
+						<th width="5%">发货数量</th>
+						<!-- <th width="8%">运费</th>
+                        <th width="8%">税率</th>
+                        <th width="8%">折扣</th> -->
+						<th width="10%">备注</th>
+
+Git版本回退：https://blog.csdn.net/gomeplus/article/details/78241070
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
