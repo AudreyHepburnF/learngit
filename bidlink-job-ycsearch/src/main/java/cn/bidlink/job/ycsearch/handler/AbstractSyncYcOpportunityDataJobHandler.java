@@ -1,6 +1,7 @@
 package cn.bidlink.job.ycsearch.handler;
 
 import cn.bidlink.job.common.es.ElasticClient;
+import cn.bidlink.job.common.utils.AreaUtil;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.RegionUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
@@ -14,11 +15,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.util.*;
+
+import static cn.bidlink.job.common.utils.AreaUtil.queryAreaInfo;
 
 /**
  * @author <a href="mailto:zhihuizhou@ebnew.com">zhouzhihui</a>
@@ -48,6 +52,8 @@ public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler
     protected int    BIDDING_PROJECT_TYPE       = 1;
     // 采购项目类型
     protected int    PURCHASE_PROJECT_TYPE      = 2;
+    // 竞价项目类型
+    protected int    AUCTION_PROJECT_TYPE       = 3;
     // 新平台数据
     protected String SOURCE_NEW                 = "new";
     // 老平台数据
@@ -98,7 +104,18 @@ public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler
      * @param result
      * @return
      */
-    protected abstract String generateOpportunityId(Map<String, Object> result);
+    protected String generateOpportunityId(Map<String, Object> result) {
+        Long projectId = (Long) result.get(PROJECT_ID);
+        Long purchaseId = (Long) result.get(PURCHASE_ID);
+        if (projectId == null) {
+            throw new RuntimeException("商机ID生成失败，原因：项目ID为空!");
+        }
+        if (StringUtils.isEmpty(purchaseId)) {
+            throw new RuntimeException("商机ID生成失败，原因：采购商ID为空!");
+        }
+
+        return DigestUtils.md5DigestAsHex((projectId + "_" + purchaseId + "_" + SOURCE_OLD).getBytes());
+    }
 
 
     protected class DirectoryEntity {
@@ -158,15 +175,19 @@ public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler
                     }
                 }
 
-                // 处理采购品
+                // 处理采购商id
                 Set<Long> purchaseIds = new HashSet<>();
                 for (Map<String, Object> result : resultToExecute) {
                     purchaseIds.add((Long) result.get(PURCHASE_ID));
-                    refresh(result, projectDirectoryMap);
                 }
 
                 // 添加区域
                 appendAreaStrToResult(resultToExecute, purchaseIds);
+
+                for (Map<String, Object> result : resultToExecute) {
+                    purchaseIds.add((Long) result.get(PURCHASE_ID));
+                    refresh(result, projectDirectoryMap);
+                }
                 // 处理商机的状态
                 batchExecute(resultToExecute);
                 i += pageSize;
@@ -175,12 +196,30 @@ public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler
     }
 
     /**
-     * 添加租户key tenantKey和区域 areaStr
+     * 添加区域 areaStr
      *
      * @param resultToExecute
      * @param purchaseIds
      */
-    protected abstract void appendAreaStrToResult(List<Map<String, Object>> resultToExecute, Set<Long> purchaseIds);
+    protected void appendAreaStrToResult(List<Map<String, Object>> resultToExecute, Set<Long> purchaseIds) {
+        if (purchaseIds.size() > 0) {
+            Map<Long, AreaUtil.AreaInfo> areaMap = queryAreaInfo(uniregDataSource, purchaseIds);
+            for (Map<String, Object> result : resultToExecute) {
+                Long purchaseId = Long.valueOf(String.valueOf(result.get(PURCHASE_ID)));
+                AreaUtil.AreaInfo areaInfo = areaMap.get(purchaseId);
+                if (areaInfo != null) {
+                    result.put(AREA_STR, areaInfo.getAreaStr());
+                    // 添加不分词的areaStr
+                    result.put(AREA_STR_NOT_ANALYZED, result.get(AREA_STR));
+                    result.put(REGION, areaInfo.getRegion());
+                    if (Objects.isNull(result.get(PURCHASE_NAME))) {
+                        // 如果项目采购商公司名称为空 取中心库
+                        result.put(PURCHASE_NAME, areaInfo.getPurchaseName());
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * 刷新字段
@@ -251,7 +290,6 @@ public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler
     protected abstract void parseOpportunity(Timestamp currentDate, List<Map<String, Object>> resultToExecute, Map<String, Object> result);
 
     protected void batchExecute(List<Map<String, Object>> resultsToUpdate) {
-//        System.out.println(resultsToUpdate);
 //        System.out.println("size : " + resultsToUpdate.size());
 //        for (Map<String, Object> map : resultsToUpdate) {
 //            System.out.println(map);

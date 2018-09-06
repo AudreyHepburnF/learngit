@@ -14,7 +14,6 @@ import org.elasticsearch.search.SearchHit;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
@@ -59,7 +58,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                 "cluster.type.supplier_opportunity",
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery("projectType", PURCHASE_PROJECT_TYPE))
-                        .must(QueryBuilders.termQuery("source", SOURCE_OLD)));
+                        .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.YUECAI_SOURCE)));
         Timestamp lastSyncStartTime = new Timestamp(new DateTime(new DateTime().getYear(), 1, 1, 0, 0, 0).getMillis());
         if (Objects.equals(SyncTimeUtil.GMT_TIME, lastSyncTime)) {
             lastSyncTime = lastSyncStartTime;
@@ -267,19 +266,6 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
         }
     }
 
-    @Override
-    protected String generateOpportunityId(Map<String, Object> result) {
-        Long projectId = (Long) result.get(PROJECT_ID);
-        Long purchaseId = (Long) result.get(PURCHASE_ID);
-        if (projectId == null) {
-            throw new RuntimeException("商机ID生成失败，原因：项目ID为空!");
-        }
-        if (StringUtils.isEmpty(purchaseId)) {
-            throw new RuntimeException("商机ID生成失败，原因：采购商ID为空!");
-        }
-
-        return DigestUtils.md5DigestAsHex((projectId + "_" + purchaseId + "_" + SOURCE_OLD).getBytes());
-    }
 
     @Override
     protected void refresh(Map<String, Object> result, Map<Long, Set<DirectoryEntity>> projectDirectoryMap) {
