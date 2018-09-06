@@ -97,7 +97,7 @@
         <profile>
             <id>dev</id>
             <properties>
-                <pom.application.name>bidlink-job-business</pom.application.name>
+                <pom.application.name>bidlink-job-ycsearch</pom.application.name>
                 <pom.xxl.job.admin.addresses>http://10.4.0.98:8080/xxl-job</pom.xxl.job.admin.addresses>
                 <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
                 <pom.log.rootLogger>CONSOLE</pom.log.rootLogger>
@@ -135,7 +135,7 @@
         <profile>
             <id>test</id>
             <properties>
-                <pom.application.name>bidlink-job-business</pom.application.name>
+                <pom.application.name>bidlink-job-ycsearch</pom.application.name>
                 <pom.xxl.job.admin.addresses>http://testxxl-dashboard:8080/xxl-job</pom.xxl.job.admin.addresses>
                 <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
                 <pom.log.rootLogger>FILE</pom.log.rootLogger>
@@ -159,13 +159,6 @@
                 <pom.cluster.name>elasticsearch</pom.cluster.name>
                 <pom.cluster.index>longdaoyun_test</pom.cluster.index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
-                <pom.cluster.type.supplier_product>supplier_product</pom.cluster.type.supplier_product>
-                <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
-                <pom.cluster.type.enterprise_space_product>enterprise_space_product</pom.cluster.type.enterprise_space_product>
-                <pom.cluster.type.purchase>purchase</pom.cluster.type.purchase>
-                <pom.cluster.type.notice>notice</pom.cluster.type.notice>
-                <pom.cluster.type.project>project</pom.cluster.type.project>
-                <pom.cluster.type.deal_supplier>deal_supplier</pom.cluster.type.deal_supplier>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
@@ -177,7 +170,7 @@
         <profile>
             <id>product</id>
             <properties>
-                <pom.application.name>bidlink-job-business</pom.application.name>
+                <pom.application.name>bidlink-job-ycsearch</pom.application.name>
                 <pom.xxl.job.admin.addresses>http://xxl-dashboard.internal.cg-xt.com:8080/xxl-job</pom.xxl.job.admin.addresses>
                 <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
                 <pom.log.rootLogger>FILE</pom.log.rootLogger>

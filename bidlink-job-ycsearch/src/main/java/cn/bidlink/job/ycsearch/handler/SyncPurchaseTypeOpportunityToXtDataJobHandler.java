@@ -29,7 +29,7 @@ import static cn.bidlink.job.common.utils.AreaUtil.queryAreaInfo;
  * @description :同步采购商机数据 悦采平台到隆道云 es中
  * @date : 2018/09/03
  */
-@JobHander(value = "syncPurchaseTypeOpportunityToXTDataJobHandler")
+@JobHander(value = "syncPurchaseTypeOpportunityToXtDataJobHandler")
 @Service
 public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOpportunityDataJobHandler /*implements InitializingBean*/ {
     // 自动截标
@@ -60,7 +60,12 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery("projectType", PURCHASE_PROJECT_TYPE))
                         .must(QueryBuilders.termQuery("source", SOURCE_OLD)));
-        logger.info("采购项目商机同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
+        Timestamp lastSyncStartTime = new Timestamp(new DateTime(new DateTime().getYear(), 1, 1, 0, 0, 0).getMillis());
+        if (Objects.equals(SyncTimeUtil.GMT_TIME, lastSyncTime)) {
+            lastSyncTime = lastSyncStartTime;
+        }
+        logger.info("采购项目商机同步时间,lastSyncTime：" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n"
+                + ",syncTime:" + new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
         syncPurchaseProjectDataService(lastSyncTime);
         fixExpiredAutoStopTypePurchaseProjectDataService(lastSyncTime);
     }
@@ -78,7 +83,8 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
                 .must(QueryBuilders.termQuery("status", 1))
                 .must(QueryBuilders.termQuery("projectType", PURCHASE_PROJECT_TYPE))
-                .must(QueryBuilders.rangeQuery("syncTime").lt(currentTime));
+                .must(QueryBuilders.rangeQuery("syncTime").lt(currentTime))
+                .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE));
 
         int batchSize = 100;
         SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
