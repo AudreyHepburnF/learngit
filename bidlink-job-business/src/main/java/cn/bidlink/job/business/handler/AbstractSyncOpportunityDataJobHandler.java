@@ -1,5 +1,6 @@
 package cn.bidlink.job.business.handler;
 
+import cn.bidlink.job.common.constant.BusinessConstant;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.RegionUtil;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
@@ -53,11 +55,6 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected int    BIDDING_PROJECT_TYPE       = 1;
     // 采购项目类型
     protected int    PURCHASE_PROJECT_TYPE      = 2;
-    // 新平台数据
-    protected String SOURCE_NEW                 = "new";
-    // 老平台数据
-    protected String SOURCE_OLD                 = "old";
-
 
     protected String ID                          = "id";
     protected String PURCHASE_ID                 = "purchaseId";
@@ -86,8 +83,6 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected String CITY                        = "city";
     protected String COUNTY                      = "county";
     protected String PROVINCE                    = "province";
-    // 数据来源，new表示新平台，old表示老平台
-    protected String SOURCE                      = "source";
 
 
     protected Map<String, Object> appendIdToResult(Map<String, Object> result) {
@@ -103,7 +98,18 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
      * @param result
      * @return
      */
-    protected abstract String generateOpportunityId(Map<String, Object> result);
+    protected  String generateOpportunityId(Map<String, Object> result) {
+            Long projectId = (Long) result.get(PROJECT_ID);
+            Long purchaseId = (Long) result.get(PURCHASE_ID);
+            if (projectId == null) {
+                throw new RuntimeException("商机ID生成失败，原因：项目ID为空!");
+            }
+            if (StringUtils.isEmpty(purchaseId)) {
+                throw new RuntimeException("商机ID生成失败，原因：采购商ID为空!");
+            }
+
+            return DigestUtils.md5DigestAsHex((projectId + "_" + purchaseId + "_" + BusinessConstant.IXIETONG_SOURCE).getBytes());
+        }
 
     protected class DirectoryEntity {
         protected Long   directoryId;

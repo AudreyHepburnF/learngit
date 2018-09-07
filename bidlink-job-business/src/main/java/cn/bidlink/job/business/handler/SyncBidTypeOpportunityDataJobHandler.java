@@ -8,8 +8,6 @@ import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
-import org.springframework.util.DigestUtils;
-import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.util.Collections;
@@ -51,7 +49,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                 "cluster.type.supplier_opportunity",
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery("projectType", BIDDING_PROJECT_TYPE))
-                        .must(QueryBuilders.termQuery("source", SOURCE_NEW)));
+                        .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE)));
         logger.info("招标项目商机同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
 //        Timestamp lastSyncTime = SyncTimeUtil.GMT_TIME;
         syncBiddingProjectDataService(lastSyncTime);
@@ -107,20 +105,6 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
     }
 
     @Override
-    protected String generateOpportunityId(Map<String, Object> result) {
-        Long projectId = (Long) result.get(PROJECT_ID);
-        Long purchaseId = (Long) result.get(PURCHASE_ID);
-        if (projectId == null) {
-            throw new RuntimeException("商机ID生成失败，原因：项目ID为空!");
-        }
-        if (StringUtils.isEmpty(purchaseId)) {
-            throw new RuntimeException("商机ID生成失败，原因：采购商ID为空!");
-        }
-
-        return DigestUtils.md5DigestAsHex((projectId + "_" + purchaseId + "_" + SOURCE_NEW).getBytes());
-    }
-
-    @Override
     protected void refresh(Map<String, Object> result, Map<Long, Set<DirectoryEntity>> projectDirectoryMap) {
         super.refresh(result, projectDirectoryMap);
         result.put(QUOTE_STOP_TIME, SyncTimeUtil.toDateString(result.get(QUOTE_STOP_TIME)));
@@ -128,8 +112,6 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
         result.put(PROJECT_TYPE, BIDDING_PROJECT_TYPE);
         // 公开类型，默认为1
         result.put(OPEN_RANGE_TYPE, 1);
-        // 新平台
-        result.put(SOURCE, SOURCE_NEW);
         //添加平台来源
         result.put(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.IXIETONG_SOURCE);
     }

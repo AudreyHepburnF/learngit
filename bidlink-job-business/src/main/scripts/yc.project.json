@@ -34,7 +34,8 @@
         "type": "integer"
       },
       "platformSource": {
-        "type": "integer"
+        "type": "integer",
+        "index": "not_analyzed"
       }
     }
   }

@@ -8,8 +8,6 @@ import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
-import org.springframework.util.DigestUtils;
-import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.util.Collections;
@@ -54,7 +52,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
                                                                    "cluster.type.supplier_opportunity",
                                                                    QueryBuilders.boolQuery()
                                                                            .must(QueryBuilders.termQuery("projectType", PURCHASE_PROJECT_TYPE))
-                                                                           .must(QueryBuilders.termQuery("source", SOURCE_NEW)));
+                                                                           .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.IXIETONG_SOURCE)));
         logger.info("协同采购项目商机同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
 //        Timestamp lastSyncTime = SyncTimeUtil.GMT_TIME;
         syncPurchaseProjectDataService(lastSyncTime);
@@ -119,20 +117,6 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
         doSyncProjectDataService(purchaseDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList((Object) lastSyncTime));
     }
 
-    @Override
-    protected String generateOpportunityId(Map<String, Object> result) {
-        Long projectId = (Long) result.get(PROJECT_ID);
-        Long purchaseId = (Long) result.get(PURCHASE_ID);
-        if (projectId == null) {
-            throw new RuntimeException("商机ID生成失败，原因：项目ID为空!");
-        }
-        if (StringUtils.isEmpty(purchaseId)) {
-            throw new RuntimeException("商机ID生成失败，原因：采购商ID为空!");
-        }
-
-        return DigestUtils.md5DigestAsHex((projectId + "_" + purchaseId + "_" + SOURCE_NEW).getBytes());
-    }
-
     /**
      * 解析商机数据
      *
@@ -175,8 +159,6 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
         result.put(AREA_STR_NOT_ANALYZED, result.get(AREA_STR));
         // 项目类型
         result.put(PROJECT_TYPE, PURCHASE_PROJECT_TYPE);
-        // 新平台
-        result.put(SOURCE, SOURCE_NEW);
 
         //添加平台来源
         result.put(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.IXIETONG_SOURCE);
