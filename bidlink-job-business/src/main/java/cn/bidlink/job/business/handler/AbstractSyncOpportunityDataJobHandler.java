@@ -252,7 +252,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected abstract void parseOpportunity(Timestamp currentDate, List<Map<String, Object>> resultToExecute, Map<String, Object> result);
 
     protected void batchExecute(List<Map<String, Object>> resultsToUpdate) {
-////        System.out.println(resultsToUpdate);
+//        System.out.println(resultsToUpdate);
 //        System.out.println("size : " + resultsToUpdate.size());
 //        for (Map<String, Object> map : resultsToUpdate) {
 //            System.out.println(map);

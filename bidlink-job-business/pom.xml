@@ -97,25 +97,25 @@
             <id>dev</id>
             <properties>
                 <pom.application.name>bidlink-job-business</pom.application.name>
-                <pom.xxl.job.admin.addresses>http://10.4.0.98:8080/xxl-job</pom.xxl.job.admin.addresses>
+                <pom.xxl.job.admin.addresses>http://testxxl-dashboard:8080/xxl-job</pom.xxl.job.admin.addresses>
                 <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
                 <pom.log.rootLogger>CONSOLE</pom.log.rootLogger>
                 <pom.log.level>debug</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
                 <!--企业空间数据源-->
-                <pom.enterpriseSpace.db.url>jdbc:mysql://10.4.0.43:3306/space?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.enterpriseSpace.db.url>
+                <pom.enterpriseSpace.db.url>jdbc:mariadb://testmariadb:3306/space?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.enterpriseSpace.db.url>
                 <pom.enterpriseSpace.db.username>dashuju</pom.enterpriseSpace.db.username>
                 <pom.enterpriseSpace.db.password>ixietong!@#$</pom.enterpriseSpace.db.password>
                 <!--协同平台招标数据源-->
-                <pom.tender.db.url>jdbc:mysql://10.4.0.43:3306/tender?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.tender.db.url>
+                <pom.tender.db.url>jdbc:mariadb://testmariadb:3306/tender?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.tender.db.url>
                 <pom.tender.db.username>dashuju</pom.tender.db.username>
                 <pom.tender.db.password>ixietong!@#$</pom.tender.db.password>
                 <!--协同平台采购数据源-->
-                <pom.purchase.db.url>jdbc:mysql://10.4.0.43:3306/purchase?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.purchase.db.url>
+                <pom.purchase.db.url>jdbc:mariadb://testmariadb:3306/purchase?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.purchase.db.url>
                 <pom.purchase.db.username>dashuju</pom.purchase.db.username>
                 <pom.purchase.db.password>ixietong!@#$</pom.purchase.db.password>
                 <!--协同平台中心库数据源-->
-                <pom.unireg.db.url>jdbc:mysql://10.4.0.43:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
+                <pom.unireg.db.url>jdbc:mariadb://testmariadb:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
                 <pom.unireg.db.username>dashuju</pom.unireg.db.username>
                 <pom.unireg.db.password>ixietong!@#$</pom.unireg.db.password>
                 <!--供应商企业空间-->
@@ -123,9 +123,9 @@
                 <!--供应商诚信等级空间-->
                 <pom.supplier.enterpriseSpaceDetailFormat>http://{0}.testspace.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}</pom.supplier.enterpriseSpaceDetailFormat>
                 <!--es配置-->
-                <pom.cluster.host>10.4.0.69:9300</pom.cluster.host>
-                <pom.cluster.name>dc-test</pom.cluster.name>
-                <pom.cluster.index>ixietong_test</pom.cluster.index>
+                <pom.cluster.host>testes:9300</pom.cluster.host>
+                <pom.cluster.name>elasticsearch</pom.cluster.name>
+                <pom.cluster.index>longdaoyun_test</pom.cluster.index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
                 <pom.cluster.type.supplier_product>supplier_product</pom.cluster.type.supplier_product>
                 <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
@@ -134,12 +134,12 @@
                 <pom.cluster.type.notice>notice</pom.cluster.type.notice>
                 <pom.cluster.type.project>project</pom.cluster.type.project>
                 <pom.cluster.type.deal_supplier>deal_supplier</pom.cluster.type.deal_supplier>
-                <pom.path.conf>D:/es/config/</pom.path.conf>
-                <pom.searchguard.enable>true</pom.searchguard.enable>
-                <pom.searchguard.ssl.transport.keystore_filepath>admin-keystore.jks</pom.searchguard.ssl.transport.keystore_filepath>
-                <pom.searchguard.ssl.transport.truststore_filepath>truststore.jks</pom.searchguard.ssl.transport.truststore_filepath>
-                <pom.searchguard.ssl.transport.keystore_password>49e68ad53ae7483da17e</pom.searchguard.ssl.transport.keystore_password>
-                <pom.searchguard.ssl.transport.truststore_password>49e68ad53ae7483da17e</pom.searchguard.ssl.transport.truststore_password>
+                <pom.searchguard.enable>false</pom.searchguard.enable>
+                <pom.path.conf></pom.path.conf>
+                <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
+                <pom.searchguard.ssl.transport.truststore_filepath></pom.searchguard.ssl.transport.truststore_filepath>
+                <pom.searchguard.ssl.transport.keystore_password></pom.searchguard.ssl.transport.keystore_password>
+                <pom.searchguard.ssl.transport.truststore_password></pom.searchguard.ssl.transport.truststore_password>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>

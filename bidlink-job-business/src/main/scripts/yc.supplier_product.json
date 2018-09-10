@@ -46,8 +46,7 @@
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "platformSource": {
-        "type": "integer",
-        "index": "not_analyzed"
+        "type": "integer"
       }
     }
   }

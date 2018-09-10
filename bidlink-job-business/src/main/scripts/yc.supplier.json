@@ -199,8 +199,7 @@
         "analyzer": "ik"
       },
       "platformSource": {
-        "type": "integer",
-        "index": "not_analyzed"
+        "type": "integer"
       }
     }
   }

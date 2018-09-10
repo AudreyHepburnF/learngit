@@ -198,8 +198,7 @@
         "type": "string"
       },
       "platformSource": {
-        "type": "integer",
-        "index": "not_analyzed"
+        "type": "integer"
       }
     }
   }
