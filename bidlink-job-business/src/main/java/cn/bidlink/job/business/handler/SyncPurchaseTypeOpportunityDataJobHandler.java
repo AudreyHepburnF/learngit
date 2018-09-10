@@ -56,7 +56,8 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery("projectType", PURCHASE_PROJECT_TYPE))
                         .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE)));
-        logger.info("协同采购项目商机同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
+        logger.info("协同采购项目商机同步时间lastSyncTime：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss") + "\n," +
+                SyncTimeUtil.toDateString(SyncTimeUtil.getCurrentDate()));
         syncPurchaseProjectDataService(lastSyncTime);
         // 修复商机状态
         fixExpiredPurchaseTypeOpportunityData(lastSyncTime);
