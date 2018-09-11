@@ -117,16 +117,16 @@
                 <!--供应商诚信等级空间-->
                 <pom.supplier.enterpriseSpaceDetailFormat>http://{0}.testspace.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}</pom.supplier.enterpriseSpaceDetailFormat>
                 <!--es配置-->
-                <pom.cluster.host>10.4.0.69:9300</pom.cluster.host>
-                <pom.cluster.name>dc-test</pom.cluster.name>
-                <pom.cluster.index>ixietong_test</pom.cluster.index>
+                <pom.cluster.host>testes:9300</pom.cluster.host>
+                <pom.cluster.name>elasticsearch</pom.cluster.name>
+                <pom.cluster.index>longdaoyun_test</pom.cluster.index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
-                <pom.path.conf>D:/es/config/</pom.path.conf>
-                <pom.searchguard.enable>true</pom.searchguard.enable>
-                <pom.searchguard.ssl.transport.keystore_filepath>admin-keystore.jks</pom.searchguard.ssl.transport.keystore_filepath>
-                <pom.searchguard.ssl.transport.truststore_filepath>truststore.jks</pom.searchguard.ssl.transport.truststore_filepath>
-                <pom.searchguard.ssl.transport.keystore_password>49e68ad53ae7483da17e</pom.searchguard.ssl.transport.keystore_password>
-                <pom.searchguard.ssl.transport.truststore_password>49e68ad53ae7483da17e</pom.searchguard.ssl.transport.truststore_password>
+                <pom.searchguard.enable>false</pom.searchguard.enable>
+                <pom.path.conf></pom.path.conf>
+                <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
+                <pom.searchguard.ssl.transport.truststore_filepath></pom.searchguard.ssl.transport.truststore_filepath>
+                <pom.searchguard.ssl.transport.keystore_password></pom.searchguard.ssl.transport.keystore_password>
+                <pom.searchguard.ssl.transport.truststore_password></pom.searchguard.ssl.transport.truststore_password>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>

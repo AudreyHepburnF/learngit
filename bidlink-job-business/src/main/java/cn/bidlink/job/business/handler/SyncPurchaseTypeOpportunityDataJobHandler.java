@@ -60,22 +60,21 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
                 SyncTimeUtil.toDateString(SyncTimeUtil.getCurrentDate()));
         syncPurchaseProjectDataService(lastSyncTime);
         // 修复商机状态
-        fixExpiredPurchaseTypeOpportunityData(lastSyncTime);
+        fixExpiredPurchaseTypeOpportunityData();
     }
 
     /**
      * 修复商机状态
      *
-     * @param lastSyncTime
      */
-    private void fixExpiredPurchaseTypeOpportunityData(Timestamp lastSyncTime) {
+    private void fixExpiredPurchaseTypeOpportunityData() {
         logger.info("开始修复商机截止时间状态");
         Properties properties = elasticClient.getProperties();
         String currentTime = SyncTimeUtil.toDateString(SyncTimeUtil.getCurrentDate());
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery().must(QueryBuilders.termQuery(PROJECT_TYPE, PURCHASE_PROJECT_TYPE))
                 .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE))
                 .must(QueryBuilders.rangeQuery(SyncTimeUtil.SYNC_TIME).lte(currentTime));
-        int batchSize = 100;
+        int batchSize = 1000;
         SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setSize(batchSize)
