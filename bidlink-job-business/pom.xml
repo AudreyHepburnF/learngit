@@ -114,6 +114,10 @@
                 <pom.purchase.db.url>jdbc:mariadb://testmariadb:3306/purchase?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.purchase.db.url>
                 <pom.purchase.db.username>dashuju</pom.purchase.db.username>
                 <pom.purchase.db.password>ixietong!@#$</pom.purchase.db.password>
+                <!--协同平台竞价数据源-->
+                <pom.auction.db.url>jdbc:mariadb://testmariadb:3306/auction?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.auction.db.url>
+                <pom.auction.db.username>dashuju</pom.auction.db.username>
+                <pom.auction.db.password>ixietong!@#$</pom.auction.db.password>
                 <!--协同平台中心库数据源-->
                 <pom.unireg.db.url>jdbc:mariadb://testmariadb:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
                 <pom.unireg.db.username>dashuju</pom.unireg.db.username>
@@ -134,6 +138,7 @@
                 <pom.cluster.type.notice>notice</pom.cluster.type.notice>
                 <pom.cluster.type.project>project</pom.cluster.type.project>
                 <pom.cluster.type.deal_supplier>deal_supplier</pom.cluster.type.deal_supplier>
+                <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
@@ -166,6 +171,10 @@
                 <pom.purchase.db.url>jdbc:mariadb://testmariadb:3306/purchase?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.purchase.db.url>
                 <pom.purchase.db.username>dashuju</pom.purchase.db.username>
                 <pom.purchase.db.password>ixietong!@#$</pom.purchase.db.password>
+                <!--协同平台竞价数据源-->
+                <pom.auction.db.url>jdbc:mariadb://testmariadb:3306/auction?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.auction.db.url>
+                <pom.auction.db.username>dashuju</pom.auction.db.username>
+                <pom.auction.db.password>ixietong!@#$</pom.auction.db.password>
                 <!--协同平台中心库数据源-->
                 <pom.unireg.db.url>jdbc:mariadb://testmariadb:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
                 <pom.unireg.db.username>dashuju</pom.unireg.db.username>
@@ -186,6 +195,7 @@
                 <pom.cluster.type.notice>notice</pom.cluster.type.notice>
                 <pom.cluster.type.project>project</pom.cluster.type.project>
                 <pom.cluster.type.deal_supplier>deal_supplier</pom.cluster.type.deal_supplier>
+                <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
@@ -215,6 +225,10 @@
                 <pom.purchase.db.url>jdbc:mariadb://purchase-mariadb.internal.cg-xt.com:3306/purchase?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.purchase.db.url>
                 <pom.purchase.db.username>purchase</pom.purchase.db.username>
                 <pom.purchase.db.password>purchase!@#$4321</pom.purchase.db.password>
+                <!--协同平台竞价数据源-->
+                <pom.auction.db.url>jdbc:mariadb://purchase-mariadb.internal.cg-xt.com:3306/auction?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.auction.db.url>
+                <pom.auction.db.username>auction</pom.auction.db.username>
+                <pom.auction.db.password>auction!@#$4321</pom.auction.db.password>
                 <!--协同平台中心库数据源-->
                 <pom.unireg.db.url>jdbc:mariadb://usercenter-mariadb.internal.cg-xt.com:3312/usercenter?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
                 <pom.unireg.db.username>appaccount</pom.unireg.db.username>
@@ -235,6 +249,7 @@
                 <pom.cluster.type.notice>notice</pom.cluster.type.notice>
                 <pom.cluster.type.project>project</pom.cluster.type.project>
                 <pom.cluster.type.deal_supplier>deal_supplier</pom.cluster.type.deal_supplier>
+                <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
