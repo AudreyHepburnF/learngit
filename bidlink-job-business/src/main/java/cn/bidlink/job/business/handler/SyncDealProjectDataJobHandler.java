@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * @author <a href="mailto:zhihuizhou@ebnew.com">zhouzhihui</a>
  * @version Ver 1.0
- * @description:同步平台成交项目数据
+ * @description:同步采购商平台成交项目数据
  * @Date 2018/6/8
  */
 @Service
