@@ -240,6 +240,7 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
     @Override
     protected void refresh(Map<String, Object> result) {
         super.refresh(result);
+        result.put(SUB_PROJECT_ID, String.valueOf(result.get(SUB_PROJECT_ID)));
         // 公告类型为招标公告
         result.put(PROJECT_TYPE, BID_NOTICE_TYPE);
     }

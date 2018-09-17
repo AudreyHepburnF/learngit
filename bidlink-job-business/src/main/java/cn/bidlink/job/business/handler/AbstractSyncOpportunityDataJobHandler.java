@@ -43,18 +43,23 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected DataSource purchaseDataSource;
 
     @Autowired
+    @Qualifier("auctionDataSource")
+    protected DataSource auctionDataSource;
+    @Autowired
     @Qualifier("uniregDataSource")
     protected DataSource uniregDataSource;
 
 
     // 有效的商机
-    protected int    VALID_OPPORTUNITY_STATUS   = 1;
+    protected int VALID_OPPORTUNITY_STATUS   = 1;
     // 无效的商机
-    protected int    INVALID_OPPORTUNITY_STATUS = -1;
+    protected int INVALID_OPPORTUNITY_STATUS = -1;
     // 招标项目类型
-    protected int    BIDDING_PROJECT_TYPE       = 1;
+    protected int BIDDING_PROJECT_TYPE       = 1;
     // 采购项目类型
-    protected int    PURCHASE_PROJECT_TYPE      = 2;
+    protected int PURCHASE_PROJECT_TYPE      = 2;
+    // 竞价项目类型
+    protected int AUCTION_PROJECT_TYPE       = 3;
 
     protected String ID                          = "id";
     protected String PURCHASE_ID                 = "purchaseId";
@@ -70,6 +75,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected String PROJECT_NAME                = "projectName";
     protected String PROJECT_NAME_NOT_ANALYZED   = "projectNameNotAnalyzed";
     protected String PROJECT_STATUS              = "projectStatus";
+    protected String NODE                        = "node";
     protected String AREA_STR                    = "areaStr";
     protected String AREA_STR_NOT_ANALYZED       = "areaStrNotAnalyzed";
     protected String REGION                      = "region";
@@ -98,18 +104,18 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
      * @param result
      * @return
      */
-    protected  String generateOpportunityId(Map<String, Object> result) {
-            Long projectId = (Long) result.get(PROJECT_ID);
-            Long purchaseId = (Long) result.get(PURCHASE_ID);
-            if (projectId == null) {
-                throw new RuntimeException("商机ID生成失败，原因：项目ID为空!");
-            }
-            if (StringUtils.isEmpty(purchaseId)) {
-                throw new RuntimeException("商机ID生成失败，原因：采购商ID为空!");
-            }
-
-            return DigestUtils.md5DigestAsHex((projectId + "_" + purchaseId + "_" + BusinessConstant.IXIETONG_SOURCE).getBytes());
+    protected String generateOpportunityId(Map<String, Object> result) {
+        Long projectId = (Long) result.get(PROJECT_ID);
+        Long purchaseId = (Long) result.get(PURCHASE_ID);
+        if (projectId == null) {
+            throw new RuntimeException("商机ID生成失败，原因：项目ID为空!");
         }
+        if (StringUtils.isEmpty(purchaseId)) {
+            throw new RuntimeException("商机ID生成失败，原因：采购商ID为空!");
+        }
+
+        return DigestUtils.md5DigestAsHex((projectId + "_" + purchaseId + "_" + BusinessConstant.IXIETONG_SOURCE).getBytes());
+    }
 
     protected class DirectoryEntity {
         protected Long   directoryId;
