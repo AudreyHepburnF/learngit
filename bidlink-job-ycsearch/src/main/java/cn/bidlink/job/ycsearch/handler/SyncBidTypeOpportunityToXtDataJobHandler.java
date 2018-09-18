@@ -10,10 +10,7 @@ import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -49,6 +46,10 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery("projectType", BIDDING_PROJECT_TYPE))
                         .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.YUECAI_SOURCE)));
+        Timestamp lastSyncStartTime = new Timestamp(new DateTime(new DateTime().getYear(), 1, 1, 0, 0, 0).getMillis());
+        if (Objects.equals(SyncTimeUtil.GMT_TIME, lastSyncTime)) {
+            lastSyncTime = lastSyncStartTime;
+        }
         logger.info("招标项目商机同步时间lastSyncTime:" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss") + "\n,"
                 + "syncTime:" + SyncTimeUtil.toDateString(SyncTimeUtil.getCurrentDate()));
         syncBiddingProjectDataService(lastSyncTime);
