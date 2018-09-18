@@ -34,12 +34,55 @@ limit ?,?;
 
 ##招标项目
 	##查询总数
-SELECT COUNT(*) FROM bid b
-LEFT JOIN proj_inter_project pip ON b.PROJECT_ID=pip.ID
-WHERE b.IS_BID_SUCCESS=1;
+SELECT
+	COUNT(*)
+FROM
+	bid b
+	LEFT JOIN proj_inter_project pip ON b.PROJECT_ID = pip.ID
+	LEFT JOIN bid_decided bd ON b.PROJECT_ID = bd.PROJECT_ID
+WHERE
+	b.IS_BID_SUCCESS = 1
+	AND bd.UPDATE_DATE > ?
+	AND pip.PROJECT_STATUS IN (9, 11)
+	AND NOT EXISTS (
+			SELECT
+				1
+			FROM
+				bid_decided bd1
+			WHERE
+				bd.ROUND < bd1.ROUND
+				AND bd.PROJECT_ID = bd1.PROJECT_ID
+	);
+
 
 	##查询信息
-
+SELECT
+	pip.id projectId,
+	pip.PROJECT_NAME projectName,
+	pip.PROJECT_NAME projectNameNotAnalyzed,
+	pip.PROJECT_NUMBER projectCode,
+	pip.COMPANY_ID companyId,
+	b.BIDER_ID supplierId,
+	b.BIDER_NAME supplierName,
+	b.BIDER_PRICE_UNE dealTotalPrice,
+	bd.UPDATE_DATE dealTime
+FROM
+	bid b
+	LEFT JOIN proj_inter_project pip ON b.PROJECT_ID = pip.ID
+	LEFT JOIN bid_decided bd ON b.PROJECT_ID = bd.PROJECT_ID
+WHERE
+	b.IS_BID_SUCCESS = 1
+	AND bd.UPDATE_DATE > ?
+	AND pip.PROJECT_STATUS IN (9, 11)
+	AND NOT EXISTS (
+			SELECT
+				1
+			FROM
+				bid_decided bd1
+			WHERE
+				bd.ROUND < bd1.ROUND
+				AND bd.PROJECT_ID = bd1.PROJECT_ID
+	) LIMIT ?,?;
 
 ##竞价项目
 	##查询打包的项目数量

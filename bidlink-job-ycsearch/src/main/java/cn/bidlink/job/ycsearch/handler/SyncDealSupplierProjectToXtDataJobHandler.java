@@ -19,13 +19,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
+import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @JobHander("syncDealSupplierProjectToXtDataJobHandler")
@@ -44,7 +43,10 @@ public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler {
     private DataSource ycDataSource;
 
     private String  ID                    = "id";
+    private String  NAME                    = "name";
     private String  COMPANY_ID            = "companyId";
+    private String  COMPANY_NAME           = "companyName";
+    private String  COMPANY_NAME_NOT_ANALYZED   = "companyNameNotAnalyzed";
     private String  SUPPLIER_ID            = "supplierId";
     private String  PROJECT_ID            = "projectId";
     private String  DEAL_TOTAL_PRICE      = "dealTotalPrice";
@@ -118,6 +120,59 @@ public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler {
         String queryCountSql = "SELECT\n" +
                 "\tCOUNT(*)\n" +
                 "FROM\n" +
+                "\tbid b\n" +
+                "\tLEFT JOIN proj_inter_project pip ON b.PROJECT_ID = pip.ID\n" +
+                "\tLEFT JOIN bid_decided bd ON b.PROJECT_ID = bd.PROJECT_ID\n" +
+                "WHERE\n" +
+                "\tb.IS_BID_SUCCESS = 1\n" +
+                "\tAND bd.UPDATE_DATE > ?\n" +
+                "\tAND pip.PROJECT_STATUS IN (9, 11)\n" +
+                "\tAND NOT EXISTS (\n" +
+                "\t\t\tSELECT\n" +
+                "\t\t\t\t1\n" +
+                "\t\t\tFROM\n" +
+                "\t\t\t\tbid_decided bd1\n" +
+                "\t\t\tWHERE\n" +
+                "\t\t\t\tbd.ROUND < bd1.ROUND\n" +
+                "\t\t\t\tAND bd.PROJECT_ID = bd1.PROJECT_ID\n" +
+                "\t)";
+        String querySql = "SELECT\n" +
+                "\tpip.id projectId,\n" +
+                "\tpip.PROJECT_NAME projectName,\n" +
+                "\tpip.PROJECT_NAME projectNameNotAnalyzed,\n" +
+                "\tpip.PROJECT_NUMBER projectCode,\n" +
+                "\tpip.COMPANY_ID companyId,\n" +
+                "\tb.BIDER_ID supplierId,\n" +
+                "\tb.BIDER_NAME supplierName,\n" +
+                "\tb.BIDER_PRICE_UNE dealTotalPrice,\n" +
+                "\tbd.UPDATE_DATE dealTime\n" +
+                "FROM\n" +
+                "\tbid b\n" +
+                "\tLEFT JOIN proj_inter_project pip ON b.PROJECT_ID = pip.ID\n" +
+                "\tLEFT JOIN bid_decided bd ON b.PROJECT_ID = bd.PROJECT_ID\n" +
+                "WHERE\n" +
+                "\tb.IS_BID_SUCCESS = 1\n" +
+                "\tAND bd.UPDATE_DATE > ?\n" +
+                "\tAND pip.PROJECT_STATUS IN (9, 11)\n" +
+                "\tAND NOT EXISTS (\n" +
+                "\t\t\tSELECT\n" +
+                "\t\t\t\t1\n" +
+                "\t\t\tFROM\n" +
+                "\t\t\t\tbid_decided bd1\n" +
+                "\t\t\tWHERE\n" +
+                "\t\t\t\tbd.ROUND < bd1.ROUND\n" +
+                "\t\t\t\tAND bd.PROJECT_ID = bd1.PROJECT_ID\n" +
+                "\t) LIMIT ?,?";
+        List<Object> params = new ArrayList<>();
+        params.add(lastSyncTime);
+        doSyncDealProjectService(queryCountSql, querySql, ycDataSource, params, BID_PROJECT_TYPE);
+    }
+
+    //同步竞价打包
+    private void doSyncSupplierAuction1DealProjectService(Timestamp lastSyncTime) {
+        String queryCountSql = "SELECT\n" +
+                "\tCOUNT(*)\n" +
+                "FROM\n" +
                 "\tauction_bid_supplier abs\n" +
                 "\tLEFT JOIN auction_project ap ON abs.project_id = ap.id\n" +
                 "WHERE\n" +
@@ -142,13 +197,14 @@ public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler {
                 "AND ap.publish_result_time > ?\n" +
                 "AND ap.project_type = 1\n" +
                 "LIMIT ?,?";
+
         List<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
-        doSyncDealProjectService(queryCountSql, querySql, ycDataSource, params, BID_PROJECT_TYPE);
+        doSyncDealProjectService(queryCountSql, querySql, ycDataSource, params, AUCTION_PROJECT_TYPE);
     }
 
-    //同步竞价打包
-    private void doSyncSupplierAuction1DealProjectService(Timestamp lastSyncTime) {
+    //同步竞价非打包
+    private void doSyncSupplierAuction2DealProjectService(Timestamp lastSyncTime) {
         String queryCountSql = "SELECT\n" +
                 "\tCOUNT(*)\n" +
                 "FROM\n" +
@@ -197,15 +253,6 @@ public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler {
         doSyncDealProjectService(queryCountSql, querySql, ycDataSource, params, AUCTION_PROJECT_TYPE);
     }
 
-    //同步竞价非打包
-    private void doSyncSupplierAuction2DealProjectService(Timestamp lastSyncTime) {
-        String queryCountSql = "";
-        String querySql = "";
-        List<Object> params = new ArrayList<>();
-        params.add(lastSyncTime);
-        doSyncDealProjectService(queryCountSql, querySql, ycDataSource, params, AUCTION_PROJECT_TYPE);
-    }
-
     private void doSyncDealProjectService(String queryCountSql, String querySql, DataSource dataSource, List<Object> params, Integer projectType) {
         long count = DBUtil.count(dataSource, queryCountSql, params);
         logger.info("执行countSql:{}, params:{}, 共{}条", queryCountSql, params.toString(), count);
@@ -249,8 +296,18 @@ public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler {
     }
 
     private void refresh(List<Map<String, Object>> mapList, Integer projectType) {
+        Map<Long, String> companyMap=null;
+        if(projectType.equals(AUCTION_PROJECT_TYPE) || projectType.equals(BID_PROJECT_TYPE) ){
+            String companyIds = getCompanyIds(mapList);
+            companyMap = getCompanyMap(companyIds);
+        }
         for (Map<String, Object> map : mapList) {
             map.put(ID, generateSupplierProjectId(map));
+            if(companyMap!=null){
+                String companyName = companyMap.get((Long) map.get(COMPANY_ID));
+                map.put(COMPANY_NAME,companyName);
+                map.put(COMPANY_NAME_NOT_ANALYZED,companyName);
+            }
             map.put(COMPANY_ID, String.valueOf(map.get(COMPANY_ID)));
             map.put(SUPPLIER_ID, String.valueOf(map.get(SUPPLIER_ID)));
             map.put(PROJECT_ID, String.valueOf(map.get(PROJECT_ID)));
@@ -276,4 +333,23 @@ public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler {
         return DigestUtils.md5DigestAsHex((supplierId + "_" + projectId+"_"+BusinessConstant.YUECAI_SOURCE).getBytes());
     }
 
+    private String getCompanyIds(List<Map<String, Object>> mapList){
+        Set<Long> companySet=new HashSet<>();
+        for (Map<String, Object> map : mapList) {
+            companySet.add((Long)map.get(SUPPLIER_ID));
+        }
+        return StringUtils.collectionToCommaDelimitedString(companySet);
+    }
+
+    private Map<Long,String> getCompanyMap(String companyIds){
+        String querySqlTemplate="SELECT id,name from t_reg_company where ID in (%s)";
+        String querySql=String.format(querySqlTemplate,companyIds);
+        List<Map<String, Object>> mapList = DBUtil.query(uniregDataSource, querySql, null);
+        Map<Long,String> map=new HashMap<>();
+        for (Map<String, Object> company : mapList) {
+            map.put((Long) company.get(ID),(String) company.get(NAME));
+        }
+        return map;
+
+    }
 }
