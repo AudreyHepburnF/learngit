@@ -127,7 +127,7 @@
                 <!--供应商诚信等级空间-->
                 <pom.supplier.enterpriseSpaceDetailFormat>http://{0}.testspace.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}</pom.supplier.enterpriseSpaceDetailFormat>
                 <!--es配置-->
-                <pom.cluster.host>testes:9300</pom.cluster.host>
+                <pom.cluster.host>103.227.82.73:9300</pom.cluster.host>
                 <pom.cluster.name>elasticsearch</pom.cluster.name>
                 <pom.cluster.index>longdaoyun_test</pom.cluster.index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
@@ -184,7 +184,7 @@
                 <!--供应商诚信等级空间-->
                 <pom.supplier.enterpriseSpaceDetailFormat>http://{0}.testspace.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}</pom.supplier.enterpriseSpaceDetailFormat>
                 <!--es配置-->
-                <pom.cluster.host>testes:9300</pom.cluster.host>
+                <pom.cluster.host>103.227.82.73:9300</pom.cluster.host>
                 <pom.cluster.name>elasticsearch</pom.cluster.name>
                 <pom.cluster.index>longdaoyun_test</pom.cluster.index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
