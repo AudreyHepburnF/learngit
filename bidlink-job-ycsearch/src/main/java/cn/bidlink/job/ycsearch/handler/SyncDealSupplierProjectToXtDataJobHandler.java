@@ -229,7 +229,7 @@ public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler {
                 "\t\t\tLEFT JOIN auction_directory_info adi ON (abs.directory_id=adi.directory_id AND abs.project_id=adi.project_id)\n" +
                 "\t\tWHERE\n" +
                 "\t\t\tabs.bid_status = 1\n" +
-                "\t\t\tAND ap.publish_result_time > 0\n" +
+                "\t\t\tAND ap.publish_result_time > ?\n" +
                 "\t\t\tAND ap.project_type = 2\n" +
                 "\t\t\tAND abs.divide_rate IS NOT NULL\n" +
                 "\t\tGROUP BY\n" +
