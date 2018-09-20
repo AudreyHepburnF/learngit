@@ -114,6 +114,7 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
                 "LEFT JOIN purchase_project_ext ppe ON psp.project_id = ppe.id\n" +
                 "WHERE\n" +
                 "\tpsp.deal_status = 2\n" +
+                "AND pp.id IS NOT NULL\n" +
                 "AND ppe.publish_result_time > ?";
         String querySql = "SELECT\n" +
                 "\tpp.id projectId,\n" +
@@ -133,6 +134,7 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
                 "LEFT JOIN purchase_project_ext ppe ON psp.project_id = ppe.id\n" +
                 "WHERE\n" +
                 "\tpsp.deal_status = 2\n" +
+                "AND pp.id IS NOT NULL\n" +
                 "AND ppe.publish_result_time > ?\n" +
                 "LIMIT ?,?";
         List<Object> params = new ArrayList<>();

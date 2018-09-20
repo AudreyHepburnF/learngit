@@ -8,6 +8,7 @@ LEFT JOIN purchase_project pp ON psp.project_id = pp.id
 LEFT JOIN purchase_project_ext ppe ON psp.project_id = ppe.id
 WHERE
 	psp.deal_status = 2
+AND pp.id IS NOT NULL
 AND ppe.publish_result_time > ?;
 
   ##查询信息
@@ -29,6 +30,7 @@ LEFT JOIN purchase_project pp ON psp.project_id = pp.id
 LEFT JOIN purchase_project_ext ppe ON psp.project_id = ppe.id
 WHERE
 	psp.deal_status = 2
+AND pp.id IS NOT NULL
 AND ppe.publish_result_time > ?
 LIMIT ?,?;
 
@@ -72,6 +74,7 @@ FROM
 	LEFT JOIN auction_project_ext ape ON asp.project_id = ape.id
 WHERE
 	asp.deal_status = 3
+AND ap.id IS NOT NULL
 AND ape.publish_result_time > ?;
 
 	##查询信息
@@ -93,5 +96,6 @@ FROM
 	LEFT JOIN auction_project_ext ape ON asp.project_id = ape.id
 WHERE
 	asp.deal_status = 3
+AND ap.id IS NOT NULL
 AND ape.publish_result_time > ?
 LIMIT ?,?;
