@@ -1,6 +1,5 @@
 package cn.bidlink.job.business.handler;
 
-import cn.bidlink.job.common.constant.BusinessConstant;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.RegionUtil;
@@ -45,9 +44,14 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     @Autowired
     @Qualifier("auctionDataSource")
     protected DataSource auctionDataSource;
+
     @Autowired
     @Qualifier("uniregDataSource")
     protected DataSource uniregDataSource;
+
+    @Autowired
+    @Qualifier("apiDataSource")
+    protected DataSource apiDataSource;
 
 
     // 有效的商机
@@ -89,11 +93,12 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected String CITY                        = "city";
     protected String COUNTY                      = "county";
     protected String PROVINCE                    = "province";
+    protected String REAL_QUOTE_STOP_TIME        = "realQuoteStopTime";
 
 
-    protected Map<String, Object> appendIdToResult(Map<String, Object> result) {
+    protected Map<String, Object> appendIdToResult(Map<String, Object> result,Integer platformSourceValue) {
         // 生成id
-        result.put(ID, generateOpportunityId(result));
+        result.put(ID, generateOpportunityId(result,platformSourceValue));
         return result;
     }
 
@@ -104,7 +109,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
      * @param result
      * @return
      */
-    protected String generateOpportunityId(Map<String, Object> result) {
+    protected String generateOpportunityId(Map<String, Object> result,Integer platformSourceValue) {
         Long projectId = (Long) result.get(PROJECT_ID);
         Long purchaseId = (Long) result.get(PURCHASE_ID);
         if (projectId == null) {
@@ -114,7 +119,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
             throw new RuntimeException("商机ID生成失败，原因：采购商ID为空!");
         }
 
-        return DigestUtils.md5DigestAsHex((projectId + "_" + purchaseId + "_" + BusinessConstant.IXIETONG_SOURCE).getBytes());
+        return DigestUtils.md5DigestAsHex((projectId + "_" + purchaseId + "_" + platformSourceValue).getBytes());
     }
 
     protected class DirectoryEntity {

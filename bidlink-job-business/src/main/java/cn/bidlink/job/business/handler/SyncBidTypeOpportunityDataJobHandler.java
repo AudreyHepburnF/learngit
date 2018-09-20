@@ -217,11 +217,10 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                 && projectStatus == PROJECT_EXECUTING
                 && node == BIDDING) {
             result.put(STATUS, VALID_OPPORTUNITY_STATUS);
-            resultToExecute.add(appendIdToResult(result));
         } else {
             result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
-            resultToExecute.add(appendIdToResult(result));
         }
+        resultToExecute.add(appendIdToResult(result,BusinessConstant.IXIETONG_SOURCE));
     }
 
 

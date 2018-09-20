@@ -122,6 +122,10 @@
                 <pom.unireg.db.url>jdbc:mariadb://testmariadb:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
                 <pom.unireg.db.username>dashuju</pom.unireg.db.username>
                 <pom.unireg.db.password>ixietong!@#$</pom.unireg.db.password>
+                <!--第三方平台商机数据源-->
+                <pom.api.db.url>jdbc:mariadb://testmariadb:3306/api?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.api.db.url>
+                <pom.api.db.username>dashuju</pom.api.db.username>
+                <pom.api.db.password>ixietong!@#$</pom.api.db.password>
                 <!--供应商企业空间-->
                 <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
@@ -179,6 +183,10 @@
                 <pom.unireg.db.url>jdbc:mariadb://testmariadb:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
                 <pom.unireg.db.username>dashuju</pom.unireg.db.username>
                 <pom.unireg.db.password>ixietong!@#$</pom.unireg.db.password>
+                <!--第三方平台商机数据源-->
+                <pom.api.db.url>jdbc:mariadb://testmariadb:3306/api?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.api.db.url>
+                <pom.api.db.username>dashuju</pom.api.db.username>
+                <pom.api.db.password>ixietong!@#$</pom.api.db.password>
                 <!--供应商企业空间-->
                 <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->

@@ -6,7 +6,6 @@ import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -24,7 +23,7 @@ import java.util.Set;
  */
 @JobHander(value = "syncAuctionTypeOpportunityDataJobHandler")
 @Service
-public class SyncAuctionTypeOpportunityDataJobHandler extends AbstractSyncOpportunityDataJobHandler implements InitializingBean {
+public class SyncAuctionTypeOpportunityDataJobHandler extends AbstractSyncOpportunityDataJobHandler /*implements InitializingBean*/ {
 
     private String PROVINCE = "province";
 
@@ -205,7 +204,7 @@ public class SyncAuctionTypeOpportunityDataJobHandler extends AbstractSyncOpport
         } else {
             result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
         }
-        resultToExecute.add(appendIdToResult(result));
+        resultToExecute.add(appendIdToResult(result,BusinessConstant.IXIETONG_SOURCE));
     }
 
     @Override
@@ -226,8 +225,8 @@ public class SyncAuctionTypeOpportunityDataJobHandler extends AbstractSyncOpport
     }
 
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        execute();
-    }
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+//        execute();
+//    }
 }

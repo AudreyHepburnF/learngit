@@ -33,9 +33,7 @@ import java.util.*;
 public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOpportunityDataJobHandler /*implements InitializingBean*/ {
 
 
-    private String REAL_QUOTE_STOP_TIME = "realQuoteStopTime";
-    private String PROVINCE             = "province";
-    private String IS_CORE              = "isCore";
+    private String IS_CORE = "isCore";
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
@@ -65,7 +63,6 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
 
     /**
      * 修复商机状态
-     *
      */
     private void fixExpiredPurchaseTypeOpportunityData() {
         logger.info("开始修复商机截止时间状态");
@@ -229,11 +226,10 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
                 && processStatus == PROCESS_TO_QUOTE
                 && projectStatus == PROJECT_EXECUTING) {
             result.put(STATUS, VALID_OPPORTUNITY_STATUS);
-            resultToExecute.add(appendIdToResult(result));
         } else {
             result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
-            resultToExecute.add(appendIdToResult(result));
         }
+        resultToExecute.add(appendIdToResult(result, BusinessConstant.IXIETONG_SOURCE));
     }
 
     @Override
