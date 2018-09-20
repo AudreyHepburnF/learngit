@@ -91,7 +91,7 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
                 "\tbs.company_name companyName,\n" +
                 "\tbs.company_name companyNameNotAnalyzed,\n" +
                 "\tbs.supplier_id supplierId,\n" +
-                "\tbs.supplier_name supplierName,\n" +
+                "\tbs.supplier_name supplierNameNotAnalyzed,\n" +
                 "\tbs.win_bid_time dealTime,\n" +
                 "\tbs.win_bid_total_price dealTotalPrice\n" +
                 "FROM\n" +
@@ -124,7 +124,7 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
                 "\tpp.company_name companyName,\n" +
                 "\tpp.company_name companyNameNotAnalyzed,\n" +
                 "\tpsp.supplier_id supplierId,\n" +
-                "\tpsp.supplier_name supplierName,\n" +
+                "\tpsp.supplier_name supplierNameNotAnalyzed,\n" +
                 "\tppe.publish_result_time dealTime,\n" +
                 "\tpsp.deal_total_price dealTotalPrice\n" +
                 "FROM\n" +

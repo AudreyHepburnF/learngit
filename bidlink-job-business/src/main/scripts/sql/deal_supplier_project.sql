@@ -20,7 +20,7 @@ SELECT
 	pp.company_name companyName,
 	pp.company_name companyNameNotAnalyzed,
 	psp.supplier_id supplierId,
-	psp.supplier_name supplierName,
+	psp.supplier_name supplierNameNotAnalyzed,
 	ppe.publish_result_time dealTime,
 	psp.deal_total_price dealTotalPrice
 FROM
@@ -52,7 +52,7 @@ SELECT
 	bs.company_name companyName,
 	bs.company_name companyNameNotAnalyzed,
 	bs.supplier_id supplierId,
-	bs.supplier_name supplierName,
+	bs.supplier_name supplierNameNotAnalyzed,
 	bs.win_bid_time dealTime,
 	bs.win_bid_total_price dealTotalPrice
 FROM
@@ -84,7 +84,7 @@ SELECT
 	ap.company_name companyName,
 	ap.company_name companyNameNotAnalyzed,
 	asp.supplier_id supplierId,
-	asp.supplier_name supplierName,
+	asp.supplier_name supplierNameNotAnalyzed,
 	ape.publish_result_time dealTime,
 	asp.deal_total_price dealTotalPrice
 FROM

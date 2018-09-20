@@ -20,7 +20,7 @@ SELECT
 	bp.comp_name companyName,
 	bp.comp_name companyNameNotAnalyzed,
 	bspb.supplier_id supplierId,
-	bspb.supplier_name supplierName,
+	bspb.supplier_name supplierNameNotAnalyzed,
 	bspb.deal_total_price dealTotalPrice,
 	bpe.publish_bid_result_time dealTime
 FROM
@@ -63,7 +63,7 @@ SELECT
 	pip.PROJECT_NUMBER projectCode,
 	pip.COMPANY_ID companyId,
 	b.BIDER_ID supplierId,
-	b.BIDER_NAME supplierName,
+	b.BIDER_NAME supplierNameNotAnalyzed,
 	b.BIDER_PRICE_UNE dealTotalPrice,
 	bd.UPDATE_DATE dealTime
 FROM
@@ -104,7 +104,7 @@ SELECT
 	ap.project_code projectCode,
 	ap.comp_id companyId,
 	abs.supplier_id supplierId,
-	abs.supplier_name supplierName,
+	abs.supplier_name supplierNameNotAnalyzed,
 	ap.publish_result_time dealTime,
 	IFNULL(abs.final_price,abs.real_price) dealTotalPrice
 FROM
@@ -148,7 +148,7 @@ SELECT
 	ap.project_code projectCode,
 	ap.comp_id companyId,
 	abs.supplier_id supplierId,
-	abs.supplier_name supplierName,
+	abs.supplier_name supplierNameNotAnalyzed,
 	ap.publish_result_time dealTime,
 	SUM(IFNULL(abs.final_price,abs.real_price)*adi.plan_amount*abs.divide_rate/100) dealTotalPrice
 FROM
