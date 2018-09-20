@@ -11,6 +11,8 @@ import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +68,8 @@ public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler {
     }
 
     private void syncDealSupplierProjectDataService() {
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+        queryBuilder.must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.YUECAI_SOURCE));
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.deal_supplier_project", null);
         logger.info("悦采平台成交项目数据lastSyncTime:" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n" + ",syncTime:" +
                 new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
@@ -99,7 +103,7 @@ public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler {
                 "\tbp.comp_name companyName,\n" +
                 "\tbp.comp_name companyNameNotAnalyzed,\n" +
                 "\tbspb.supplier_id supplierId,\n" +
-                "\tbspb.supplier_name supplierName,\n" +
+                "\tbspb.supplier_name supplierNameNotAnalyzed,\n" +
                 "\tbspb.deal_total_price dealTotalPrice,\n" +
                 "\tbpe.publish_bid_result_time dealTime\n" +
                 "FROM\n" +
@@ -143,7 +147,7 @@ public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler {
                 "\tpip.PROJECT_NUMBER projectCode,\n" +
                 "\tpip.COMPANY_ID companyId,\n" +
                 "\tb.BIDER_ID supplierId,\n" +
-                "\tb.BIDER_NAME supplierName,\n" +
+                "\tb.BIDER_NAME supplierNameNotAnalyzed,\n" +
                 "\tb.BIDER_PRICE_UNE dealTotalPrice,\n" +
                 "\tbd.UPDATE_DATE dealTime\n" +
                 "FROM\n" +
@@ -186,7 +190,7 @@ public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler {
                 "\tap.project_code projectCode,\n" +
                 "\tap.comp_id companyId,\n" +
                 "\tabs.supplier_id supplierId,\n" +
-                "\tabs.supplier_name supplierName,\n" +
+                "\tabs.supplier_name supplierNameNotAnalyzed,\n" +
                 "\tap.publish_result_time dealTime,\n" +
                 "\tIFNULL(abs.final_price,abs.real_price) dealTotalPrice\n" +
                 "FROM\n" +
@@ -232,7 +236,7 @@ public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler {
                 "\tap.project_code projectCode,\n" +
                 "\tap.comp_id companyId,\n" +
                 "\tabs.supplier_id supplierId,\n" +
-                "\tabs.supplier_name supplierName,\n" +
+                "\tabs.supplier_name supplierNameNotAnalyzed,\n" +
                 "\tap.publish_result_time dealTime,\n" +
                 "\tSUM(IFNULL(abs.final_price,abs.real_price)*adi.plan_amount*abs.divide_rate/100) dealTotalPrice\n" +
                 "FROM\n" +

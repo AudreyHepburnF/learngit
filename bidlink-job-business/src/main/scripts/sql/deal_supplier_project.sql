@@ -8,6 +8,7 @@ LEFT JOIN purchase_project pp ON psp.project_id = pp.id
 LEFT JOIN purchase_project_ext ppe ON psp.project_id = ppe.id
 WHERE
 	psp.deal_status = 2
+AND pp.id IS NOT NULL
 AND ppe.publish_result_time > ?;
 
   ##查询信息
@@ -20,7 +21,7 @@ SELECT
 	pp.company_name companyName,
 	pp.company_name companyNameNotAnalyzed,
 	psp.supplier_id supplierId,
-	psp.supplier_name supplierName,
+	psp.supplier_name supplierNameNotAnalyzed,
 	ppe.publish_result_time dealTime,
 	psp.deal_total_price dealTotalPrice
 FROM
@@ -29,6 +30,7 @@ LEFT JOIN purchase_project pp ON psp.project_id = pp.id
 LEFT JOIN purchase_project_ext ppe ON psp.project_id = ppe.id
 WHERE
 	psp.deal_status = 2
+AND pp.id IS NOT NULL
 AND ppe.publish_result_time > ?
 LIMIT ?,?;
 
@@ -52,7 +54,7 @@ SELECT
 	bs.company_name companyName,
 	bs.company_name companyNameNotAnalyzed,
 	bs.supplier_id supplierId,
-	bs.supplier_name supplierName,
+	bs.supplier_name supplierNameNotAnalyzed,
 	bs.win_bid_time dealTime,
 	bs.win_bid_total_price dealTotalPrice
 FROM
@@ -72,6 +74,7 @@ FROM
 	LEFT JOIN auction_project_ext ape ON asp.project_id = ape.id
 WHERE
 	asp.deal_status = 3
+AND ap.id IS NOT NULL
 AND ape.publish_result_time > ?;
 
 	##查询信息
@@ -84,7 +87,7 @@ SELECT
 	ap.company_name companyName,
 	ap.company_name companyNameNotAnalyzed,
 	asp.supplier_id supplierId,
-	asp.supplier_name supplierName,
+	asp.supplier_name supplierNameNotAnalyzed,
 	ape.publish_result_time dealTime,
 	asp.deal_total_price dealTotalPrice
 FROM
@@ -93,5 +96,6 @@ FROM
 	LEFT JOIN auction_project_ext ape ON asp.project_id = ape.id
 WHERE
 	asp.deal_status = 3
+AND ap.id IS NOT NULL
 AND ape.publish_result_time > ?
 LIMIT ?,?;

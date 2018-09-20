@@ -11,6 +11,8 @@ import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +65,9 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
     }
 
     private void syncDealSupplierProjectDataService() {
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.deal_supplier_project", null);
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+        queryBuilder.must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.IXIETONG_SOURCE));
+        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.deal_supplier_project", queryBuilder);
         logger.info("协同平台成交项目数据lastSyncTime:" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n" + ",syncTime:" +
                 new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
         doSyncSupplierPurchaseDealProjectService(lastSyncTime);
@@ -87,7 +91,7 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
                 "\tbs.company_name companyName,\n" +
                 "\tbs.company_name companyNameNotAnalyzed,\n" +
                 "\tbs.supplier_id supplierId,\n" +
-                "\tbs.supplier_name supplierName,\n" +
+                "\tbs.supplier_name supplierNameNotAnalyzed,\n" +
                 "\tbs.win_bid_time dealTime,\n" +
                 "\tbs.win_bid_total_price dealTotalPrice\n" +
                 "FROM\n" +
@@ -110,6 +114,7 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
                 "LEFT JOIN purchase_project_ext ppe ON psp.project_id = ppe.id\n" +
                 "WHERE\n" +
                 "\tpsp.deal_status = 2\n" +
+                "AND pp.id IS NOT NULL\n" +
                 "AND ppe.publish_result_time > ?";
         String querySql = "SELECT\n" +
                 "\tpp.id projectId,\n" +
@@ -120,7 +125,7 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
                 "\tpp.company_name companyName,\n" +
                 "\tpp.company_name companyNameNotAnalyzed,\n" +
                 "\tpsp.supplier_id supplierId,\n" +
-                "\tpsp.supplier_name supplierName,\n" +
+                "\tpsp.supplier_name supplierNameNotAnalyzed,\n" +
                 "\tppe.publish_result_time dealTime,\n" +
                 "\tpsp.deal_total_price dealTotalPrice\n" +
                 "FROM\n" +
@@ -129,6 +134,7 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
                 "LEFT JOIN purchase_project_ext ppe ON psp.project_id = ppe.id\n" +
                 "WHERE\n" +
                 "\tpsp.deal_status = 2\n" +
+                "AND pp.id IS NOT NULL\n" +
                 "AND ppe.publish_result_time > ?\n" +
                 "LIMIT ?,?";
         List<Object> params = new ArrayList<>();
