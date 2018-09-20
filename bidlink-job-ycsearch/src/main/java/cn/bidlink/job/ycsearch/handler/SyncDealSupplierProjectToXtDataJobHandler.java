@@ -68,23 +68,21 @@ public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler {
     }
 
     private void syncDealSupplierProjectDataService() {
-        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-        queryBuilder.must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.YUECAI_SOURCE));
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.deal_supplier_project", null);
-        logger.info("悦采平台成交项目数据lastSyncTime:" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n" + ",syncTime:" +
-                new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
         //同步采购项目
-        doSyncSupplierPurchaseDealProjectService(lastSyncTime);
+        doSyncSupplierPurchaseDealProjectService();
         //同步招标项目
-        doSyncSupplierBidDealProjectService(lastSyncTime);
+        doSyncSupplierBidDealProjectService();
         //同步竞价打包
-        doSyncSupplierAuction1DealProjectService(lastSyncTime);
+        Timestamp timestamp = doSyncSupplierAuction1DealProjectService();
         //同步竞价非打包
-        doSyncSupplierAuction2DealProjectService(lastSyncTime);
+        doSyncSupplierAuction2DealProjectService(timestamp);
     }
 
     //同步招标项目
-    private void doSyncSupplierPurchaseDealProjectService(Timestamp lastSyncTime) {
+    private void doSyncSupplierPurchaseDealProjectService() {
+        Timestamp lastSyncTime = getLastSyncTime(PURCHASE_PROJECT_TYPE);
+        logger.info("悦采平台供应商采购成交项目数据lastSyncTime:" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n" + ",syncTime:" +
+                new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
         String queryCountSql = "SELECT\n" +
                 "\tCOUNT(*)\n" +
                 "FROM\n" +
@@ -120,7 +118,10 @@ public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler {
     }
 
     //同步采购项目
-    private void doSyncSupplierBidDealProjectService(Timestamp lastSyncTime) {
+    private void doSyncSupplierBidDealProjectService() {
+        Timestamp lastSyncTime = getLastSyncTime(BID_PROJECT_TYPE);
+        logger.info("悦采平台供应商招标成交项目数据lastSyncTime:" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n" + ",syncTime:" +
+                new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
         String queryCountSql = "SELECT\n" +
                 "\tCOUNT(*)\n" +
                 "FROM\n" +
@@ -173,7 +174,10 @@ public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler {
     }
 
     //同步竞价打包
-    private void doSyncSupplierAuction1DealProjectService(Timestamp lastSyncTime) {
+    private Timestamp doSyncSupplierAuction1DealProjectService() {
+        Timestamp lastSyncTime = getLastSyncTime(AUCTION_PROJECT_TYPE);
+        logger.info("悦采平台供应商竞价打包成交项目数据lastSyncTime:" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n" + ",syncTime:" +
+                new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
         String queryCountSql = "SELECT\n" +
                 "\tCOUNT(*)\n" +
                 "FROM\n" +
@@ -205,10 +209,13 @@ public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler {
         List<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
         doSyncDealProjectService(queryCountSql, querySql, ycDataSource, params, AUCTION_PROJECT_TYPE);
+        return lastSyncTime;
     }
 
     //同步竞价非打包
     private void doSyncSupplierAuction2DealProjectService(Timestamp lastSyncTime) {
+        logger.info("悦采平台供应商竞价非打包成交项目数据lastSyncTime:" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n" + ",syncTime:" +
+                new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
         String queryCountSql = "SELECT\n" +
                 "\tCOUNT(*)\n" +
                 "FROM\n" +
@@ -355,5 +362,12 @@ public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler {
         }
         return map;
 
+    }
+
+    private Timestamp getLastSyncTime(Integer projectType){
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+        queryBuilder.must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.YUECAI_SOURCE))
+                .must(QueryBuilders.termQuery(PROJECT_TYPE,projectType));
+        return ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.deal_supplier_project", queryBuilder);
     }
 }

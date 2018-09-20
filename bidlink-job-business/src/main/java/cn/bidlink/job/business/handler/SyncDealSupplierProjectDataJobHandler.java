@@ -65,16 +65,14 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
     }
 
     private void syncDealSupplierProjectDataService() {
-        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-        queryBuilder.must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.IXIETONG_SOURCE));
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.deal_supplier_project", queryBuilder);
-        logger.info("协同平台成交项目数据lastSyncTime:" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n" + ",syncTime:" +
-                new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
-        doSyncSupplierPurchaseDealProjectService(lastSyncTime);
-        doSyncSupplierBidDealProjectService(lastSyncTime);
+        doSyncSupplierPurchaseDealProjectService();
+        doSyncSupplierBidDealProjectService();
     }
 
-    private void doSyncSupplierBidDealProjectService(Timestamp lastSyncTime) {
+    private void doSyncSupplierBidDealProjectService() {
+        Timestamp lastSyncTime = getLastSyncTime(BID_PROJECT_TYPE);
+        logger.info("协同平台供应商招标成交项目数据lastSyncTime:" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n" + ",syncTime:" +
+                new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
         String queryCountSql = "SELECT\n" +
                 "\tCOUNT(*)\n" +
                 "FROM\n" +
@@ -105,7 +103,10 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
         doSyncDealProjectService(queryCountSql, querySql, tenderDataSource, params, BID_PROJECT_TYPE);
     }
 
-    private void doSyncSupplierPurchaseDealProjectService(Timestamp lastSyncTime) {
+    private void doSyncSupplierPurchaseDealProjectService() {
+        Timestamp lastSyncTime = getLastSyncTime(PURCHASE_PROJECT_TYPE);
+        logger.info("协同平台供应商采购成交项目数据lastSyncTime:" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n" + ",syncTime:" +
+                new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
         String queryCountSql = "SELECT\n" +
                 "\tCOUNT(*)\n" +
                 "FROM\n" +
@@ -210,6 +211,13 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
             throw new RuntimeException("供应商项目ID生成失败，原因：projectId为null!");
         }
         return DigestUtils.md5DigestAsHex((supplierId + "_" + projectId+"_"+BusinessConstant.IXIETONG_SOURCE).getBytes());
+    }
+
+    private Timestamp getLastSyncTime(Integer projectType){
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+        queryBuilder.must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.IXIETONG_SOURCE))
+                .must(QueryBuilders.termQuery(PROJECT_TYPE,projectType));
+        return ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.deal_supplier_project", queryBuilder);
     }
 
 }
