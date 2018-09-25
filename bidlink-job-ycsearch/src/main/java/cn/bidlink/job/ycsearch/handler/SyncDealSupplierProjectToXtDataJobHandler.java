@@ -52,7 +52,7 @@ public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler {
     private String  SUPPLIER_ID            = "supplierId";
     private String  PROJECT_ID            = "projectId";
     private String  DEAL_TOTAL_PRICE      = "dealTotalPrice";
-    private String  LONG_DEAL_TOTAL_PRICE = "longDealTotalPrice";
+    private String  DOUBLE_DEAL_TOTAL_PRICE = "doubleDealTotalPrice";
     private String  PROJECT_TYPE          = "projectType";
     private Integer AUCTION_PROJECT_TYPE = 3;
     private Integer PURCHASE_PROJECT_TYPE = 2;
@@ -323,8 +323,8 @@ public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler {
             map.put(SUPPLIER_ID, String.valueOf(map.get(SUPPLIER_ID)));
             map.put(PROJECT_ID, String.valueOf(map.get(PROJECT_ID)));
             BigDecimal bigDecimal = (BigDecimal) map.get(DEAL_TOTAL_PRICE);
-            map.put(DEAL_TOTAL_PRICE, bigDecimal == null ? "0" : bigDecimal.toString());
-            map.put(LONG_DEAL_TOTAL_PRICE, bigDecimal == null ? 0 : bigDecimal.longValue());
+            map.put(DEAL_TOTAL_PRICE, bigDecimal == null ? "0" : bigDecimal.setScale(2,BigDecimal.ROUND_HALF_UP).toPlainString());
+            map.put(DOUBLE_DEAL_TOTAL_PRICE, bigDecimal == null ? 0 : bigDecimal.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue());
             map.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
             map.put(PROJECT_TYPE, projectType);
             //添加平台来源
