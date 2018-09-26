@@ -11,6 +11,10 @@
         "type": "string",
         "index": "not_analyzed"
       },
+      "projectId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
       "supplierId": {
         "type": "string",
         "index": "not_analyzed"

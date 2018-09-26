@@ -197,6 +197,9 @@
       "md5": {
         "type": "string"
       },
+      "bidUrl": {
+        "type": "string"
+      },
       "platformSource": {
         "type": "integer"
       }

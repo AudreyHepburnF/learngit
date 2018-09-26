@@ -51,7 +51,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                 "cluster.index",
                 "cluster.type.supplier_opportunity",
                 QueryBuilders.boolQuery()
-                        .must(QueryBuilders.termQuery("projectType", BIDDING_PROJECT_TYPE))
+                        .must(QueryBuilders.termQuery(PROJECT_TYPE, BIDDING_PROJECT_TYPE))
                         .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE)));
         logger.info("招标项目商机同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
 //        Timestamp lastSyncTime = SyncTimeUtil.GMT_TIME;
@@ -220,7 +220,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
         } else {
             result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
         }
-        resultToExecute.add(appendIdToResult(result,BusinessConstant.IXIETONG_SOURCE));
+        resultToExecute.add(appendIdToResult(result, BusinessConstant.IXIETONG_SOURCE));
     }
 
 

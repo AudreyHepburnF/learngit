@@ -45,6 +45,10 @@ public abstract class AbstractSyncNoticeDataJobHandler extends JobHandler {
     @Qualifier("auctionDataSource")
     protected DataSource auctionDataSource;
 
+    @Autowired
+    @Qualifier("apiDataSource")
+    protected DataSource apiDataSource;
+
     protected String ID                        = "id";
     protected String PROJECT_ID                = "projectId";
     protected String COMPANY_ID                = "companyId";
@@ -59,6 +63,8 @@ public abstract class AbstractSyncNoticeDataJobHandler extends JobHandler {
     protected String NOTICE_TYPE               = "noticeType";
     protected String SUB_PROJECT_ID            = "subProjectId";
     protected String APPROVE_STATUS            = "approveStatus";
+    protected String RESULT_OPEN_RANGE         = "resultOpenRange";
+    protected String PRICE_OPEN_RANGE          = "priceOpenRange";
 
     protected Integer SOURCE_NOTICE        = 1; // 原始公告和变更公告
     protected Integer RESULT_NOTICE        = 2; // 结果公告

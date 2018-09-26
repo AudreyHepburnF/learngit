@@ -58,6 +58,7 @@ public class SyncDealPurchaseSupplierDataJobHandler extends JobHandler /*impleme
     private String SUPPLIER_NAME              = "supplierName";
     private String SUPPLIER_ID                = "supplierId";
     private String PROJECT_TYPE               = "projectType";
+    private String PROJECT_ID                 = "projectId";
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
@@ -92,6 +93,7 @@ public class SyncDealPurchaseSupplierDataJobHandler extends JobHandler /*impleme
 
         String querySql = "SELECT\n" +
                 "\tcompany_id as companyId,\n" +
+                "\tsub_project_id as projectId,\n" +
                 "\tsupplier_id as supplierId,\n" +
                 "\tsupplier_name as supplierName,\n" +
                 "\tlink_man as linkManNotAnalyzed,\n" +
@@ -123,6 +125,7 @@ public class SyncDealPurchaseSupplierDataJobHandler extends JobHandler /*impleme
 
         String querySql = "SELECT\n" +
                 "\tcompany_id as companyId,\n" +
+                "\tproject_id as projectId,\n" +
                 "\tsupplier_id as supplierId,\n" +
                 "\tsupplier_name as supplierName,\n" +
                 "\tlink_man as linkManNotAnalyzed,\n" +
@@ -180,13 +183,14 @@ public class SyncDealPurchaseSupplierDataJobHandler extends JobHandler /*impleme
     private void refresh(List<Map<String, Object>> mapList, int projectType) {
         mapList.forEach(map -> {
             map.put(ID, generateDealSupplierId(map));
-            map.put(COMPANY_ID, String.valueOf(map.get(COMPANY_ID).toString()));
-            map.put(SUPPLIER_ID, String.valueOf(map.get(SUPPLIER_ID).toString()));
+            map.put(COMPANY_ID, String.valueOf(map.get(COMPANY_ID)));
+            map.put(SUPPLIER_ID, String.valueOf(map.get(SUPPLIER_ID)));
             map.put(PROJECT_TYPE, projectType);
             map.put(SUPPLIER_NAME_NOT_ANALYZED, map.get(SUPPLIER_NAME));
             map.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
+            map.put(PROJECT_ID, String.valueOf(map.get(PROJECT_ID)));
             //添加平台来源
-            map.put(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.IXIETONG_SOURCE);
+            map.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE);
         });
     }
 

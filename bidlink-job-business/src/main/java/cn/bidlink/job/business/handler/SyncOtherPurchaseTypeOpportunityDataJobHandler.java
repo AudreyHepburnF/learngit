@@ -38,6 +38,7 @@ public class SyncOtherPurchaseTypeOpportunityDataJobHandler extends AbstractSync
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.supplier_opportunity",
                 QueryBuilders.boolQuery().must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.OTHER_SOURCE))
                         .must(QueryBuilders.termQuery(PROJECT_TYPE, PURCHASE_PROJECT_TYPE)));
+//        Timestamp lastSyncTime = SyncTimeUtil.GMT_TIME;
         logger.info("同步第三方平台采购商机lastSyncTime:" + SyncTimeUtil.toDateString(lastSyncTime) + "\n" + ",syncTime:" + SyncTimeUtil.currentDateToString());
         syncOtherPurchaseOpportunityDataService(lastSyncTime);
     }
@@ -53,7 +54,8 @@ public class SyncOtherPurchaseTypeOpportunityDataJobHandler extends AbstractSync
                 "FROM\n" +
                 "\tpurchase_information \n" +
                 "WHERE\n" +
-                "\tcreate_time > ?";
+                "\tis_complete = 1" +
+                "\tAND create_time > ?";
 
         String querySql = "SELECT\n" +
                 "                    s.*, pii.id AS directoryId,pii.`name` AS directoryName\n" +
@@ -68,14 +70,14 @@ public class SyncOtherPurchaseTypeOpportunityDataJobHandler extends AbstractSync
                 "                          pi.quote_stop_time AS quoteStopTime,\n" +
                 "                          pi.real_quote_stop_time AS realQuoteStopTime,\n" +
                 "                          pi.zone_str AS areaStr,\n" +
-                //                         FIXME  缺少provide区编码的字段,需要通过该字段来判断属于什么区域
-//                "                        pi.province AS province," +
+                "                          pi.province AS province," +
                 "                          pi.create_time AS createTime,\n" +
                 "                          pi.update_time AS updateTime\n" +
                 "                    FROM" +
                 "                       purchase_information pi                 \n" +
                 "                    WHERE" +
-                "                    pi.create_time > ?" +
+                "                    pi.is_complete = 1" +
+                "                    and pi.create_time > ?" +
                 "                    LIMIT ?,?\n" +
                 "                    ) s\n" +
                 "                 LEFT JOIN purchase_information_item pii ON s.projectId = pii.project_id\n" +
@@ -104,13 +106,14 @@ public class SyncOtherPurchaseTypeOpportunityDataJobHandler extends AbstractSync
                 "                          pi.quote_stop_time AS quoteStopTime,\n" +
                 "                          pi.real_quote_stop_time AS realQuoteStopTime,\n" +
                 "                          pi.zone_str AS areaStr,\n" +
-//                "                        pi.province AS province," +
+                "                          pi.province AS province," +
                 "                          pi.create_time AS createTime,\n" +
                 "                          pi.update_time AS updateTime\n" +
                 "                    FROM" +
                 "                       purchase_information pi                 \n" +
                 "                    WHERE" +
-                "                    pi.update_time > ?" +
+                "                    pi.is_complete = 1" +
+                "                    AND pi.update_time > ?" +
                 "                    LIMIT ?,?\n" +
                 "                    ) s\n" +
                 "                 LEFT JOIN purchase_information_item pii ON s.projectId = pii.project_id\n" +
@@ -122,7 +125,7 @@ public class SyncOtherPurchaseTypeOpportunityDataJobHandler extends AbstractSync
     protected void parseOpportunity(Timestamp currentDate, List<Map<String, Object>> resultToExecute, Map<String, Object> result) {
         Timestamp quoteStopTime = ((Timestamp) result.get(QUOTE_STOP_TIME));
         Timestamp realQuoteStopTime = (Timestamp) result.get(REAL_QUOTE_STOP_TIME);
-        if (realQuoteStopTime != null && quoteStopTime != null && currentDate.before(quoteStopTime)) {
+        if (realQuoteStopTime == null && quoteStopTime != null && currentDate.before(quoteStopTime)) {
             result.put(STATUS, VALID_OPPORTUNITY_STATUS);
         } else {
             result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
@@ -135,6 +138,7 @@ public class SyncOtherPurchaseTypeOpportunityDataJobHandler extends AbstractSync
         super.refresh(result, projectDirectoryMap);
         // 移除属性
         result.remove(REAL_QUOTE_STOP_TIME);
+        result.put(PROJECT_TYPE, PURCHASE_PROJECT_TYPE);
         result.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.OTHER_SOURCE);
     }
 
