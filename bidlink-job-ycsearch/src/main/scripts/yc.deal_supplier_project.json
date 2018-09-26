@@ -50,8 +50,8 @@
         "type": "string",
         "index": "not_analyzed"
       },
-      "doubleDealTotalPrice": {
-        "type": "double"
+      "longDealTotalPrice": {
+        "type": "long"
       },
       "dealTime": {
         "type": "date",

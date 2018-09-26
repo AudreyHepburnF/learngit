@@ -130,7 +130,7 @@ FROM
 			LEFT JOIN auction_directory_info adi ON (abs.directory_id=adi.directory_id AND abs.project_id=adi.project_id)
 		WHERE
 			abs.bid_status = 1
-			AND ap.publish_result_time > 0
+			AND ap.publish_result_time > ?
 			AND ap.project_type = 2
 			AND abs.divide_rate IS NOT NULL
 		GROUP BY

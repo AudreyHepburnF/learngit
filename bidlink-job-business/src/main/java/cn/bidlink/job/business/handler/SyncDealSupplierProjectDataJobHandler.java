@@ -50,7 +50,7 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
     private String  SUPPLIER_ID            = "supplierId";
     private String  PROJECT_ID            = "projectId";
     private String  DEAL_TOTAL_PRICE      = "dealTotalPrice";
-    private String  LONG_DEAL_TOTAL_PRICE = "longDealTotalPrice";
+    private String  DOUBLE_DEAL_TOTAL_PRICE = "doubleDealTotalPrice";
     private String  PROJECT_TYPE          = "projectType";
     private Integer PURCHASE_PROJECT_TYPE = 2;
     private Integer BID_PROJECT_TYPE      = 1;
@@ -65,16 +65,14 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
     }
 
     private void syncDealSupplierProjectDataService() {
-        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-        queryBuilder.must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.IXIETONG_SOURCE));
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.deal_supplier_project", queryBuilder);
-        logger.info("协同平台成交项目数据lastSyncTime:" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n" + ",syncTime:" +
-                new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
-        doSyncSupplierPurchaseDealProjectService(lastSyncTime);
-        doSyncSupplierBidDealProjectService(lastSyncTime);
+        doSyncSupplierPurchaseDealProjectService();
+        doSyncSupplierBidDealProjectService();
     }
 
-    private void doSyncSupplierBidDealProjectService(Timestamp lastSyncTime) {
+    private void doSyncSupplierBidDealProjectService() {
+        Timestamp lastSyncTime = getLastSyncTime(BID_PROJECT_TYPE);
+        logger.info("协同平台供应商招标成交项目数据lastSyncTime:" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n" + ",syncTime:" +
+                new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
         String queryCountSql = "SELECT\n" +
                 "\tCOUNT(*)\n" +
                 "FROM\n" +
@@ -105,7 +103,10 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
         doSyncDealProjectService(queryCountSql, querySql, tenderDataSource, params, BID_PROJECT_TYPE);
     }
 
-    private void doSyncSupplierPurchaseDealProjectService(Timestamp lastSyncTime) {
+    private void doSyncSupplierPurchaseDealProjectService() {
+        Timestamp lastSyncTime = getLastSyncTime(PURCHASE_PROJECT_TYPE);
+        logger.info("协同平台供应商采购成交项目数据lastSyncTime:" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n" + ",syncTime:" +
+                new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
         String queryCountSql = "SELECT\n" +
                 "\tCOUNT(*)\n" +
                 "FROM\n" +
@@ -191,8 +192,8 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
             map.put(SUPPLIER_ID, String.valueOf(map.get(SUPPLIER_ID)));
             map.put(PROJECT_ID, String.valueOf(map.get(PROJECT_ID)));
             BigDecimal bigDecimal = (BigDecimal) map.get(DEAL_TOTAL_PRICE);
-            map.put(DEAL_TOTAL_PRICE, bigDecimal == null ? "0" : bigDecimal.toString());
-            map.put(LONG_DEAL_TOTAL_PRICE, bigDecimal == null ? 0 : bigDecimal.longValue());
+            map.put(DEAL_TOTAL_PRICE, bigDecimal == null ? "0" : bigDecimal.setScale(2,BigDecimal.ROUND_HALF_UP).toPlainString());
+            map.put(DOUBLE_DEAL_TOTAL_PRICE, bigDecimal == null ? 0 : bigDecimal.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue());
             map.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
             map.put(PROJECT_TYPE, projectType);
             //添加平台来源
@@ -210,6 +211,13 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
             throw new RuntimeException("供应商项目ID生成失败，原因：projectId为null!");
         }
         return DigestUtils.md5DigestAsHex((supplierId + "_" + projectId+"_"+BusinessConstant.IXIETONG_SOURCE).getBytes());
+    }
+
+    private Timestamp getLastSyncTime(Integer projectType){
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+        queryBuilder.must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.IXIETONG_SOURCE))
+                .must(QueryBuilders.termQuery(PROJECT_TYPE,projectType));
+        return ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.deal_supplier_project", queryBuilder);
     }
 
 }
