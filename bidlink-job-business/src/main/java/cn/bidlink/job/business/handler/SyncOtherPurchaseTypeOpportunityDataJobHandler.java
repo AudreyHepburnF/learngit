@@ -5,14 +5,16 @@ import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author <a href="mailto:zhihuizhou@ebnew.com">wisdom</a>
@@ -41,6 +43,79 @@ public class SyncOtherPurchaseTypeOpportunityDataJobHandler extends AbstractSync
 //        Timestamp lastSyncTime = SyncTimeUtil.GMT_TIME;
         logger.info("同步第三方平台采购商机lastSyncTime:" + SyncTimeUtil.toDateString(lastSyncTime) + "\n" + ",syncTime:" + SyncTimeUtil.currentDateToString());
         syncOtherPurchaseOpportunityDataService(lastSyncTime);
+        // 修复采购商机时间截止
+        fixExpiredOtherPurchaseTypeOpportunityDataService();
+    }
+
+    private void fixExpiredOtherPurchaseTypeOpportunityDataService() {
+        logger.info("开始修复采购商机截止时间");
+        Properties properties = elasticClient.getProperties();
+        int batchSize = 1000;
+        String currentDate = SyncTimeUtil.currentDateToString();
+        SearchResponse scrollResponse = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+                .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
+                .setQuery(QueryBuilders.boolQuery()
+                        .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.OTHER_SOURCE))
+                        .must(QueryBuilders.termQuery(PROJECT_TYPE, PURCHASE_PROJECT_TYPE))
+                        .must(QueryBuilders.rangeQuery(SyncTimeUtil.SYNC_TIME).lte(currentDate)))
+                .setScroll(new TimeValue(60000))
+                .setSize(batchSize)
+                .execute().actionGet();
+
+        do {
+            SearchHit[] hits = scrollResponse.getHits().getHits();
+            List<Long> projectIds = new ArrayList<>();
+            for (SearchHit hit : hits) {
+                projectIds.add(Long.valueOf(hit.getSource().get(PROJECT_ID).toString()));
+            }
+            doFixExpiredOtherPurchaseTypeOpportunityDataService(projectIds, SyncTimeUtil.getCurrentDate());
+            scrollResponse = elasticClient.getTransportClient().prepareSearchScroll(scrollResponse.getScrollId())
+                    .setScroll(new TimeValue(60000))
+                    .execute().actionGet();
+        } while (scrollResponse.getHits().getHits().length != 0);
+        logger.info("采购商机修复截止时间完成");
+    }
+
+    private void doFixExpiredOtherPurchaseTypeOpportunityDataService(List<Long> projectIds, Timestamp currentDate) {
+        if (!CollectionUtils.isEmpty(projectIds)) {
+            String countSqlTemplate = "SELECT\n" +
+                    "\tcount( 1 ) \n" +
+                    "FROM\n" +
+                    "\tpurchase_information \n" +
+                    "WHERE\n" +
+                    "\tis_complete = 1" +
+                    "\tAND id in (%s) and quote_stop_time < ?";
+
+            String querySqlTemplate = "SELECT\n" +
+                    "                    s.*, pii.id AS directoryId,pii.`name` AS directoryName\n" +
+                    "                 FROM\n" +
+                    "                    (\n" +
+                    "                       SELECT\n" +
+                    "                          pi.company_id AS purchaseId,\n" +
+                    "                          pi.company_name AS purchaseName,\n" +
+                    "                          pi.id AS projectId,\n" +
+                    "                          pi. code AS projectCode,\n" +
+                    "                          pi.`name` AS projectName,\n" +
+                    "                          pi.quote_stop_time AS quoteStopTime,\n" +
+                    "                          pi.real_quote_stop_time AS realQuoteStopTime,\n" +
+                    "                          pi.zone_str AS areaStr,\n" +
+                    "                          pi.province AS province," +
+                    "                          pi.create_time AS createTime,\n" +
+                    "                          pi.update_time AS updateTime\n" +
+                    "                    FROM" +
+                    "                       purchase_information pi                 \n" +
+                    "                    WHERE" +
+                    "                    pi.is_complete = 1" +
+                    "                    and pi.id in (%s)" +
+                    "                    and quote_stop_time < ?" +
+                    "                    LIMIT ?,?\n" +
+                    "                    ) s\n" +
+                    "                 LEFT JOIN purchase_information_item pii ON s.projectId = pii.project_id\n" +
+                    "                 AND s.purchaseId = pii.company_id";
+            String countSql = String.format(countSqlTemplate, StringUtils.collectionToCommaDelimitedString(projectIds));
+            String querySql = String.format(querySqlTemplate, StringUtils.collectionToCommaDelimitedString(projectIds));
+            doSyncProjectDataService(apiDataSource, countSql, querySql, Collections.singletonList(currentDate));
+        }
     }
 
     private void syncOtherPurchaseOpportunityDataService(Timestamp lastSyncTime) {
