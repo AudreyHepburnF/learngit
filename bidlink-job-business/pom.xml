@@ -126,6 +126,11 @@
                 <pom.api.db.url>jdbc:mariadb://testmariadb:3306/api?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.api.db.url>
                 <pom.api.db.username>dashuju</pom.api.db.username>
                 <pom.api.db.password>ixietong!@#$</pom.api.db.password>
+                <!--pro_test数据源-->
+                <pom.pro.db.url>jdbc:mariadb://testmariadb:3306/pro_test?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
+                <pom.pro.db.username>dashuju</pom.pro.db.username>
+                <pom.pro.db.password>ixietong!@#$</pom.pro.db.password>
+
                 <!--供应商企业空间-->
                 <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
@@ -143,6 +148,11 @@
                 <pom.cluster.type.project>project</pom.cluster.type.project>
                 <pom.cluster.type.deal_supplier>deal_supplier</pom.cluster.type.deal_supplier>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
+
+                <!--隆道云项目直通车-->
+                <pom.cluster.express_index>longdaoyun_express</pom.cluster.express_index>
+                <pom.cluster.type.project_express>project_express</pom.cluster.type.project_express>
+                <pom.cluster.type.supplier_recommend_record>supplier_recommend_record</pom.cluster.type.supplier_recommend_record>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
@@ -187,6 +197,10 @@
                 <pom.api.db.url>jdbc:mariadb://testmariadb:3306/api?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.api.db.url>
                 <pom.api.db.username>dashuju</pom.api.db.username>
                 <pom.api.db.password>ixietong!@#$</pom.api.db.password>
+                <!--pro_test数据源-->
+                <pom.pro.db.url>jdbc:mariadb://testmariadb:3306/pro_test?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
+                <pom.pro.db.username>dashuju</pom.pro.db.username>
+                <pom.pro.db.password>ixietong!@#$</pom.pro.db.password>
                 <!--供应商企业空间-->
                 <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
@@ -204,6 +218,11 @@
                 <pom.cluster.type.project>project</pom.cluster.type.project>
                 <pom.cluster.type.deal_supplier>deal_supplier</pom.cluster.type.deal_supplier>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
+                <!--隆道云项目直通车-->
+                <pom.cluster.express_index>longdaoyun_express</pom.cluster.express_index>
+                <pom.cluster.type.project_express>project_express</pom.cluster.type.project_express>
+                <pom.cluster.type.supplier_recommend_record>supplier_recommend_record</pom.cluster.type.supplier_recommend_record>
+
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
@@ -258,6 +277,11 @@
                 <pom.cluster.type.project>project</pom.cluster.type.project>
                 <pom.cluster.type.deal_supplier>deal_supplier</pom.cluster.type.deal_supplier>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
+
+                <!--隆道云项目直通车-->
+                <pom.cluster.express_index>longdaoyun_express</pom.cluster.express_index>
+                <pom.cluster.type.project_express>project_express</pom.cluster.type.project_express>
+                <pom.cluster.type.supplier_recommend_record>supplier_recommend_record</pom.cluster.type.supplier_recommend_record>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
