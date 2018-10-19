@@ -260,6 +260,15 @@
                 <pom.unireg.db.url>jdbc:mariadb://usercenter-mariadb.internal.cg-xt.com:3312/usercenter?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
                 <pom.unireg.db.username>appaccount</pom.unireg.db.username>
                 <pom.unireg.db.password>app!@#$4321</pom.unireg.db.password>
+
+                <!--第三方平台商机数据源 TODO 待修改-->
+                <pom.api.db.url>jdbc:mariadb://testmariadb:3306/api?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.api.db.url>
+                <pom.api.db.username>dashuju</pom.api.db.username>
+                <pom.api.db.password>ixietong!@#$</pom.api.db.password>
+                <!--pro_test数据源 TODO 待修改-->
+                <pom.pro.db.url>jdbc:mariadb://testmariadb:3306/pro_test?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
+                <pom.pro.db.username>dashuju</pom.pro.db.username>
+                <pom.pro.db.password>ixietong!@#$</pom.pro.db.password>
                 <!--供应商企业空间-->
                 <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
