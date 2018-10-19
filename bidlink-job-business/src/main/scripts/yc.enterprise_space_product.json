@@ -50,9 +50,12 @@
         "type": "string",
         "index": "not_analyzed"
       },
-      "createTime":  {
+      "createTime": {
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "platformSource": {
+        "type": "integer"
       }
     }
   }

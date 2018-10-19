@@ -44,4 +44,8 @@ public class SyncTimeUtil {
             return String.valueOf(propertyValue);
         }
     }
+
+    public static String currentDateToString() {
+        return toDateString(getCurrentDate());
+    }
 }

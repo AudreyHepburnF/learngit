@@ -1,5 +1,6 @@
 package cn.bidlink.job.business.handler;
 
+import cn.bidlink.job.common.constant.BusinessConstant;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
@@ -386,6 +387,8 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
         resultToUse.put(ID, generateSupplierProductId(resultToUse));
         // 将supplierId转为string
         resultToUse.put(SUPPLIER_ID, String.valueOf(resultToUse.get(SUPPLIER_ID)));
+        //添加平台来源
+        resultToUse.put(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.IXIETONG_SOURCE);
         return resultToUse;
     }
 

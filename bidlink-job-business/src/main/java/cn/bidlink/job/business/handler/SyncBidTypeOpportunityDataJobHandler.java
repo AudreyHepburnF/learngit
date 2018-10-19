@@ -1,23 +1,22 @@
 package cn.bidlink.job.business.handler;
 
-import cn.bidlink.job.business.utils.AreaUtil;
+import cn.bidlink.job.common.constant.BusinessConstant;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
-import org.springframework.util.DigestUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static cn.bidlink.job.business.utils.AreaUtil.queryAreaInfo;
+import java.util.*;
 
 
 /**
@@ -30,7 +29,7 @@ import static cn.bidlink.job.business.utils.AreaUtil.queryAreaInfo;
  */
 @JobHander(value = "syncBidTypeOpportunityDataJobHandler")
 @Service
-public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunityDataJobHandler /*implements InitializingBean */{
+public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunityDataJobHandler /*implements InitializingBean*/ {
 
     private String OPEN_RANGE_TYPE = "openRangeType";
     private String NODE            = "node";
@@ -52,31 +51,63 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                 "cluster.index",
                 "cluster.type.supplier_opportunity",
                 QueryBuilders.boolQuery()
-                        .must(QueryBuilders.termQuery("projectType", BIDDING_PROJECT_TYPE))
-                        .must(QueryBuilders.termQuery("source", SOURCE_NEW)));
+                        .must(QueryBuilders.termQuery(PROJECT_TYPE, BIDDING_PROJECT_TYPE))
+                        .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE)));
         logger.info("招标项目商机同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
 //        Timestamp lastSyncTime = SyncTimeUtil.GMT_TIME;
         syncBiddingProjectDataService(lastSyncTime);
+        // 修复招标项目 截止时间到后,商机状态
+        fixExpiredBiddingProjectDataService();
     }
 
     /**
-     * 同步招标项目
-     *
-     * @param lastSyncTime
+     * 修复招标项目商机状态
      */
-    private void syncBiddingProjectDataService(Timestamp lastSyncTime) {
-        String countUpdatedSql = "SELECT\n"
-                + "   count(1)\n"
-                + "FROM\n"
-                + "   bid_sub_project\n"
-                + "WHERE\n"
-                + "   is_bid_open = 1 AND node > 1 AND approve_status = 2 AND update_time > ?";
-        String queryUpdatedSql = "SELECT\n" +
-                "\tproject.*,\n" +
-                "\tbpi.id AS directoryId,\n" +
-                "\tbpi.`name` AS directoryName \n" +
-                "FROM\n" +
-                "\t(\n" +
+    private void fixExpiredBiddingProjectDataService() {
+        logger.info("开始修复招标项目自动截标商机状态");
+//        long startTime = System.currentTimeMillis();
+        String currentDate = SyncTimeUtil.toDateString(SyncTimeUtil.getCurrentDate());
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE))
+                .must(QueryBuilders.termQuery(PROJECT_TYPE, BIDDING_PROJECT_TYPE))
+                .must(QueryBuilders.rangeQuery(SyncTimeUtil.SYNC_TIME).lte(currentDate));
+        int batchSize = 1000;
+        Properties properties = elasticClient.getProperties();
+        SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+                .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
+                .setQuery(queryBuilder)
+                .setScroll(new TimeValue(60000))
+                .setSize(batchSize)
+                .execute().actionGet();
+        do {
+            SearchHit[] hits = scrollResp.getHits().getHits();
+            List<Long> projectIds = new ArrayList<>();
+            for (SearchHit hit : hits) {
+                projectIds.add(Long.valueOf(hit.getSource().get("projectId").toString()));
+            }
+            doFixExpiredBiddingProjectDataService(projectIds);
+            scrollResp = elasticClient.getTransportClient().prepareSearchScroll(scrollResp.getScrollId())
+                    .setScroll(new TimeValue(60000))
+                    .execute().actionGet();
+        } while (scrollResp.getHits().getHits().length != 0);
+//        long endTime = System.currentTimeMillis();
+//        System.out.println(endTime - startTime);
+        logger.info("结束修复招标项目自动截标商机状态");
+    }
+
+    private void doFixExpiredBiddingProjectDataService(List<Long> projectIds) {
+        if (!CollectionUtils.isEmpty(projectIds)) {
+            String countTemplateSql = "SELECT\n"
+                    + "   count(1)\n"
+                    + "FROM\n"
+                    + "   bid_sub_project\n"
+                    + "WHERE\n"
+                    + "   is_bid_open = 1 AND node > 1 AND approve_status = 2 AND  id in (%s) AND bid_endtime < ?";
+            String queryTemplateSql = "SELECT\n" +
+                    "\tproject.*,\n" +
+                    "\tbpi.id AS directoryId,\n" +
+                    "\tbpi.`name` AS directoryName \n" +
+                    "FROM\n" +
+                    "\t(\n" +
                     "SELECT\n" +
                     "\tbsp.id AS projectId,\n" +
                     "\tbsp.project_code AS projectCode,\n" +
@@ -101,43 +132,65 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                     "\tis_bid_open = 1 \n" +
                     "\tAND node > 1 \n" +
                     "\tAND bsp.approve_status = 2\n" +
-                    "\tAND bsp.update_time > ? \n" +
+                    "\tAND bsp.id in (%s) \n" +
+                    "\tAND bsp.bid_endtime < ? \n" +
                     "\tLIMIT ?,? \n" +
+                    "\t) project\n" +
+                    "\tLEFT JOIN bid_project_item bpi ON project.projectId = bpi.sub_project_id";
+            String projectIdsStr = StringUtils.collectionToCommaDelimitedString(projectIds);
+            String countSql = String.format(countTemplateSql, projectIdsStr);
+            String querySql = String.format(queryTemplateSql, projectIdsStr);
+            doSyncProjectDataService(tenderDataSource, countSql, querySql, Collections.singletonList(SyncTimeUtil.getCurrentDate()));
+        }
+    }
+
+    /**
+     * 同步招标项目
+     *
+     * @param lastSyncTime
+     */
+    private void syncBiddingProjectDataService(Timestamp lastSyncTime) {
+        String countUpdatedSql = "SELECT\n"
+                + "   count(1)\n"
+                + "FROM\n"
+                + "   bid_sub_project\n"
+                + "WHERE\n"
+                + "   is_bid_open = 1 AND node > 1 AND approve_status = 2 AND update_time > ?";
+        String queryUpdatedSql = "SELECT\n" +
+                "\tproject.*,\n" +
+                "\tbpi.id AS directoryId,\n" +
+                "\tbpi.`name` AS directoryName \n" +
+                "FROM\n" +
+                "\t(\n" +
+                "SELECT\n" +
+                "\tbsp.id AS projectId,\n" +
+                "\tbsp.project_code AS projectCode,\n" +
+                "\tbsp.project_name AS projectName,\n" +
+                "\tbsp.project_status AS projectStatus,\n" +
+                "\tbsp.company_id AS purchaseId,\n" +
+                "\tbsp.company_name AS purchaseName,\n" +
+                "\tbsp.create_time AS createTime,\n" +
+                "\tbsp.node,\n" +
+                "\tbsp.bid_open_time AS bidOpenTime,\n" +
+                "\tbsp.bid_endtime AS quoteStopTime,\n" +
+                "\tbsp.sys_id AS sourceId,\n" +
+                "\tbsp.update_time AS updateTime,\n" +
+                "\tbp.province,\n" +
+                "\tbp.zone_str AS areaStr, \n" +
+                "\tbp.industry_name AS industryStr \n" +
+                "FROM\n" +
+                "\tbid_sub_project bsp\n" +
+                "\tLEFT JOIN bid_project bp ON bsp.project_id = bp.id \n" +
+                "\tAND bsp.company_id = bp.company_id \n" +
+                "WHERE\n" +
+                "\tis_bid_open = 1 \n" +
+                "\tAND node > 1 \n" +
+                "\tAND bsp.approve_status = 2\n" +
+                "\tAND bsp.update_time > ? \n" +
+                "\tLIMIT ?,? \n" +
                 "\t) project\n" +
                 "\tLEFT JOIN bid_project_item bpi ON project.projectId = bpi.sub_project_id";
         doSyncProjectDataService(tenderDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList(((Object) lastSyncTime)));
-    }
-
-
-    @Override
-    protected void appendTenantKeyAndAreaStrToResult(List<Map<String, Object>> resultToExecute, Set<Long> purchaseIds) {
-        if (purchaseIds.size() > 0) {
-            Map<Long, AreaUtil.AreaInfo> areaMap = queryAreaInfo(uniregDataSource, purchaseIds);
-            for (Map<String, Object> result : resultToExecute) {
-                Long purchaseId = Long.valueOf(String.valueOf(result.get(PURCHASE_ID)));
-                AreaUtil.AreaInfo areaInfo = areaMap.get(purchaseId);
-                if (areaInfo != null) {
-                    result.put(AREA_STR, areaInfo.getAreaStr());
-                    // 添加不分词的areaStr
-                    result.put(AREA_STR_NOT_ANALYZED, result.get(AREA_STR));
-                    result.put(REGION, areaInfo.getRegion());
-                }
-            }
-        }
-    }
-
-    @Override
-    protected String generateOpportunityId(Map<String, Object> result) {
-        Long projectId = (Long) result.get(PROJECT_ID);
-        Long purchaseId = (Long) result.get(PURCHASE_ID);
-        if (projectId == null) {
-            throw new RuntimeException("商机ID生成失败，原因：项目ID为空!");
-        }
-        if (StringUtils.isEmpty(purchaseId)) {
-            throw new RuntimeException("商机ID生成失败，原因：采购商ID为空!");
-        }
-
-        return DigestUtils.md5DigestAsHex((projectId + "_" + purchaseId + "_" + SOURCE_NEW).getBytes());
     }
 
     @Override
@@ -148,8 +201,8 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
         result.put(PROJECT_TYPE, BIDDING_PROJECT_TYPE);
         // 公开类型，默认为1
         result.put(OPEN_RANGE_TYPE, 1);
-        // 新平台
-        result.put(SOURCE, SOURCE_NEW);
+        //添加平台来源
+        result.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE);
     }
 
     @Override
@@ -164,11 +217,10 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                 && projectStatus == PROJECT_EXECUTING
                 && node == BIDDING) {
             result.put(STATUS, VALID_OPPORTUNITY_STATUS);
-            resultToExecute.add(appendIdToResult(result));
         } else {
             result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
-            resultToExecute.add(appendIdToResult(result));
         }
+        resultToExecute.add(appendIdToResult(result, BusinessConstant.IXIETONG_SOURCE));
     }
 
 

@@ -1,0 +1,71 @@
+// 方式1：直接在head界面操作，longdaoyun_test/deal_supplier_project/_mapping POST
+// 方式2：curl -XPOST http://dcsearch.api.yuecai.com/longdaoyun_test/deal_supplier_project/_mapping -d'
+{
+  "deal_supplier_project": {
+    "properties": {
+      "id": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "companyId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "companyName": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "companyNameNotAnalyzed": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "supplierId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "supplierNameNotAnalyzed": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "projectId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "projectType": {
+        "type": "integer"
+      },
+      "projectName": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "projectNameNotAnalyzed": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "projectCode": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "dealTotalPrice": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "doubleDealTotalPrice": {
+        "type": "double"
+      },
+      "dealTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "syncTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "platformSource": {
+        "type": "integer"
+      }
+    }
+  }
+}
+
+

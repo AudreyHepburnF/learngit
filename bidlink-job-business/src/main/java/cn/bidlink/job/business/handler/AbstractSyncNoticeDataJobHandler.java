@@ -1,5 +1,6 @@
 package cn.bidlink.job.business.handler;
 
+import cn.bidlink.job.common.constant.BusinessConstant;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
@@ -15,7 +16,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.CollectionUtils;
 
 import javax.sql.DataSource;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:zhihuizhou@ebnew.com">zhouzhihui</a>
@@ -38,6 +41,14 @@ public abstract class AbstractSyncNoticeDataJobHandler extends JobHandler {
     @Qualifier("tenderDataSource")
     protected DataSource tenderDataSource;
 
+    @Autowired
+    @Qualifier("auctionDataSource")
+    protected DataSource auctionDataSource;
+
+    @Autowired
+    @Qualifier("apiDataSource")
+    protected DataSource apiDataSource;
+
     protected String ID                        = "id";
     protected String PROJECT_ID                = "projectId";
     protected String COMPANY_ID                = "companyId";
@@ -52,14 +63,17 @@ public abstract class AbstractSyncNoticeDataJobHandler extends JobHandler {
     protected String NOTICE_TYPE               = "noticeType";
     protected String SUB_PROJECT_ID            = "subProjectId";
     protected String APPROVE_STATUS            = "approveStatus";
+    protected String RESULT_OPEN_RANGE         = "resultOpenRange";
+    protected String PRICE_OPEN_RANGE          = "priceOpenRange";
 
     protected Integer SOURCE_NOTICE        = 1; // 原始公告和变更公告
     protected Integer RESULT_NOTICE        = 2; // 结果公告
     protected Integer BID_NOTICE_TYPE      = 1; // 招标公告
     protected Integer PURCHASE_NOTICE_TYPE = 2; // 采购公告
+    protected Integer AUCTION_NOTICE_TYPE  = 3; // 竞价公告
 
 
-    protected void doSyncNoticeService(DataSource dataSource, String countSql, String querySql, ArrayList<Object> params, Integer noticeType) {
+    protected void doSyncNoticeService(DataSource dataSource, String countSql, String querySql, List<Object> params, Integer noticeType) {
         long count = DBUtil.count(dataSource, countSql, params);
         logger.debug("执行countSql: {}, params: {}, 共{}条", countSql, params, count);
         for (long i = 0; i < count; i = i + pageSize) {
@@ -81,11 +95,12 @@ public abstract class AbstractSyncNoticeDataJobHandler extends JobHandler {
         result.put(ID, String.valueOf(result.get(ID)));
         result.put(COMPANY_ID, String.valueOf(result.get(COMPANY_ID)));
         result.put(PROJECT_ID, String.valueOf(result.get(PROJECT_ID)));
-        result.put(SUB_PROJECT_ID, String.valueOf(result.get(SUB_PROJECT_ID)));
         result.put(PROJECT_NAME_NOT_ANALYZED, result.get(PROJECT_NAME));
         result.put(COMPANY_NAME_NOT_ANALYZED, result.get(COMPANY_NAME));
         // 添加同步时间字段
         result.put(SYNC_TIME, SyncTimeUtil.getCurrentDate());
+        //添加平台来源
+        result.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE);
     }
 
     protected void batchExecute(List<Map<String, Object>> mapList) {

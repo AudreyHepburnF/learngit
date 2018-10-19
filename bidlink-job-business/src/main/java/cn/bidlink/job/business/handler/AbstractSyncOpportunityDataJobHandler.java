@@ -1,8 +1,8 @@
 package cn.bidlink.job.business.handler;
 
-import cn.bidlink.job.business.utils.RegionUtil;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
+import cn.bidlink.job.common.utils.RegionUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.ValueFilter;
@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
@@ -41,23 +42,28 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected DataSource purchaseDataSource;
 
     @Autowired
+    @Qualifier("auctionDataSource")
+    protected DataSource auctionDataSource;
+
+    @Autowired
     @Qualifier("uniregDataSource")
     protected DataSource uniregDataSource;
 
+    @Autowired
+    @Qualifier("apiDataSource")
+    protected DataSource apiDataSource;
+
 
     // 有效的商机
-    protected int    VALID_OPPORTUNITY_STATUS   = 1;
+    protected int VALID_OPPORTUNITY_STATUS   = 1;
     // 无效的商机
-    protected int    INVALID_OPPORTUNITY_STATUS = -1;
+    protected int INVALID_OPPORTUNITY_STATUS = -1;
     // 招标项目类型
-    protected int    BIDDING_PROJECT_TYPE       = 1;
+    protected int BIDDING_PROJECT_TYPE       = 1;
     // 采购项目类型
-    protected int    PURCHASE_PROJECT_TYPE      = 2;
-    // 新平台数据
-    protected String SOURCE_NEW                 = "new";
-    // 老平台数据
-    protected String SOURCE_OLD                 = "old";
-
+    protected int PURCHASE_PROJECT_TYPE      = 2;
+    // 竞价项目类型
+    protected int AUCTION_PROJECT_TYPE       = 3;
 
     protected String ID                          = "id";
     protected String PURCHASE_ID                 = "purchaseId";
@@ -73,6 +79,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected String PROJECT_NAME                = "projectName";
     protected String PROJECT_NAME_NOT_ANALYZED   = "projectNameNotAnalyzed";
     protected String PROJECT_STATUS              = "projectStatus";
+    protected String NODE                        = "node";
     protected String AREA_STR                    = "areaStr";
     protected String AREA_STR_NOT_ANALYZED       = "areaStrNotAnalyzed";
     protected String REGION                      = "region";
@@ -86,13 +93,12 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected String CITY                        = "city";
     protected String COUNTY                      = "county";
     protected String PROVINCE                    = "province";
-    // 数据来源，new表示新平台，old表示老平台
-    protected String SOURCE                      = "source";
+    protected String REAL_QUOTE_STOP_TIME        = "realQuoteStopTime";
 
 
-    protected Map<String, Object> appendIdToResult(Map<String, Object> result) {
+    protected Map<String, Object> appendIdToResult(Map<String, Object> result,Integer platformSourceValue) {
         // 生成id
-        result.put(ID, generateOpportunityId(result));
+        result.put(ID, generateOpportunityId(result,platformSourceValue));
         return result;
     }
 
@@ -103,7 +109,18 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
      * @param result
      * @return
      */
-    protected abstract String generateOpportunityId(Map<String, Object> result);
+    protected String generateOpportunityId(Map<String, Object> result,Integer platformSourceValue) {
+        Long projectId = (Long) result.get(PROJECT_ID);
+        Long purchaseId = (Long) result.get(PURCHASE_ID);
+        if (projectId == null) {
+            throw new RuntimeException("商机ID生成失败，原因：项目ID为空!");
+        }
+        if (StringUtils.isEmpty(purchaseId)) {
+            throw new RuntimeException("商机ID生成失败，原因：采购商ID为空!");
+        }
+
+        return DigestUtils.md5DigestAsHex((projectId + "_" + purchaseId + "_" + platformSourceValue).getBytes());
+    }
 
     protected class DirectoryEntity {
         protected Long   directoryId;
@@ -169,8 +186,6 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
                     refresh(result, projectDirectoryMap);
                 }
 
-                // 添加tenantKey，以及区域 TODO 采购项目和招标项目取项目对应项目表中的
-//                appendTenantKeyAndAreaStrToResult(resultToExecute, purchaseIds);
                 // 处理商机的状态
                 batchExecute(resultToExecute);
                 i += pageSize;
@@ -178,13 +193,6 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
         }
     }
 
-    /**
-     * 添加租户key tenantKey和区域 areaStr
-     *
-     * @param resultToExecute
-     * @param purchaseIds
-     */
-    protected abstract void appendTenantKeyAndAreaStrToResult(List<Map<String, Object>> resultToExecute, Set<Long> purchaseIds);
 
     /**
      * 刷新字段
@@ -256,10 +264,10 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
 
     protected void batchExecute(List<Map<String, Object>> resultsToUpdate) {
 //        System.out.println(resultsToUpdate);
-        System.out.println("size : " + resultsToUpdate.size());
-        for (Map<String, Object> map : resultsToUpdate) {
-            System.out.println(map);
-        }
+//        System.out.println("size : " + resultsToUpdate.size());
+//        for (Map<String, Object> map : resultsToUpdate) {
+//            System.out.println(map);
+//        }
         if (!CollectionUtils.isEmpty(resultsToUpdate)) {
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> result : resultsToUpdate) {
