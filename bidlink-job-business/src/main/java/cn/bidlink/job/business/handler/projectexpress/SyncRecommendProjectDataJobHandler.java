@@ -236,8 +236,8 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                             recommendRecord.put("matchedProducts", matchedProducts);
                             recommendRecord.put("coreSupplierProject", coreSupplierProject);
                             recommendRecord.put("matchedDate", now);
-                            recommendRecord.put("bsCreateTime", now);
-                            recommendRecord.put("bsUpdateTime", null);
+                            recommendRecord.put("createTime", now);
+                            recommendRecord.put("updateTime", null);
                             recommendRecord.put("attendStatus", 1);
                             recommendRecord.put("id", DigestUtils.md5DigestAsHex((map.get("orderCode").toString() + "_" + projectId).getBytes()));
                             recommendRecords.add(recommendRecord);

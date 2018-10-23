@@ -15,7 +15,6 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -33,7 +32,7 @@ import java.util.*;
  */
 @Service
 @JobHander(value = "syncProjectExpressDataJobHandler")
-public class SyncProjectExpressDataJobHandler extends JobHandler implements InitializingBean {
+public class SyncProjectExpressDataJobHandler extends JobHandler /*implements InitializingBean*/ {
 
     private Logger logger = LoggerFactory.getLogger(SyncProjectExpressDataJobHandler.class);
 
@@ -180,8 +179,8 @@ public class SyncProjectExpressDataJobHandler extends JobHandler implements Init
         map.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        execute();
-    }
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+//        execute();
+//    }
 }
