@@ -295,6 +295,7 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
                 "\ttrc.CREATE_TIME AS createTime,\n" +
                 "\ttrc.UPDATE_TIME AS updateTime,\n" +
                 "\ttrc.WEB_TYPE AS webType,\n" +
+                "\ttrc.status AS status,\n" +
                 "\ttru.LOGIN_NAME AS loginName,\n" +
                 "\ttru.`NAME` AS supplierName,\n" +
                 "\ttru.MOBILE AS mobile,\n" +
@@ -341,6 +342,7 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
                 + "   trc.CREATE_TIME AS createTime,\n"
                 + "   trc.UPDATE_TIME AS updateTime,\n"
                 + "   trc.WEB_TYPE AS webType,\n"
+                + "   trc.status AS status,\n"
                 + "   tru.LOGIN_NAME AS loginName,\n"
                 + "   tru.`NAME` AS supplierName,\n"
                 + "   tru.MOBILE AS mobile,\n"

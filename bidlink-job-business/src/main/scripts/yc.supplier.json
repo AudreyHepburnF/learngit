@@ -200,6 +200,9 @@
       },
       "platformSource": {
         "type": "integer"
+      },
+      "status": {
+        "type": "long"
       }
     }
   }

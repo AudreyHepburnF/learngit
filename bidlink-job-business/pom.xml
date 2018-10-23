@@ -152,7 +152,7 @@
                 <!--隆道云项目直通车-->
                 <pom.cluster.express_index>longdaoyun_express</pom.cluster.express_index>
                 <pom.cluster.type.project_express>project_express</pom.cluster.type.project_express>
-                <pom.cluster.type.supplier_recommend_record>supplier_recommend_record</pom.cluster.type.supplier_recommend_record>
+                <pom.cluster.type.project_express_supplier_recommend_record>project_express_supplier_recommend_record</pom.cluster.type.project_express_supplier_recommend_record>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
@@ -221,7 +221,7 @@
                 <!--隆道云项目直通车-->
                 <pom.cluster.express_index>longdaoyun_express</pom.cluster.express_index>
                 <pom.cluster.type.project_express>project_express</pom.cluster.type.project_express>
-                <pom.cluster.type.supplier_recommend_record>supplier_recommend_record</pom.cluster.type.supplier_recommend_record>
+                <pom.cluster.type.project_express_supplier_recommend_record>project_express_supplier_recommend_record</pom.cluster.type.project_express_supplier_recommend_record>
 
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
@@ -290,7 +290,7 @@
                 <!--隆道云项目直通车-->
                 <pom.cluster.express_index>longdaoyun_express</pom.cluster.express_index>
                 <pom.cluster.type.project_express>project_express</pom.cluster.type.project_express>
-                <pom.cluster.type.supplier_recommend_record>supplier_recommend_record</pom.cluster.type.supplier_recommend_record>
+                <pom.cluster.type.project_express_supplier_recommend_record>project_express_supplier_recommend_record</pom.cluster.type.project_express_supplier_recommend_record>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>

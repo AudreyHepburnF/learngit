@@ -1,6 +1,8 @@
 package cn.bidlink.job.common.utils;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.util.Date;
@@ -47,5 +49,12 @@ public class SyncTimeUtil {
 
     public static String currentDateToString() {
         return toDateString(getCurrentDate());
+    }
+
+    public static Date toStringDate(String propertyValue) {
+        if (!StringUtils.isEmpty(propertyValue)) {
+            return DateTime.parse(propertyValue, DateTimeFormat.forPattern(SyncTimeUtil.DATE_TIME_PATTERN)).toDate();
+        }
+        return null;
     }
 }

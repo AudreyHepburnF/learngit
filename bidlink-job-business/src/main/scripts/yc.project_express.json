@@ -59,6 +59,10 @@
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
+      "bsUpdateTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
       "createUserId": {
         "type": "string",
         "index": "not_analyzed"
@@ -69,9 +73,13 @@
       },
       "keywords": {
         "type": "string",
-        "index": "not_analyzed"
+        "analyzer": "ik"
       },
       "matchTimes": {
+        "type": "integer",
+        "index": "not_analyzed"
+      },
+      "alreadyMatchTimes": {
         "type": "integer",
         "index": "not_analyzed"
       },
