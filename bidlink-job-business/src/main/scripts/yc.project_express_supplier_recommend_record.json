@@ -1,0 +1,85 @@
+// 方式1：直接在head界面操作，yc_test/purchase/_mapping POST
+// 方式2：curl -XPOST http://dcsearch.api.yuecai.com/yc_test/purchase/_mapping -d'
+{
+  "project_express_supplier_recommend_record": {
+    "properties": {
+      "attendStatus": {
+        "type": "integer"
+      },
+      "bidStopTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "bidStopType": {
+        "type": "integer"
+      },
+      "createTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "updateTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "coreSupplierProject": {
+        "type": "integer"
+      },
+      "id": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "keywords": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "linkMan": {
+        "type": "string"
+      },
+      "linkPhone": {
+        "type": "string"
+      },
+      "matchedDate": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "matchedProducts": {
+        "type": "string"
+      },
+      "orderCode": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "projectCode": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "projectId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "projectName": {
+        "type": "string"
+      },
+      "projectStatus": {
+        "type": "integer"
+      },
+      "purchaserId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "purchaserName": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "supplierId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "supplierName": {
+        "type": "string",
+        "index": "not_analyzed"
+      }
+    }
+  }
+}
+
