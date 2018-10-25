@@ -95,6 +95,7 @@ public abstract class AbstractSyncSupplierDataJobHandler extends JobHandler {
     protected String REGION                      = "region";
     protected String COMPANY_NAME                = "companyName";
     protected String COMPANY_NAME_NOT_ANALYZED   = "companyNameNotAnalyzed";
+    protected String DATA_STATUS                 = "dataStatus";
 
     // 两位有效数字，四舍五入
     protected final DecimalFormat format = new DecimalFormat("0.00");

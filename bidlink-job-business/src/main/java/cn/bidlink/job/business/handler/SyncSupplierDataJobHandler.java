@@ -1,10 +1,7 @@
 package cn.bidlink.job.business.handler;
 
 import cn.bidlink.job.common.constant.BusinessConstant;
-import cn.bidlink.job.common.utils.AreaUtil;
-import cn.bidlink.job.common.utils.DBUtil;
-import cn.bidlink.job.common.utils.ElasticClientUtil;
-import cn.bidlink.job.common.utils.SyncTimeUtil;
+import cn.bidlink.job.common.utils.*;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.search.SearchResponse;
@@ -379,6 +376,13 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
 
                 // 添加区域
                 appendAreaStrToResult(resultToExecute, supplierIds);
+
+                // 数据校验
+                for (Map<String, Object> result : resultToExecute) {
+                    // 数据完整性 1:完整 0:不完整
+                    result.put(DATA_STATUS, ValidateUtil.checkDataComplete(result, 13));
+                }
+
                 // 添加诚信等级 FIXME 诚信值表(目前默认为38)
                 appendCreditToResult(resultToExecute, supplierIds);
                 // 添加企业空间 FIXME 企业空间待更换数据源
