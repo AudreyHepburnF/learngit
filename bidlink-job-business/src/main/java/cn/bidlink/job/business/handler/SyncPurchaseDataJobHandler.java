@@ -183,7 +183,7 @@ public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandl
 
                 // 校验数据
                 for (Map<String, Object> purchaser : purchasers) {
-                    purchaser.put(DATA_STATUS, ValidateUtil.checkDataComplete(purchaser, 12));
+                    purchaser.put(DATA_STATUS, ValidateUtil.checkDataComplete(purchaser, ValidateUtil.PURCHASER));
                 }
                 // 添加采购商交易量信息,从es中查询
                 appendPurchaseTradingInfo(purchasers, purchaserIds, syncWay);

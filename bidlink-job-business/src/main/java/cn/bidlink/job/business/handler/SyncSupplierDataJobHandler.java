@@ -380,7 +380,7 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
                 // 数据校验
                 for (Map<String, Object> result : resultToExecute) {
                     // 数据完整性 1:完整 0:不完整
-                    result.put(DATA_STATUS, ValidateUtil.checkDataComplete(result, 13));
+                    result.put(DATA_STATUS, ValidateUtil.checkDataComplete(result, ValidateUtil.SUPPLIER));
                 }
 
                 // 添加诚信等级 FIXME 诚信值表(目前默认为38)

@@ -12,19 +12,19 @@ import java.util.Objects;
 public class ValidateUtil {
 
     // 采购商
-    private static final Integer PURCHASER = 12;
+    public static final Integer PURCHASER = 12;
 
     // 供应商
-    private static final Integer SUPPLIER = 13;
+    public static final Integer SUPPLIER = 13;
 
     // 完善
-    private static final Integer COMPLETE = 1;
+    public static final Integer COMPLETE = 1;
 
     // 不完善
-    private static final Integer NOT_COMPLETE = 0;
+    public static final Integer NOT_COMPLETE = 0;
 
     // 限制次数
-    private static final Integer LIMIT_NUM = 3;
+    public static final Integer LIMIT_NUM = 3;
 
     /**
      * 检查数据完整性 1:完整 0:不完整
