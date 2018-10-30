@@ -221,6 +221,8 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
         } else {
             result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
         }
+        // 招标商机默认展示
+        result.put(IS_SHOW, SHOW);
         resultToExecute.add(appendIdToResult(result, BusinessConstant.IXIETONG_SOURCE));
     }
 
