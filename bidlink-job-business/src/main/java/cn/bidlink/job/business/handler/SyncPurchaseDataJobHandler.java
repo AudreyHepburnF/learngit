@@ -1,10 +1,7 @@
 package cn.bidlink.job.business.handler;
 
 import cn.bidlink.job.common.constant.BusinessConstant;
-import cn.bidlink.job.common.utils.AreaUtil;
-import cn.bidlink.job.common.utils.DBUtil;
-import cn.bidlink.job.common.utils.ElasticClientUtil;
-import cn.bidlink.job.common.utils.SyncTimeUtil;
+import cn.bidlink.job.common.utils.*;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.search.SearchResponse;
@@ -184,6 +181,10 @@ public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandl
                 // 添加采购商区域信息
                 appendPurchaseRegion(purchasers, purchaserIds);
 
+                // 校验数据
+                for (Map<String, Object> purchaser : purchasers) {
+                    purchaser.put(DATA_STATUS, ValidateUtil.checkDataComplete(purchaser, ValidateUtil.PURCHASER));
+                }
                 // 添加采购商交易量信息,从es中查询
                 appendPurchaseTradingInfo(purchasers, purchaserIds, syncWay);
             }

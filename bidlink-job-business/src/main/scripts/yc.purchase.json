@@ -109,6 +109,9 @@
       },
       "status": {
         "type": "long"
+      },
+      "dataStatus": {
+        "type": "integer"
       }
     }
   }

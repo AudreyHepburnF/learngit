@@ -65,6 +65,7 @@ public abstract class AbstractSyncPurchaseDataJobHandler extends JobHandler{
     protected String COOPERATE_SUPPLIER_COUNT   = "cooperateSupplierCount";
     protected String AUCTION_PROJECT_COUNT      = "auctionProjectCount";
     protected String AUCTION_TRADING_VOLUME     = "auctionTradingVolume";
+    protected String DATA_STATUS                = "dataStatus";
 
     protected void batchInsert(List<Map<String, Object>> purchases) {
 //        System.out.println("=============" + purchases);

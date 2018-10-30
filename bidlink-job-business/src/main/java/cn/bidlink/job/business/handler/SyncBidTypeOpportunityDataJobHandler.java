@@ -177,6 +177,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                 "\tbsp.update_time AS updateTime,\n" +
                 "\tbp.province,\n" +
                 "\tbp.zone_str AS areaStr, \n" +
+                "\tbp.bid_type AS bidType, \n" +
                 "\tbp.industry_name AS industryStr \n" +
                 "FROM\n" +
                 "\tbid_sub_project bsp\n" +
@@ -220,6 +221,8 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
         } else {
             result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
         }
+        // 招标商机默认展示
+        result.put(IS_SHOW, SHOW);
         resultToExecute.add(appendIdToResult(result, BusinessConstant.IXIETONG_SOURCE));
     }
 

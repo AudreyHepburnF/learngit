@@ -33,7 +33,9 @@ import java.util.*;
 public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOpportunityDataJobHandler /*implements InitializingBean*/ {
 
 
-    private String IS_CORE = "isCore";
+    private String  IS_CORE              = "isCore";
+    // 撤项
+    private Integer CANAL_PROJECT_STATUS = 3;
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
@@ -228,6 +230,12 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
             result.put(STATUS, VALID_OPPORTUNITY_STATUS);
         } else {
             result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
+        }
+        if (Objects.equals(projectStatus, CANAL_PROJECT_STATUS)) {
+            // 项目撤项 不展示
+            result.put(IS_SHOW, NO_SHOW);
+        } else {
+            result.put(IS_SHOW, SHOW);
         }
         resultToExecute.add(appendIdToResult(result, BusinessConstant.IXIETONG_SOURCE));
     }
