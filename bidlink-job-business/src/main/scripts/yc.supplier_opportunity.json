@@ -109,6 +109,9 @@
       "status": {
         "type": "long"
       },
+      "isShow": {
+        "type": "integer"
+      },
       "syncTime": {
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"

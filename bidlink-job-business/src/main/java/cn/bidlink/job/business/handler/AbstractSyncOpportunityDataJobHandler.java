@@ -65,6 +65,12 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     // 竞价项目类型
     protected int AUCTION_PROJECT_TYPE       = 3;
 
+    // 展示
+    protected int    SHOW    = 1;
+    // 不展示
+    protected int    NO_SHOW = 0;
+    protected String IS_SHOW = "isShow";
+
     protected String ID                          = "id";
     protected String PURCHASE_ID                 = "purchaseId";
     protected String PROJECT_ID                  = "projectId";
@@ -96,9 +102,9 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected String REAL_QUOTE_STOP_TIME        = "realQuoteStopTime";
 
 
-    protected Map<String, Object> appendIdToResult(Map<String, Object> result,Integer platformSourceValue) {
+    protected Map<String, Object> appendIdToResult(Map<String, Object> result, Integer platformSourceValue) {
         // 生成id
-        result.put(ID, generateOpportunityId(result,platformSourceValue));
+        result.put(ID, generateOpportunityId(result, platformSourceValue));
         return result;
     }
 
@@ -109,7 +115,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
      * @param result
      * @return
      */
-    protected String generateOpportunityId(Map<String, Object> result,Integer platformSourceValue) {
+    protected String generateOpportunityId(Map<String, Object> result, Integer platformSourceValue) {
         Long projectId = (Long) result.get(PROJECT_ID);
         Long purchaseId = (Long) result.get(PURCHASE_ID);
         if (projectId == null) {
