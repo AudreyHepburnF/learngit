@@ -392,7 +392,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
         resultToUse.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE);
         // 添加供应商核心供状态
         Object coreStatus = resultToUse.get(CORE_STATUS);
-        resultToUse.put(CORE, coreStatus == null ? 0 : coreStatus.toString().substring(0, 1));
+        resultToUse.put(CORE, coreStatus == null ? 0 : Integer.valueOf(String.valueOf(coreStatus).substring(0, 1)));
         resultToUse.remove(CORE_STATUS);
         return resultToUse;
     }
