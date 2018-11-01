@@ -366,6 +366,7 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
                 // 查出符合条件的供应商
                 List<Map<String, Object>> resultToExecute = query(uniregDataSource, querySql, paramsToUse);
                 logger.info("执行querySql : {}, params : {}，共{}条", querySql, paramsToUse, resultToExecute.size());
+                // 地区不为空的公司商id
                 Set<Long> supplierIds = new HashSet<>();
                 for (Map<String, Object> result : resultToExecute) {
                     if (!StringUtils.isEmpty(result.get(AREA))) {
@@ -377,18 +378,20 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
                 // 添加区域
                 appendAreaStrToResult(resultToExecute, supplierIds);
 
+                Set<Long> supplierIdList = new HashSet<>();
                 // 数据校验
                 for (Map<String, Object> result : resultToExecute) {
                     // 数据完整性 1:完整 0:不完整
                     result.put(DATA_STATUS, ValidateUtil.checkDataComplete(result, ValidateUtil.SUPPLIER));
+                    supplierIdList.add(Long.valueOf(result.get(ID).toString()));
                 }
 
                 // 添加诚信等级 FIXME 诚信值表(目前默认为38)
-                appendCreditToResult(resultToExecute, supplierIds);
+                appendCreditToResult(resultToExecute, supplierIdList);
                 // 添加企业空间 FIXME 企业空间待更换数据源
-                appendEnterpriseSpaceToResult(resultToExecute, supplierIds);
+                appendEnterpriseSpaceToResult(resultToExecute, supplierIdList);
                 // 插入数据保存,更新数据获取供应商交易信息
-                appendSupplierTradingInfo(resultToExecute, supplierIds, syncWay);
+                appendSupplierTradingInfo(resultToExecute, supplierIdList, syncWay);
             }
         }
     }
@@ -451,10 +454,10 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
         resultToUse.put(USER_ID, convertToString(resultToUse.get(USER_ID)));
         // 核心供状态
         Object coreStatus = resultToUse.get("coreStatus");
-        resultToUse.put(CORE, coreStatus == null ? 0 :Integer.valueOf(String.valueOf(coreStatus).substring(0,1)));
+        resultToUse.put(CORE, coreStatus == null ? 0 : Integer.valueOf(String.valueOf(coreStatus).substring(0, 1)));
 
         //添加平台来源
-        resultToUse.put(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.IXIETONG_SOURCE);
+        resultToUse.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE);
     }
 
     private String convertToString(Object value) {
