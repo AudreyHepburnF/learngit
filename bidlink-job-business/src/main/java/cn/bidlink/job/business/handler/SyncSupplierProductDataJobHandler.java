@@ -33,10 +33,7 @@ import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
@@ -82,6 +79,8 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     private String DIRECTORY_NAME_NOT_ANALYZED = "directoryNameNotAnalyzed";
     private String SUPPLIER_ID                 = "supplierId";
     private String SUPPLIER_DIRECTORY_REL      = "supplierDirectoryRel";
+    private String CORE                        = "core";
+    private String CORE_STATUS                 = "coreStatus";
 
     // 主营产品类型
     private static final int MAIN_PRODUCT_DIRECTORY_REL = 4;
@@ -241,6 +240,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
 //                                  + "   tucs.CORE_SUPPLIER_STATUS AS core,\n"
                 + "   trc.create_time AS createTime,\n"
                 + "   trc.company_logo AS companyLogo,\n"
+                + "   trc.core_status AS coreStatus,\n"
                 + "   trc.UPDATE_TIME AS updateTime\n"
                 + "FROM\n"
                 + "   t_reg_company trc\n"
@@ -258,6 +258,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
 //                                 + "   tucs.CORE_SUPPLIER_STATUS AS core,\n"
                 + "   trc.CREATE_TIME AS createTime,\n"
                 + "   trc.company_logo AS companyLogo,\n"
+                + "   trc.core_status AS coreStatus,\n"
                 + "   trc.UPDATE_TIME AS updateTime\n"
                 + "FROM\n"
                 + "   t_reg_company trc\n"
@@ -388,7 +389,11 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
         // 将supplierId转为string
         resultToUse.put(SUPPLIER_ID, String.valueOf(resultToUse.get(SUPPLIER_ID)));
         //添加平台来源
-        resultToUse.put(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.IXIETONG_SOURCE);
+        resultToUse.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE);
+        // 添加供应商核心供状态
+        Object coreStatus = resultToUse.get(CORE_STATUS);
+        resultToUse.put(CORE, coreStatus == null ? 0 : Integer.valueOf(String.valueOf(coreStatus).substring(0, 1)));
+        resultToUse.remove(CORE_STATUS);
         return resultToUse;
     }
 
