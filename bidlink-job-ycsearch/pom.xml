@@ -104,26 +104,26 @@
                 <pom.log.level>debug</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
                 <!--悦采数据源-->
-                <pom.yuecai.db.url>jdbc:mysql://10.4.0.9:3306/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yuecai.db.url>
+                <pom.yuecai.db.url>jdbc:mariadb://testmariadb:3305/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yuecai.db.url>
                 <pom.yuecai.db.username>develop</pom.yuecai.db.username>
                 <pom.yuecai.db.password>123123</pom.yuecai.db.password>
 
-                <!--悦采中心库数据源-->
-                <pom.unireg.db.url>jdbc:mysql://10.1.1.209:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
-                <pom.unireg.db.username>shujuzx_programs</pom.unireg.db.username>
-                <pom.unireg.db.password>!QAZ#EDC2wsx</pom.unireg.db.password>
+                <!--协同平台中心库数据源-->
+                <pom.unireg.db.url>jdbc:mariadb://testmariadb:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
+                <pom.unireg.db.username>dashuju</pom.unireg.db.username>
+                <pom.unireg.db.password>ixietong!@#$</pom.unireg.db.password>
                 <!--供应商企业空间-->
                 <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
                 <pom.supplier.enterpriseSpaceDetailFormat>http://{0}.testspace.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}</pom.supplier.enterpriseSpaceDetailFormat>
                 <!--es配置 -->
-                <pom.cluster.host>10.4.0.69:9300</pom.cluster.host>
-                <pom.cluster.name>dc-test</pom.cluster.name>
+                <pom.cluster.host>100.100.0.122:9300</pom.cluster.host>
+                <pom.cluster.name>elasticsearch</pom.cluster.name>
                 <pom.cluster.index>longdaoyun_test</pom.cluster.index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
                 <pom.path.conf>D:/es/config/</pom.path.conf>
-                <pom.searchguard.enable>true</pom.searchguard.enable>
+                <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.searchguard.ssl.transport.keystore_filepath>admin-keystore.jks</pom.searchguard.ssl.transport.keystore_filepath>
                 <pom.searchguard.ssl.transport.truststore_filepath>truststore.jks</pom.searchguard.ssl.transport.truststore_filepath>
                 <pom.searchguard.ssl.transport.keystore_password>49e68ad53ae7483da17e</pom.searchguard.ssl.transport.keystore_password>
@@ -134,20 +134,20 @@
             <id>dev</id>
             <properties>
                 <pom.application.name>bidlink-job-ycsearch</pom.application.name>
-                <pom.xxl.job.admin.addresses>http://10.4.0.98:8080/xxl-job</pom.xxl.job.admin.addresses>
+                <pom.xxl.job.admin.addresses>http://testxxl-dashboard:8080/xxl-job</pom.xxl.job.admin.addresses>
                 <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
                 <pom.log.rootLogger>CONSOLE</pom.log.rootLogger>
                 <pom.log.level>debug</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
                 <!--悦采数据源-->
-                <pom.yuecai.db.url>jdbc:mysql://10.4.0.9:3306/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yuecai.db.url>
+                <pom.yuecai.db.url>jdbc:mariadb://testmariadb:3305/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yuecai.db.url>
                 <pom.yuecai.db.username>develop</pom.yuecai.db.username>
                 <pom.yuecai.db.password>123123</pom.yuecai.db.password>
 
-                <!--悦采中心库数据源-->
-                <pom.unireg.db.url>jdbc:mysql://10.1.1.209:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
-                <pom.unireg.db.username>shujuzx_programs</pom.unireg.db.username>
-                <pom.unireg.db.password>!QAZ#EDC2wsx</pom.unireg.db.password>
+                <!--协同平台中心库数据源-->
+                <pom.unireg.db.url>jdbc:mariadb://testmariadb:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
+                <pom.unireg.db.username>dashuju</pom.unireg.db.username>
+                <pom.unireg.db.password>ixietong!@#$</pom.unireg.db.password>
                 <!--供应商企业空间-->
                 <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
@@ -173,19 +173,20 @@
             <id>test</id>
             <properties>
                 <pom.application.name>bidlink-job-ycsearch</pom.application.name>
-                <pom.xxl.job.admin.addresses>http://10.4.0.98:8080/xxl-job</pom.xxl.job.admin.addresses>
+                <pom.xxl.job.admin.addresses>http://testxxl-dashboard:8080/xxl-job</pom.xxl.job.admin.addresses>
                 <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
                 <pom.log.rootLogger>FILE</pom.log.rootLogger>
                 <pom.log.level>info</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
                 <!--悦采数据源-->
-                <pom.yuecai.db.url>jdbc:mysql://10.4.0.9:3306/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yuecai.db.url>
+                <pom.yuecai.db.url>jdbc:mariadb://testmariadb:3305/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yuecai.db.url>
                 <pom.yuecai.db.username>develop</pom.yuecai.db.username>
                 <pom.yuecai.db.password>123123</pom.yuecai.db.password>
-                <!--悦采中心库数据源-->
-                <pom.unireg.db.url>jdbc:mysql://10.1.1.209:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
-                <pom.unireg.db.username>shujuzx_programs</pom.unireg.db.username>
-                <pom.unireg.db.password>!QAZ#EDC2wsx</pom.unireg.db.password>
+
+                <!--协同平台中心库数据源-->
+                <pom.unireg.db.url>jdbc:mariadb://testmariadb:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
+                <pom.unireg.db.username>dashuju</pom.unireg.db.username>
+                <pom.unireg.db.password>ixietong!@#$</pom.unireg.db.password>
 
                 <!--供应商企业空间-->
                 <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
@@ -214,11 +215,11 @@
                 <pom.log.rootLogger>FILE</pom.log.rootLogger>
                 <pom.log.level>INFO</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
-                <!--悦采数据源-->
+                <!--悦采数据源 TODO 待修改-->
                 <pom.yuecai.db.url>jdbc:mysql://10.0.0.86:3306/nyc?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yuecai.db.url>
                 <pom.yuecai.db.username>shujuzx_programs</pom.yuecai.db.username>
                 <pom.yuecai.db.password>!QAZ#EDC2wsx</pom.yuecai.db.password>
-                <!--悦采中心库数据源-->
+                <!--悦采中心库数据源 TODO 待修改-->
                 <pom.unireg.db.url>jdbc:mysql://mariadb.ebnew.com:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
                 <pom.unireg.db.username>shujuzx_programs</pom.unireg.db.username>
                 <pom.unireg.db.password>!QAZ#EDC2wsx</pom.unireg.db.password>

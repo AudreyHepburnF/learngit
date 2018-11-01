@@ -215,8 +215,8 @@
                 <pom.pageview.db.password>ixietong!@#$</pom.pageview.db.password>
                 <!--console数据源-->
                 <pom.console.db.url>jdbc:mariadb://testmariadb:3305/console?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.console.db.url>
-                <pom.console.db.username>dashuju</pom.console.db.username>
-                <pom.console.db.password>ixietong!@#$</pom.console.db.password>
+                <pom.console.db.username>develop</pom.console.db.username>
+                <pom.console.db.password>123123</pom.console.db.password>
                 <!--供应商企业空间-->
                 <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
