@@ -45,7 +45,7 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
                 "cluster.type.supplier_opportunity",
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery("projectType", BIDDING_PROJECT_TYPE))
-                        .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.YUECAI_SOURCE)));
+                        .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE)));
         Timestamp lastSyncStartTime = new Timestamp(new DateTime(new DateTime().getYear(), 1, 1, 0, 0, 0).getMillis());
         if (Objects.equals(SyncTimeUtil.GMT_TIME, lastSyncTime)) {
             lastSyncTime = lastSyncStartTime;
@@ -229,6 +229,12 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
         result.put(OPEN_RANGE_TYPE, 1);
         // 老平台
         result.put(SOURCE, SOURCE_OLD);
+        // 招标撤项项目 商机不展示
+        if (Objects.equals(result.get(PROJECT_STATUS), WITH_DRAWED)) {
+            result.put(IS_SHOW, HIDDEN);
+        } else {
+            result.put(IS_SHOW, SHOW);
+        }
         // 悦采平台
         result.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE);
     }

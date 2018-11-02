@@ -68,7 +68,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     // 展示
     protected int    SHOW    = 1;
     // 不展示
-    protected int    NO_SHOW = 0;
+    protected int    HIDDEN  = 0;
     protected String IS_SHOW = "isShow";
 
     protected String ID                          = "id";

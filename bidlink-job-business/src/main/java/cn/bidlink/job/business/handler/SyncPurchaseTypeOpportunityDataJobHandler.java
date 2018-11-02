@@ -233,7 +233,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
         }
         if (Objects.equals(projectStatus, CANAL_PROJECT_STATUS)) {
             // 项目撤项 不展示
-            result.put(IS_SHOW, NO_SHOW);
+            result.put(IS_SHOW, HIDDEN);
         } else {
             result.put(IS_SHOW, SHOW);
         }

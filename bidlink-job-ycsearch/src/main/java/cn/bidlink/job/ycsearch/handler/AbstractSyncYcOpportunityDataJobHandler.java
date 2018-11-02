@@ -59,6 +59,12 @@ public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler
     // 老平台数据
     protected String SOURCE_OLD                 = "old";
 
+    // 是否展示
+    protected String IS_SHOW = "isShow";
+
+    protected int SHOW   = 1;
+    protected int HIDDEN = 0;
+
 
     protected String ID                          = "id";
     protected String PURCHASE_ID                 = "purchaseId";

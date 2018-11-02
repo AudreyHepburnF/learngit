@@ -35,6 +35,8 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
     private int AUTO_STOP_TYPE   = 2;
     // 手动截标
     private int MANUAL_STOP_TYPE = 1;
+    // 项目状态 撤项
+    private int CANAL            = 10;
 
     private String BID_STOP_TYPE      = "bidStopType";
     private String BID_STOP_TIME      = "bidStopTime";
@@ -58,7 +60,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                 "cluster.type.supplier_opportunity",
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery("projectType", PURCHASE_PROJECT_TYPE))
-                        .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.YUECAI_SOURCE)));
+                        .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE)));
         Timestamp lastSyncStartTime = new Timestamp(new DateTime(new DateTime().getYear(), 1, 1, 0, 0, 0).getMillis());
         if (Objects.equals(SyncTimeUtil.GMT_TIME, lastSyncTime)) {
             lastSyncTime = lastSyncStartTime;
@@ -279,7 +281,12 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
         result.put(PROJECT_TYPE, PURCHASE_PROJECT_TYPE);
         // 老平台
         result.put(SOURCE, SOURCE_OLD);
-
+        // 是否展示(project_status=10 代表撤项,不展示)
+        if (Objects.equals(result.get(PROJECT_STATUS), CANAL)) {
+            result.put(IS_SHOW, HIDDEN);
+        } else {
+            result.put(IS_SHOW, SHOW);
+        }
         // 悦采
         result.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE);
     }
