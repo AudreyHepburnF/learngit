@@ -72,6 +72,8 @@
                 <configuration>
                     <descriptor>${project.basedir}/src/main/assembly/assembly.xml</descriptor>
                     <encoding>UTF-8</encoding>
+                    <finalName>${pom.application.name}</finalName>
+                    <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
                 <executions>
                     <execution>
@@ -113,9 +115,12 @@
                 <pom.unireg.db.username>dashuju</pom.unireg.db.username>
                 <pom.unireg.db.password>ixietong!@#$</pom.unireg.db.password>
                 <!--供应商企业空间-->
-                <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
+                <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/
+                </pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
-                <pom.supplier.enterpriseSpaceDetailFormat>http://{0}.testspace.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}</pom.supplier.enterpriseSpaceDetailFormat>
+                <pom.supplier.enterpriseSpaceDetailFormat>
+                    http://{0}.testspace.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}
+                </pom.supplier.enterpriseSpaceDetailFormat>
                 <!--es配置 -->
                 <pom.cluster.host>100.100.0.122:9300</pom.cluster.host>
                 <pom.cluster.name>elasticsearch</pom.cluster.name>
@@ -124,10 +129,14 @@
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
                 <pom.path.conf>D:/es/config/</pom.path.conf>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
-                <pom.searchguard.ssl.transport.keystore_filepath>admin-keystore.jks</pom.searchguard.ssl.transport.keystore_filepath>
-                <pom.searchguard.ssl.transport.truststore_filepath>truststore.jks</pom.searchguard.ssl.transport.truststore_filepath>
-                <pom.searchguard.ssl.transport.keystore_password>49e68ad53ae7483da17e</pom.searchguard.ssl.transport.keystore_password>
-                <pom.searchguard.ssl.transport.truststore_password>49e68ad53ae7483da17e</pom.searchguard.ssl.transport.truststore_password>
+                <pom.searchguard.ssl.transport.keystore_filepath>admin-keystore.jks
+                </pom.searchguard.ssl.transport.keystore_filepath>
+                <pom.searchguard.ssl.transport.truststore_filepath>truststore.jks
+                </pom.searchguard.ssl.transport.truststore_filepath>
+                <pom.searchguard.ssl.transport.keystore_password>49e68ad53ae7483da17e
+                </pom.searchguard.ssl.transport.keystore_password>
+                <pom.searchguard.ssl.transport.truststore_password>49e68ad53ae7483da17e
+                </pom.searchguard.ssl.transport.truststore_password>
             </properties>
         </profile>
         <profile>
@@ -149,9 +158,12 @@
                 <pom.unireg.db.username>dashuju</pom.unireg.db.username>
                 <pom.unireg.db.password>ixietong!@#$</pom.unireg.db.password>
                 <!--供应商企业空间-->
-                <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
+                <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/
+                </pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
-                <pom.supplier.enterpriseSpaceDetailFormat>http://{0}.testspace.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}</pom.supplier.enterpriseSpaceDetailFormat>
+                <pom.supplier.enterpriseSpaceDetailFormat>
+                    http://{0}.testspace.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}
+                </pom.supplier.enterpriseSpaceDetailFormat>
                 <!--es配置 -->
                 <pom.cluster.host>100.100.0.122:9300</pom.cluster.host>
                 <pom.cluster.name>elasticsearch</pom.cluster.name>
@@ -189,9 +201,12 @@
                 <pom.unireg.db.password>ixietong!@#$</pom.unireg.db.password>
 
                 <!--供应商企业空间-->
-                <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
+                <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/
+                </pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
-                <pom.supplier.enterpriseSpaceDetailFormat>http://{0}.testspace.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}</pom.supplier.enterpriseSpaceDetailFormat>
+                <pom.supplier.enterpriseSpaceDetailFormat>
+                    http://{0}.testspace.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}
+                </pom.supplier.enterpriseSpaceDetailFormat>
                 <!--es配置 -->
                 <pom.cluster.host>100.100.0.122:9300</pom.cluster.host>
                 <pom.cluster.name>elasticsearch</pom.cluster.name>
@@ -210,7 +225,8 @@
             <id>product</id>
             <properties>
                 <pom.application.name>bidlink-job-ycsearch</pom.application.name>
-                <pom.xxl.job.admin.addresses>http://xxl-dashboard.internal.cg-xt.com:8080/xxl-job</pom.xxl.job.admin.addresses>
+                <pom.xxl.job.admin.addresses>http://xxl-dashboard.internal.cg-xt.com:8080/xxl-job
+                </pom.xxl.job.admin.addresses>
                 <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
                 <pom.log.rootLogger>FILE</pom.log.rootLogger>
                 <pom.log.level>INFO</pom.log.level>
@@ -224,11 +240,16 @@
                 <pom.unireg.db.username>shujuzx_programs</pom.unireg.db.username>
                 <pom.unireg.db.password>!QAZ#EDC2wsx</pom.unireg.db.password>
                 <!--供应商企业空间-->
-                <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
+                <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/
+                </pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
-                <pom.supplier.enterpriseSpaceDetailFormat>http://{0}.space.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}</pom.supplier.enterpriseSpaceDetailFormat>
+                <pom.supplier.enterpriseSpaceDetailFormat>
+                    http://{0}.space.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}
+                </pom.supplier.enterpriseSpaceDetailFormat>
                 <!--es配置 TODO 待修改es地址-->
-                <pom.cluster.host>es-cloud-01.internal.cg-xt.com:9300,es-cloud-02.internal.cg-xt.com:9300,es-cloud-03.internal.cg-xt.com:9300</pom.cluster.host>
+                <pom.cluster.host>
+                    es-cloud-01.internal.cg-xt.com:9300,es-cloud-02.internal.cg-xt.com:9300,es-cloud-03.internal.cg-xt.com:9300
+                </pom.cluster.host>
                 <pom.cluster.name>dc</pom.cluster.name>
                 <pom.cluster.index>ixietong_opportunity</pom.cluster.index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
