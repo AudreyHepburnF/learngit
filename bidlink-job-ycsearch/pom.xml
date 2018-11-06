@@ -139,6 +139,7 @@
                 <pom.cluster.host>100.100.0.122:9300</pom.cluster.host>
                 <pom.cluster.name>elasticsearch</pom.cluster.name>
                 <pom.cluster.index>longdaoyun_test</pom.cluster.index>
+                <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
                 <!--项目直通车-->
@@ -198,6 +199,7 @@
                 <pom.cluster.host>100.100.0.122:9300</pom.cluster.host>
                 <pom.cluster.name>elasticsearch</pom.cluster.name>
                 <pom.cluster.index>longdaoyun_test</pom.cluster.index>
+                <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
 
@@ -258,6 +260,7 @@
                 </pom.cluster.host>
                 <pom.cluster.name>dc</pom.cluster.name>
                 <pom.cluster.index>ixietong_opportunity</pom.cluster.index>
+                <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
                 <!--项目直通车-->
