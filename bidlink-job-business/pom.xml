@@ -129,18 +129,6 @@
                 <pom.api.db.url>jdbc:mariadb://testmariadb:3306/api?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.api.db.url>
                 <pom.api.db.username>dashuju</pom.api.db.username>
                 <pom.api.db.password>ixietong!@#$</pom.api.db.password>
-                <!--pro_test数据源-->
-                <pom.pro.db.url>jdbc:mariadb://testmariadb:3306/pro_test?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
-                <pom.pro.db.username>dashuju</pom.pro.db.username>
-                <pom.pro.db.password>ixietong!@#$</pom.pro.db.password>
-                <!--pageview数据源-->
-                <pom.pageview.db.url>jdbc:mariadb://testmariadb:3306/pageview?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pageview.db.url>
-                <pom.pageview.db.username>dashuju</pom.pageview.db.username>
-                <pom.pageview.db.password>ixietong!@#$</pom.pageview.db.password>
-                <!--console数据源-->
-                <pom.console.db.url>jdbc:mariadb://testmariadb:3305/console?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.console.db.url>
-                <pom.console.db.username>dashuju</pom.console.db.username>
-                <pom.console.db.password>ixietong!@#$</pom.console.db.password>
                 <!--供应商企业空间-->
                 <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
@@ -158,12 +146,6 @@
                 <pom.cluster.type.project>project</pom.cluster.type.project>
                 <pom.cluster.type.deal_supplier>deal_supplier</pom.cluster.type.deal_supplier>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
-
-                <!--隆道云项目直通车-->
-                <pom.cluster.express_index>longdaoyun_express</pom.cluster.express_index>
-                <pom.cluster.type.project_express>project_express</pom.cluster.type.project_express>
-                <pom.cluster.type.project_express_traffic_statistic>project_express_traffic_statistic</pom.cluster.type.project_express_traffic_statistic>
-                <pom.cluster.type.project_express_supplier_recommend_record>project_express_supplier_recommend_record</pom.cluster.type.project_express_supplier_recommend_record>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
@@ -205,18 +187,6 @@
                 <pom.api.db.url>jdbc:mariadb://testmariadb:3306/api?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.api.db.url>
                 <pom.api.db.username>dashuju</pom.api.db.username>
                 <pom.api.db.password>ixietong!@#$</pom.api.db.password>
-                <!--pro_test数据源-->
-                <pom.pro.db.url>jdbc:mariadb://testmariadb:3306/pro_test?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
-                <pom.pro.db.username>dashuju</pom.pro.db.username>
-                <pom.pro.db.password>ixietong!@#$</pom.pro.db.password>
-                <!--pageview数据源-->
-                <pom.pageview.db.url>jdbc:mariadb://testmariadb:3306/pageview?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pageview.db.url>
-                <pom.pageview.db.username>dashuju</pom.pageview.db.username>
-                <pom.pageview.db.password>ixietong!@#$</pom.pageview.db.password>
-                <!--console数据源-->
-                <pom.console.db.url>jdbc:mariadb://testmariadb:3305/console?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.console.db.url>
-                <pom.console.db.username>develop</pom.console.db.username>
-                <pom.console.db.password>123123</pom.console.db.password>
                 <!--供应商企业空间-->
                 <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
@@ -234,12 +204,6 @@
                 <pom.cluster.type.project>project</pom.cluster.type.project>
                 <pom.cluster.type.deal_supplier>deal_supplier</pom.cluster.type.deal_supplier>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
-                <!--隆道云项目直通车-->
-                <pom.cluster.express_index>longdaoyun_express</pom.cluster.express_index>
-                <pom.cluster.type.project_express>project_express</pom.cluster.type.project_express>
-                <pom.cluster.type.project_express_traffic_statistic>project_express_traffic_statistic</pom.cluster.type.project_express_traffic_statistic>
-                <pom.cluster.type.project_express_supplier_recommend_record>project_express_supplier_recommend_record</pom.cluster.type.project_express_supplier_recommend_record>
-
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
@@ -282,18 +246,6 @@
                 <pom.api.db.url>jdbc:mariadb://testmariadb:3306/api?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.api.db.url>
                 <pom.api.db.username>dashuju</pom.api.db.username>
                 <pom.api.db.password>ixietong!@#$</pom.api.db.password>
-                <!--pro_test数据源 TODO 待修改-->
-                <pom.pro.db.url>jdbc:mariadb://testmariadb:3306/pro_test?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
-                <pom.pro.db.username>dashuju</pom.pro.db.username>
-                <pom.pro.db.password>ixietong!@#$</pom.pro.db.password>
-                <!--pageview数据源 TODO 待修改-->
-                <pom.pageview.db.url>jdbc:mariadb://testmariadb:3306/pageview?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pageview.db.url>
-                <pom.pageview.db.username>dashuju</pom.pageview.db.username>
-                <pom.pageview.db.password>ixietong!@#$</pom.pageview.db.password>
-                <!--console数据源 TODO 待修改-->
-                <pom.console.db.url>jdbc:mariadb://testmariadb:3305/console?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.console.db.url>
-                <pom.console.db.username>dashuju</pom.console.db.username>
-                <pom.console.db.password>ixietong!@#$</pom.console.db.password>
                 <!--供应商企业空间-->
                 <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
@@ -312,11 +264,6 @@
                 <pom.cluster.type.deal_supplier>deal_supplier</pom.cluster.type.deal_supplier>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
 
-                <!--隆道云项目直通车-->
-                <pom.cluster.express_index>longdaoyun_express</pom.cluster.express_index>
-                <pom.cluster.type.project_express>project_express</pom.cluster.type.project_express>
-                <pom.cluster.type.project_express_traffic_statistic>project_express_traffic_statistic</pom.cluster.type.project_express_traffic_statistic>
-                <pom.cluster.type.project_express_supplier_recommend_record>project_express_supplier_recommend_record</pom.cluster.type.project_express_supplier_recommend_record>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>

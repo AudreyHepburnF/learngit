@@ -1,11 +1,11 @@
-package cn.bidlink.job.business.handler.projectexpress;
+package cn.bidlink.job.ycsearch.handler.projectexpress;
 
-import cn.bidlink.job.business.handler.JobHandler;
 import cn.bidlink.job.common.constant.BusinessConstant;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
+import cn.bidlink.job.ycsearch.handler.JobHandler;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
@@ -175,7 +175,7 @@ public class SyncProjectExpressDataJobHandler extends JobHandler /*implements In
         }
         map.put(ALREADY_MATCH_TIMES, map.get(MATCH_TIMES));
         map.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE);
-        map.put(MATCH_MARK, getZeroTimeLongValue());
+        map.put(MATCH_MARK, SyncTimeUtil.getZeroTimeLongValue());
         map.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
     }
 

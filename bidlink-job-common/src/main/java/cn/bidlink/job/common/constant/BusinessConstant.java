@@ -21,4 +21,12 @@ public class BusinessConstant {
      */
     public static final int OTHER_SOURCE = 3;
 
+
+    /**
+     * 企业来源
+     */
+    public static final String WEB_TYPE = "webType";
+
+    public static final String YUECAI = "YUECAI";
+
 }

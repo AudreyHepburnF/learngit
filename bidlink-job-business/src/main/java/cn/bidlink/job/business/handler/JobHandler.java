@@ -25,26 +25,5 @@ public abstract class JobHandler extends IJobHandler {
         return paramsToUse;
     }
 
-    /**
-     * 获取零点时间
-     *
-     * @return
-     */
-    protected Date getZeroTime() {
-        DateTime dateTime = new DateTime();
-        DateTime zeroTime = dateTime.minusHours(dateTime.getHourOfDay())
-                .minusMinutes(dateTime.getMinuteOfHour())
-                .minusSeconds(dateTime.getSecondOfMinute())
-                .minusMillis(dateTime.getMillisOfSecond());
-        return zeroTime.toDate();
-    }
 
-    protected Long getZeroTimeLongValue() {
-        DateTime dateTime = new DateTime();
-        DateTime zeroTime = dateTime.minusHours(dateTime.getHourOfDay())
-                .minusMinutes(dateTime.getMinuteOfHour())
-                .minusSeconds(dateTime.getSecondOfMinute())
-                .minusMillis(dateTime.getMillisOfSecond());
-        return zeroTime.toDate().getTime();
-    }
 }
