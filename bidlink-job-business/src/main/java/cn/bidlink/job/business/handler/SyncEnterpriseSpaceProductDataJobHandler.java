@@ -13,6 +13,8 @@ import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.joda.time.DateTime;
@@ -29,6 +31,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:zhihuizhou@ebnew.com">zhouzhihui</a>
@@ -94,31 +97,86 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends JobHandler /*imple
 
     private void fixedProductWfirstStatus() {
         Properties properties = elasticClient.getProperties();
-        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
-                .setTypes(properties.getProperty("cluster.type.enterprise_space_product"))
+        // 回滚标王数据
+        SearchResponse wfirstResponse = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+                .setTypes(properties.getProperty("cluster.type.supplier_product"))
+                .setQuery(QueryBuilders.termQuery("supplierDirectoryRel", 3))
                 .setScroll(new TimeValue(60000))
                 .setSize(pageSize)
                 .execute().actionGet();
         do {
-            SearchHits hits = response.getHits();
-            if (hits.getTotalHits() > 0) {
+            SearchHits wfirstHits = wfirstResponse.getHits();
+            if (wfirstHits.getTotalHits() > 0) {
                 List<Map<String, Object>> resultFromEs = new ArrayList<>();
-                List<Long> productIds = new ArrayList<>();
-                for (SearchHit hit : hits.getHits()) {
-                    resultFromEs.add(hit.getSource());
-                    Object idObj = hit.getSource().get(ID);
-                    if (!Objects.isNull(idObj)) {
-                        productIds.add(Long.valueOf(String.valueOf(idObj)));
-                    }
+                for (SearchHit hit : wfirstHits.getHits()) {
+                    Map<String, Object> source = hit.getSource();
+                    HashMap<String, Object> map = new HashMap<>(2);
+                    map.put("supplierId", source.get("supplierId"));
+                    map.put("directoryName", source.get("directoryName"));
+                    resultFromEs.add(map);
                 }
-                // 添加产品标王状态
-                appendProductWfirstStatus(resultFromEs, productIds);
-                batchInsert(resultFromEs);
-                response = elasticClient.getTransportClient().prepareSearchScroll(response.getScrollId())
+
+                BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+                for (Map<String, Object> condition : resultFromEs) {
+                    BoolQueryBuilder must = QueryBuilders.boolQuery().must(QueryBuilders.termQuery("companyId", condition.get("supplierId")))
+                            .must(QueryBuilders.wildcardQuery("productName", "*" + condition.get("directoryName") + "*"));
+                    boolQuery.should(must);
+                }
+
+                // 回滚包含标王的产品数据,更新产品
+                SearchResponse productResponse = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+                        .setTypes(properties.getProperty("cluster.type.enterprise_space_product"))
+                        .setScroll(new TimeValue(60000))
+                        .setQuery(boolQuery)
+                        .setSize(pageSize)
+                        .execute().actionGet();
+                SearchHits productHits = productResponse.getHits();
+                do {
+                    if (productHits.getTotalHits() > 0) {
+                        List<Map<String, Object>> mapList = Arrays.stream(productHits.getHits()).map(searchHit -> {
+                            Map<String, Object> source = searchHit.getSource();
+                            source.put(WFIRST_STATUS, BINDING_WFIRST);
+                            return source;
+                        }).collect(Collectors.toList());
+                        batchUpdate(mapList);
+                        productResponse = elasticClient.getTransportClient().prepareSearchScroll(productResponse.getScrollId())
+                                .setScroll(new TimeValue(60000))
+                                .execute().actionGet();
+                    }
+                } while (productResponse.getHits().getHits().length != 0);
+//                // 添加产品标王状态
+//                appendProductWfirstStatus(resultFromEs, productIds);
+//                batchInsert(resultFromEs);
+                wfirstResponse = elasticClient.getTransportClient().prepareSearchScroll(wfirstResponse.getScrollId())
                         .setScroll(new TimeValue(60000))
                         .execute().actionGet();
             }
-        } while (response.getHits().getHits().length != 0);
+        } while (wfirstResponse.getHits().getHits().length != 0);
+    }
+
+    private void batchUpdate(List<Map<String, Object>> mapList) {
+        if (!CollectionUtils.isEmpty(mapList)) {
+            BulkRequestBuilder prepareBulk = elasticClient.getTransportClient().prepareBulk();
+            Properties properties = elasticClient.getProperties();
+            for (Map<String, Object> map : mapList) {
+                prepareBulk.add(elasticClient.getTransportClient().prepareUpdate(
+                        properties.getProperty("cluster.index"), properties.getProperty("cluster.type.enterprise_space_product"),
+                        String.valueOf(map.get(ID))
+                ).setDoc(JSON.toJSONString(map, new ValueFilter() {
+                    @Override
+                    public Object process(Object object, String propertyName, Object propertyValue) {
+                        if (propertyValue instanceof Date) {
+                            return SyncTimeUtil.toDateString(propertyValue);
+                        }
+                        return propertyValue;
+                    }
+                })));
+            }
+            BulkResponse response = prepareBulk.execute().actionGet();
+            if (response.hasFailures()) {
+                logger.error("更新产品状态失败,错误信息:{}", response.buildFailureMessage());
+            }
+        }
     }
 
     private void appendProductWfirstStatus(List<Map<String, Object>> resultFromEs, List<Long> productIds) {
@@ -173,6 +231,9 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends JobHandler /*imple
                 "\tcreate_time AS createTime,\n" +
                 "\tNOTICESTATE AS noticeState,\n" +
                 "\tis_del AS isDel,\n" +
+                "\tspec AS spec,\n" +
+                "\ttrademark AS trademark,\n" +
+                "\tmodel AS model,\n" +
                 "\tZONESTR AS zoneStr\n" +
                 "FROM\n" +
                 "\tspace_product \n" +
@@ -205,6 +266,9 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends JobHandler /*imple
                 "\tcreate_time AS createTime,\n" +
                 "\tNOTICESTATE AS noticeState,\n" +
                 "\tis_del AS isDel,\n" +
+                "\tspec AS spec,\n" +
+                "\ttrademark AS trademark,\n" +
+                "\tmodel AS model,\n" +
                 "\tZONESTR AS zoneStr\n" +
                 "FROM\n" +
                 "\tspace_product \n" +
@@ -281,6 +345,8 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends JobHandler /*imple
         product.put(ZONE_STR_NOT_ANALYZED, product.get(ZONE_STR));
         product.put(PRODUCT_NAME_NOT_ANALYZED, product.get(PRODUCT_NAME));
         product.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
+        // 默认没绑定标王状态
+        product.put(WFIRST_STATUS, NO_WFIRST);
         //添加平台来源
         product.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE);
     }
