@@ -273,7 +273,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
     protected void refresh(Map<String, Object> result, Map<Long, Set<DirectoryEntity>> projectDirectoryMap) {
         super.refresh(result, projectDirectoryMap);
         // 移除不需要的属性
-        result.remove(BID_STOP_TYPE);
+//        result.remove(BID_STOP_TYPE);
         result.put(QUOTE_STOP_TIME, SyncTimeUtil.toDateString(result.get(BID_STOP_TIME)));
         result.remove(BID_STOP_TIME);
         result.remove(BID_TRUE_STOP_TIME);

@@ -91,7 +91,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                 Integer coreSupplierProject = Integer.valueOf(resultFromEs.get("isCore").toString());
                 String status = Integer.valueOf(resultFromEs.get("status").toString()).toString();
                 // TODO 待采购商机数据添加bidStopType字段
-//                Integer bidStopType = Integer.valueOf(resultFromEs.get("bidStopType").toString());
+                Integer bidStopType = Integer.valueOf(resultFromEs.get("bidStopType").toString());
                 //撤项消息
                 if (CANAL_STATUS.equals(projectStatus)) {
                     logger.info("处理撤项商机数据:{}", resultFromEs);
@@ -213,7 +213,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                             recommendRecord.put("purchaserId", purchaserId);
                             recommendRecord.put("purchaserName", purchaserName);
                             // TODO 待修改
-//                        recommendRecord.put("bidStopType", bidStopType);
+                        recommendRecord.put("bidStopType", bidStopType);
 //                        recommendRecord.put("bidStopTime", bidStopTime);
                             recommendRecord.put("supplierId", map.get("supplierId"));
                             recommendRecord.put("supplierName", map.get("supplierName"));
