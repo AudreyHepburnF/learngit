@@ -22,6 +22,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -44,7 +45,7 @@ import static cn.bidlink.job.common.utils.SyncTimeUtil.getZeroTimeLongValue;
  */
 @Service
 @JobHander(value = "syncRecommendProjectDataJobHandler")
-public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements InitializingBean*/ {
+public class SyncRecommendProjectDataJobHandler extends JobHandler implements InitializingBean {
 
     private Logger logger = LoggerFactory.getLogger(SyncRecommendProjectDataJobHandler.class);
 
@@ -89,9 +90,10 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                 String projectName = String.valueOf(resultFromEs.get("projectName"));
                 String projectCode = String.valueOf(resultFromEs.get("projectCode"));
                 Integer coreSupplierProject = Integer.valueOf(resultFromEs.get("isCore").toString());
-                String status = Integer.valueOf(resultFromEs.get("status").toString()).toString();
+                Integer status = Integer.valueOf(resultFromEs.get("status").toString());
                 // TODO 待采购商机数据添加bidStopType字段
                 Integer bidStopType = Integer.valueOf(resultFromEs.get("bidStopType").toString());
+                Object bidStopTime = resultFromEs.get("quoteStopTime");
                 //撤项消息
                 if (CANAL_STATUS.equals(projectStatus)) {
                     logger.info("处理撤项商机数据:{}", resultFromEs);
@@ -191,6 +193,12 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                                 logger.info("供应商：[" + map.get("supplierName") + "] 已经被" + purchaserName + "拉黑");
                                 continue;
                             }
+                            Set<String> products = supplierMatchedProductMap.get(map.get("supplierId").toString() + "_" + map.get("orderCode").toString());
+                            StringBuilder matchedProducts = new StringBuilder("");
+                            if (CollectionUtils.isEmpty(products)) {
+                                logger.info("供应商id不匹配,跳过projectId:{}",projectId);
+                                continue;
+                            }
                             Object alreadyMatchTimes = map.get("alreadyMatchTimes");
                             map.put("alreadyMatchTimes", alreadyMatchTimes == null ? 0 : Integer.valueOf(alreadyMatchTimes.toString()) + 1);
                             map.put("latestMatchTime", now);
@@ -213,8 +221,11 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                             recommendRecord.put("purchaserId", purchaserId);
                             recommendRecord.put("purchaserName", purchaserName);
                             // TODO 待修改
-                        recommendRecord.put("bidStopType", bidStopType);
-//                        recommendRecord.put("bidStopTime", bidStopTime);
+                            recommendRecord.put("bidStopType", bidStopType);
+                            if (bidStopType == 2) {
+                                // 自动截标添加截止时间
+                                recommendRecord.put("bidStopTime", SyncTimeUtil.toDateString(bidStopTime));
+                            }
                             recommendRecord.put("supplierId", map.get("supplierId"));
                             recommendRecord.put("supplierName", map.get("supplierName"));
                             recommendRecord.put("projectCode", projectCode);
@@ -227,14 +238,10 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
 //                        } catch (Exception e) {
 //                            logger.error("供应商联系人，联系电话查询异常 供应商Id:{}",map.get("supplierId"));
 //                        }
-                            Set<String> products = supplierMatchedProductMap.get(map.get("supplierId").toString() + "_" + map.get("orderCode").toString());
-                            StringBuilder matchedProducts = new StringBuilder("");
                             for (String product : products) {
                                 matchedProducts.append(product).append(";");
                             }
-
                             recommendRecord.put("projectStatus", status);
-
                             recommendRecord.put("matchedProducts", matchedProducts);
                             recommendRecord.put("coreSupplierProject", coreSupplierProject);
                             recommendRecord.put("matchedDate", now);
@@ -515,8 +522,8 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
         return false;
     }
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }
 }
