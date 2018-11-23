@@ -1,5 +1,6 @@
 package cn.bidlink.job.business.handler;
 
+import cn.bidlink.job.common.constant.BusinessConstant;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
@@ -80,7 +81,7 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
     private void syncBiddenSupplierCountData() {
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
 //                .must(QueryBuilders.termQuery("status", 1))
-                .must(QueryBuilders.termQuery("source", "new"));  // 新平台
+                .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE));  // 新平台
 
         Properties properties = elasticClient.getProperties();
         SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
