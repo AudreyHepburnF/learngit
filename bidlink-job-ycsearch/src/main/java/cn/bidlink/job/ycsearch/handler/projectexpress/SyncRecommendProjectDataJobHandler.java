@@ -36,8 +36,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 
-import static cn.bidlink.job.common.utils.SyncTimeUtil.getZeroTime;
-import static cn.bidlink.job.common.utils.SyncTimeUtil.getZeroTimeLongValue;
+import static cn.bidlink.job.common.utils.SyncTimeUtil.*;
 
 /**
  * @author <a href="mailto:zhihuizhou@ebnew.com">wisdom</a>
@@ -75,6 +74,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
     private void syncRecommendProjectData() {
         Properties properties = elasticClient.getProperties();
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.express_index", "cluster.type.project_express_supplier_recommend_record", null);
+//        Date lastSyncTime = SyncTimeUtil.toStringDate("2018-11-23 09:58:15");
         SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(QueryBuilders.boolQuery()
@@ -103,7 +103,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                 //撤项消息
                 if (CANAL_STATUS.equals(projectStatus)) {
                     logger.info("处理撤项商机数据:{}", resultFromEs);
-                    List<Map<String, Object>> recommendProjects = getRecommendProjects(null, projectId, purchaserId);
+                    List<Map<String, Object>> recommendProjects = this.getRecommendProjects(null, projectId, purchaserId);
                     if (!CollectionUtils.isEmpty(recommendProjects)) {
                         // 已撤项项目把匹配次数加回去
                         for (Map<String, Object> map : recommendProjects) {
@@ -128,7 +128,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                     if (!CollectionUtils.isEmpty(directoryNames)) {
                         for (String directoryName : directoryNames) {
                             // 根据采购商机采购品匹配供应商项目直通车
-                            List<Map<String, Object>> recommendSuppliersForOneDirectorys = getRecommendSuppliersOrders(directoryName);
+                            List<Map<String, Object>> recommendSuppliersForOneDirectorys = this.getRecommendSuppliersOrders(directoryName);
                             if (!CollectionUtils.isEmpty(recommendSuppliersForOneDirectorys)) {
                                 for (Map<String, Object> map : recommendSuppliersForOneDirectorys) {
                                     if (contains(directoryName, map)) {
@@ -222,7 +222,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
 
                             // 封装推荐项目数据
                             Map<String, Object> recommendRecord = new HashMap<String, Object>();
-                            recommendRecord.put("projectId", projectId);
+                            recommendRecord.put("projectId", String.valueOf(projectId));
                             recommendRecord.put("projectName", projectName);
                             recommendRecord.put("purchaserId", purchaserId);
                             recommendRecord.put("purchaserName", purchaserName);
@@ -452,6 +452,18 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                     .setQuery(boolQueryBuilder);
 
             builder.execute().actionGet();
+
+            // 更新其中一条数据
+            SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.express_index")).setTypes(properties.getProperty("cluster.type.project_express_supplier_recommend_record"))
+                    .setSize(1).execute().actionGet();
+            SearchHits hits = response.getHits();
+            if (hits.getTotalHits() > 0) {
+                Map<String, Object> source = hits.getHits()[0].getSource();
+                source.put(SYNC_TIME, SyncTimeUtil.currentDateToString());
+                elasticClient.getTransportClient().prepareUpdate(properties.getProperty("cluster.express_index"), properties.getProperty("cluster.type.project_express_supplier_recommend_record"), String.valueOf(source.get("id")))
+                        .setDoc(source)
+                        .execute().actionGet();
+            }
         } catch (Exception e) {
             logger.error("项目直通车数据从ElasticSearch删除失败: " + e.getMessage(), e);
         }
