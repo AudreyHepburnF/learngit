@@ -21,8 +21,10 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -46,7 +48,7 @@ import static cn.bidlink.job.common.utils.SyncTimeUtil.*;
  */
 @Service
 @JobHander(value = "syncRecommendProjectDataJobHandler")
-public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements InitializingBean*/ {
+public class SyncRecommendProjectDataJobHandler extends JobHandler implements InitializingBean {
 
     private Logger logger = LoggerFactory.getLogger(SyncRecommendProjectDataJobHandler.class);
 
@@ -74,7 +76,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
     private void syncRecommendProjectData() {
         Properties properties = elasticClient.getProperties();
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.express_index", "cluster.type.project_express_supplier_recommend_record", null);
-//        Date lastSyncTime = SyncTimeUtil.toStringDate("2018-11-23 09:58:15");
+//        Date lastSyncTime = SyncTimeUtil.toStringDate("2018-11-23 10:42:00");
         SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(QueryBuilders.boolQuery()
@@ -82,6 +84,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                         .must(QueryBuilders.termQuery(PROJECT_TYPE, PURCHASE_PROJECT_TYPE))
                         .must(QueryBuilders.rangeQuery(UPDATE_TIME).gte(lastSyncTime.before(getZeroTime()) ? SyncTimeUtil.toDateString(getZeroTime()) : SyncTimeUtil.toDateString(lastSyncTime)))
                 )
+                .addSort("createTime", SortOrder.ASC)
                 .setSize(pageSize)
                 .setScroll(new TimeValue(60000))
                 .execute().actionGet();
@@ -94,6 +97,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                 Long purchaserId = Long.valueOf(resultFromEs.get("purchaseId").toString());
                 String purchaserName = String.valueOf(resultFromEs.get("purchaseName"));
                 String projectName = String.valueOf(resultFromEs.get("projectName"));
+                logger.info("商机项目id:{},项目名称:{}", projectId, projectName);
                 String projectCode = String.valueOf(resultFromEs.get("projectCode"));
                 Integer coreSupplierProject = Integer.valueOf(resultFromEs.get("isCore").toString());
                 Integer status = Integer.valueOf(resultFromEs.get("status").toString());
@@ -129,6 +133,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                         for (String directoryName : directoryNames) {
                             // 根据采购商机采购品匹配供应商项目直通车
                             List<Map<String, Object>> recommendSuppliersForOneDirectorys = this.getRecommendSuppliersOrders(directoryName);
+                            logger.info("根据采购品匹配到项目订单,recommendSuppliersForOneDirectorys:{}", JSON.toJSONString(recommendSuppliersForOneDirectorys));
                             if (!CollectionUtils.isEmpty(recommendSuppliersForOneDirectorys)) {
                                 for (Map<String, Object> map : recommendSuppliersForOneDirectorys) {
                                     if (contains(directoryName, map)) {
@@ -324,6 +329,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                         }))
                 );
             }
+            bulkRequest.setRefresh(true);
             BulkResponse response = bulkRequest.execute().actionGet();
             if (response.hasFailures()) {
                 logger.error("保存项目直通车数据到es失败,错误信息:{}", response.buildFailureMessage());
@@ -542,8 +548,8 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
         return false;
     }
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }
 }

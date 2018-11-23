@@ -48,7 +48,6 @@ public class SyncProjectExpressDataJobHandler extends JobHandler /*implements In
     private String CREATE_USER_ID      = "createUserId";
     private String PRODUCT_CODE        = "productCode";
     private String MATCH_TIMES         = "matchTimes";
-    private String ALREADY_MATCH_TIMES = "alreadyMatchTimes";
     private String ES_ORDER_STATUS     = "esOrderStatus";
     private String END_DATE            = "endDate";
     private String LATEST_MATCH_TIME   = "latestMatchTime";
@@ -173,7 +172,6 @@ public class SyncProjectExpressDataJobHandler extends JobHandler /*implements In
         } else {
             map.put(ES_ORDER_STATUS, 1);
         }
-        map.put(ALREADY_MATCH_TIMES, map.get(MATCH_TIMES));
         map.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE);
         map.put(MATCH_MARK, SyncTimeUtil.getZeroTimeLongValue());
         map.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
