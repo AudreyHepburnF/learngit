@@ -19,8 +19,11 @@ import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static cn.bidlink.job.common.utils.AreaUtil.queryAreaInfo;
 
@@ -194,11 +197,37 @@ public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler
                     purchaseIds.add((Long) result.get(PURCHASE_ID));
                     refresh(result, projectDirectoryMap);
                 }
+                if (this instanceof SyncBidTypeOpportunityToXtDataJobHandler) {
+                    this.appendCompanyTenantSite(resultToExecute);
+                }
                 // 处理商机的状态
                 batchExecute(resultToExecute);
                 i += pageSize;
             }
         }
+    }
+
+    private void appendCompanyTenantSite(List<Map<String, Object>> resultToExecute) {
+        Set<Long> companyIds = resultToExecute.stream().map(map -> Long.valueOf(map.get("purchaseId").toString())).collect(Collectors.toSet());
+        String querySqlTemplate = "SELECT\n" +
+                "\tid AS companyId,\n" +
+                "\tTENANT_SITE AS tenantSite \n" +
+                "FROM\n" +
+                "\tt_reg_company \n" +
+                "WHERE\n" +
+                "\tid IN (%s)";
+        String querySql = String.format(querySqlTemplate, StringUtils.collectionToCommaDelimitedString(companyIds));
+        Map<Long, Object> tenantSiteMap = DBUtil.query(uniregDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Long, Object>>() {
+            @Override
+            public Map<Long, Object> execute(ResultSet resultSet) throws SQLException {
+                Map<Long, Object> map = new HashMap<>();
+                while (resultSet.next()) {
+                    map.put(resultSet.getLong(1), resultSet.getString(2));
+                }
+                return map;
+            }
+        });
+        resultToExecute.forEach(map -> map.put("tenantSite", tenantSiteMap.get(Long.valueOf(map.get("purchaseId").toString()))));
     }
 
     /**

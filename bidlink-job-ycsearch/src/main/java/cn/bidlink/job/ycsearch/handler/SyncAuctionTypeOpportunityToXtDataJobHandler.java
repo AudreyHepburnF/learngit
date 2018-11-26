@@ -28,7 +28,7 @@ public class SyncAuctionTypeOpportunityToXtDataJobHandler extends AbstractSyncYc
     // 撤项
     private int CANAL = 6;
 
-    private String AUCTION_END_TIME = "auctionEndTime";
+    private String QUOTE_STOP_TIME = "quoteStopTime";
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
@@ -73,7 +73,7 @@ public class SyncAuctionTypeOpportunityToXtDataJobHandler extends AbstractSyncYc
                 "\tap.project_stats AS projectStatus,\n" +
                 "\tap.create_time AS createTime,\n" +
                 "\tap.update_time AS updateTime,\n" +
-                "\tar.auction_end_time As auctionEndTime\n" +
+                "\tar.auction_end_time As quoteStopTime\n" +
                 "FROM\n" +
                 "\tauction_project ap\n" +
                 "\tLEFT JOIN auction_rule ar ON ap.id = ar.project_id \n" +
@@ -92,8 +92,8 @@ public class SyncAuctionTypeOpportunityToXtDataJobHandler extends AbstractSyncYc
     @Override
     protected void parseOpportunity(Timestamp currentDate, List<Map<String, Object>> resultToExecute, Map<String, Object> result) {
         Integer projectStatus = Integer.valueOf(result.get(PROJECT_STATUS).toString());
-        Timestamp auctionEndTime = (Timestamp) result.get(AUCTION_END_TIME);
-        if (projectStatus < WAIT_ARCHIVE && currentDate.before(auctionEndTime)) {
+        Timestamp quoteStopTime = (Timestamp) result.get(QUOTE_STOP_TIME);
+        if (projectStatus < WAIT_ARCHIVE && currentDate.before(quoteStopTime)) {
             result.put(STATUS, VALID_OPPORTUNITY_STATUS);
         } else {
             result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
@@ -110,6 +110,7 @@ public class SyncAuctionTypeOpportunityToXtDataJobHandler extends AbstractSyncYc
     @Override
     protected void refresh(Map<String, Object> result, Map<Long, Set<DirectoryEntity>> projectDirectoryMap) {
         super.refresh(result, projectDirectoryMap);
+        result.put(PROJECT_TYPE, AUCTION_PROJECT_TYPE);
         result.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE);
     }
 

@@ -251,6 +251,7 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
             result.put(STATUS, VALID_OPPORTUNITY_STATUS);
             resultToExecute.add(appendIdToResult(result));
         }
+//
     }
 
 //    @Override
