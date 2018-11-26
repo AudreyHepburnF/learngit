@@ -25,6 +25,9 @@ public class SyncAuctionTypeOpportunityToXtDataJobHandler extends AbstractSyncYc
     // 待归档
     private int WAIT_ARCHIVE = 4;
 
+    // 撤项
+    private int CANAL = 6;
+
     private String AUCTION_END_TIME = "auctionEndTime";
 
     @Override
@@ -94,6 +97,12 @@ public class SyncAuctionTypeOpportunityToXtDataJobHandler extends AbstractSyncYc
             result.put(STATUS, VALID_OPPORTUNITY_STATUS);
         } else {
             result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
+        }
+        if (projectStatus == CANAL) {
+            // 撤项
+            result.put(IS_SHOW, HIDDEN);
+        } else {
+            result.put(IS_SHOW, SHOW);
         }
         resultToExecute.add(appendIdToResult(result));
     }
