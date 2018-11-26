@@ -1,11 +1,9 @@
 package cn.bidlink.job.business.handler;
 
 import com.xxl.job.core.handler.IJobHandler;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -24,6 +22,4 @@ public abstract class JobHandler extends IJobHandler {
         paramsToUse.add(pageSize);
         return paramsToUse;
     }
-
-
 }
