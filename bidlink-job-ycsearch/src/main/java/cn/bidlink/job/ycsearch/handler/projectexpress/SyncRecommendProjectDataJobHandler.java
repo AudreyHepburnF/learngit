@@ -493,14 +493,14 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
         QueryBuilder keyWordsBuilder = QueryBuilders.matchQuery("keywords", queryStr);
 
         //每天限制2次匹配
-        QueryBuilder matchMarkBuilder = QueryBuilders.rangeQuery("matchMark").lt(getZeroTimeLongValue() + 2L);
+//        QueryBuilder matchMarkBuilder = QueryBuilders.rangeQuery("matchMark").lt(getZeroTimeLongValue() + 2L);
 
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.must(paidStatusBuilder)
                 .must(orderStatusBuilder)
                 .must(esOrderStatusBuilder)
-                .must(matchMarkBuilder)
+//                .must(matchMarkBuilder)
                 .must(keyWordsBuilder);
 
         Properties properties = elasticClient.getProperties();
