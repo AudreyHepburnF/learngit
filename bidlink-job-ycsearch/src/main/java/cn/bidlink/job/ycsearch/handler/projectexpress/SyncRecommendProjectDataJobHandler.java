@@ -209,19 +209,24 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                                 logger.info("供应商id不匹配,跳过projectId:{}", projectId);
                                 continue;
                             }
-                            Object alreadyMatchTimes = map.get("alreadyMatchTimes");
-                            map.put("alreadyMatchTimes", alreadyMatchTimes == null ? 0 : Integer.valueOf(alreadyMatchTimes.toString()) + 1);
-                            map.put("latestMatchTime", now);
-                            if (Long.valueOf(map.get("matchMark").toString()).longValue() < getZeroTimeLongValue()) {
-                                map.put("matchMark", getZeroTimeLongValue() + 1L);
-                            } else {
-                                map.put("matchMark", Long.valueOf(map.get("matchMark").toString()) + 1L);
-                            }
-                            Object maxMatchTimes = map.get("productCode");
-                            if (maxMatchTimes != null && alreadyMatchTimes != null
-                                    && (Integer.valueOf(maxMatchTimes.toString()).intValue() <= Integer.valueOf(alreadyMatchTimes.toString()).intValue())) {
-                                map.put("orderEndDate", now);
-                                map.put("esOrderStatus", 0);
+                            String recommendProjectId = DigestUtils.md5DigestAsHex((map.get("orderCode").toString() + "_" + projectId).getBytes());
+                            logger.info("检查该项目是否推荐过该订单,是则项目直通车匹配次数不变,orderCode:{},projectId:{},recommendProjectId:{}", map.get("orderCode"), projectId, recommendProjectId);
+                            boolean isDuplicationRecommend = this.checkRecommendProjectDuplication(recommendProjectId);
+                            if (!isDuplicationRecommend) {
+                                Object alreadyMatchTimes = map.get("alreadyMatchTimes");
+                                map.put("alreadyMatchTimes", alreadyMatchTimes == null ? 0 : Integer.valueOf(alreadyMatchTimes.toString()) + 1);
+                                map.put("latestMatchTime", now);
+                                if (Long.valueOf(map.get("matchMark").toString()).longValue() < getZeroTimeLongValue()) {
+                                    map.put("matchMark", getZeroTimeLongValue() + 1L);
+                                } else {
+                                    map.put("matchMark", Long.valueOf(map.get("matchMark").toString()) + 1L);
+                                }
+                                Object maxMatchTimes = map.get("productCode");
+                                if (maxMatchTimes != null && alreadyMatchTimes != null
+                                        && (Integer.valueOf(maxMatchTimes.toString()).intValue() <= Integer.valueOf(map.get("alreadyMatchTimes").toString()).intValue())) {
+                                    map.put("orderEndDate", now);
+                                    map.put("esOrderStatus", 0);
+                                }
                             }
 
                             // 封装推荐项目数据
@@ -274,6 +279,21 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                     .setScroll(new TimeValue(60000))
                     .execute().actionGet();
         } while (response.getHits().getHits().length != 0);
+    }
+
+    /**
+     * 检查该项目是否匹配过次订单 true:是重复匹配  false:不是
+     *
+     * @param recommendProjectId
+     * @return
+     */
+    private boolean checkRecommendProjectDuplication(String recommendProjectId) {
+        Properties properties = elasticClient.getProperties();
+        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.express_index"))  //悦采索引
+                .setTypes(properties.getProperty("cluster.type.project_express_supplier_recommend_record"))
+                .setQuery(QueryBuilders.termQuery("id", recommendProjectId))
+                .execute().actionGet();
+        return response.getHits().getTotalHits() > 0 ? true : false;
     }
 
     /**
