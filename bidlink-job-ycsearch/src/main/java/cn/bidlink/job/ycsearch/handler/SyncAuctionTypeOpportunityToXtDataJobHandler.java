@@ -41,7 +41,7 @@ public class SyncAuctionTypeOpportunityToXtDataJobHandler extends AbstractSyncYc
 
     private void syncAuctionProjectData() {
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.supplier_opportunity",
-                QueryBuilders.boolQuery().must(QueryBuilders.termQuery("source", SOURCE_OLD))
+                QueryBuilders.boolQuery().must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.YUECAI_SOURCE))
                         .must(QueryBuilders.termQuery(PROJECT_TYPE, AUCTION_PROJECT_TYPE)));
         Timestamp lastSyncStartTime = new Timestamp(new DateTime(new DateTime().getYear(), 1, 1, 0, 0, 0).getMillis());
         if (Objects.equals(SyncTimeUtil.GMT_TIME, lastSyncTime)) {
