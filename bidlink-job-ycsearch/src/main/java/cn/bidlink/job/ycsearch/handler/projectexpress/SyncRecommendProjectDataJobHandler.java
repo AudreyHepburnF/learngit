@@ -510,7 +510,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
 //		//es标记的订单状态为1：表示还有可用匹配次数
         QueryBuilder esOrderStatusBuilder = QueryBuilders.termQuery("esOrderStatus", 1);
         //查询关键字
-        QueryBuilder keyWordsBuilder = QueryBuilders.wildcardQuery("keywords", "*" + queryStr + "*");
+        QueryBuilder keyWordsBuilder = QueryBuilders.matchQuery("keywords", queryStr);
 
         //每天限制2次匹配
 //        QueryBuilder matchMarkBuilder = QueryBuilders.rangeQuery("matchMark").lt(getZeroTimeLongValue() + 2L);
