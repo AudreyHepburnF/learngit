@@ -48,9 +48,14 @@ public class SyncDealPurchaseSupplierDataJobHandler extends JobHandler /*impleme
     @Qualifier("purchaseDataSource")
     private DataSource purchaseDataSource;
 
+    @Autowired
+    @Qualifier("auctionDataSource")
+    private DataSource auctionDataSource;
+
     private   Logger logger                = LoggerFactory.getLogger(SyncDealPurchaseSupplierDataJobHandler.class);
     protected int    BIDDING_PROJECT_TYPE  = 1;
     protected int    PURCHASE_PROJECT_TYPE = 2;
+    protected int    AUCTION_PROJECT_TYPE  = 3;
 
     private String ID                         = "id";
     private String COMPANY_ID                 = "companyId";
@@ -79,6 +84,7 @@ public class SyncDealPurchaseSupplierDataJobHandler extends JobHandler /*impleme
     private void syncDealPurchaseSupplierService(Timestamp lastSyncTime) {
         syncDealPurchaseProjectService(lastSyncTime);
         syncDealBidProjectService(lastSyncTime);
+        syncDealAuctionProjectService(lastSyncTime);
     }
 
     private void syncDealBidProjectService(Timestamp lastSyncTime) {
@@ -141,6 +147,37 @@ public class SyncDealPurchaseSupplierDataJobHandler extends JobHandler /*impleme
         ArrayList<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
         doSyncDealSupplierData(purchaseDataSource, countSql, querySql, params, PURCHASE_PROJECT_TYPE);
+        logger.info("1.2【结束】同步采购项目成交供应商");
+    }
+
+    private void syncDealAuctionProjectService(Timestamp lastSyncTime) {
+        logger.info("1.1【开始】同步采购项目成交供应商");
+        String countSql = "SELECT\n" +
+                "\tcount(1) \n" +
+                "FROM\n" +
+                "\t`auction_supplier_project_origin` \n" +
+                "WHERE\n" +
+                "\tdeal_status = 3 \n" +
+                "\tAND update_time > ?";
+
+        String querySql = "SELECT\n" +
+                "\tcompany_id as companyId,\n" +
+                "\tproject_id as projectId,\n" +
+                "\tsupplier_id as supplierId,\n" +
+                "\tsupplier_name as supplierName,\n" +
+                "\tlink_man as linkManNotAnalyzed,\n" +
+                "\tlink_phone as linkPhoneNotAnalyzed,\n" +
+                "\tcreate_time as createTime,\n" +
+                "\tsign_over as signOver\n" +
+                "FROM\n" +
+                "\t`auction_supplier_project_origin` \n" +
+                "WHERE\n" +
+                "\tdeal_status = 3 " +
+                "AND update_time > ?" +
+                "limit ?,?";
+        ArrayList<Object> params = new ArrayList<>();
+        params.add(lastSyncTime);
+        doSyncDealSupplierData(auctionDataSource, countSql, querySql, params, AUCTION_PROJECT_TYPE);
         logger.info("1.2【结束】同步采购项目成交供应商");
     }
 

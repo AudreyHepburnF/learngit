@@ -48,6 +48,10 @@ public abstract class AbstractSyncSupplierDataJobHandler extends JobHandler {
     @Qualifier("tenderDataSource")
     protected DataSource tenderDataSource;
 
+    @Autowired
+    @Qualifier("auctionDataSource")
+    protected DataSource auctionDataSource;
+
     @Value("${enterpriseSpaceFormat}")
     protected String enterpriseSpaceFormat;
 
@@ -83,12 +87,15 @@ public abstract class AbstractSyncSupplierDataJobHandler extends JobHandler {
     protected String INDUSTRY_STR                = "industryStr";
     protected String TOTAL_PURCHASE_PROJECT      = "totalPurchaseProject";
     protected String TOTAL_BID_PROJECT           = "totalBidProject";
+    protected String TOTAL_AUCTION_PROJECT       = "totalAuctionProject";
     protected String TOTAL_PROJECT               = "totalProject";
     protected String TOTAL_DEAL_PURCHASE_PROJECT = "totalDealPurchaseProject";
     protected String TOTAL_DEAL_BID_PROJECT      = "totalDealBidProject";
+    protected String TOTAL_DEAL_AUCTION_PROJECT  = "totalDealAuctionProject";
     protected String TOTAL_DEAL_PROJECT          = "totalDealProject";
     protected String TOTAL_DEAL_PURCHASE_PRICE   = "totalDealPurchasePrice";
     protected String TOTAL_DEAL_BID_PRICE        = "totalDealBidPrice";
+    protected String TOTAL_DEAL_AUCTION_PRICE    = "totalDealAuctionPrice";
     protected String TOTAL_DEAL_PRICE            = "totalDealPrice";
     protected String TOTAL_PRODUCT               = "totalProduct";
     protected String TOTAL_COOPERATED_PURCHASER  = "totalCooperatedPurchaser";
@@ -106,7 +113,7 @@ public abstract class AbstractSyncSupplierDataJobHandler extends JobHandler {
     protected Map<String, String> industryCodeMap = new HashMap<>();
 
     protected void batchExecute(List<Map<String, Object>> resultsToUpdate) {
-//        System.out.println("size : " + resultsToUpdate.size());
+//        System.out.println("size : " + resultsToUpdate);
         if (!CollectionUtils.isEmpty(resultsToUpdate)) {
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> result : resultsToUpdate) {

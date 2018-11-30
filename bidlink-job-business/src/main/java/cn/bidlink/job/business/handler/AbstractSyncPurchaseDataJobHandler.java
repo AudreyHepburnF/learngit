@@ -24,7 +24,7 @@ import java.util.Map;
  * @description:
  * @Date 2018/5/24
  */
-public abstract class AbstractSyncPurchaseDataJobHandler extends JobHandler{
+public abstract class AbstractSyncPurchaseDataJobHandler extends JobHandler {
 
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -40,6 +40,10 @@ public abstract class AbstractSyncPurchaseDataJobHandler extends JobHandler{
     protected DataSource tenderDataSource;
 
     @Autowired
+    @Qualifier("auctionDataSource")
+    protected DataSource auctionDataSource;
+
+    @Autowired
     @Qualifier("uniregDataSource")
     protected DataSource uniregDataSource;
 
@@ -47,11 +51,13 @@ public abstract class AbstractSyncPurchaseDataJobHandler extends JobHandler{
     protected String COMPANY_ID                 = "companyId";
     protected String PURCHASE_TRADING_VOLUME    = "purchaseTradingVolume";
     protected String BID_TRADING_VOLUME         = "bidTradingVolume";
+    protected String AUCTION_TRADING_VOLUME_STR = "auctionTradingVolumeStr";
     protected String TRADING_VOLUME             = "tradingVolume";
     protected String LONG_TRADING_VOLUME        = "longTradingVolume";
     protected String COMPANY_SITE_ALIAS         = "companySiteAlias";
     protected String PURCHASE_PROJECT_COUNT     = "purchaseProjectCount";
     protected String BID_PROJECT_COUNT          = "bidProjectCount";
+    protected String AUCTION_PROJECT_COUNT      = "auctionProjectCount";
     protected String PROJECT_COUNT              = "projectCount";
     protected String REGION                     = "region";
     protected String AREA_STR                   = "areaStr";
@@ -63,8 +69,6 @@ public abstract class AbstractSyncPurchaseDataJobHandler extends JobHandler{
     protected String PURCHASE_NAME              = "purchaseName";
     protected String PURCHASE_NAME_NOT_ANALYZED = "purchaseNameNotAnalyzed";
     protected String COOPERATE_SUPPLIER_COUNT   = "cooperateSupplierCount";
-    protected String AUCTION_PROJECT_COUNT      = "auctionProjectCount";
-    protected String AUCTION_TRADING_VOLUME     = "auctionTradingVolume";
     protected String DATA_STATUS                = "dataStatus";
 
     protected void batchInsert(List<Map<String, Object>> purchases) {

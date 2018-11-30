@@ -53,6 +53,10 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
     @Qualifier("purchaseDataSource")
     protected DataSource purchaseDataSource;
 
+    @Autowired
+    @Qualifier("auctionDataSource")
+    protected DataSource auctionDataSource;
+
     @Value("${pageSize}")
     protected int pageSize;
 
@@ -60,6 +64,8 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
     protected int BIDDING_PROJECT_TYPE  = 1;
     // 采购项目类型
     protected int PURCHASE_PROJECT_TYPE = 2;
+    // 竞价项目
+    protected int AUCTION_PROJECT_TYPE  = 3;
 
     protected String ID                    = "id";
     protected String PROJECT_ID            = "projectId";
@@ -99,19 +105,29 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
             // 招标项目
             List<Map<String, Object>> bidProjectSource = new ArrayList<>();
             Set<Pair> bidProjectPairs = new HashSet<>();
+            // 竞价项目
+            List<Map<String, Object>> auctionProjectSource = new ArrayList<>();
+            Set<Pair> auctionProjectPairs = new HashSet<>();
 
             for (SearchHit searchHit : searchHits) {
                 Integer projectType = (Integer) searchHit.getSource().get("projectType");
-                if (projectType != null && projectType == PURCHASE_PROJECT_TYPE) {
-                    purchaseProjectSource.add(searchHit.getSource());
-                    Long projectId = Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID)));
-                    Long companyId = Long.valueOf(String.valueOf(searchHit.getSource().get(PURCHASE_ID)));
-                    purchaseProjectPairs.add(new Pair(companyId, projectId));
-                } else {
-                    bidProjectSource.add(searchHit.getSource());
-                    Long projectId = Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID)));
-                    Long companyId = Long.valueOf(String.valueOf(searchHit.getSource().get(PURCHASE_ID)));
-                    bidProjectPairs.add(new Pair(companyId, projectId));
+                if (projectType != null) {
+                    if (projectType == PURCHASE_PROJECT_TYPE) {
+                        purchaseProjectSource.add(searchHit.getSource());
+                        Long projectId = Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID)));
+                        Long companyId = Long.valueOf(String.valueOf(searchHit.getSource().get(PURCHASE_ID)));
+                        purchaseProjectPairs.add(new Pair(companyId, projectId));
+                    } else if (projectType == BIDDING_PROJECT_TYPE) {
+                        bidProjectSource.add(searchHit.getSource());
+                        Long projectId = Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID)));
+                        Long companyId = Long.valueOf(String.valueOf(searchHit.getSource().get(PURCHASE_ID)));
+                        bidProjectPairs.add(new Pair(companyId, projectId));
+                    } else if (projectType == AUCTION_PROJECT_TYPE) {
+                        auctionProjectSource.add(searchHit.getSource());
+                        Long projectId = Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID)));
+                        Long companyId = Long.valueOf(String.valueOf(searchHit.getSource().get(PURCHASE_ID)));
+                        auctionProjectPairs.add(new Pair(companyId, projectId));
+                    }
                 }
             }
 
@@ -121,6 +137,10 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
 
             if (bidProjectPairs.size() > 0) {
                 syncData(tenderDataSource, bidProjectSource, getBidProjectCountSql(bidProjectPairs));
+            }
+
+            if (auctionProjectPairs.size() > 0) {
+                syncData(auctionDataSource, auctionProjectSource, getAuctionProjectCountSql(auctionProjectPairs));
             }
             scrollResp = elasticClient.getTransportClient().prepareSearchScroll(scrollResp.getScrollId())
                     .setScroll(new TimeValue(60000))
@@ -181,10 +201,37 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
         return String.format(querySqlTemplate, whereConditionBuilder.toString());
     }
 
+    private String getAuctionProjectCountSql(Set<Pair> auctionProjectPair) {
+        String querySqlTemplate = "SELECT\n"
+                + "   company_id AS purchaseId,\n"
+                + "   project_id AS projectId,\n"
+                + "   count(supplier_id) AS biddenSupplierCount\n"
+                + "FROM\n"
+                + "   (SELECT company_id, project_id, supplier_id FROM auction_supplier_project WHERE company_id IS NOT NULL AND quote_status > 1 AND (%s)) s\n"
+                + "GROUP BY\n"
+                + "   company_id,\n"
+                + "   project_id;\n"
+                + "\n";
+        int index = 0;
+        StringBuilder whereConditionBuilder = new StringBuilder();
+        for (Pair projectPair : auctionProjectPair) {
+            if (index > 0) {
+                whereConditionBuilder.append(" OR ");
+            }
+            whereConditionBuilder.append("(company_id=").append(projectPair.companyId)
+                    .append(" AND project_id=")
+                    .append(projectPair.projectId)
+                    .append(") ");
+            index++;
+        }
+
+        return String.format(querySqlTemplate, whereConditionBuilder.toString());
+    }
+
     /**
      * 查询对应项目的已报价供应商统计
-     *  @param sources
      *
+     * @param sources
      */
     private void syncData(DataSource dataSource, List<Map<String, Object>> sources, String querySql) {
         Map<Pair, Integer> biddenSupplierCountMap = DBUtil.query(dataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Pair, Integer>>() {

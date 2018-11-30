@@ -144,31 +144,40 @@
       "totalBidProject": {
         "type": "long"
       },
-      "totalCooperatedPurchaser": {
-        "type": "long"
-      },
       "totalDealBidProject": {
-        "type": "long"
-      },
-      "totalDealPurchaseProject": {
-        "type": "long"
-      },
-      "totalDealProject": {
         "type": "long"
       },
       "totalDealBidPrice": {
         "type": "long"
       },
+      "totalPurchaseProject": {
+        "type": "long"
+      },
+      "totalDealPurchaseProject": {
+        "type": "long"
+      },
       "totalDealPurchasePrice": {
+        "type": "long"
+      },
+      "totalAuctionProject": {
+        "type": "long"
+      },
+      "totalDealAuctionProject": {
+        "type": "long"
+      },
+      "totalDealAuctionPrice": {
+        "type": "long"
+      },
+      "totalCooperatedPurchaser": {
+        "type": "long"
+      },
+      "totalDealProject": {
         "type": "long"
       },
       "totalDealPrice": {
         "type": "long"
       },
       "totalProduct": {
-        "type": "long"
-      },
-      "totalPurchaseProject": {
         "type": "long"
       },
       "totalProject": {
