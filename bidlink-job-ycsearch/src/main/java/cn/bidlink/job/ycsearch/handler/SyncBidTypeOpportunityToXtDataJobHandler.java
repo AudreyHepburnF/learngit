@@ -64,6 +64,113 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
         syncNothingBiddingProjectDataService(lastSyncTime);
         syncPreQualifyBiddingProjectDataService(lastSyncTime);
         syncTwoStageBiddingProjectDataService(lastSyncTime);
+        syncInviteOpenBiddingProjectDataService(lastSyncTime);
+        syncInviteOpenTwoStageBiddingProjectDataService(lastSyncTime);
+    }
+
+    private void syncInviteOpenBiddingProjectDataService(Timestamp lastSyncTime) {
+        logger.info("同步邀请招标公开的招标项目商机开始");
+        String countNothingSql = "SELECT\n"
+                + "   count(1)\n"
+                + "FROM\n"
+                + "   proj_inter_project pip\n"
+                + "JOIN notice_bid nb ON pip.id = nb.PROJECT_ID\n"
+                + "WHERE\n"
+                + "   pip.TENDER_MODE = 2\n"
+                + "AND pip.IS_PREQUALIFY = 2\n"
+                + "AND pip.IS_TWO_STAGE = 2\n"
+                + "AND pip.bidding_Open_Flag = 1\n"
+                + "AND nb.BID_ENDTIME IS NOT NULL";
+        String queryNothingSql = "SELECT\n"
+                + "    project.ID AS projectId,\n"
+                + "    project.PROJECT_NUMBER AS projectCode,\n"
+                + "    project.PROJECT_NAME AS projectName,\n"
+//                                 + "    project.REGION AS areaStr,\n"
+                + "    project.COMPANY_ID AS purchaseId,\n"
+                + "    project.PROJECT_STATUS AS projectStatus,\n"
+                + "    project.TENDER_NAMES AS purchaseName,\n"
+                + "    project.CREATE_TIME AS createTime,\n"
+                + "    project.BID_ENDTIME AS endTime,\n"
+                + "    product.id AS directoryId,\n"
+                + "    product.PRODUCT_NAME AS directoryName\n"
+                + "FROM\n"
+                + "   (\n"
+                + "      SELECT\n"
+                + "         pip.ID,\n"
+                + "         pip.PROJECT_NUMBER,\n"
+                + "         pip.PROJECT_NAME,\n"
+                + "         pip.REGION,\n"
+                + "         pip.COMPANY_ID,\n"
+                + "         pip.PROJECT_STATUS,\n"
+                + "         pip.TENDER_NAMES,\n"
+                + "         nb.BID_ENDTIME,\n"
+                + "         nb.CREATE_TIME\n"
+                + "      FROM\n"
+                + "         proj_inter_project pip\n"
+                + "      JOIN notice_bid nb ON pip.id = nb.PROJECT_ID\n"
+                + "      WHERE\n"
+                + "         pip.TENDER_MODE = 2\n"
+                + "      AND pip.IS_PREQUALIFY = 2\n"
+                + "      AND pip.IS_TWO_STAGE = 2\n"
+                + "      AND pip.bidding_Open_Flag = 1\n"
+                + "      AND nb.BID_ENDTIME IS NOT NULL"
+                + "      LIMIT ?,?\n"
+                + "   ) project\n"
+                + "LEFT JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
+        doSyncProjectDataService(ycDataSource, countNothingSql, queryNothingSql, Collections.emptyList());
+        logger.info("同步邀请招标公开的招标项目商机结束");
+    }
+
+    private void syncInviteOpenTwoStageBiddingProjectDataService(Timestamp lastSyncTime) {
+        logger.info("同步邀请招标公开两阶段招标项目的商机开始");
+        String countTwoStageSql = "SELECT\n"
+                + "   count(1)\n"
+                + "FROM\n"
+                + "   proj_inter_project pip\n"
+                + "JOIN notice_bid nb ON pip.id = nb.PROJECT_ID\n"
+                + "WHERE\n"
+                + "   pip.TENDER_MODE = 2\n"
+                + "AND pip.IS_PREQUALIFY = 2\n"
+                + "AND pip.bidding_Open_Flag = 1\n"
+                + "AND pip.IS_TWO_STAGE = 1";
+        // 两阶段
+        String queryTwoStageSql = "SELECT\n"
+                + "    project.ID AS projectId,\n"
+                + "    project.PROJECT_NUMBER AS projectCode,\n"
+                + "    project.PROJECT_NAME AS projectName,\n"
+//                                  + "    project.REGION AS areaStr,\n"
+                + "    project.COMPANY_ID AS purchaseId,\n"
+                + "    project.PROJECT_STATUS AS projectStatus,\n"
+                + "    project.TENDER_NAMES AS purchaseName,\n"
+                + "    project.CREATE_TIME AS createTime,\n"
+                + "    project.TECHNICAL_ADVICE_CUT_TIME AS endTime,\n"
+                + "    product.id AS directoryId,\n"
+                + "    product.PRODUCT_NAME AS directoryName\n"
+                + "FROM\n"
+                + "   (\n"
+                + "      SELECT\n"
+                + "         pip.ID,\n"
+                + "         pip.PROJECT_NUMBER,\n"
+                + "         pip.PROJECT_NAME,\n"
+                + "         pip.REGION,\n"
+                + "         pip.COMPANY_ID,\n"
+                + "         pip.PROJECT_STATUS,\n"
+                + "         pip.TENDER_NAMES,\n"
+                + "         nb.CREATE_TIME,\n"
+                + "         nb.TECHNICAL_ADVICE_CUT_TIME\n"
+                + "      FROM\n"
+                + "         proj_inter_project pip\n"
+                + "      JOIN notice_bid nb ON pip.id = nb.PROJECT_ID\n"
+                + "      WHERE\n"
+                + "         pip.TENDER_MODE = 2\n"
+                + "      AND pip.IS_PREQUALIFY = 2\n"
+                + "      AND pip.IS_TWO_STAGE = 1\n"
+                + "      AND pip.bidding_Open_Flag = 1\n"
+                + "      LIMIT ?,?\n"
+                + "   ) project\n"
+                + "JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
+        doSyncProjectDataService(ycDataSource, countTwoStageSql, queryTwoStageSql, Collections.emptyList());
+        logger.info("同步邀请招标公开两阶段招标项目的商机结束");
     }
 
     private void syncNothingBiddingProjectDataService(Timestamp lastSyncTime) {
@@ -186,6 +293,7 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
                 + "    project.PROJECT_NAME AS projectName,\n"
 //                                  + "    project.REGION AS areaStr,\n"
                 + "    project.COMPANY_ID AS purchaseId,\n"
+                + "    project.PROJECT_STATUS AS projectStatus,\n"
                 + "    project.TENDER_NAMES AS purchaseName,\n"
                 + "    project.CREATE_TIME AS createTime,\n"
                 + "    project.TECHNICAL_ADVICE_CUT_TIME AS endTime,\n"
@@ -199,6 +307,7 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
                 + "         pip.PROJECT_NAME,\n"
                 + "         pip.REGION,\n"
                 + "         pip.COMPANY_ID,\n"
+                + "         pip.PROJECT_STATUS,\n"
                 + "         pip.TENDER_NAMES,\n"
                 + "         nb.CREATE_TIME,\n"
                 + "         nb.TECHNICAL_ADVICE_CUT_TIME\n"
@@ -251,7 +360,6 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
             result.put(STATUS, VALID_OPPORTUNITY_STATUS);
             resultToExecute.add(appendIdToResult(result));
         }
-//
     }
 
 //    @Override
