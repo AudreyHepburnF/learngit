@@ -63,7 +63,7 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
     private void syncBiddingProjectDataService(Timestamp lastSyncTime) {
         syncNothingBiddingProjectDataService(lastSyncTime);
         syncPreQualifyBiddingProjectDataService(lastSyncTime);
-//        syncTwoStageBiddingProjectDataService(lastSyncTime);
+        syncTwoStageBiddingProjectDataService(lastSyncTime);
     }
 
     private void syncNothingBiddingProjectDataService(Timestamp lastSyncTime) {
