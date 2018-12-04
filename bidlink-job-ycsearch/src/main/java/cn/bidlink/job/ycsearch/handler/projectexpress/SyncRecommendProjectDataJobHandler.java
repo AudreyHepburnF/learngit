@@ -1,10 +1,11 @@
-package cn.bidlink.job.business.handler.projectexpress;
+package cn.bidlink.job.ycsearch.handler.projectexpress;
 
-import cn.bidlink.job.business.handler.JobHandler;
 import cn.bidlink.job.common.constant.BusinessConstant;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
+import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
+import cn.bidlink.job.ycsearch.handler.JobHandler;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
@@ -20,6 +21,7 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +34,10 @@ import org.springframework.util.StringUtils;
 import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.*;
+
+import static cn.bidlink.job.common.utils.SyncTimeUtil.*;
 
 /**
  * @author <a href="mailto:zhihuizhou@ebnew.com">wisdom</a>
@@ -54,6 +59,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
     protected DataSource uniregDataSource;
 
     private String  PROJECT_TYPE          = "projectType";
+    private String  UPDATE_TIME           = "updateTime";
     private Integer PURCHASE_PROJECT_TYPE = 2;
     private Integer CANAL_STATUS          = 10;
 
@@ -68,11 +74,16 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
 
     private void syncRecommendProjectData() {
         Properties properties = elasticClient.getProperties();
+        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.express_index", "cluster.type.project_express_supplier_recommend_record", null);
+//        Date lastSyncTime = SyncTimeUtil.toStringDate("2018-11-23 10:42:00");
         SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
-                        .must(QueryBuilders.termQuery(PROJECT_TYPE, PURCHASE_PROJECT_TYPE)))
+                        .must(QueryBuilders.termQuery(PROJECT_TYPE, PURCHASE_PROJECT_TYPE))
+                        .must(QueryBuilders.rangeQuery(UPDATE_TIME).gte(lastSyncTime.before(getZeroTime()) ? SyncTimeUtil.toDateString(getZeroTime()) : SyncTimeUtil.toDateString(lastSyncTime)))
+                )
+                .addSort("createTime", SortOrder.ASC)
                 .setSize(pageSize)
                 .setScroll(new TimeValue(60000))
                 .execute().actionGet();
@@ -85,15 +96,17 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                 Long purchaserId = Long.valueOf(resultFromEs.get("purchaseId").toString());
                 String purchaserName = String.valueOf(resultFromEs.get("purchaseName"));
                 String projectName = String.valueOf(resultFromEs.get("projectName"));
+                logger.info("商机项目id:{},项目名称:{}", projectId, projectName);
                 String projectCode = String.valueOf(resultFromEs.get("projectCode"));
                 Integer coreSupplierProject = Integer.valueOf(resultFromEs.get("isCore").toString());
-                String status = Integer.valueOf(resultFromEs.get("status").toString()).toString();
+                Integer status = Integer.valueOf(resultFromEs.get("status").toString());
                 // TODO 待采购商机数据添加bidStopType字段
-//                Integer bidStopType = Integer.valueOf(resultFromEs.get("bidStopType").toString());
+                Integer bidStopType = Integer.valueOf(resultFromEs.get("bidStopType").toString());
+                Object bidStopTime = resultFromEs.get("quoteStopTime");
                 //撤项消息
                 if (CANAL_STATUS.equals(projectStatus)) {
                     logger.info("处理撤项商机数据:{}", resultFromEs);
-                    List<Map<String, Object>> recommendProjects = getRecommendProjects(null, projectId, purchaserId);
+                    List<Map<String, Object>> recommendProjects = this.getRecommendProjects(null, projectId, purchaserId);
                     if (!CollectionUtils.isEmpty(recommendProjects)) {
                         // 已撤项项目把匹配次数加回去
                         for (Map<String, Object> map : recommendProjects) {
@@ -118,7 +131,8 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                     if (!CollectionUtils.isEmpty(directoryNames)) {
                         for (String directoryName : directoryNames) {
                             // 根据采购商机采购品匹配供应商项目直通车
-                            List<Map<String, Object>> recommendSuppliersForOneDirectorys = getRecommendSuppliersOrders(directoryName);
+                            List<Map<String, Object>> recommendSuppliersForOneDirectorys = this.getRecommendSuppliersOrders(directoryName);
+                            logger.info("根据采购品匹配到项目订单,recommendSuppliersForOneDirectorys:{}", JSON.toJSONString(recommendSuppliersForOneDirectorys));
                             if (!CollectionUtils.isEmpty(recommendSuppliersForOneDirectorys)) {
                                 for (Map<String, Object> map : recommendSuppliersForOneDirectorys) {
                                     if (contains(directoryName, map)) {
@@ -189,30 +203,44 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                                 logger.info("供应商：[" + map.get("supplierName") + "] 已经被" + purchaserName + "拉黑");
                                 continue;
                             }
-                            Object alreadyMatchTimes = map.get("alreadyMatchTimes");
-                            map.put("alreadyMatchTimes", alreadyMatchTimes == null ? 0 : Integer.valueOf(alreadyMatchTimes.toString()) + 1);
-                            map.put("latestMatchTime", now);
-                            if (Long.valueOf(map.get("matchMark").toString()).longValue() < getZeroTimeLongValue()) {
-                                map.put("matchMark", getZeroTimeLongValue() + 1L);
-                            } else {
-                                map.put("matchMark", Long.valueOf(map.get("matchMark").toString()) + 1L);
+                            Set<String> products = supplierMatchedProductMap.get(map.get("supplierId").toString() + "_" + map.get("orderCode").toString());
+                            StringBuilder matchedProducts = new StringBuilder("");
+                            if (CollectionUtils.isEmpty(products)) {
+                                logger.info("供应商id不匹配,跳过projectId:{}", projectId);
+                                continue;
                             }
-                            Object maxMatchTimes = map.get("productCode");
-                            if (maxMatchTimes != null && alreadyMatchTimes != null
-                                    && (Integer.valueOf(maxMatchTimes.toString()).intValue() <= Integer.valueOf(alreadyMatchTimes.toString()).intValue())) {
-                                map.put("orderEndDate", now);
-                                map.put("esOrderStatus", 0);
+                            String recommendProjectId = DigestUtils.md5DigestAsHex((map.get("orderCode").toString() + "_" + projectId).getBytes());
+                            logger.info("检查该项目是否推荐过该订单,是则项目直通车匹配次数不变,orderCode:{},projectId:{},recommendProjectId:{}", map.get("orderCode"), projectId, recommendProjectId);
+                            boolean isDuplicationRecommend = this.checkRecommendProjectDuplication(recommendProjectId);
+                            if (!isDuplicationRecommend) {
+                                Object alreadyMatchTimes = map.get("alreadyMatchTimes");
+                                map.put("alreadyMatchTimes", alreadyMatchTimes == null ? 0 : Integer.valueOf(alreadyMatchTimes.toString()) + 1);
+                                map.put("latestMatchTime", now);
+                                if (Long.valueOf(map.get("matchMark").toString()).longValue() < getZeroTimeLongValue()) {
+                                    map.put("matchMark", getZeroTimeLongValue() + 1L);
+                                } else {
+                                    map.put("matchMark", Long.valueOf(map.get("matchMark").toString()) + 1L);
+                                }
+                                Object maxMatchTimes = map.get("productCode");
+                                if (maxMatchTimes != null && alreadyMatchTimes != null
+                                        && (Integer.valueOf(maxMatchTimes.toString()).intValue() <= Integer.valueOf(map.get("alreadyMatchTimes").toString()).intValue())) {
+                                    map.put("orderEndDate", now);
+                                    map.put("esOrderStatus", 0);
+                                }
                             }
 
                             // 封装推荐项目数据
                             Map<String, Object> recommendRecord = new HashMap<String, Object>();
-                            recommendRecord.put("projectId", projectId);
+                            recommendRecord.put("projectId", String.valueOf(projectId));
                             recommendRecord.put("projectName", projectName);
                             recommendRecord.put("purchaserId", purchaserId);
                             recommendRecord.put("purchaserName", purchaserName);
                             // TODO 待修改
-//                        recommendRecord.put("bidStopType", bidStopType);
-//                        recommendRecord.put("bidStopTime", bidStopTime);
+                            recommendRecord.put("bidStopType", bidStopType);
+                            if (bidStopType == 2) {
+                                // 自动截标添加截止时间
+                                recommendRecord.put("bidStopTime", bidStopTime);
+                            }
                             recommendRecord.put("supplierId", map.get("supplierId"));
                             recommendRecord.put("supplierName", map.get("supplierName"));
                             recommendRecord.put("projectCode", projectCode);
@@ -225,24 +253,22 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
 //                        } catch (Exception e) {
 //                            logger.error("供应商联系人，联系电话查询异常 供应商Id:{}",map.get("supplierId"));
 //                        }
-                            Set<String> products = supplierMatchedProductMap.get(map.get("supplierId").toString() + "_" + map.get("orderCode").toString());
-                            StringBuilder matchedProducts = new StringBuilder("");
                             for (String product : products) {
                                 matchedProducts.append(product).append(";");
                             }
-
                             recommendRecord.put("projectStatus", status);
-
                             recommendRecord.put("matchedProducts", matchedProducts);
                             recommendRecord.put("coreSupplierProject", coreSupplierProject);
-                            recommendRecord.put("matchedDate", now);
-                            recommendRecord.put("createTime", now);
+                            Timestamp currentDate = SyncTimeUtil.getCurrentDate();
+                            recommendRecord.put(SyncTimeUtil.SYNC_TIME, currentDate);
+                            recommendRecord.put("matchedDate", currentDate);
+                            recommendRecord.put("createTime", currentDate);
                             recommendRecord.put("updateTime", null);
                             recommendRecord.put("attendStatus", 1);
                             recommendRecord.put("id", DigestUtils.md5DigestAsHex((map.get("orderCode").toString() + "_" + projectId).getBytes()));
                             recommendRecords.add(recommendRecord);
                         }
-                        logger.info("保存:{}", recommendRecords);
+                        logger.info("保存项目直通车订单数据:{}", recommendSupplierOrders);
                         insertBatchToEs(recommendSupplierOrders, properties.getProperty("cluster.express_index"), properties.getProperty("cluster.type.project_express"));
                         logger.info("保存供应商项目直通车匹配到的项目信息:{}", recommendRecords);
                         insertBatchToEs(recommendRecords, properties.getProperty("cluster.express_index"), properties.getProperty("cluster.type.project_express_supplier_recommend_record"));
@@ -253,6 +279,21 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                     .setScroll(new TimeValue(60000))
                     .execute().actionGet();
         } while (response.getHits().getHits().length != 0);
+    }
+
+    /**
+     * 检查该项目是否匹配过次订单 true:是重复匹配  false:不是
+     *
+     * @param recommendProjectId
+     * @return
+     */
+    private boolean checkRecommendProjectDuplication(String recommendProjectId) {
+        Properties properties = elasticClient.getProperties();
+        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.express_index"))  //悦采索引
+                .setTypes(properties.getProperty("cluster.type.project_express_supplier_recommend_record"))
+                .setQuery(QueryBuilders.termQuery("id", recommendProjectId))
+                .execute().actionGet();
+        return response.getHits().getTotalHits() > 0 ? true : false;
     }
 
     /**
@@ -307,6 +348,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                         }))
                 );
             }
+            bulkRequest.setRefresh(true);
             BulkResponse response = bulkRequest.execute().actionGet();
             if (response.hasFailures()) {
                 logger.error("保存项目直通车数据到es失败,错误信息:{}", response.buildFailureMessage());
@@ -435,6 +477,18 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                     .setQuery(boolQueryBuilder);
 
             builder.execute().actionGet();
+
+            // 更新其中一条数据
+            SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.express_index")).setTypes(properties.getProperty("cluster.type.project_express_supplier_recommend_record"))
+                    .setSize(1).execute().actionGet();
+            SearchHits hits = response.getHits();
+            if (hits.getTotalHits() > 0) {
+                Map<String, Object> source = hits.getHits()[0].getSource();
+                source.put(SYNC_TIME, SyncTimeUtil.currentDateToString());
+                elasticClient.getTransportClient().prepareUpdate(properties.getProperty("cluster.express_index"), properties.getProperty("cluster.type.project_express_supplier_recommend_record"), String.valueOf(source.get("id")))
+                        .setDoc(source)
+                        .execute().actionGet();
+            }
         } catch (Exception e) {
             logger.error("项目直通车数据从ElasticSearch删除失败: " + e.getMessage(), e);
         }
@@ -459,14 +513,14 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
         QueryBuilder keyWordsBuilder = QueryBuilders.matchQuery("keywords", queryStr);
 
         //每天限制2次匹配
-        QueryBuilder matchMarkBuilder = QueryBuilders.rangeQuery("matchMark").lt(getZeroTimeLongValue() + 2L);
+//        QueryBuilder matchMarkBuilder = QueryBuilders.rangeQuery("matchMark").lt(getZeroTimeLongValue() + 2L);
 
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.must(paidStatusBuilder)
                 .must(orderStatusBuilder)
                 .must(esOrderStatusBuilder)
-                .must(matchMarkBuilder)
+//                .must(matchMarkBuilder)
                 .must(keyWordsBuilder);
 
         Properties properties = elasticClient.getProperties();

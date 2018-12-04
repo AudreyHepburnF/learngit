@@ -1,4 +1,4 @@
-package cn.bidlink.job.business.handler;
+package cn.bidlink.job.ycsearch.handler;
 
 import cn.bidlink.job.common.constant.BusinessConstant;
 import cn.bidlink.job.common.es.ElasticClient;
@@ -30,32 +30,22 @@ import java.sql.SQLException;
 import java.util.*;
 
 /**
- * 同步商机已报价的供应商数目统计
- *
- * @author : <a href="mailto:zikaifeng@ebnew.com">冯子恺</a>
- * @version : Ver 1.0
- * @description :
- * @date : 2018/1/31
+ * @author <a href="mailto:zhihuizhou@ebnew.com">wisdom</a>
+ * @version Ver 1.0
+ * @description:同步悦采商机项目已参与供应商数量
+ * @Date 2018/10/26
  */
-@JobHander("syncBiddenSupplierCountDataJobHandler")
+@JobHander("syncBiddenSupplierCountToXtDataJobHandler")
 @Service
-public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implements InitializingBean*/ {
-    private Logger logger = LoggerFactory.getLogger(SyncBiddenSupplierCountDataJobHandler.class);
+public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*implements InitializingBean*/ {
+    private Logger logger = LoggerFactory.getLogger(SyncBiddenSupplierCountToXtDataJobHandler.class);
 
     @Autowired
     private ElasticClient elasticClient;
 
     @Autowired
-    @Qualifier("tenderDataSource")
-    protected DataSource tenderDataSource;
-
-    @Autowired
-    @Qualifier("purchaseDataSource")
-    protected DataSource purchaseDataSource;
-
-    @Autowired
-    @Qualifier("auctionDataSource")
-    protected DataSource auctionDataSource;
+    @Qualifier("ycDataSource")
+    protected DataSource ycDataSource;
 
     @Value("${pageSize}")
     protected int pageSize;
@@ -87,7 +77,7 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
     private void syncBiddenSupplierCountData() {
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
 //                .must(QueryBuilders.termQuery("status", 1))
-                .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE));  // 新平台
+                .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE));  // 新平台
 
         Properties properties = elasticClient.getProperties();
         SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
@@ -132,15 +122,15 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
             }
 
             if (purchaseProjectPairs.size() > 0) {
-                syncData(purchaseDataSource, purchaseProjectSource, getPurchaseProjectCountSql(purchaseProjectPairs));
+                syncData(ycDataSource, purchaseProjectSource, getPurchaseProjectCountSql(purchaseProjectPairs));
             }
 
             if (bidProjectPairs.size() > 0) {
-                syncData(tenderDataSource, bidProjectSource, getBidProjectCountSql(bidProjectPairs));
+                syncData(ycDataSource, bidProjectSource, getBidProjectCountSql(bidProjectPairs));
             }
 
             if (auctionProjectPairs.size() > 0) {
-                syncData(auctionDataSource, auctionProjectSource, getAuctionProjectCountSql(auctionProjectPairs));
+                syncData(ycDataSource, auctionProjectSource, getAuctionProjectCountSql(auctionProjectPairs));
             }
             scrollResp = elasticClient.getTransportClient().prepareSearchScroll(scrollResp.getScrollId())
                     .setScroll(new TimeValue(60000))
@@ -150,15 +140,41 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
 
     private String getPurchaseProjectCountSql(Set<Pair> projectPairs) {
         String querySqlTemplate = "SELECT\n"
-                + "   company_id AS purchaseId,\n"
+                + "   comp_id AS purchaseId,\n"
                 + "   project_id AS projectId,\n"
                 + "   count(supplier_id) AS biddenSupplierCount\n"
                 + "FROM\n"
-                + "   (SELECT company_id, project_id, supplier_id FROM purchase_supplier_project WHERE company_id IS NOT NULL AND quote_status > 1 AND (%s)) s\n"
+                + "   (SELECT comp_id, project_id, supplier_id FROM bmpfjz_supplier_project_bid WHERE comp_id IS NOT NULL AND supplier_bid_status IN ( 2, 3, 6, 7 )  AND (%s)) s\n"
                 + "GROUP BY\n"
-                + "   company_id,\n"
+                + "   comp_id,\n"
                 + "   project_id;\n"
                 + "\n";
+        int index = 0;
+        StringBuilder whereConditionBuilder = new StringBuilder();
+        for (Pair projectPair : projectPairs) {
+            if (index > 0) {
+                whereConditionBuilder.append(" OR ");
+            }
+            whereConditionBuilder.append("(comp_id=").append(projectPair.companyId)
+                    .append(" AND project_id=")
+                    .append(projectPair.projectId)
+                    .append(") ");
+            index++;
+        }
+
+        return String.format(querySqlTemplate, whereConditionBuilder.toString());
+    }
+
+    private String getBidProjectCountSql(Set<Pair> projectPairs) {
+        String querySqlTemplate = "SELECT\n"
+                + "   company_id AS purchaseId,\n"
+                + "   project_id AS projectId,\n"
+                + "   count(BIDER_ID) AS biddenSupplierCount\n"
+                + "FROM\n"
+                + "   (SELECT company_id, project_id, BIDER_ID FROM bid WHERE IS_WITHDRAWBID = 0 AND (%s)) s\n"
+                + "GROUP BY\n"
+                + "   company_id,\n"
+                + "   project_id";
         int index = 0;
         StringBuilder whereConditionBuilder = new StringBuilder();
         for (Pair projectPair : projectPairs) {
@@ -175,41 +191,15 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
         return String.format(querySqlTemplate, whereConditionBuilder.toString());
     }
 
-    private String getBidProjectCountSql(Set<Pair> projectPairs) {
-        String querySqlTemplate = "SELECT\n"
-                + "   company_id AS purchaseId,\n"
-                + "   sub_project_id AS projectId,\n"
-                + "   count(supplier_id) AS biddenSupplierCount\n"
-                + "FROM\n"
-                + "   (SELECT company_id, sub_project_id, supplier_id FROM bid_supplier WHERE bid_status = 1 AND(%s)) s\n"
-                + "GROUP BY\n"
-                + "   company_id,\n"
-                + "   sub_project_id";
-        int index = 0;
-        StringBuilder whereConditionBuilder = new StringBuilder();
-        for (Pair projectPair : projectPairs) {
-            if (index > 0) {
-                whereConditionBuilder.append(" OR ");
-            }
-            whereConditionBuilder.append("(company_id=").append(projectPair.companyId)
-                    .append(" AND sub_project_id=")
-                    .append(projectPair.projectId)
-                    .append(") ");
-            index++;
-        }
-
-        return String.format(querySqlTemplate, whereConditionBuilder.toString());
-    }
-
     private String getAuctionProjectCountSql(Set<Pair> auctionProjectPair) {
         String querySqlTemplate = "SELECT\n"
-                + "   company_id AS purchaseId,\n"
+                + "   comp_id AS purchaseId,\n"
                 + "   project_id AS projectId,\n"
                 + "   count(supplier_id) AS biddenSupplierCount\n"
                 + "FROM\n"
-                + "   (SELECT company_id, project_id, supplier_id FROM auction_supplier_project WHERE company_id IS NOT NULL AND (%s)) s\n"
+                + "   (SELECT comp_id, project_id, supplier_id FROM auction_bid_supplier WHERE comp_id IS NOT NULL AND (%s)) s\n"
                 + "GROUP BY\n"
-                + "   company_id,\n"
+                + "   comp_id,\n"
                 + "   project_id;\n"
                 + "\n";
         int index = 0;
@@ -218,7 +208,7 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
             if (index > 0) {
                 whereConditionBuilder.append(" OR ");
             }
-            whereConditionBuilder.append("(company_id=").append(projectPair.companyId)
+            whereConditionBuilder.append("(comp_id=").append(projectPair.companyId)
                     .append(" AND project_id=")
                     .append(projectPair.projectId)
                     .append(") ");
@@ -276,7 +266,7 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
                         .setSource(JSON.toJSONString(result, new ValueFilter() {
                             @Override
                             public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof java.util.Date) {
+                                if (propertyValue instanceof Date) {
                                     return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
                                 } else {
                                     return propertyValue;

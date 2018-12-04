@@ -33,7 +33,10 @@ import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
@@ -56,9 +59,9 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     @Autowired
     private ElasticClient elasticClient;
 
-//    @Autowired
-//    @Qualifier("proDataSource")
-//    private DataSource proDataSource;
+    @Autowired
+    @Qualifier("proDataSource")
+    private DataSource proDataSource;
 
 //    @Autowired
 //    @Qualifier("ycDataSource")
@@ -85,6 +88,9 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     // 主营产品类型
     private static final int MAIN_PRODUCT_DIRECTORY_REL = 4;
 
+    // 标王类型
+    private static final int WFIRST_DIRCTORY_REL = 3;
+
     private Semaphore       semaphore;
     private AtomicLong      atomicLong;
     private ExecutorService executorService;
@@ -101,6 +107,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
                 return t;
             }
         });
+//        execute();
     }
 
     @Override
@@ -114,13 +121,14 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
 
     // 供应商产品关系（1、报价产品；2、中标产品；3、标王关键词；4、主营产品：）
     private void syncProductData() {
+//        Timestamp lastSyncTime = new Timestamp(0);
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.supplier_product", null);
         logger.info("供应商产品数据同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss") + "\n"
                 + ", syncTime : " + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
 //        syncTradeProductDataService(lastSyncTime);
 //        syncTradeBidProductDataService(lastSyncTime);
         // FIXME 同步标王待沟通
-//        syncProDataService(lastSyncTime);
+        syncProDataService(lastSyncTime);
         syncCenterDataService(lastSyncTime);
     }
 
@@ -206,23 +214,23 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
      *
      * @param lastSyncTime
      */
-//    private void syncProDataService(Timestamp lastSyncTime) {
-//        logger.info("同步标王关键字开始");
-//        String countInsertedSql = "SELECT count(1) FROM user_wfirst_use WHERE CREATE_TIME > ? AND ENABLE_DISABLE = 1 AND STATE=1";
-//        String queryInsertedSql = "SELECT\n"
-//                                  + "   ufu.COMPANY_ID AS supplierId,\n"
-//                                  + "   w.KEY_WORD AS directoryNameAlias,\n"
-//                                  + "   3 AS supplierDirectoryRel,\n"
-//                                  + "   ufu.CREATE_TIME AS createTime,\n"
-//                                  + "   ufu.UPDATE_TIME AS updateTime\n"
-//                                  + "FROM\n"
-//                                  + "   user_wfirst_use ufu\n"
-//                                  + "LEFT JOIN wfirst w ON ufu.WFIRST_ID = w.ID\n"
-//                                  + "WHERE ufu.CREATE_TIME > ? AND ufu.ENABLE_DISABLE = 1 AND ufu.STATE=1\n"
-//                                  + "LIMIT ?, ?";
-//        doSyncInsertedData(proDataSource, countInsertedSql, queryInsertedSql, lastSyncTime);
-//        logger.info("同步标王关键字结束");
-//    }
+    private void syncProDataService(Timestamp lastSyncTime) {
+        logger.info("同步标王关键字开始");
+        String countInsertedSql = "SELECT count(1) FROM user_wfirst_use WHERE CREATE_TIME > ? AND ENABLE_DISABLE = 1 AND STATE=1";
+        String queryInsertedSql = "SELECT\n"
+                + "   ufu.COMPANY_ID AS supplierId,\n"
+                + "   w.KEY_WORD AS directoryName,\n"
+                + "   3 AS supplierDirectoryRel,\n"
+                + "   ufu.CREATE_TIME AS createTime,\n"
+                + "   ufu.UPDATE_TIME AS updateTime\n"
+                + "FROM\n"
+                + "   user_wfirst_use ufu\n"
+                + "LEFT JOIN wfirst w ON ufu.WFIRST_ID = w.ID\n"
+                + "WHERE ufu.CREATE_TIME > ? AND ufu.ENABLE_DISABLE = 1 AND ufu.STATE=1\n"
+                + "LIMIT ?, ?";
+        doSyncInsertedData(proDataSource, countInsertedSql, queryInsertedSql, lastSyncTime);
+        logger.info("同步标王关键字结束");
+    }
 
     /**
      * 同步中心库供应商主营产品

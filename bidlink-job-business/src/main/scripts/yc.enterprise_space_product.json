@@ -30,6 +30,18 @@
         "type": "string",
         "index": "not_analyzed"
       },
+      "spec": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "trademark": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "model": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
       "state": {
         "type": "integer"
       },
@@ -40,6 +52,9 @@
         "type": "integer"
       },
       "isDel": {
+        "type": "integer"
+      },
+      "wfirstStatus": {
         "type": "integer"
       },
       "syncTime": {

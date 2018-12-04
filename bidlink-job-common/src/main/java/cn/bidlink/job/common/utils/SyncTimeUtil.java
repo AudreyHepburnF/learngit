@@ -57,4 +57,27 @@ public class SyncTimeUtil {
         }
         return null;
     }
+
+    /**
+     * 获取零点时间
+     *
+     * @return
+     */
+    public static Date getZeroTime() {
+        DateTime dateTime = new DateTime();
+        DateTime zeroTime = dateTime.minusHours(dateTime.getHourOfDay())
+                .minusMinutes(dateTime.getMinuteOfHour())
+                .minusSeconds(dateTime.getSecondOfMinute())
+                .minusMillis(dateTime.getMillisOfSecond());
+        return zeroTime.toDate();
+    }
+
+    public static Long getZeroTimeLongValue() {
+        DateTime dateTime = new DateTime();
+        DateTime zeroTime = dateTime.minusHours(dateTime.getHourOfDay())
+                .minusMinutes(dateTime.getMinuteOfHour())
+                .minusSeconds(dateTime.getSecondOfMinute())
+                .minusMillis(dateTime.getMillisOfSecond());
+        return zeroTime.toDate().getTime();
+    }
 }

@@ -1,0 +1,30 @@
+// 方式1：直接在head界面操作，yc_v1/supplier/_mapping POST
+// 方式2：curl -XPOST http://dcsearch.api.yuecai.com/yc_v1/supplier/_mapping -d'
+{
+  "supplier_express": {
+    "properties": {
+      "areaStr": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "companyName": {
+        "type": "string",
+        "analyzer": "ik"
+      },
+      "id": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "totalCooperatedPurchaser": {
+        "type": "long"
+      },
+      "totalDealPrice": {
+        "type": "long"
+      },
+      "mainProduct": {
+        "type": "string",
+        "analyzer": "ik"
+      }
+    }
+  }
+}

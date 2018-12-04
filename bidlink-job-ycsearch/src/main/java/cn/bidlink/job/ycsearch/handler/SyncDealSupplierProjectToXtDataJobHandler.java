@@ -347,7 +347,7 @@ public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler {
     private String getCompanyIds(List<Map<String, Object>> mapList){
         Set<Long> companySet=new HashSet<>();
         for (Map<String, Object> map : mapList) {
-            companySet.add((Long)map.get(SUPPLIER_ID));
+            companySet.add((Long)map.get(COMPANY_ID));
         }
         return StringUtils.collectionToCommaDelimitedString(companySet);
     }

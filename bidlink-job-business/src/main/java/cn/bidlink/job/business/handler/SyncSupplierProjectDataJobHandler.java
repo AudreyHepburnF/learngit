@@ -51,7 +51,11 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
             Set<String> supplierIds = new HashSet<>();
             List<Map<String, Object>> resultFromEs = new ArrayList<>();
             for (SearchHit searchHit : searchHits) {
-                supplierIds.add(searchHit.getId());
+                String id = searchHit.getId();
+                if (!Objects.equals(Long.valueOf(id), 11113173840L)) {
+                    continue;
+                }
+                supplierIds.add(id);
                 resultFromEs.add(searchHit.getSource());
             }
 
@@ -113,11 +117,27 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
             source.put(TOTAL_BID_PROJECT, (value == null ? 0 : value));
         }
 
+        // 竞价项目
+        String queryAuctionProjectSqlTemplate = "select\n"
+                + "    count(1),\n"
+                + "    supplier_id AS supplierId\n"
+                + " from\n"
+                + "    auction_supplier_project\n"
+                + "    where quote_status in (2,3) AND supplier_id in (%s)\n"
+                + " GROUP BY\n"
+                + "    supplier_id";
+        Map<String, Long> auctionProjectStat = getSupplierStatMap(auctionDataSource, queryAuctionProjectSqlTemplate, supplierIds);
+        for (Map<String, Object> source : resultFromEs) {
+            Object value = auctionProjectStat.get(source.get(ID));
+            source.put(TOTAL_AUCTION_PROJECT, (value == null ? 0 : value));
+        }
+
         // 已参与总项目个数
         resultFromEs.forEach(map -> {
             Long totalPurchaseProject = Long.valueOf(map.get(TOTAL_PURCHASE_PROJECT).toString());
             Long totalBidProject = Long.valueOf(map.get(TOTAL_BID_PROJECT).toString());
-            map.put(TOTAL_PROJECT, totalPurchaseProject + totalBidProject);
+            Long totalAuctionProject = Long.valueOf(map.get(TOTAL_AUCTION_PROJECT).toString());
+            map.put(TOTAL_PROJECT, totalPurchaseProject + totalBidProject + totalAuctionProject);
         });
     }
 
@@ -158,11 +178,28 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
             source.put(TOTAL_DEAL_BID_PROJECT, value == null ? 0 : value);
         }
 
+        // 竞价项目
+        String queryAuctionProjectSqlTemplate = "select\n"
+                + "    count(1),\n"
+                + "    supplier_id AS supplierId\n"
+                + " from\n"
+                + "    auction_supplier_project\n"
+                + "      WHERE\n"
+                + "         deal_status = 3 AND supplier_id in (%s)\n"
+                + " GROUP BY\n"
+                + "    supplier_id";
+        Map<String, Long> auctionProjectStat = getSupplierStatMap(auctionDataSource, queryAuctionProjectSqlTemplate, supplierIds);
+        for (Map<String, Object> source : resultFromEs) {
+            Object value = auctionProjectStat.get(source.get(ID));
+            source.put(TOTAL_DEAL_AUCTION_PROJECT, value == null ? 0 : value);
+        }
+
         // 总成交项目数量
         resultFromEs.forEach(map -> {
             Long totalDealPurchaseProject = Long.valueOf(map.get(TOTAL_DEAL_PURCHASE_PROJECT).toString());
             Long totalDealBidProject = Long.valueOf(map.get(TOTAL_DEAL_BID_PROJECT).toString());
-            map.put(TOTAL_DEAL_PROJECT, totalDealPurchaseProject + totalDealBidProject);
+            Long totalDealAuctionProject = Long.valueOf(map.get(TOTAL_DEAL_AUCTION_PROJECT).toString());
+            map.put(TOTAL_DEAL_PROJECT, totalDealPurchaseProject + totalDealBidProject + totalDealAuctionProject);
         });
     }
 
@@ -184,6 +221,23 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
             source.put(TOTAL_DEAL_PURCHASE_PRICE, bigDecimal == null ? BigDecimal.ZERO.longValue() : bigDecimal.longValue());
         }
 
+        // 竞价项目
+        String queryAuctionDealPriceSqlTemplate = "SELECT\n" +
+                "\tsupplier_id,\n" +
+                "\tsum( deal_total_price ) \n" +
+                "FROM\n" +
+                "\t`auction_supplier_project` \n" +
+                "WHERE\n" +
+                "\tdeal_status = 3 \n" +
+                "\tAND supplier_id IN (%s) \n" +
+                "GROUP BY\n" +
+                "\tsupplier_id";
+        Map<String, BigDecimal> auctionDealPriceStat = getSupplierPriceStatMap(auctionDataSource, queryAuctionDealPriceSqlTemplate, supplierIds);
+        for (Map<String, Object> source : resultFromEs) {
+            BigDecimal value = auctionDealPriceStat.get(source.get(ID));
+            source.put(TOTAL_DEAL_AUCTION_PRICE, value == null ? BigDecimal.ZERO.longValue() : value.longValue());
+        }
+
         // 招标项目
         String queryBidDealPriceSqlTemplate = "SELECT\n" +
                 "\tsupplier_id,\n" +
@@ -200,9 +254,9 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
             BigDecimal bigDecimal = bidDealPriceStat.get(source.get(ID));
             source.put(TOTAL_DEAL_BID_PRICE, bigDecimal == null ? BigDecimal.ZERO.longValue() : bigDecimal.longValue());
             if (bigDecimal == null) {
-                source.put(TOTAL_DEAL_PRICE, source.get(TOTAL_DEAL_PURCHASE_PRICE));
+                source.put(TOTAL_DEAL_PRICE, ((Long) source.get(TOTAL_DEAL_PURCHASE_PRICE)) + ((Long) source.get(TOTAL_DEAL_BID_PRICE)));
             } else {
-                source.put(TOTAL_DEAL_PRICE, bigDecimal.longValue() + Long.valueOf(source.get(TOTAL_DEAL_PURCHASE_PRICE).toString()));
+                source.put(TOTAL_DEAL_PRICE, bigDecimal.longValue() + Long.valueOf(source.get(TOTAL_DEAL_PURCHASE_PRICE).toString()) + ((Long) source.get(TOTAL_DEAL_AUCTION_PRICE)));
             }
         }
     }

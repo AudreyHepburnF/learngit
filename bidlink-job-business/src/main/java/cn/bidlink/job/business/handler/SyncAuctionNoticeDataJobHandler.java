@@ -67,8 +67,8 @@ public class SyncAuctionNoticeDataJobHandler extends AbstractSyncNoticeDataJobHa
                 "\tanh.project_id AS projectId,\n" +
                 "\tanh.project_name AS projectName,\n" +
                 "\tanh.project_code AS projectCode,\n" +
-                // TODO 竞价项目的截止时间待产品定义
-//                "\tanh.auction_end_time AS quoteStopTime,\n" +
+//                "\tanh.auction_start_time AS quoteStartTime,\n" +
+                "\tanh.auction_end_time AS quoteStopTime,\n" +
                 "\tanh.publish_notice_time AS publishNoticeTime,\n" +
                 "\tanh.project_info AS projectInfo,\n" +
                 "\tanh.link_man AS linkMan,\n" +
@@ -104,7 +104,7 @@ public class SyncAuctionNoticeDataJobHandler extends AbstractSyncNoticeDataJobHa
                 "\tanh.project_name AS projectName,\n" +
                 "\tanh.project_code AS projectCode,\n" +
                 // TODO 竞价项目的截止时间待产品定义
-//                "\tanh.auction_end_time AS quoteStopTime,\n" +
+                "\tanh.auction_end_time AS quoteStopTime,\n" +
                 "\tanh.publish_notice_time AS publishNoticeTime,\n" +
                 "\tanh.project_info AS projectInfo,\n" +
                 "\tanh.link_man AS linkMan,\n" +
@@ -143,7 +143,8 @@ public class SyncAuctionNoticeDataJobHandler extends AbstractSyncNoticeDataJobHa
                 "\tanr.project_name AS projectName,\n" +
                 "\tanr.project_code AS projectCode,\n" +
                 // TODO 竞价项目的截止时间待产品定义
-//                "\tanr.auction_end_time AS quoteStopTime,\n" +
+//                "\tanh.auction_start_time AS quoteStartTime,\n" +
+                "\tanr.auction_end_time AS quoteStopTime,\n" +
                 "\tanr.publish_notice_time AS publishNoticeTime,\n" +
                 "\tanr.publish_result_time AS publishResultTime,\n" +
                 "\tanr.project_info AS projectInfo,\n" +
@@ -187,8 +188,8 @@ public class SyncAuctionNoticeDataJobHandler extends AbstractSyncNoticeDataJobHa
                 "\tanr.project_id AS projectId,\n" +
                 "\tanr.project_name AS projectName,\n" +
                 "\tanr.project_code AS projectCode,\n" +
-                // TODO 竞价项目的截止时间待产品定义
-//                "\tanr.auction_end_time AS quoteStopTime,\n" +
+//                "\tanh.auction_start_time AS quoteStartTime,\n" +
+                "\tanr.auction_end_time AS quoteStopTime,\n" +
                 "\tanr.publish_notice_time AS publishNoticeTime,\n" +
                 "\tanr.publish_result_time AS publishResultTime,\n" +
                 "\tanr.project_info AS projectInfo,\n" +
@@ -220,6 +221,18 @@ public class SyncAuctionNoticeDataJobHandler extends AbstractSyncNoticeDataJobHa
     @Override
     protected void refresh(Map<String, Object> result) {
         super.refresh(result);
+        Boolean isShowMobile = (Boolean) result.get(IS_SHOW_MOBILE);
+        if (isShowMobile != null && isShowMobile) {
+            result.put(IS_SHOW_MOBILE, 1);
+        } else {
+            result.put(IS_SHOW_MOBILE, 0);
+        }
+        Boolean isShowTel = (Boolean) result.get(IS_SHOW_TEL);
+        if (isShowTel != null && isShowTel) {
+            result.put(IS_SHOW_TEL, 1);
+        } else {
+            result.put(IS_SHOW_TEL, 0);
+        }
         result.put(PROJECT_TYPE, AUCTION_NOTICE_TYPE);
     }
 

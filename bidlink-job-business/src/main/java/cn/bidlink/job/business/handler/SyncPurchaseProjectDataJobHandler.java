@@ -70,15 +70,15 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
             // 添加采购交易额
             appendPurchaseTradingVolume(resultFromEs, purchaserIdToString);
 
-            // 添加招标项目数量
-            appendBidProjectCount(resultFromEs, purchaserIdToString);
-            // 添加招标交易额
-            appendBidTradingVolume(resultFromEs, purchaserIdToString);
-
             // 添加竞价项目数量
             appendAuctionProjectCount(resultFromEs, purchaserIdToString);
             // 添加竞价交易额
             appendAuctionTradingVolume(resultFromEs, purchaserIdToString);
+
+            // 添加招标项目数量
+            appendBidProjectCount(resultFromEs, purchaserIdToString);
+            // 添加招标交易额
+            appendBidTradingVolume(resultFromEs, purchaserIdToString);
 
             // 添加合作供应商数量
             appendCooperateSupplierCount(resultFromEs, purchaserIdToString);
@@ -196,16 +196,77 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
     }
 
     private void appendAuctionProjectCount(List<Map<String, Object>> resultFromEs, String purchaserIdToString) {
-        // FIXME 待竞价项目开发后统计
-        for (Map<String, Object> result : resultFromEs) {
-            result.put(AUCTION_PROJECT_COUNT, 0);
+        String queryAuctionSqlTemplate = "SELECT\n" +
+                "\tcount( 1 ) AS auctionProjectCount,\n" +
+                "\tap.company_id AS companyId \n" +
+                "FROM\n" +
+                "\tauction_project ap \n" +
+                "WHERE\n" +
+                "\tap.project_status = 5\n" +
+                "\tAND ap.company_id IN (%s) \n" +
+                "GROUP BY\n" +
+                "\tap.company_id";
+        if (!StringUtils.isEmpty(purchaserIdToString)) {
+            String querySql = String.format(queryAuctionSqlTemplate, purchaserIdToString);
+            Map<Long, Long> auctionProjectCountMap = DBUtil.query(auctionDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Long, Long>>() {
+                @Override
+                public Map<Long, Long> execute(ResultSet resultSet) throws SQLException {
+                    HashMap<Long, Long> projectCountMap = new HashMap<>();
+                    while (resultSet.next()) {
+                        projectCountMap.put(resultSet.getLong("companyId"), resultSet.getLong("auctionProjectCount"));
+                    }
+                    return projectCountMap;
+                }
+            });
+
+            for (Map<String, Object> map : resultFromEs) {
+                Long auctionProjectCount = auctionProjectCountMap.get(Long.parseLong(((String) map.get(ID))));
+                if (auctionProjectCount == null) {
+                    map.put(AUCTION_PROJECT_COUNT, 0L);
+                } else {
+                    map.put(AUCTION_PROJECT_COUNT, auctionProjectCount);
+                }
+            }
         }
     }
 
     private void appendAuctionTradingVolume(List<Map<String, Object>> resultFromEs, String purchaserIdToString) {
         // FIXME 待竞价项目开发后统计
-        for (Map<String, Object> result : resultFromEs) {
-            result.put(AUCTION_TRADING_VOLUME, 0);
+        String queryAuctionProjectSqlTemplate = "SELECT\n" +
+                "\tsum( ape.deal_total_price ) AS auctionTradingVolumeStr,\n" +
+                "\tap.company_id AS companyId \n" +
+                "FROM\n" +
+                "\tauction_project ap\n" +
+                "\tLEFT JOIN auction_project_ext ape ON ap.id = ape.id \n" +
+                "\tAND ap.company_id = ape.company_id \n" +
+                "WHERE\n" +
+                "\tap.project_status = 5 \n" +
+                "\tAND ape.deal_total_price IS NOT NULL \n" +
+                "\tAND ap.company_id IN (%s) \n" +
+                "GROUP BY\n" +
+                "\tap.company_id";
+
+        if (!StringUtils.isEmpty(purchaserIdToString)) {
+            String queryPurchaseSql = String.format(queryAuctionProjectSqlTemplate, purchaserIdToString);
+            // 根据采购商id查询交易额
+            List<Map<String, Object>> auctionTradingVolumeList = DBUtil.query(auctionDataSource, queryPurchaseSql, null);
+            HashMap<String, BigDecimal> auctionAttributeMap = new HashMap<>();
+            // list<Map>转换为map
+            if (!CollectionUtils.isEmpty(auctionTradingVolumeList)) {
+                for (Map<String, Object> map : auctionTradingVolumeList) {
+                    auctionAttributeMap.put(String.valueOf(map.get(COMPANY_ID)), ((BigDecimal) map.get(AUCTION_TRADING_VOLUME_STR)));
+                }
+            }
+            // 遍历采购商封装交易额
+            for (Map<String, Object> map : resultFromEs) {
+                // 根据采购商id查询交易额
+                BigDecimal auctionTradingVolume = auctionAttributeMap.get(map.get(ID));
+                if (auctionTradingVolume == null) {
+                    map.put(AUCTION_TRADING_VOLUME_STR, BigDecimal.ZERO);
+                } else {
+                    map.put(AUCTION_TRADING_VOLUME_STR, auctionTradingVolume);
+                }
+            }
         }
     }
 
@@ -280,20 +341,19 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
             for (Map<String, Object> purchaser : purchasers) {
                 // 采购商招标额
                 BigDecimal bidTradingVolume = bidAttributeMap.get(purchaser.get(ID));
+                BigDecimal tradingVolume = null;
                 if (bidTradingVolume != null) {
-                    //采购商总交易额
                     purchaser.put(BID_TRADING_VOLUME, bidTradingVolume.toString());
-                    BigDecimal tradingVolume = ((BigDecimal) purchaser.get(PURCHASE_TRADING_VOLUME)).add(bidTradingVolume);
-                    purchaser.put(TRADING_VOLUME, tradingVolume.toString());
-                    purchaser.put(LONG_TRADING_VOLUME, tradingVolume.longValue());
+                    tradingVolume = ((BigDecimal) purchaser.get(PURCHASE_TRADING_VOLUME)).add(bidTradingVolume).add(((BigDecimal) purchaser.get(AUCTION_TRADING_VOLUME_STR)));
                 } else {
                     purchaser.put(BID_TRADING_VOLUME, "0");
-                    BigDecimal tradingVolume = (BigDecimal) purchaser.get(PURCHASE_TRADING_VOLUME);
-                    purchaser.put(TRADING_VOLUME, tradingVolume.toString());
-                    purchaser.put(LONG_TRADING_VOLUME, tradingVolume.longValue());
+                    tradingVolume = ((BigDecimal) purchaser.get(PURCHASE_TRADING_VOLUME)).add(((BigDecimal) purchaser.get(AUCTION_TRADING_VOLUME_STR)));
                 }
+                purchaser.put(TRADING_VOLUME, tradingVolume.toString());
+                purchaser.put(LONG_TRADING_VOLUME, tradingVolume.longValue());
                 // 处理为String类型
                 purchaser.put(PURCHASE_TRADING_VOLUME, purchaser.get(PURCHASE_TRADING_VOLUME).toString());
+                purchaser.put(AUCTION_TRADING_VOLUME_STR, purchaser.get(AUCTION_TRADING_VOLUME_STR).toString());
             }
         }
     }
@@ -362,15 +422,12 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
                 // 采购商招标项目个数
                 Long bidProjectCount = bidProjectCountMap.get(Long.parseLong(((String) purchaser.get(ID))));
                 if (bidProjectCount != null) {
-                    // 采购商总项目数
                     purchaser.put(BID_PROJECT_COUNT, bidProjectCount);
-                    Long projectCount = (Long) purchaser.get(PURCHASE_PROJECT_COUNT) + bidProjectCount;
-                    purchaser.put(PROJECT_COUNT, projectCount);
                 } else {
-                    purchaser.put(BID_PROJECT_COUNT, 0);
-                    Long projectCount = (Long) purchaser.get(PURCHASE_PROJECT_COUNT);
-                    purchaser.put(PROJECT_COUNT, projectCount);
+                    purchaser.put(BID_PROJECT_COUNT, 0L);
                 }
+                Long projectCount = (Long) purchaser.get(PURCHASE_PROJECT_COUNT) + ((Long) purchaser.get(AUCTION_PROJECT_COUNT)) + ((Long) purchaser.get(BID_PROJECT_COUNT));
+                purchaser.put(PROJECT_COUNT, projectCount);
             }
 
         }
