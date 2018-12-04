@@ -146,7 +146,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
 
             String countSql = String.format(countTemplateSql, StringUtils.collectionToCommaDelimitedString(projectIds));
             String querySql = String.format(queryTemplateSql, StringUtils.collectionToCommaDelimitedString(projectIds));
-            doSyncProjectDataService(purchaseDataSource, countSql, querySql, Collections.singletonList((Object) lastSyncTime));
+            doSyncProjectDataService(purchaseDataSource, countSql, querySql, Collections.singletonList((Object) lastSyncTime), UPDATE_OPERATION);
         }
     }
 
@@ -206,7 +206,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
                 + "   ) s\n"
                 + "LEFT JOIN purchase_project_item ppi ON s.projectId = ppi.project_id\n"
                 + "AND s.purchaseId = ppi.company_id";
-        doSyncProjectDataService(purchaseDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList((Object) lastSyncTime));
+        doSyncProjectDataService(purchaseDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList((Object) lastSyncTime), INSERT_OPERATION);
     }
 
     /**

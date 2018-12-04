@@ -65,6 +65,9 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     // 竞价项目类型
     protected int AUCTION_PROJECT_TYPE       = 3;
 
+    protected int INSERT_OPERATION = 1;
+    protected int UPDATE_OPERATION = 2;
+
     // 展示
     protected int    SHOW    = 1;
     // 不展示
@@ -157,7 +160,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
         }
     }
 
-    protected void doSyncProjectDataService(DataSource dataSource, String countSql, String querySql, List<Object> params) {
+    protected void doSyncProjectDataService(DataSource dataSource, String countSql, String querySql, List<Object> params, int operationType) {
         long count = DBUtil.count(dataSource, countSql, params);
         logger.debug("执行countSql : {}, params : {}，共{}条", countSql, params, count);
         if (count > 0) {
@@ -193,7 +196,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
                 }
 
                 // 处理商机的状态
-                batchExecute(resultToExecute);
+                batchExecute(resultToExecute, operationType);
                 i += pageSize;
             }
         }
@@ -268,7 +271,7 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
      */
     protected abstract void parseOpportunity(Timestamp currentDate, List<Map<String, Object>> resultToExecute, Map<String, Object> result);
 
-    protected void batchExecute(List<Map<String, Object>> resultsToUpdate) {
+    protected void batchExecute(List<Map<String, Object>> resultsToUpdate, int operationType) {
 //        System.out.println(resultsToUpdate);
 //        System.out.println("size : " + resultsToUpdate.size());
 //        for (Map<String, Object> map : resultsToUpdate) {
@@ -276,28 +279,47 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
 //        }
         if (!CollectionUtils.isEmpty(resultsToUpdate)) {
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
-            for (Map<String, Object> result : resultsToUpdate) {
-                bulkRequest.add(elasticClient.getTransportClient()
-                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
-                                elasticClient.getProperties().getProperty("cluster.type.supplier_opportunity"),
-                                String.valueOf(result.get(ID)))
-                        .setSource(JSON.toJSONString(result, new ValueFilter() {
-                            @Override
-                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof java.util.Date) {
-                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                } else {
-                                    return propertyValue;
+            if (Objects.equals(operationType, INSERT_OPERATION)) {
+                for (Map<String, Object> result : resultsToUpdate) {
+                    bulkRequest.add(elasticClient.getTransportClient()
+                            .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
+                                    elasticClient.getProperties().getProperty("cluster.type.supplier_opportunity"),
+                                    String.valueOf(result.get(ID)))
+                            .setSource(JSON.toJSONString(result, new ValueFilter() {
+                                @Override
+                                public Object process(Object object, String propertyName, Object propertyValue) {
+                                    if (propertyValue instanceof java.util.Date) {
+                                        return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
+                                    } else {
+                                        return propertyValue;
+                                    }
                                 }
-                            }
-                        })));
+                            })));
+                }
+            } else if (Objects.equals(operationType, UPDATE_OPERATION)) {
+                for (Map<String, Object> result : resultsToUpdate) {
+                    bulkRequest.add(elasticClient.getTransportClient()
+                            .prepareUpdate(elasticClient.getProperties().getProperty("cluster.index"),
+                                    elasticClient.getProperties().getProperty("cluster.type.supplier_opportunity"),
+                                    String.valueOf(result.get(ID)))
+                            .setDoc(JSON.toJSONString(result, new ValueFilter() {
+                                @Override
+                                public Object process(Object object, String propertyName, Object propertyValue) {
+                                    if (propertyValue instanceof java.util.Date) {
+                                        return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
+                                    } else {
+                                        return propertyValue;
+                                    }
+                                }
+                            })));
+                }
             }
-
             BulkResponse response = bulkRequest.execute().actionGet();
             if (response.hasFailures()) {
                 logger.error(response.buildFailureMessage());
             }
         }
+
     }
 }
 

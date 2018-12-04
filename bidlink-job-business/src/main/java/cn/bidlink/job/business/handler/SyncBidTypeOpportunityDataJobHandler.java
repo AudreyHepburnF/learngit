@@ -140,7 +140,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
             String projectIdsStr = StringUtils.collectionToCommaDelimitedString(projectIds);
             String countSql = String.format(countTemplateSql, projectIdsStr);
             String querySql = String.format(queryTemplateSql, projectIdsStr);
-            doSyncProjectDataService(tenderDataSource, countSql, querySql, Collections.singletonList(SyncTimeUtil.getCurrentDate()));
+            doSyncProjectDataService(tenderDataSource, countSql, querySql, Collections.singletonList(SyncTimeUtil.getCurrentDate()), UPDATE_OPERATION);
         }
     }
 
@@ -191,7 +191,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                 "\tLIMIT ?,? \n" +
                 "\t) project\n" +
                 "\tLEFT JOIN bid_project_item bpi ON project.projectId = bpi.sub_project_id";
-        doSyncProjectDataService(tenderDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList(((Object) lastSyncTime)));
+        doSyncProjectDataService(tenderDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList(((Object) lastSyncTime)), INSERT_OPERATION);
     }
 
     @Override
