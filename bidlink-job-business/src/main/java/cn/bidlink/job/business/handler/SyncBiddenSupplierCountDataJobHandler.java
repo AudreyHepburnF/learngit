@@ -207,7 +207,7 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
                 + "   project_id AS projectId,\n"
                 + "   count(supplier_id) AS biddenSupplierCount\n"
                 + "FROM\n"
-                + "   (SELECT company_id, project_id, supplier_id FROM auction_supplier_project WHERE company_id IS NOT NULL AND quote_status > 1 AND (%s)) s\n"
+                + "   (SELECT company_id, project_id, supplier_id FROM auction_supplier_project WHERE company_id IS NOT NULL AND (%s)) s\n"
                 + "GROUP BY\n"
                 + "   company_id,\n"
                 + "   project_id;\n"
