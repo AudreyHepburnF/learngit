@@ -11,7 +11,6 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -181,7 +180,7 @@ public class SyncAuctionTypeOpportunityDataJobHandler extends AbstractSyncOpport
                 "                    ) s\n" +
                 "                 LEFT JOIN auction_project_item api ON s.projectId = api.project_id\n" +
                 "                 AND s.purchaseId = api.company_id;";
-        doSyncProjectDataService(auctionDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList((Object) lastSyncTime), UPDATE_OPERATION);
+        doSyncProjectDataService(auctionDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList((Object) lastSyncTime), INSERT_OPERATION);
     }
 
     /**
