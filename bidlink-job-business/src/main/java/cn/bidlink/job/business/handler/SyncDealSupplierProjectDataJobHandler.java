@@ -45,6 +45,10 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
     @Qualifier("tenderDataSource")
     private DataSource tenderDataSource;
 
+    @Autowired
+    @Qualifier("auctionDataSource")
+    private DataSource auctionDataSource;
+
     private String  ID                    = "id";
     private String  COMPANY_ID            = "companyId";
     private String  SUPPLIER_ID            = "supplierId";
@@ -52,8 +56,10 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
     private String  DEAL_TOTAL_PRICE      = "dealTotalPrice";
     private String  DOUBLE_DEAL_TOTAL_PRICE = "doubleDealTotalPrice";
     private String  PROJECT_TYPE          = "projectType";
+    private Integer AUCTION_PROJECT_TYPE = 3;
     private Integer PURCHASE_PROJECT_TYPE = 2;
     private Integer BID_PROJECT_TYPE      = 1;
+
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
@@ -65,8 +71,12 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
     }
 
     private void syncDealSupplierProjectDataService() {
+        //同步采购项目
         doSyncSupplierPurchaseDealProjectService();
+        //同步招标项目
         doSyncSupplierBidDealProjectService();
+        //同步竞价项目
+        doSyncSupplierAuctionDealProjectService();
     }
 
     private void doSyncSupplierBidDealProjectService() {
@@ -141,6 +151,46 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
         List<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
         doSyncDealProjectService(queryCountSql, querySql, purchaseDataSource, params, PURCHASE_PROJECT_TYPE);
+    }
+
+    private void doSyncSupplierAuctionDealProjectService() {
+        Timestamp lastSyncTime = getLastSyncTime(AUCTION_PROJECT_TYPE);
+        logger.info("协同平台供应商竞价成交项目数据lastSyncTime:" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n" + ",syncTime:" +
+                new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
+        String queryCountSql = "SELECT\n" +
+                "\tCOUNT(*)\n" +
+                "FROM\n" +
+                "\tauction_supplier_project asp\n" +
+                "\tLEFT JOIN auction_project ap ON asp.project_id = ap.id\n" +
+                "\tLEFT JOIN auction_project_ext ape ON asp.project_id = ape.id\n" +
+                "WHERE\n" +
+                "\tasp.deal_status = 3\n" +
+                "AND ap.id IS NOT NULL\n" +
+                "AND ape.publish_result_time > ?";
+        String querySql = "SELECT\n" +
+                "\tap.id projectId,\n" +
+                "\tap.`name` projectName,\n" +
+                "\tap.`name` projectNameNotAnalyzed,\n" +
+                "\tap.`code` projectCode,\n" +
+                "\tap.company_id companyId,\n" +
+                "\tap.company_name companyName,\n" +
+                "\tap.company_name companyNameNotAnalyzed,\n" +
+                "\tasp.supplier_id supplierId,\n" +
+                "\tasp.supplier_name supplierNameNotAnalyzed,\n" +
+                "\tape.publish_result_time dealTime,\n" +
+                "\tasp.deal_total_price dealTotalPrice\n" +
+                "FROM\n" +
+                "\tauction_supplier_project asp\n" +
+                "\tLEFT JOIN auction_project ap ON asp.project_id = ap.id\n" +
+                "\tLEFT JOIN auction_project_ext ape ON asp.project_id = ape.id\n" +
+                "WHERE\n" +
+                "\tasp.deal_status = 3\n" +
+                "AND ap.id IS NOT NULL\n" +
+                "AND ape.publish_result_time > ?\n" +
+                "LIMIT ?,?";
+        List<Object> params = new ArrayList<>();
+        params.add(lastSyncTime);
+        doSyncDealProjectService(queryCountSql, querySql, auctionDataSource, params, AUCTION_PROJECT_TYPE);
     }
 
     private void doSyncDealProjectService(String queryCountSql, String querySql, DataSource dataSource, List<Object> params, Integer projectType) {
