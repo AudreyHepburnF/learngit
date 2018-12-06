@@ -131,7 +131,7 @@ public class SyncAuctionTypeOpportunityDataJobHandler extends AbstractSyncOpport
 
             String countSql = String.format(countTemplateSql, StringUtils.collectionToCommaDelimitedString(projectIds));
             String querySql = String.format(queryTemplateSql, StringUtils.collectionToCommaDelimitedString(projectIds));
-            doSyncProjectDataService(auctionDataSource, countSql, querySql, Collections.singletonList((Object) currentSyncTime));
+            doSyncProjectDataService(auctionDataSource, countSql, querySql, Collections.singletonList((Object) currentSyncTime), UPDATE_OPERATION);
         }
     }
 
@@ -180,7 +180,7 @@ public class SyncAuctionTypeOpportunityDataJobHandler extends AbstractSyncOpport
                 "                    ) s\n" +
                 "                 LEFT JOIN auction_project_item api ON s.projectId = api.project_id\n" +
                 "                 AND s.purchaseId = api.company_id;";
-        doSyncProjectDataService(auctionDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList((Object) lastSyncTime));
+        doSyncProjectDataService(auctionDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList((Object) lastSyncTime), INSERT_OPERATION);
     }
 
     /**

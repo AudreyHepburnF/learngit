@@ -90,8 +90,9 @@
       "cooperateSupplierCount": {
         "type": "long"
       },
-      "auctionTradingVolume": {
-        "type": "long"
+      "auctionTradingVolumeStr": {
+        "type": "string",
+        "index": "not_analyzed"
       },
       "auctionProjectCount": {
         "type": "long"

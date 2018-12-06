@@ -114,7 +114,7 @@ public class SyncOtherPurchaseTypeOpportunityDataJobHandler extends AbstractSync
                     "                 AND s.purchaseId = pii.company_id";
             String countSql = String.format(countSqlTemplate, StringUtils.collectionToCommaDelimitedString(projectIds));
             String querySql = String.format(querySqlTemplate, StringUtils.collectionToCommaDelimitedString(projectIds));
-            doSyncProjectDataService(apiDataSource, countSql, querySql, Collections.singletonList(currentDate));
+            doSyncProjectDataService(apiDataSource, countSql, querySql, Collections.singletonList(currentDate), UPDATE_OPERATION);
         }
     }
 
@@ -157,7 +157,7 @@ public class SyncOtherPurchaseTypeOpportunityDataJobHandler extends AbstractSync
                 "                    ) s\n" +
                 "                 LEFT JOIN purchase_information_item pii ON s.projectId = pii.project_id\n" +
                 "                 AND s.purchaseId = pii.company_id";
-        doSyncProjectDataService(apiDataSource, countSql, querySql, Collections.singletonList(lastSyncTime));
+        doSyncProjectDataService(apiDataSource, countSql, querySql, Collections.singletonList(lastSyncTime), INSERT_OPERATION);
     }
 
     private void syncOtherPurchaseOpportunityUpdateDataService(Timestamp lastSyncTime) {
@@ -193,7 +193,7 @@ public class SyncOtherPurchaseTypeOpportunityDataJobHandler extends AbstractSync
                 "                    ) s\n" +
                 "                 LEFT JOIN purchase_information_item pii ON s.projectId = pii.project_id\n" +
                 "                 AND s.purchaseId = pii.company_id";
-        doSyncProjectDataService(apiDataSource, countSql, querySql, Collections.singletonList(lastSyncTime));
+        doSyncProjectDataService(apiDataSource, countSql, querySql, Collections.singletonList(lastSyncTime), INSERT_OPERATION);
     }
 
     @Override
