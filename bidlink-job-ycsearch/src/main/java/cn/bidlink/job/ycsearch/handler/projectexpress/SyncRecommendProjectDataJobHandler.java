@@ -81,7 +81,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                 .setQuery(QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
                         .must(QueryBuilders.termQuery(PROJECT_TYPE, PURCHASE_PROJECT_TYPE))
-                        .must(QueryBuilders.rangeQuery(UPDATE_TIME).gte(lastSyncTime.before(getZeroTime()) ? SyncTimeUtil.toDateString(getZeroTime()) : SyncTimeUtil.toDateString(lastSyncTime)))
+                        .must(QueryBuilders.rangeQuery(SYNC_TIME).gte(SyncTimeUtil.toDateString(getZeroTime())))
                 )
                 .addSort("createTime", SortOrder.ASC)
                 .setSize(pageSize)
