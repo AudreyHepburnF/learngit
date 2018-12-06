@@ -3,7 +3,6 @@ package cn.bidlink.job.ycsearch.handler.projectexpress;
 import cn.bidlink.job.common.constant.BusinessConstant;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
-import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import cn.bidlink.job.ycsearch.handler.JobHandler;
 import com.alibaba.fastjson.JSON;
@@ -74,8 +73,6 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
 
     private void syncRecommendProjectData() {
         Properties properties = elasticClient.getProperties();
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.express_index", "cluster.type.project_express_supplier_recommend_record", null);
-//        Date lastSyncTime = SyncTimeUtil.toStringDate("2018-11-23 10:42:00");
         SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(QueryBuilders.boolQuery()
