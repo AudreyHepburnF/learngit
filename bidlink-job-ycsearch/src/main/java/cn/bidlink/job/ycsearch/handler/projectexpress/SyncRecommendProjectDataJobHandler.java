@@ -214,7 +214,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                             boolean isDuplicationRecommend = this.checkRecommendProjectDuplication(recommendProjectId);
                             if (!isDuplicationRecommend) {
                                 Object alreadyMatchTimes = map.get("alreadyMatchTimes");
-                                map.put("alreadyMatchTimes", alreadyMatchTimes == null ? 0 : Integer.valueOf(alreadyMatchTimes.toString()) + 1);
+                                map.put("alreadyMatchTimes", alreadyMatchTimes == null ? 1 : Integer.valueOf(alreadyMatchTimes.toString()) + 1);
                                 map.put("latestMatchTime", now);
                                 if (Long.valueOf(map.get("matchMark").toString()).longValue() < getZeroTimeLongValue()) {
                                     map.put("matchMark", getZeroTimeLongValue() + 1L);
