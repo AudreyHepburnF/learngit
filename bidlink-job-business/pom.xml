@@ -243,7 +243,7 @@
                 <pom.purchase.db.username>purchase</pom.purchase.db.username>
                 <pom.purchase.db.password>purchase!@#$4321</pom.purchase.db.password>
                 <!--协同平台竞价数据源-->
-                <pom.auction.db.url>jdbc:mariadb://purchase-mariadb.internal.cg-xt.com:3306/auction?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.auction.db.url>
+                <pom.auction.db.url>jdbc:mariadb://web-mariadb.internal.cg-xt.com:3311/auction?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.auction.db.url>
                 <pom.auction.db.username>auction</pom.auction.db.username>
                 <pom.auction.db.password>auction!@#$4321</pom.auction.db.password>
                 <!--协同平台中心库数据源-->

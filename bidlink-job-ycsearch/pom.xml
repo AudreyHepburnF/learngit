@@ -140,6 +140,7 @@
                 <pom.cluster.name>elasticsearch</pom.cluster.name>
                 <pom.cluster.index>longdaoyun_test</pom.cluster.index>
                 <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
+                <pom.cluster.type.recruit>recruit</pom.cluster.type.recruit>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
                 <!--项目直通车-->
@@ -200,6 +201,7 @@
                 <pom.cluster.name>elasticsearch</pom.cluster.name>
                 <pom.cluster.index>longdaoyun_test</pom.cluster.index>
                 <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
+                <pom.cluster.type.recruit>recruit</pom.cluster.type.recruit>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
 
@@ -261,6 +263,7 @@
                 <pom.cluster.name>dc</pom.cluster.name>
                 <pom.cluster.index>ixietong_opportunity</pom.cluster.index>
                 <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
+                <pom.cluster.type.recruit>recruit</pom.cluster.type.recruit>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
                 <!--项目直通车-->

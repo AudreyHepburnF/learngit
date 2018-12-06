@@ -57,6 +57,8 @@ public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler
     protected int    PURCHASE_PROJECT_TYPE      = 2;
     // 竞价项目类型
     protected int    AUCTION_PROJECT_TYPE       = 3;
+    // 招募类型
+    protected int    RECRUIT_PROJECT_TYPE       = 4;
     // 新平台数据
     protected String SOURCE_NEW                 = "new";
     // 老平台数据
@@ -90,6 +92,7 @@ public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler
     protected String FIRST_DIRECTORY_NAME        = "firstDirectoryName";
     protected String DIRECTORY_NAME_COUNT        = "directoryNameCount";
     protected String QUOTE_STOP_TIME             = "quoteStopTime";
+    protected String QUOTE_STOP_TIME_STR         = "quoteStopTimeStr";
     protected String PROCESS_STATUS              = "processStatus";
     protected String AREA                        = "area";
     protected String CODE                        = "code";

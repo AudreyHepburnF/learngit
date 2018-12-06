@@ -139,6 +139,14 @@
       "tenantSite": {
         "type": "string",
         "index": "not_analyzed"
+      },
+      "quoteStopTimeStr": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "compTypeStr": {
+        "type": "string",
+        "index": "not_analyzed"
       }
     }
   }
