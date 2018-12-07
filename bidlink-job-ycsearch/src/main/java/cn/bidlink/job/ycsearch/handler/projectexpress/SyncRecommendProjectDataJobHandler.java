@@ -57,8 +57,11 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
     @Qualifier("uniregDataSource")
     protected DataSource uniregDataSource;
 
+    @Autowired
+    @Qualifier("ycDataSource")
+    protected DataSource ycDataSource;
+
     private String  PROJECT_TYPE          = "projectType";
-    private String  UPDATE_TIME           = "updateTime";
     private Integer PURCHASE_PROJECT_TYPE = 2;
     private Integer CANAL_STATUS          = 10;
 
@@ -243,13 +246,13 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                             recommendRecord.put("projectCode", projectCode);
                             recommendRecord.put("orderCode", map.get("orderCode"));
                             recommendRecord.put("keywords", map.get("keywords"));
-//                        try {
-//                            Map<String, Object> supplierInfo = getSupplierInfo(Long.valueOf(map.get("supplierId").toString()));
-//                            recommendRecord.put("linkPhone", supplierInfo.get("linkPhone"));
-//                            recommendRecord.put("linkMan", supplierInfo.get("linkMan"));
-//                        } catch (Exception e) {
-//                            logger.error("供应商联系人，联系电话查询异常 供应商Id:{}",map.get("supplierId"));
-//                        }
+                            try {
+                                Map<String, Object> supplierInfo = getSupplierInfo(Long.valueOf(map.get("supplierId").toString()));
+                                recommendRecord.put("linkPhone", supplierInfo.get("linkPhone"));
+                                recommendRecord.put("linkMan", supplierInfo.get("linkMan"));
+                            } catch (Exception e) {
+                                logger.error("供应商联系人，联系电话查询异常 供应商Id:{}", map.get("supplierId"));
+                            }
                             for (String product : products) {
                                 matchedProducts.append(product).append(";");
                             }
@@ -276,6 +279,24 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                     .setScroll(new TimeValue(60000))
                     .execute().actionGet();
         } while (response.getHits().getHits().length != 0);
+    }
+
+    private Map<String, Object> getSupplierInfo(Long supplierId) {
+        SearchResponse response = elasticClient.getTransportClient().prepareSearch("cluster.index")
+                .setTypes("cluster.type.supplier")
+                .setQuery(QueryBuilders.termQuery("id", String.valueOf(supplierId)))
+                .execute().actionGet();
+        SearchHits hits = response.getHits();
+        Map<String, Object> map = new HashMap<>(2);
+        if (hits.getTotalHits() > 0) {
+            Map<String, Object> source = hits.getHits()[0].getSource();
+            map.put("linkMan", source.get("contact"));
+            map.put("linkPhone", source.get("tel"));
+        } else {
+            map.put("linkMan", "");
+            map.put("linkPhone", "");
+        }
+        return map;
     }
 
     /**
@@ -312,7 +333,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                     "\tAND supplier_id IN (%s)";
             String querySql = String.format(querySqlTemplate, StringUtils.collectionToCommaDelimitedString(supplierIds));
             logger.info("查询匹配商机订单中被拉黑的供应商,querySql:{},params:{}", querySql, purchaserId);
-            return DBUtil.query(uniregDataSource, querySql, Collections.singletonList(purchaserId), new DBUtil.ResultSetCallback<List<Long>>() {
+            return DBUtil.query(ycDataSource, querySql, Collections.singletonList(purchaserId), new DBUtil.ResultSetCallback<List<Long>>() {
                 @Override
                 public List<Long> execute(ResultSet resultSet) throws SQLException {
                     ArrayList<Long> supplierIds = new ArrayList<>();

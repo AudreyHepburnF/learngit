@@ -90,7 +90,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\tr.AREA_NAME AS areaName,\n" +
                 "\tr.AREA_LIMITE AS areaLimit,\n" +
 //                "\tr.QUALIFICATION_NAME AS qualificationName,\n" +
-//                "\tr.PURCHASER_ID AS purchaseId,\n" +
+                "\tr.PURCHASER_ID AS purchaseId,\n" +
 //                "\tr.PURCHASER AS purchaseName,\n" +
                 "\tr.status,\n" +
                 "\tr.endless,\n" +
@@ -125,7 +125,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\tr.edate AS endDate,\n" +
                 "\tr.AREA_LIMITE AS areaLimit,\n" +
 //                "\tr.QUALIFICATION_NAME AS qualificationName,\n" +
-//                "\tr.PURCHASER_ID AS purchaseId,\n" +
+                "\tr.PURCHASER_ID AS purchaseId,\n" +
 //                "\tr.PURCHASER AS purchaseName,\n" +
                 "\tr.status,\n" +
                 "\tr.endless,\n" +
@@ -171,7 +171,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
         } else {
             map.put(STATUS, INVALID_OPPORTUNITY_STATUS);
         }
-//        map.put(PURCHASE_ID, String.valueOf(map.get(PURCHASE_ID)));
+        map.put(PURCHASE_ID, String.valueOf(map.get(PURCHASE_ID)));
         map.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
         map.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE);
 

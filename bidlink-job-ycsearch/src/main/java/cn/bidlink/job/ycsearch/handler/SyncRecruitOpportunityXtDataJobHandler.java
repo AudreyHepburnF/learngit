@@ -36,10 +36,14 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
     @Qualifier(value = "proDataSource")
     private DataSource proDataSource;
 
-    private String AREA_CODE    = "areaCode";
+    // 是否无期限：1有期限；2无
+    private String ENDLESS      = "endless";
+    private int    LIMIT        = 1;
+    private int    UN_LIMIT     = 2;
     private String S_DATE       = "sdate";
     private String E_DATE       = "edate";
     private String INDUSTRY_STR = "industryStr";
+    private String COMPTYPE_STR = "compTypeStr";
 
     private int UNDERWAY = 2;
 
@@ -75,7 +79,7 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
                 "\tid AS projectId,\n" +
                 "\tTITLE AS projectName,\n" +
                 "\tsdate,\n" +
-                "\tedate,\n" +
+                "\tedate as quoteStopTime,\n" +
                 "\tAPPLY_COUNT AS biddenSupplierCount,\n" +
 //                "\tAREA AS areaCode,\n" +
 //                "\tAREA_NAME AS areaStr,\n" +
@@ -83,7 +87,7 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
                 "\tPURCHASER_ID AS purchaseId,\n" +
                 "\tPURCHASER AS purchaseName,\n" +
                 "\tstatus,\n" +
-//                "\tendless,\n" +
+                "\tendless,\n" +
                 "\tDEL_FLAG AS isShow,\n" +
                 "\tCREATE_TIME AS createTime,\n" +
                 "\tUPDATE_TIME AS updateTime \n" +
@@ -107,7 +111,7 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
                 "\tid AS projectId,\n" +
                 "\tTITLE AS projectName,\n" +
                 "\tsdate,\n" +
-                "\tedate,\n" +
+                "\tedate as quoteStopTime,\n" +
                 "\tAPPLY_COUNT AS biddenSupplierCount,\n" +
 //                "\tAREA AS areaCode,\n" +
 //                "\tAREA_NAME AS areaStr,\n" +
@@ -115,7 +119,7 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
                 "\tPURCHASER_ID AS purchaseId,\n" +
                 "\tPURCHASER AS purchaseName,\n" +
                 "\tstatus,\n" +
-//                "\tendless,\n" +
+                "\tendless,\n" +
                 "\tDEL_FLAG AS isShow,\n" +
                 "\tCREATE_TIME AS createTime,\n" +
                 "\tUPDATE_TIME AS updateTime \n" +
@@ -161,41 +165,62 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
             Set<Long> purchaserIds = mapList.stream().map(map -> Long.valueOf(map.get(PURCHASE_ID).toString())).collect(Collectors.toSet());
             String querySqlTemplate = "SELECT\n" +
                     "\tid ,\n" +
-                    "\tINDUSTRY_STR\n" +
+                    "\tINDUSTRY_STR," +
+                    "workpattern\n" +
                     "FROM\n" +
                     "\tt_reg_company \n" +
                     "WHERE\n" +
                     "\tid IN (%s)";
             String querySql = String.format(querySqlTemplate, StringUtils.collectionToCommaDelimitedString(purchaserIds));
-            Map<Long, Object> companyIndustryMap = DBUtil.query(uniregDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Long, Object>>() {
+            Map<Long, CompanyInfo> companyIndustryMap = DBUtil.query(uniregDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Long, CompanyInfo>>() {
                 @Override
-                public Map<Long, Object> execute(ResultSet resultSet) throws SQLException {
-                    Map<Long, Object> map = new HashMap<>();
+                public Map<Long, CompanyInfo> execute(ResultSet resultSet) throws SQLException {
+                    Map<Long, CompanyInfo> map = new HashMap<>();
                     while (resultSet.next()) {
-                        map.put(resultSet.getLong(1), resultSet.getString(2));
+                        map.put(resultSet.getLong(1), new CompanyInfo(resultSet.getString(2), resultSet.getString(3)));
                     }
                     return map;
                 }
             });
             for (Map<String, Object> map : mapList) {
-                map.put(INDUSTRY_STR, companyIndustryMap.get(Long.valueOf(map.get(PURCHASE_ID).toString())));
+                CompanyInfo companyInfo = companyIndustryMap.get(Long.valueOf(map.get(PURCHASE_ID).toString()));
+                if (!Objects.isNull(companyInfo)) {
+                    map.put(INDUSTRY_STR, companyInfo.getIndustryStr());
+                    map.put(COMPTYPE_STR, companyInfo.getCompTypeStr());
+                }
             }
         }
     }
 
     private void handlerData(Map<String, Object> map) {
-
-        Object sDate = map.get(S_DATE);
-        Object eDate = map.get(E_DATE);
-        if (!Objects.isNull(sDate) && !Objects.isNull(eDate)) {
-            map.put(QUOTE_STOP_TIME, eDate);
-            map.put(QUOTE_STOP_TIME_STR, SyncTimeUtil.toDateString(sDate) + " 至 " + SyncTimeUtil.toDateString(eDate));
-        }
         Object status = map.get(STATUS);
         if (!Objects.isNull(status) && Objects.equals(status, UNDERWAY)) {
-            map.put(STATUS, VALID_OPPORTUNITY_STATUS);
+            if (Objects.equals(map.get(ENDLESS), LIMIT) && ((Date) map.get(QUOTE_STOP_TIME)).after(new Date())) {
+                map.put(STATUS, VALID_OPPORTUNITY_STATUS);
+            } else if (Objects.equals(map.get(ENDLESS), UN_LIMIT)) {
+                map.put(STATUS, VALID_OPPORTUNITY_STATUS);
+            } else {
+                map.put(STATUS, INVALID_OPPORTUNITY_STATUS);
+            }
         } else {
             map.put(STATUS, INVALID_OPPORTUNITY_STATUS);
+        }
+
+        Object sDate = map.get(S_DATE);
+        Object eDate = map.get(QUOTE_STOP_TIME);
+        if (Objects.equals(map.get(ENDLESS), LIMIT)) {
+            // 有限制时,显示剩余多久时间
+            long l = ((Date) eDate).getTime() - (new Date()).getTime();
+            if (l > 0) {
+                long day = l / (24 * 60 * 60 * 1000);
+                long hour = (l / (60 * 60 * 1000) - day * 24);
+                map.put(QUOTE_STOP_TIME_STR, day + "天" + hour + "小时");
+            } else {
+                map.put(QUOTE_STOP_TIME_STR, "已过期");
+            }
+            map.put(QUOTE_STOP_TIME, eDate);
+        } else if (!Objects.isNull(eDate)) {
+            map.put(QUOTE_STOP_TIME_STR, SyncTimeUtil.toDateString(sDate) + " 至 " + "长期有效");
         }
         Object isShow = map.get(IS_SHOW);
         // 删除不展示
@@ -211,12 +236,38 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
         map.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE);
         map.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
         map.remove(S_DATE);
-        map.remove(E_DATE);
+        map.remove(ENDLESS);
     }
 
     @Override
     protected void parseOpportunity(Timestamp currentDate, List<Map<String, Object>> resultToExecute, Map<String, Object> result) {
 
+    }
+
+    class CompanyInfo {
+        private String industryStr;
+        private String compTypeStr; // 经营模式  es字段加错导致名字问题
+
+        public CompanyInfo(String industryStr, String compTypeStr) {
+            this.industryStr = industryStr;
+            this.compTypeStr = compTypeStr;
+        }
+
+        public String getIndustryStr() {
+            return industryStr;
+        }
+
+        public void setIndustryStr(String industryStr) {
+            this.industryStr = industryStr;
+        }
+
+        public String getCompTypeStr() {
+            return compTypeStr;
+        }
+
+        public void setCompTypeStr(String compTypeStr) {
+            this.compTypeStr = compTypeStr;
+        }
     }
 
 //    @Override
