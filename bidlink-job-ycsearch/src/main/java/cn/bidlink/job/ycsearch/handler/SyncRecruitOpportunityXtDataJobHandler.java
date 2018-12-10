@@ -28,22 +28,20 @@ import java.util.stream.Collectors;
  * @Date 2018/12/5
  */
 @Service(value = "syncRecruitOpportunityXtDataJobHandler")
-public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpportunityDataJobHandler/* implements InitializingBean*/ {
+public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpportunityDataJobHandler /*implements InitializingBean*/ {
 
     private Logger logger = LoggerFactory.getLogger(SyncRecruitOpportunityXtDataJobHandler.class);
 
     @Autowired
-    @Qualifier(value = "proDataSource")
-    private DataSource proDataSource;
+    @Qualifier(value = "recruitDataSource")
+    private DataSource recruitDataSource;
 
     // 是否无期限：1有期限；2无
-    private String ENDLESS      = "endless";
-    private int    LIMIT        = 1;
-    private int    UN_LIMIT     = 2;
-    private String S_DATE       = "sdate";
-    private String E_DATE       = "edate";
-    private String INDUSTRY_STR = "industryStr";
-    private String COMPTYPE_STR = "compTypeStr";
+    private String ENDLESS          = "endless";
+    private int    LIMIT            = 1;
+    private int    UN_LIMIT         = 2;
+    private String INDUSTRY_STR     = "industryStr";
+    private String COMPTYPE_STR     = "compTypeStr";
 
     private int UNDERWAY = 2;
 
@@ -78,7 +76,7 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
                 "\tid AS id,\n" +
                 "\tid AS projectId,\n" +
                 "\tTITLE AS projectName,\n" +
-                "\tsdate,\n" +
+                "\tsdate as quoteStartTime,\n" +
                 "\tedate as quoteStopTime,\n" +
                 "\tAPPLY_COUNT AS biddenSupplierCount,\n" +
 //                "\tAREA AS areaCode,\n" +
@@ -96,7 +94,7 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
                 "WHERE\n" +
                 "\t`STATUS` > 1 \n" +
                 "\tAND CREATE_TIME > ? limit ?,?";
-        doSncRecruitDataService(proDataSource, insertCountSql, insertQuerySql, Collections.singletonList(lastSyncTime));
+        doSncRecruitDataService(recruitDataSource, insertCountSql, insertQuerySql, Collections.singletonList(lastSyncTime));
 
         String updateCountSql = "SELECT\n" +
                 "\tcount( 1 ) \n" +
@@ -110,7 +108,7 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
                 "\tid AS id,\n" +
                 "\tid AS projectId,\n" +
                 "\tTITLE AS projectName,\n" +
-                "\tsdate,\n" +
+                "\tsdate as quoteStartTime,\n" +
                 "\tedate as quoteStopTime,\n" +
                 "\tAPPLY_COUNT AS biddenSupplierCount,\n" +
 //                "\tAREA AS areaCode,\n" +
@@ -128,7 +126,7 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
                 "WHERE\n" +
                 "\t`STATUS` > 1 \n" +
                 "\tAND update_time > ? limit ?,?";
-        doSncRecruitDataService(proDataSource, updateCountSql, updateQuerySql, Collections.singletonList(lastSyncTime));
+        doSncRecruitDataService(recruitDataSource, updateCountSql, updateQuerySql, Collections.singletonList(lastSyncTime));
     }
 
     private void doSncRecruitDataService(DataSource dataSource, String countSql, String querySql, List<Object> params) {
@@ -194,6 +192,7 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
 
     private void handlerData(Map<String, Object> map) {
         Object status = map.get(STATUS);
+        // 项目状态
         if (!Objects.isNull(status) && Objects.equals(status, UNDERWAY)) {
             if (Objects.equals(map.get(ENDLESS), LIMIT) && ((Date) map.get(QUOTE_STOP_TIME)).after(new Date())) {
                 map.put(STATUS, VALID_OPPORTUNITY_STATUS);
@@ -206,22 +205,7 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
             map.put(STATUS, INVALID_OPPORTUNITY_STATUS);
         }
 
-        Object sDate = map.get(S_DATE);
-        Object eDate = map.get(QUOTE_STOP_TIME);
-        if (Objects.equals(map.get(ENDLESS), LIMIT)) {
-            // 有限制时,显示剩余多久时间
-            long l = ((Date) eDate).getTime() - (new Date()).getTime();
-            if (l > 0) {
-                long day = l / (24 * 60 * 60 * 1000);
-                long hour = (l / (60 * 60 * 1000) - day * 24);
-                map.put(QUOTE_STOP_TIME_STR, day + "天" + hour + "小时");
-            } else {
-                map.put(QUOTE_STOP_TIME_STR, "已过期");
-            }
-            map.put(QUOTE_STOP_TIME, eDate);
-        } else if (!Objects.isNull(eDate)) {
-            map.put(QUOTE_STOP_TIME_STR, SyncTimeUtil.toDateString(sDate) + " 至 " + "长期有效");
-        }
+        // 截止时间
         Object isShow = map.get(IS_SHOW);
         // 删除不展示
         if (!Objects.isNull(isShow) && Objects.equals(isShow, 1)) {
@@ -235,8 +219,6 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
         map.put(PURCHASE_ID, String.valueOf(map.get(PURCHASE_ID)));
         map.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE);
         map.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
-        map.remove(S_DATE);
-        map.remove(ENDLESS);
     }
 
     @Override

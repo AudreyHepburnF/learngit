@@ -38,8 +38,8 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
     private Logger logger = LoggerFactory.getLogger(SyncRecruitXtDataJobHandler.class);
 
     @Autowired
-    @Qualifier(value = "proDataSource")
-    private DataSource proDataSource;
+    @Qualifier(value = "recruitDataSource")
+    private DataSource recruitDataSource;
 
     @Autowired
     private ElasticClient elasticClient;
@@ -106,7 +106,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\tAND r.DEL_FLAG = 1 and r.create_time > ?\n" +
                 "GROUP BY\n" +
                 "\tr.ID limit ?,?";
-        doSncRecruitDataService(proDataSource, insertCountSql, insertQuerySql, Collections.singletonList(lastSyncTime));
+        doSncRecruitDataService(recruitDataSource, insertCountSql, insertQuerySql, Collections.singletonList(lastSyncTime));
 
         String updateCountSql = "SELECT\n" +
                 "\tcount( 1 ) \n" +
@@ -141,7 +141,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\tAND r.DEL_FLAG = 1 and r.update_time > ?\n" +
                 "GROUP BY\n" +
                 "\tr.ID limit ?,?";
-        doSncRecruitDataService(proDataSource, updateCountSql, updateQuerySql, Collections.singletonList(lastSyncTime));
+        doSncRecruitDataService(recruitDataSource, updateCountSql, updateQuerySql, Collections.singletonList(lastSyncTime));
     }
 
     private void doSncRecruitDataService(DataSource dataSource, String countSql, String querySql, List<Object> params) {
