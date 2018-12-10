@@ -5,7 +5,11 @@ import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,11 +41,11 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
     private DataSource recruitDataSource;
 
     // 是否无期限：1有期限；2无
-    private String ENDLESS          = "endless";
-    private int    LIMIT            = 1;
-    private int    UN_LIMIT         = 2;
-    private String INDUSTRY_STR     = "industryStr";
-    private String COMPTYPE_STR     = "compTypeStr";
+    private String ENDLESS      = "endless";
+    private int    LIMIT        = 1;
+    private int    UN_LIMIT     = 2;
+    private String INDUSTRY_STR = "industryStr";
+    private String COMPTYPE_STR = "compTypeStr";
 
     private int UNDERWAY = 2;
 
@@ -60,7 +64,75 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
                         .must(QueryBuilders.termQuery(PROJECT_TYPE, RECRUIT_PROJECT_TYPE)));
 //        Timestamp lastSyncTime = new Timestamp(0);
         logger.info("1.1 同步招募信息lastSyncTime:" + SyncTimeUtil.toDateString(lastSyncTime) + "\n" + ",syncTime:" + SyncTimeUtil.currentDateToString());
-        syncRecruitDataService(lastSyncTime);
+        this.syncRecruitDataService(lastSyncTime);
+        // 修复有限期招募商机的数据
+        this.fixedLimitRecruitTypeDataService();
+    }
+
+    private void fixedLimitRecruitTypeDataService() {
+        logger.info("1.开始修复招募商机数据截止时间到后商机状态");
+        Properties properties = elasticClient.getProperties();
+        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+                .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
+                .setQuery(QueryBuilders.boolQuery()
+                        .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
+                        .must(QueryBuilders.termQuery(PROJECT_TYPE, RECRUIT_PROJECT_TYPE))
+                        .must(QueryBuilders.termQuery(ENDLESS, LIMIT))
+                        .must(QueryBuilders.rangeQuery(QUOTE_STOP_TIME).lte(SyncTimeUtil.currentDateToString()))
+                ).setScroll(new TimeValue(60000))
+                .setSize(pageSize)
+                .execute().actionGet();
+        do {
+            SearchHits hits = response.getHits();
+            List<String> ids = new ArrayList<>();
+            for (SearchHit hit : hits.getHits()) {
+                Map<String, Object> source = hit.getSource();
+                ids.add(source.get(ID).toString());
+            }
+            this.doFixedLimitRecruitTypeDataService(ids);
+
+            response = elasticClient.getTransportClient().prepareSearchScroll(response.getScrollId())
+                    .setScroll(new TimeValue(60000))
+                    .execute().actionGet();
+        } while (response.getHits().getHits().length != 0);
+    }
+
+    private void doFixedLimitRecruitTypeDataService(List<String> ids) {
+        if (!CollectionUtils.isEmpty(ids)) {
+            String countSqlTemplate = "SELECT\n" +
+                    "\tcount( 1 ) \n" +
+                    "FROM\n" +
+                    "\t`recruit` \n" +
+                    "WHERE\n" +
+                    "\t`STATUS` > 1 \n" +
+                    "\tAND id in (%s)";
+
+            String querySqlTemplate = "SELECT\n" +
+                    "\tid AS id,\n" +
+                    "\tid AS projectId,\n" +
+                    "\tTITLE AS projectName,\n" +
+                    "\tsdate as quoteStartTime,\n" +
+                    "\tedate as quoteStopTime,\n" +
+                    "\tAPPLY_COUNT AS biddenSupplierCount,\n" +
+//                "\tAREA AS areaCode,\n" +
+//                "\tAREA_NAME AS areaStr,\n" +
+//                "\tOPERATE_MODE_NAME as compTypeStr,\n" +
+                    "\tPURCHASER_ID AS purchaseId,\n" +
+                    "\tPURCHASER AS purchaseName,\n" +
+                    "\tstatus,\n" +
+                    "\tendless,\n" +
+                    "\tDEL_FLAG AS isShow,\n" +
+                    "\tCREATE_TIME AS createTime,\n" +
+                    "\tUPDATE_TIME AS updateTime \n" +
+                    "FROM\n" +
+                    "\t`recruit` \n" +
+                    "WHERE\n" +
+                    "\t`STATUS` > 1 \n" +
+                    "\tAND id in (%s) limit ?,?";
+            String countSql = String.format(countSqlTemplate, StringUtils.collectionToDelimitedString(ids, ",", "'", "'"));
+            String querySql = String.format(querySqlTemplate, StringUtils.collectionToDelimitedString(ids, ",", "'", "'"));
+            doSncRecruitDataService(recruitDataSource, countSql, querySql, Collections.emptyList());
+        }
     }
 
     private void syncRecruitDataService(Timestamp lastSyncTime) {
@@ -149,7 +221,7 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
 
                 // 添加区域
                 appendAreaStrToResult(mapList, purchaseIds);
-                this.appendIndustry(mapList);
+//                this.appendIndustry(mapList);
                 // 处理商机的状态
                 batchExecute(mapList);
                 i += pageSize;
