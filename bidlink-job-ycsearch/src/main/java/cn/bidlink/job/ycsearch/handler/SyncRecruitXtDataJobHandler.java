@@ -8,6 +8,7 @@ import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
+import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -32,7 +33,8 @@ import java.util.Objects;
  * @description:同步招募所有信息到招募索引中
  * @Date 2018/12/5
  */
-@Service(value = "syncRecruitXtDataJobHandler")
+@Service
+@JobHander(value = "syncRecruitXtDataJobHandler")
 public class SyncRecruitXtDataJobHandler extends JobHandler /*implements InitializingBean*/ {
 
     private Logger logger = LoggerFactory.getLogger(SyncRecruitXtDataJobHandler.class);

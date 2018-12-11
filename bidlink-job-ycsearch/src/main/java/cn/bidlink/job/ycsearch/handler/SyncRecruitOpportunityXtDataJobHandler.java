@@ -5,6 +5,7 @@ import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
+import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -31,7 +32,8 @@ import java.util.stream.Collectors;
  * @description:同步招募基本信息到商机表中
  * @Date 2018/12/5
  */
-@Service(value = "syncRecruitOpportunityXtDataJobHandler")
+@Service
+@JobHander(value = "syncRecruitOpportunityXtDataJobHandler")
 public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpportunityDataJobHandler /*implements InitializingBean*/ {
 
     private Logger logger = LoggerFactory.getLogger(SyncRecruitOpportunityXtDataJobHandler.class);
