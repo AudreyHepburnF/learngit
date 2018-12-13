@@ -147,13 +147,16 @@
                 <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
                 <pom.cluster.type.recruit>recruit</pom.cluster.type.recruit>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
+                <pom.cluster.type.notice>notice</pom.cluster.type.notice>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
                 <!--项目直通车-->
                 <pom.cluster.express_index>longdaoyun_express</pom.cluster.express_index>
                 <pom.cluster.type.project_express>project_express</pom.cluster.type.project_express>
                 <pom.cluster.type.supplier_express>supplier_express</pom.cluster.type.supplier_express>
-                <pom.cluster.type.project_express_traffic_statistic>project_express_traffic_statistic</pom.cluster.type.project_express_traffic_statistic>
-                <pom.cluster.type.project_express_supplier_recommend_record>project_express_supplier_recommend_record</pom.cluster.type.project_express_supplier_recommend_record>
+                <pom.cluster.type.project_express_traffic_statistic>project_express_traffic_statistic
+                </pom.cluster.type.project_express_traffic_statistic>
+                <pom.cluster.type.project_express_supplier_recommend_record>project_express_supplier_recommend_record
+                </pom.cluster.type.project_express_supplier_recommend_record>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
@@ -212,14 +215,17 @@
                 <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
                 <pom.cluster.type.recruit>recruit</pom.cluster.type.recruit>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
+                <pom.cluster.type.notice>notice</pom.cluster.type.notice>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
 
                 <!--项目直通车-->
                 <pom.cluster.express_index>longdaoyun_express</pom.cluster.express_index>
                 <pom.cluster.type.project_express>project_express</pom.cluster.type.project_express>
                 <pom.cluster.type.supplier_express>supplier_express</pom.cluster.type.supplier_express>
-                <pom.cluster.type.project_express_traffic_statistic>project_express_traffic_statistic</pom.cluster.type.project_express_traffic_statistic>
-                <pom.cluster.type.project_express_supplier_recommend_record>project_express_supplier_recommend_record</pom.cluster.type.project_express_supplier_recommend_record>
+                <pom.cluster.type.project_express_traffic_statistic>project_express_traffic_statistic
+                </pom.cluster.type.project_express_traffic_statistic>
+                <pom.cluster.type.project_express_supplier_recommend_record>project_express_supplier_recommend_record
+                </pom.cluster.type.project_express_supplier_recommend_record>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
@@ -243,7 +249,9 @@
                 <pom.yuecai.db.username>dashuju</pom.yuecai.db.username>
                 <pom.yuecai.db.password>ixietong!@#$</pom.yuecai.db.password>
                 <!--中心库数据源-->
-                <pom.unireg.db.url>jdbc:mariadb://usercenter-mariadb.internal.cg-xt.com:3312/usercenter?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
+                <pom.unireg.db.url>
+                    jdbc:mariadb://usercenter-mariadb.internal.cg-xt.com:3312/usercenter?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true
+                </pom.unireg.db.url>
                 <pom.unireg.db.username>appaccount</pom.unireg.db.username>
                 <pom.unireg.db.password>app!@#$4321</pom.unireg.db.password>
                 <!--pro_test数据源  -->
@@ -278,13 +286,16 @@
                 <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
                 <pom.cluster.type.recruit>recruit</pom.cluster.type.recruit>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
+                <pom.cluster.type.notice>notice</pom.cluster.type.notice>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
                 <!--项目直通车-->
                 <pom.cluster.express_index>longdaoyun_express</pom.cluster.express_index>
                 <pom.cluster.type.project_express>project_express</pom.cluster.type.project_express>
                 <pom.cluster.type.supplier_express>supplier_express</pom.cluster.type.supplier_express>
-                <pom.cluster.type.project_express_traffic_statistic>project_express_traffic_statistic</pom.cluster.type.project_express_traffic_statistic>
-                <pom.cluster.type.project_express_supplier_recommend_record>project_express_supplier_recommend_record</pom.cluster.type.project_express_supplier_recommend_record>
+                <pom.cluster.type.project_express_traffic_statistic>project_express_traffic_statistic
+                </pom.cluster.type.project_express_traffic_statistic>
+                <pom.cluster.type.project_express_supplier_recommend_record>project_express_supplier_recommend_record
+                </pom.cluster.type.project_express_supplier_recommend_record>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
