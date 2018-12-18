@@ -66,25 +66,28 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
 
             String purchaserIdToString = StringUtils.collectionToCommaDelimitedString(purchaserIds);
             // 添加采购项目数量
-            appendPurchaseProjectCount(resultFromEs, purchaserIdToString);
+            this.appendPurchaseProjectCount(resultFromEs, purchaserIdToString);
             // 添加采购交易额
-            appendPurchaseTradingVolume(resultFromEs, purchaserIdToString);
+            this.appendPurchaseTradingVolume(resultFromEs, purchaserIdToString);
 
             // 添加竞价项目数量
-            appendAuctionProjectCount(resultFromEs, purchaserIdToString);
+            this.appendAuctionProjectCount(resultFromEs, purchaserIdToString);
             // 添加竞价交易额
-            appendAuctionTradingVolume(resultFromEs, purchaserIdToString);
+            this.appendAuctionTradingVolume(resultFromEs, purchaserIdToString);
 
             // 添加招标项目数量
-            appendBidProjectCount(resultFromEs, purchaserIdToString);
+            this.appendBidProjectCount(resultFromEs, purchaserIdToString);
             // 添加招标交易额
-            appendBidTradingVolume(resultFromEs, purchaserIdToString);
+            this.appendBidTradingVolume(resultFromEs, purchaserIdToString);
 
             // 添加合作供应商数量
-            appendCooperateSupplierCount(resultFromEs, purchaserIdToString);
+            this.appendCooperateSupplierCount(resultFromEs, purchaserIdToString);
 
             // 添加热门采购品
-            appendDemandManyProjectItem(resultFromEs, purchaserIdToString);
+            this.appendDemandManyProjectItem(resultFromEs, purchaserIdToString);
+
+            this.handlerProjectAndTradingVolumeTotal(resultFromEs);
+
             batchInsert(resultFromEs);
             scrollResp = elasticClient.getTransportClient().prepareSearchScroll(scrollResp.getScrollId())
                     .setScroll(new TimeValue(60000))
@@ -93,6 +96,30 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
             pageNumberToUse++;
         } while (scrollResp.getHits().getHits().length != 0);
         logger.info("同步采购商参与项目和交易统计结束");
+    }
+
+    private void handlerProjectAndTradingVolumeTotal(List<Map<String, Object>> resultFromEs) {
+        if (!CollectionUtils.isEmpty(resultFromEs)) {
+            // 计算总的交易额
+            for (Map<String, Object> purchaser : resultFromEs) {
+                // 项目数量
+                Long purchaseProjectCount = Long.valueOf(purchaser.get(PURCHASE_PROJECT_COUNT).toString());
+                Long biddingProjectCount = Long.valueOf(purchaser.get(BID_PROJECT_COUNT).toString());
+                Long auctionProjectCount = Long.valueOf(purchaser.get(AUCTION_PROJECT_COUNT).toString());
+                purchaser.put(PROJECT_COUNT, (purchaseProjectCount + biddingProjectCount + auctionProjectCount));
+
+                // 交易量
+                BigDecimal purchaseTradingVolume = (BigDecimal) purchaser.get(PURCHASE_TRADING_VOLUME);
+                BigDecimal biddingTradingVolume = (BigDecimal) purchaser.get(BID_TRADING_VOLUME);
+                BigDecimal auctionTradingVolume = (BigDecimal) purchaser.get(AUCTION_TRADING_VOLUME_STR);
+                BigDecimal tradingVolume = purchaseTradingVolume.add(biddingTradingVolume).add(auctionTradingVolume);
+                purchaser.put(LONG_TRADING_VOLUME, tradingVolume.longValue());
+                purchaser.put(PURCHASE_TRADING_VOLUME, purchaseTradingVolume.toString());
+                purchaser.put(BID_TRADING_VOLUME, purchaseTradingVolume.toString());
+                purchaser.put(AUCTION_TRADING_VOLUME_STR, auctionTradingVolume.toString());
+                purchaser.put(TRADING_VOLUME, tradingVolume.toString());
+            }
+        }
     }
 
     private void appendDemandManyProjectItem(List<Map<String, Object>> resultFromEs, String purchaserIdToString) {
@@ -195,276 +222,286 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
         return projectItemMap;
     }
 
-    private void appendAuctionProjectCount(List<Map<String, Object>> resultFromEs, String purchaserIdToString) {
-        String queryAuctionSqlTemplate = "SELECT\n" +
-                "\tcount( 1 ) AS auctionProjectCount,\n" +
-                "\tap.company_id AS companyId \n" +
-                "FROM\n" +
-                "\tauction_project ap \n" +
-                "WHERE\n" +
-                "\tap.project_status = 5\n" +
-                "\tAND ap.company_id IN (%s) \n" +
-                "GROUP BY\n" +
-                "\tap.company_id";
+    private void appendAuctionProjectCount(List<Map<String, Object>> purchasers, String purchaserIdToString) {
         if (!StringUtils.isEmpty(purchaserIdToString)) {
-            String querySql = String.format(queryAuctionSqlTemplate, purchaserIdToString);
-            Map<Long, Long> auctionProjectCountMap = DBUtil.query(auctionDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Long, Long>>() {
-                @Override
-                public Map<Long, Long> execute(ResultSet resultSet) throws SQLException {
-                    HashMap<Long, Long> projectCountMap = new HashMap<>();
-                    while (resultSet.next()) {
-                        projectCountMap.put(resultSet.getLong("companyId"), resultSet.getLong("auctionProjectCount"));
-                    }
-                    return projectCountMap;
-                }
-            });
+            String ldQuerySqlTemplate = "SELECT\n" +
+                    "\tap.company_id AS companyId, \n" +
+                    "\tcount( 1 ) AS auctionProjectCount\n" +
+                    "FROM\n" +
+                    "\tauction_project ap \n" +
+                    "WHERE\n" +
+                    "\tap.project_status = 5\n" +
+                    "\tAND ap.company_id IN (%s) \n" +
+                    "GROUP BY\n" +
+                    "\tap.company_id";
+            Map<Long, Long> ldAuctionProjectCountMap = this.getTotal(auctionDataSource, ldQuerySqlTemplate, purchaserIdToString);
 
-            for (Map<String, Object> map : resultFromEs) {
-                Long auctionProjectCount = auctionProjectCountMap.get(Long.parseLong(((String) map.get(ID))));
-                if (auctionProjectCount == null) {
-                    map.put(AUCTION_PROJECT_COUNT, 0L);
-                } else {
-                    map.put(AUCTION_PROJECT_COUNT, auctionProjectCount);
-                }
-            }
+            String ycQuerySqlTemplate = "SELECT\n" +
+                    "\tap.comp_id AS companyId, \n" +
+                    "\tcount( 1 ) AS auctionProjectCount\n" +
+                    "FROM\n" +
+                    "\tauction_project ap \n" +
+                    "WHERE\n" +
+                    "\tap.project_stats = 5\n" +
+                    "\tAND ap.comp_id IN (%s) \n" +
+                    "GROUP BY\n" +
+                    "\tap.comp_id";
+            Map<Long, Long> ycAuctionProjectCountMap = this.getTotal(ycDataSource, ycQuerySqlTemplate, purchaserIdToString);
+
+            this.builderProjectCount(purchasers, ldAuctionProjectCountMap, ycAuctionProjectCountMap, AUCTION_PROJECT_TYPE);
         }
     }
 
     private void appendAuctionTradingVolume(List<Map<String, Object>> resultFromEs, String purchaserIdToString) {
-        // FIXME 待竞价项目开发后统计
-        String queryAuctionProjectSqlTemplate = "SELECT\n" +
-                "\tsum( ape.deal_total_price ) AS auctionTradingVolumeStr,\n" +
-                "\tap.company_id AS companyId \n" +
-                "FROM\n" +
-                "\tauction_project ap\n" +
-                "\tLEFT JOIN auction_project_ext ape ON ap.id = ape.id \n" +
-                "\tAND ap.company_id = ape.company_id \n" +
-                "WHERE\n" +
-                "\tap.project_status = 5 \n" +
-                "\tAND ape.deal_total_price IS NOT NULL \n" +
-                "\tAND ap.company_id IN (%s) \n" +
-                "GROUP BY\n" +
-                "\tap.company_id";
-
         if (!StringUtils.isEmpty(purchaserIdToString)) {
-            String queryPurchaseSql = String.format(queryAuctionProjectSqlTemplate, purchaserIdToString);
-            // 根据采购商id查询交易额
-            List<Map<String, Object>> auctionTradingVolumeList = DBUtil.query(auctionDataSource, queryPurchaseSql, null);
-            HashMap<String, BigDecimal> auctionAttributeMap = new HashMap<>();
-            // list<Map>转换为map
-            if (!CollectionUtils.isEmpty(auctionTradingVolumeList)) {
-                for (Map<String, Object> map : auctionTradingVolumeList) {
-                    auctionAttributeMap.put(String.valueOf(map.get(COMPANY_ID)), ((BigDecimal) map.get(AUCTION_TRADING_VOLUME_STR)));
-                }
-            }
-            // 遍历采购商封装交易额
-            for (Map<String, Object> map : resultFromEs) {
-                // 根据采购商id查询交易额
-                BigDecimal auctionTradingVolume = auctionAttributeMap.get(map.get(ID));
-                if (auctionTradingVolume == null) {
-                    map.put(AUCTION_TRADING_VOLUME_STR, BigDecimal.ZERO);
-                } else {
-                    map.put(AUCTION_TRADING_VOLUME_STR, auctionTradingVolume);
-                }
+            String ldQuerySqlTemplate = "SELECT\n" +
+                    "\tap.company_id AS companyId ,\n" +
+                    "\tsum( ape.deal_total_price ) AS auctionTradingVolumeStr\n" +
+                    "FROM\n" +
+                    "\tauction_project ap\n" +
+                    "\tLEFT JOIN auction_project_ext ape ON ap.id = ape.id \n" +
+                    "\tAND ap.company_id = ape.company_id \n" +
+                    "WHERE\n" +
+                    "\tap.project_status = 5 \n" +
+                    "\tAND ape.deal_total_price IS NOT NULL \n" +
+                    "\tAND ap.company_id IN (%s) \n" +
+                    "GROUP BY\n" +
+                    "\tap.company_id";
+            Map<Long, BigDecimal> ldAuctionProjectVolumeMap = this.findPurchaserTrading(auctionDataSource, ldQuerySqlTemplate, purchaserIdToString);
+
+            String ycQuerySqlTemplate = "SELECT\n" +
+                    "\tap.comp_id AS companyId ,\n" +
+                    "\tsum( ap.deal_total_price ) AS auctionTradingVolumeStr\n" +
+                    "FROM\n" +
+                    "\tauction_project ap\n" +
+                    "WHERE\n" +
+                    "\tap.project_stats = 5 \n" +
+                    "\tAND ap.deal_total_price IS NOT NULL \n" +
+                    "\tAND ap.comp_id IN (%s) \n" +
+                    "GROUP BY\n" +
+                    "\tap.comp_id";
+            Map<Long, BigDecimal> ycAuctionProjectVolumeMap = this.findPurchaserTrading(ycDataSource, ycQuerySqlTemplate, purchaserIdToString);
+
+            this.builderTradingVolume(resultFromEs, ldAuctionProjectVolumeMap, ycAuctionProjectVolumeMap, AUCTION_PROJECT_TYPE);
+        }
+    }
+
+    private void builderTradingVolume(List<Map<String, Object>> resultFromEs, Map<Long, BigDecimal> ldProjectTradingVolumeMap, Map<Long, BigDecimal> ycProjectTradingVolumeMap, int projectType) {
+        for (Map<String, Object> map : resultFromEs) {
+            Long purchaserId = Long.valueOf(map.get(ID).toString());
+            BigDecimal ldProjectVolume = ldProjectTradingVolumeMap.get(purchaserId) == null ? BigDecimal.ZERO : ldProjectTradingVolumeMap.get(purchaserId);
+            BigDecimal ycProjectVolume = ycProjectTradingVolumeMap.get(purchaserId) == null ? BigDecimal.ZERO : ycProjectTradingVolumeMap.get(purchaserId);
+            if (Objects.equals(projectType, PURCHASE_PROJECT_TYPE)) {
+                map.put(PURCHASE_TRADING_VOLUME, ldProjectVolume.add(ycProjectVolume));
+            } else if (Objects.equals(projectType, BIDDING_PROJECT_TYPE)) {
+                map.put(BID_TRADING_VOLUME, ldProjectVolume.add(ycProjectVolume));
+            } else if (Objects.equals(projectType, AUCTION_PROJECT_TYPE)) {
+                map.put(AUCTION_TRADING_VOLUME_STR, ldProjectVolume.add(ycProjectVolume));
             }
         }
     }
 
-    private void appendPurchaseTradingVolume(List<Map<String, Object>> purchases, String purchaserIdToString) {
-        String queryPurchaserSqlTemplate = "SELECT\n" +
-                "\tsum( ppe.deal_total_price ) AS purchaseTradingVolume,\n" +
-                "\tpp.company_id AS companyId \n" +
-                "FROM\n" +
-                "\tpurchase_project pp\n" +
-                "\tLEFT JOIN purchase_project_ext ppe ON pp.id = ppe.id \n" +
-                "\tAND pp.company_id = ppe.company_id \n" +
-                "\t\n" +
-                "WHERE\n" +
-                "\tpp.process_status IN ( 31, 40 )  \n" +
-                "\tAND ppe.deal_total_price IS NOT NULL \n" +
-                "\tAND pp.company_id IN (%s) \n" +
-                "GROUP BY\n" +
-                "\tpp.company_id;";
+    private void builderProjectCount(List<Map<String, Object>> resultFromEs, Map<Long, Long> ldProjectCountMap, Map<Long, Long> ycProjectCountMap, int projectType) {
+        for (Map<String, Object> map : resultFromEs) {
+            long companyId = Long.parseLong(((String) map.get(ID)));
+            Long ldCount = ldProjectCountMap.get(companyId) == null ? 0L : ldProjectCountMap.get(companyId);
+            Long ycCount = ycProjectCountMap.get(companyId) == null ? 0L : ycProjectCountMap.get(companyId);
+            if (Objects.equals(projectType, PURCHASE_PROJECT_TYPE)) {
+                map.put(PURCHASE_PROJECT_COUNT, ldCount + ycCount);
+            } else if (Objects.equals(projectType, BIDDING_PROJECT_TYPE)) {
+                map.put(BID_PROJECT_COUNT, ldCount + ycCount);
+            } else if (Objects.equals(projectType, AUCTION_PROJECT_TYPE)) {
+                map.put(AUCTION_PROJECT_COUNT, ldCount + ycCount);
+            } else if (Objects.equals(projectType, COOPERATE_SUPPLIER_TYPE)) {
+                map.put(COOPERATE_SUPPLIER_COUNT, ldCount + ycCount);
+            }
+        }
+    }
 
+    private void appendPurchaseTradingVolume(List<Map<String, Object>> purchasers, String purchaserIdToString) {
         if (!StringUtils.isEmpty(purchaserIdToString)) {
-            String queryPurchaseSql = String.format(queryPurchaserSqlTemplate, purchaserIdToString);
-            // 根据采购商id查询交易额
-            List<Map<String, Object>> purchaseTradingVolumeList = DBUtil.query(purchaseDataSource, queryPurchaseSql, null);
-            HashMap<String, BigDecimal> purchaseAttributeMap = new HashMap<>();
-            // list<Map>转换为map
-            if (!CollectionUtils.isEmpty(purchaseTradingVolumeList)) {
-                for (Map<String, Object> map : purchaseTradingVolumeList) {
-                    purchaseAttributeMap.put(String.valueOf(map.get(COMPANY_ID)), ((BigDecimal) map.get(PURCHASE_TRADING_VOLUME)));
-                }
-            }
-            // 遍历采购商封装交易额
-            for (Map<String, Object> purchase : purchases) {
-                // 根据采购商id查询交易额
-                BigDecimal purchaseTradingVolume = purchaseAttributeMap.get(purchase.get(ID));
-                if (purchaseTradingVolume == null) {
-                    purchase.put(PURCHASE_TRADING_VOLUME, BigDecimal.ZERO);
-                } else {
-                    purchase.put(PURCHASE_TRADING_VOLUME, purchaseTradingVolume);
-                }
-            }
+            String ldQueryPurchaserSqlTemplate = "SELECT\n" +
+                    "\tpp.company_id AS companyId, \n" +
+                    "\tsum( ppe.deal_total_price ) AS purchaseTradingVolume\n" +
+                    "FROM\n" +
+                    "\tpurchase_project pp\n" +
+                    "\tLEFT JOIN purchase_project_ext ppe ON pp.id = ppe.id \n" +
+                    "\tAND pp.company_id = ppe.company_id \n" +
+                    "\t\n" +
+                    "WHERE\n" +
+                    "\tpp.process_status IN ( 31, 40 )  \n" +
+                    "\tAND ppe.deal_total_price IS NOT NULL \n" +
+                    "\tAND pp.company_id IN (%s) \n" +
+                    "GROUP BY\n" +
+                    "\tpp.company_id;";
+            Map<Long, BigDecimal> ldPurchaserTradingVolumeMap = this.findPurchaserTrading(purchaseDataSource, ldQueryPurchaserSqlTemplate, purchaserIdToString);
+
+            String ycQueryPurchaserSqlTemplate = "SELECT\n"
+                    + "   bp.comp_id AS companyId,\n"
+                    + "   sum(bpe.deal_total_price) AS purchaseTradingVolume \n"
+                    + "FROM\n"
+                    + "   bmpfjz_project bp\n"
+                    + "LEFT JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id AND bp.comp_id = bpe.comp_id\n"
+                    + "AND bp.project_status IN (8, 9)\n"
+                    + "WHERE bpe.deal_total_price is not null\n"
+                    + "AND bp.comp_id IN (%s)\n"
+                    + "GROUP BY\n"
+                    + "   bp.comp_id";
+            Map<Long, BigDecimal> ycPurchaserTradingVolumeMap = this.findPurchaserTrading(ycDataSource, ycQueryPurchaserSqlTemplate, purchaserIdToString);
+            this.builderTradingVolume(purchasers, ldPurchaserTradingVolumeMap, ycPurchaserTradingVolumeMap, PURCHASE_PROJECT_TYPE);
         }
     }
 
     private void appendBidTradingVolume(List<Map<String, Object>> purchasers, String purchaserIdToString) {
-        String queryBidSqlTemplate = "SELECT\n" +
-                "\tbsp.company_id AS companyId,\n" +
-                "\tsum( bs.bid_total_price ) AS bidTradingVolume \n" +
-                "FROM\n" +
-                "\tbid_sub_project bsp\n" +
-                "\tLEFT JOIN bid_supplier bs ON bsp.project_id = bs.project_id \n" +
-                "\tAND bsp.id = bs.sub_project_id \n" +
-                "\tAND bsp.company_id = bs.company_id \n" +
-                "WHERE\n" +
-                "\tbsp.project_status IN ( 2, 3 ) \n" +
-                "\tAND bs.win_bid_status = 1 \n" +
-                "\tAND bs.bid_total_price IS NOT NULL\n" +
-                "\tAND bs.company_id in (%s)\n" +
-                "GROUP BY\n" +
-                "\tbsp.company_id;";
-
         if (!StringUtils.isEmpty(purchaserIdToString)) {
-            String queryBidSql = String.format(queryBidSqlTemplate, purchaserIdToString);
-            List<Map<String, Object>> bidTradingVolumeList = DBUtil.query(tenderDataSource, queryBidSql, null);
-            HashMap<String, BigDecimal> bidAttributeMap = new HashMap<>();
-            if (!CollectionUtils.isEmpty(bidTradingVolumeList)) {
-                for (Map<String, Object> bidTradingVolumeMap : bidTradingVolumeList) {
-                    bidAttributeMap.put(String.valueOf(bidTradingVolumeMap.get(COMPANY_ID)), ((BigDecimal) bidTradingVolumeMap.get(BID_TRADING_VOLUME)));
-                }
-            }
+            String ldQueryBidSqlTemplate = "SELECT\n" +
+                    "\tbsp.company_id AS companyId,\n" +
+                    "\tsum( bs.bid_total_price ) AS bidTradingVolume \n" +
+                    "FROM\n" +
+                    "\tbid_sub_project bsp\n" +
+                    "\tLEFT JOIN bid_supplier bs ON bsp.project_id = bs.project_id \n" +
+                    "\tAND bsp.id = bs.sub_project_id \n" +
+                    "\tAND bsp.company_id = bs.company_id \n" +
+                    "WHERE\n" +
+                    "\tbsp.project_status IN ( 2, 3 ) \n" +
+                    "\tAND bs.win_bid_status = 1 \n" +
+                    "\tAND bs.bid_total_price IS NOT NULL\n" +
+                    "\tAND bs.company_id in (%s)\n" +
+                    "GROUP BY\n" +
+                    "\tbsp.company_id;";
+            Map<Long, BigDecimal> ldBidProjectTradingVolumeMap = this.findPurchaserTrading(tenderDataSource, ldQueryBidSqlTemplate, purchaserIdToString);
 
-            // 计算总的交易额
-            for (Map<String, Object> purchaser : purchasers) {
-                // 采购商招标额
-                BigDecimal bidTradingVolume = bidAttributeMap.get(purchaser.get(ID));
-                BigDecimal tradingVolume = null;
-                if (bidTradingVolume != null) {
-                    purchaser.put(BID_TRADING_VOLUME, bidTradingVolume.toString());
-                    tradingVolume = ((BigDecimal) purchaser.get(PURCHASE_TRADING_VOLUME)).add(bidTradingVolume).add(((BigDecimal) purchaser.get(AUCTION_TRADING_VOLUME_STR)));
-                } else {
-                    purchaser.put(BID_TRADING_VOLUME, "0");
-                    tradingVolume = ((BigDecimal) purchaser.get(PURCHASE_TRADING_VOLUME)).add(((BigDecimal) purchaser.get(AUCTION_TRADING_VOLUME_STR)));
-                }
-                purchaser.put(TRADING_VOLUME, tradingVolume.toString());
-                purchaser.put(LONG_TRADING_VOLUME, tradingVolume.longValue());
-                // 处理为String类型
-                purchaser.put(PURCHASE_TRADING_VOLUME, purchaser.get(PURCHASE_TRADING_VOLUME).toString());
-                purchaser.put(AUCTION_TRADING_VOLUME_STR, purchaser.get(AUCTION_TRADING_VOLUME_STR).toString());
-            }
+            String ycQueryBidSqlTemplate = "SELECT\n"
+                    + "   bp.company_id AS id,\n"
+                    + "   sum(bp.total_bid_price) AS bidTradingVolume\n"
+                    + "FROM\n"
+                    + "   bid_product bp\n"
+                    + "WHERE bp.total_bid_price is not null\n"
+                    + "AND bp.company_id IN (%s)\n"
+                    + "GROUP BY\n"
+                    + "     bp.company_id\n";
+            Map<Long, BigDecimal> ycBidProjectTradingVolumeMap = this.findPurchaserTrading(ycDataSource, ycQueryBidSqlTemplate, purchaserIdToString);
+
+            this.builderTradingVolume(purchasers, ldBidProjectTradingVolumeMap, ycBidProjectTradingVolumeMap, BIDDING_PROJECT_TYPE);
+
         }
     }
 
     private void appendPurchaseProjectCount(List<Map<String, Object>> purchasers, String purchaserIdToString) {
-        String queryPurchaserSqlTemplate = "SELECT\n" +
-                "\tcount( 1 ) AS purchaseProjectCount,\n" +
-                "\tpp.company_id AS companyId \n" +
-                "FROM\n" +
-                "\tpurchase_project pp \n" +
-                "WHERE\n" +
-                "\tpp.process_status IN ( 31, 40 )\n" +
-                "\tAND pp.company_id IN (%s) \n" +
-                "GROUP BY\n" +
-                "\tpp.company_id";
         if (!StringUtils.isEmpty(purchaserIdToString)) {
-            String querySql = String.format(queryPurchaserSqlTemplate, purchaserIdToString);
-            Map<Long, Long> purchaseProjectCountMap = DBUtil.query(purchaseDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Long, Long>>() {
-                @Override
-                public Map<Long, Long> execute(ResultSet resultSet) throws SQLException {
-                    HashMap<Long, Long> projectCountMap = new HashMap<>();
-                    while (resultSet.next()) {
-                        projectCountMap.put(resultSet.getLong("companyId"), resultSet.getLong("purchaseProjectCount"));
-                    }
-                    return projectCountMap;
-                }
-            });
+            // 隆道云采购项目数量
+            String ldQueryPurchaserSqlTemplate = "SELECT\n" +
+                    "\tpp.company_id AS companyId, \n" +
+                    "\tcount( 1 ) AS purchaseProjectCount\n" +
+                    "FROM\n" +
+                    "\tpurchase_project pp \n" +
+                    "WHERE\n" +
+                    "\tpp.process_status IN ( 31, 40 )\n" +
+                    "\tAND pp.company_id IN (%s) \n" +
+                    "GROUP BY\n" +
+                    "\tpp.company_id";
+            Map<Long, Long> ldPurchaserProjectCountMap = this.getTotal(purchaseDataSource, ldQueryPurchaserSqlTemplate, purchaserIdToString);
 
-            for (Map<String, Object> purchaser : purchasers) {
-                Long purchaseProjectCount = purchaseProjectCountMap.get(Long.parseLong(((String) purchaser.get(ID))));
-                if (purchaseProjectCount == null) {
-                    purchaser.put(PURCHASE_PROJECT_COUNT, 0L);
-                } else {
-                    purchaser.put(PURCHASE_PROJECT_COUNT, purchaseProjectCount);
-                }
-            }
+            // 悦采采购项目数量
+            String ycQueryPurchaserSqlTemplate = "SELECT\n"
+                    + "   bp.comp_id AS companyId,\n"
+                    + "   count(1) AS purchaseProjectCount\n"
+                    + "FROM\n"
+                    + "   bmpfjz_project bp\n"
+                    + "WHERE bp.project_status IN (8, 9)\n"
+                    + "AND bp.comp_id IN (%s) group by bp.comp_id";
+            Map<Long, Long> ycPurchaserProjectCountMap = this.getTotal(ycDataSource, ycQueryPurchaserSqlTemplate, purchaserIdToString);
+
+            this.builderProjectCount(purchasers, ldPurchaserProjectCountMap, ycPurchaserProjectCountMap, PURCHASE_PROJECT_TYPE);
         }
     }
 
-    private void appendBidProjectCount(List<Map<String, Object>> purchasers, String purchaserIdToString) {
-        String queryBidSqlTemplate = "SELECT\n" +
-                "\tcount( 1 ) AS bidProjectCount,\n" +
-                "\tcompany_id AS companyId \n" +
-                "FROM\n" +
-                "\tbid_sub_project \n" +
-                "WHERE\n" +
-                "\tproject_status IN ( 2, 3 ) \n" +
-                "\tAND company_id IN (%s) \n" +
-                "GROUP BY\n" +
-                "\tcompany_id";
-
-        if (!StringUtils.isEmpty(purchaserIdToString)) {
-            String queryBidSql = String.format(queryBidSqlTemplate, purchaserIdToString);
-            Map<Long, Long> bidProjectCountMap = DBUtil.query(tenderDataSource, queryBidSql, null, new DBUtil.ResultSetCallback<Map<Long, Long>>() {
-                @Override
-                public Map<Long, Long> execute(ResultSet resultSet) throws SQLException {
-                    HashMap<Long, Long> projectCountMap = new HashMap<>();
-                    while (resultSet.next()) {
-                        projectCountMap.put(resultSet.getLong(COMPANY_ID), resultSet.getLong(BID_PROJECT_COUNT));
-                    }
-                    return projectCountMap;
+    private Map<Long, Long> getTotal(DataSource dataSource, String querySqlTemplate, String purchaserIdsString) {
+        String querySql = String.format(querySqlTemplate, purchaserIdsString);
+        Map<Long, Long> purchaseProjectCountMap = DBUtil.query(dataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Long, Long>>() {
+            @Override
+            public Map<Long, Long> execute(ResultSet resultSet) throws SQLException {
+                HashMap<Long, Long> projectCountMap = new HashMap<>();
+                while (resultSet.next()) {
+                    projectCountMap.put(resultSet.getLong(1), resultSet.getLong(2));
                 }
-            });
-            // 计算总的交易额 FIXME 总项目数量暂时没加竞价项目数量
-            for (Map<String, Object> purchaser : purchasers) {
-                // 采购商招标项目个数
-                Long bidProjectCount = bidProjectCountMap.get(Long.parseLong(((String) purchaser.get(ID))));
-                if (bidProjectCount != null) {
-                    purchaser.put(BID_PROJECT_COUNT, bidProjectCount);
-                } else {
-                    purchaser.put(BID_PROJECT_COUNT, 0L);
-                }
-                Long projectCount = (Long) purchaser.get(PURCHASE_PROJECT_COUNT) + ((Long) purchaser.get(AUCTION_PROJECT_COUNT)) + ((Long) purchaser.get(BID_PROJECT_COUNT));
-                purchaser.put(PROJECT_COUNT, projectCount);
+                return projectCountMap;
             }
+        });
+        return purchaseProjectCountMap;
+    }
 
+    private Map<Long, BigDecimal> findPurchaserTrading(DataSource dataSource, String querySqlTemplate, String purchaserIdsString) {
+        String querySql = String.format(querySqlTemplate, purchaserIdsString);
+        Map<Long, BigDecimal> purchaserTradingDataMap = DBUtil.query(dataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Long, BigDecimal>>() {
+            @Override
+            public Map<Long, BigDecimal> execute(ResultSet resultSet) throws SQLException {
+                HashMap<Long, BigDecimal> projectCountMap = new HashMap<>();
+                while (resultSet.next()) {
+                    projectCountMap.put(resultSet.getLong(1), resultSet.getBigDecimal(2));
+                }
+                return projectCountMap;
+            }
+        });
+        return purchaserTradingDataMap;
+    }
+
+    private void appendBidProjectCount(List<Map<String, Object>> purchasers, String purchaserIdToString) {
+        if (!StringUtils.isEmpty(purchaserIdToString)) {
+            String ldQueryBidSqlTemplate = "SELECT\n" +
+                    "\tcompany_id AS companyId, \n" +
+                    "\tcount( 1 ) AS bidProjectCount\n" +
+                    "FROM\n" +
+                    "\tbid_sub_project \n" +
+                    "WHERE\n" +
+                    "\tproject_status IN ( 2, 3 ) \n" +
+                    "\tAND company_id IN (%s) \n" +
+                    "GROUP BY\n" +
+                    "\tcompany_id";
+            Map<Long, Long> ldBiddingProjectCountMap = this.getTotal(tenderDataSource, ldQueryBidSqlTemplate, purchaserIdToString);
+
+            String ycQueryBidSqlTemplate = "SELECT\n" +
+                    "\tCOMPANY_ID AS companyId, \n" +
+                    "\tcount( ID ) AS bidProjectCount\n" +
+                    "FROM\n" +
+                    "\tproj_inter_project \n" +
+                    "WHERE\n" +
+                    "\tPROJECT_STATUS IN ( 9, 11 ) AND company_id in (%s)\n" +
+                    "GROUP BY\n" +
+                    "\tCOMPANY_ID;";
+            Map<Long, Long> ycBiddingProjectCountMap = this.getTotal(ycDataSource, ycQueryBidSqlTemplate, purchaserIdToString);
+
+            this.builderProjectCount(purchasers, ldBiddingProjectCountMap, ycBiddingProjectCountMap, BIDDING_PROJECT_TYPE);
         }
     }
 
     private void appendCooperateSupplierCount(List<Map<String, Object>> resultFromEs, String purchaserIdToString) {
-        String querySqlTemplate = "SELECT\n" +
-                "\tcount(1),\n" +
-                "\tcompany_id\n" +
-                "FROM\n" +
-                "\t`supplier` \n" +
-                "WHERE\n" +
-                "\tsymbiosis_status = 2 AND company_id in (%s)\n" +
-                "GROUP BY\n" +
-                "\tcompany_id";
         if (!StringUtils.isEmpty(purchaserIdToString)) {
-            String querySql = String.format(querySqlTemplate, purchaserIdToString);
-            Map<String, Long> cooperateSupplierMap = DBUtil.query(uniregDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<String, Long>>() {
-                @Override
-                public Map<String, Long> execute(ResultSet resultSet) throws SQLException {
-                    Map<String, Long> map = new HashMap<>();
-                    while (resultSet.next()) {
-                        map.put(String.valueOf(((Long) resultSet.getLong(2))), resultSet.getLong(1));
-                    }
-                    return map;
-                }
-            });
-            for (Map<String, Object> result : resultFromEs) {
-                result.put(COOPERATE_SUPPLIER_COUNT, cooperateSupplierMap.get(result.get(ID)) == null ? 0 : cooperateSupplierMap.get(result.get(ID)));
-            }
+            String ldQuerySqlTemplate = "SELECT\n" +
+                    "\tcompany_id as companyId,\n" +
+                    "\tcount(1) as cooperateSupplierCount\n" +
+                    "FROM\n" +
+                    "\t`supplier` \n" +
+                    "WHERE\n" +
+                    "\tsymbiosis_status = 2 AND company_id in (%s)\n" +
+                    "GROUP BY\n" +
+                    "\tcompany_id";
+            Map<Long, Long> ldCooperateSupplierCountMap = this.getTotal(uniregDataSource, ldQuerySqlTemplate, purchaserIdToString);
+
+            String ycQuerySqlTemplate = "SELECT\n" +
+                    "\tcompany_id as companyId,\n" +
+                    "\tcount(1) as cooperateSupplierCount\n" +
+                    "FROM\n" +
+                    "\t`supplier` \n" +
+                    "WHERE\n" +
+                    "\tsymbiosis_status = 2 AND company_id in (%s)\n" +
+                    "GROUP BY\n" +
+                    "\tcompany_id";
+            Map<Long, Long> ycCooperateSupplierCountMap = this.getTotal(ycDataSource, ycQuerySqlTemplate, purchaserIdToString);
+
+            this.builderProjectCount(resultFromEs, ldCooperateSupplierCountMap, ycCooperateSupplierCountMap, COOPERATE_SUPPLIER_TYPE);
         }
     }
-
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
 
     class ProjectItem {
         /**
@@ -516,4 +553,8 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
         }
     }
 
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+//        execute();
+//    }
 }

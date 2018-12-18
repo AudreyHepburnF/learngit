@@ -47,6 +47,10 @@ public abstract class AbstractSyncPurchaseDataJobHandler extends JobHandler {
     @Qualifier("uniregDataSource")
     protected DataSource uniregDataSource;
 
+    @Autowired
+    @Qualifier("ycDataSource")
+    protected DataSource ycDataSource;
+
     protected String ID                         = "id";
     protected String COMPANY_ID                 = "companyId";
     protected String PURCHASE_TRADING_VOLUME    = "purchaseTradingVolume";
@@ -70,6 +74,14 @@ public abstract class AbstractSyncPurchaseDataJobHandler extends JobHandler {
     protected String PURCHASE_NAME_NOT_ANALYZED = "purchaseNameNotAnalyzed";
     protected String COOPERATE_SUPPLIER_COUNT   = "cooperateSupplierCount";
     protected String DATA_STATUS                = "dataStatus";
+    // 招标项目类型
+    protected int    BIDDING_PROJECT_TYPE       = 1;
+    // 采购项目类型
+    protected int    PURCHASE_PROJECT_TYPE      = 2;
+    // 竞价项目类型
+    protected int    AUCTION_PROJECT_TYPE       = 3;
+
+    protected int COOPERATE_SUPPLIER_TYPE = 4;
 
     protected void batchInsert(List<Map<String, Object>> purchases) {
 //        System.out.println("=============" + purchases);
