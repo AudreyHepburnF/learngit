@@ -51,11 +51,7 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
             Set<String> supplierIds = new HashSet<>();
             List<Map<String, Object>> resultFromEs = new ArrayList<>();
             for (SearchHit searchHit : searchHits) {
-                String id = searchHit.getId();
-                if (!Objects.equals(Long.valueOf(id), 11113173840L)) {
-                    continue;
-                }
-                supplierIds.add(id);
+                supplierIds.add(searchHit.getId());
                 resultFromEs.add(searchHit.getSource());
             }
 
@@ -89,21 +85,34 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
      */
     private void appendSupplierProjectStat(List<Map<String, Object>> resultFromEs, String supplierIds) {
         // 采购项目
-        String queryPurchaseProjectSqlTemplate = "SELECT\n"
+        String ldQueryPurchaseProjectSqlTemplate = "SELECT\n"
                 + "   COUNT(1),\n"
                 + "   supplier_id\n"
                 + "FROM\n"
                 + "   purchase_supplier_project where quote_status in (2,3) AND supplier_id in (%s)\n"
                 + "GROUP BY\n"
                 + "   supplier_id";
-        Map<String, Long> purchaseProjectStat = getSupplierStatMap(purchaseDataSource, queryPurchaseProjectSqlTemplate, supplierIds);
+        Map<String, Long> ldPurchaseProjectStat = getSupplierStatMap(purchaseDataSource, ldQueryPurchaseProjectSqlTemplate, supplierIds);
+
+        // 采购项目
+        String ycQueryPurchaseProjectSqlTemplate = "SELECT\n"
+                + "   COUNT(1),\n"
+                + "   supplier_id\n"
+                + "FROM\n"
+                + "   bmpfjz_supplier_project_bid where supplier_bid_status in (2,3,6,7) AND supplier_id in (%s)\n"
+                + "GROUP BY\n"
+                + "   supplier_id";
+        Map<String, Long> ycPurchaseProjectStat = getSupplierStatMap(ycDataSource, ycQueryPurchaseProjectSqlTemplate, supplierIds);
         for (Map<String, Object> source : resultFromEs) {
-            Object value = purchaseProjectStat.get(source.get(ID));
-            source.put(TOTAL_PURCHASE_PROJECT, (value == null ? 0 : value));
+            Object supplierId = source.get(ID);
+            long ldPurchaseProjectCount = ldPurchaseProjectStat.get(supplierId) == null ? 0L : ldPurchaseProjectStat.get(supplierId);
+            long ycPurchaseProjectCount = ycPurchaseProjectStat.get(supplierId) == null ? 0L : ycPurchaseProjectStat.get(supplierId);
+            source.put(TOTAL_PURCHASE_PROJECT, ldPurchaseProjectCount + ycPurchaseProjectCount);
         }
 
+
         // 招标项目
-        String queryBidProjectSqlTemplate = "select\n"
+        String ldQueryBidProjectSqlTemplate = "select\n"
                 + "    count(1),\n"
                 + "    supplier_id AS supplierId\n"
                 + " from\n"
@@ -111,13 +120,26 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
                 + "    where bid_status = 1 AND supplier_id in (%s)\n"
                 + " GROUP BY\n"
                 + "    supplier_id";
-        Map<String, Long> bidProjectStat = getSupplierStatMap(tenderDataSource, queryBidProjectSqlTemplate, supplierIds);
+        Map<String, Long> ldBidProjectStat = getSupplierStatMap(tenderDataSource, ldQueryBidProjectSqlTemplate, supplierIds);
+
+        // 招标项目
+        String ycQueryBidProjectSqlTemplate = "select\n"
+                + "    count(1),\n"
+                + "    BIDER_ID AS supplierId\n"
+                + " from\n"
+                + "    bid\n"
+                + "    where IS_WITHDRAWBID = 0 AND bider_id in (%s)\n"
+                + " GROUP BY\n"
+                + "    BIDER_ID";
+        Map<String, Long> ycBidProjectStat = getSupplierStatMap(ycDataSource, ycQueryBidProjectSqlTemplate, supplierIds);
         for (Map<String, Object> source : resultFromEs) {
-            Object value = bidProjectStat.get(source.get(ID));
-            source.put(TOTAL_BID_PROJECT, (value == null ? 0 : value));
+            Object supplierId = source.get(ID);
+            Long ldBidProjectCount = ldBidProjectStat.get(supplierId) == null ? 0L : ldBidProjectStat.get(supplierId);
+            Long ycBidProjectCount = ycBidProjectStat.get(supplierId) == null ? 0L : ycBidProjectStat.get(supplierId);
+            source.put(TOTAL_BID_PROJECT, ldBidProjectCount + ycBidProjectCount);
         }
 
-        // 竞价项目
+        // 竞价项目 TODO 悦采竞价项目参与量不统计
         String queryAuctionProjectSqlTemplate = "select\n"
                 + "    count(1),\n"
                 + "    supplier_id AS supplierId\n"
@@ -149,21 +171,33 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
      */
     private void appendSupplierDealProjectStat(List<Map<String, Object>> resultFromEs, String supplierIds) {
         // 采购项目
-        String queryPurchaseProjectSqlTemplate = "SELECT\n"
+        String ldQueryPurchaseProjectSqlTemplate = "SELECT\n"
                 + "   COUNT(1),\n"
                 + "   supplier_id\n"
                 + "FROM\n"
                 + "   purchase_supplier_project where deal_status = 2 AND supplier_id in (%s)\n"
                 + "GROUP BY\n"
                 + "   supplier_id";
-        Map<String, Long> purchaseProjectStat = getSupplierStatMap(purchaseDataSource, queryPurchaseProjectSqlTemplate, supplierIds);
+        Map<String, Long> ldPurchaseProjectStat = getSupplierStatMap(purchaseDataSource, ldQueryPurchaseProjectSqlTemplate, supplierIds);
+
+        // 采购项目
+        String ycQueryPurchaseProjectSqlTemplate = "SELECT\n"
+                + "   COUNT(1),\n"
+                + "   supplier_id\n"
+                + "FROM\n"
+                + "   bmpfjz_supplier_project_bid where supplier_bid_status = 6 AND supplier_id in (%s)\n"
+                + "GROUP BY\n"
+                + "   supplier_id";
+        Map<String, Long> ycPurchaseProjectStat = getSupplierStatMap(ycDataSource, ycQueryPurchaseProjectSqlTemplate, supplierIds);
         for (Map<String, Object> source : resultFromEs) {
-            Object value = purchaseProjectStat.get(source.get(ID));
-            source.put(TOTAL_DEAL_PURCHASE_PROJECT, value == null ? 0 : value);
+            Object supplierId = source.get(ID);
+            Long ldPurchaseDealProject = ldPurchaseProjectStat.get(supplierId) == null ? 0L : ldPurchaseProjectStat.get(supplierId);
+            Long ycPurchaseDealProject = ycPurchaseProjectStat.get(supplierId) == null ? 0L : ycPurchaseProjectStat.get(supplierId);
+            source.put(TOTAL_DEAL_PURCHASE_PROJECT, ldPurchaseDealProject + ycPurchaseDealProject);
         }
 
         // 招标项目
-        String queryBidProjectSqlTemplate = "select\n"
+        String ldQueryBidProjectSqlTemplate = "select\n"
                 + "    count(1),\n"
                 + "    supplier_id AS supplierId\n"
                 + " from\n"
@@ -172,14 +206,29 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
                 + "         win_bid_status = 1 AND supplier_id in (%s)\n"
                 + " GROUP BY\n"
                 + "    supplier_id";
-        Map<String, Long> bidProjectStat = getSupplierStatMap(tenderDataSource, queryBidProjectSqlTemplate, supplierIds);
+
+        Map<String, Long> ldBidProjectStat = getSupplierStatMap(tenderDataSource, ldQueryBidProjectSqlTemplate, supplierIds);
+        // 招标项目
+        String ycQueryBidProjectSqlTemplate = "select\n"
+                + "    count(1),\n"
+                + "    BIDER_ID AS supplierId\n"
+                + " from\n"
+                + "    bid\n"
+                + "      WHERE\n"
+                + "         IS_BID_SUCCESS = 1 AND bider_id in (%s)\n"
+                + " GROUP BY\n"
+                + "    BIDER_ID";
+
+        Map<String, Long> ycBidProjectStat = getSupplierStatMap(ycDataSource, ycQueryBidProjectSqlTemplate, supplierIds);
         for (Map<String, Object> source : resultFromEs) {
-            Object value = bidProjectStat.get(source.get(ID));
-            source.put(TOTAL_DEAL_BID_PROJECT, value == null ? 0 : value);
+            Object supplierId = source.get(ID);
+            Long ldBidDealProject = ldBidProjectStat.get(supplierId) == null ? 0L : ldBidProjectStat.get(supplierId);
+            Long ycBidDealProject = ycBidProjectStat.get(supplierId) == null ? 0L : ycBidProjectStat.get(supplierId);
+            source.put(TOTAL_DEAL_BID_PROJECT, ycBidDealProject + ldBidDealProject);
         }
 
         // 竞价项目
-        String queryAuctionProjectSqlTemplate = "select\n"
+        String ldQueryAuctionProjectSqlTemplate = "select\n"
                 + "    count(1),\n"
                 + "    supplier_id AS supplierId\n"
                 + " from\n"
@@ -188,10 +237,24 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
                 + "         deal_status = 3 AND supplier_id in (%s)\n"
                 + " GROUP BY\n"
                 + "    supplier_id";
-        Map<String, Long> auctionProjectStat = getSupplierStatMap(auctionDataSource, queryAuctionProjectSqlTemplate, supplierIds);
+        Map<String, Long> ldAuctionProjectStat = getSupplierStatMap(auctionDataSource, ldQueryAuctionProjectSqlTemplate, supplierIds);
+
+        String ycQueryAuctionProjectSqlTemplate = "SELECT\n" +
+                "\tcount( 1 ),\n" +
+                "\tsupplier_id \n" +
+                "FROM\n" +
+                "\tauction_bid_supplier \n" +
+                "WHERE\n" +
+                "\tbid_status = 1 \n" +
+                "\tAND supplier_id IN (%s) \n" +
+                "GROUP BY\n" +
+                "\tsupplier_id";
+        Map<String, Long> ycAuctionProjectStat = getSupplierStatMap(ycDataSource, ycQueryAuctionProjectSqlTemplate, supplierIds);
         for (Map<String, Object> source : resultFromEs) {
-            Object value = auctionProjectStat.get(source.get(ID));
-            source.put(TOTAL_DEAL_AUCTION_PROJECT, value == null ? 0 : value);
+            Object supplierId = source.get(ID);
+            Long ldAuctionDealProject = ldAuctionProjectStat.get(supplierId) == null ? 0L : ldAuctionProjectStat.get(supplierId);
+            Long ycAuctionDealProject = ycAuctionProjectStat.get(supplierId) == null ? 0L : ycAuctionProjectStat.get(supplierId);
+            source.put(TOTAL_DEAL_AUCTION_PROJECT, ldAuctionDealProject + ycAuctionDealProject);
         }
 
         // 总成交项目数量
@@ -205,7 +268,7 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
 
     private void appendSupplierDealPriceStat(List<Map<String, Object>> resultFromEs, String supplierIds) {
         // 采购项目
-        String queryPurchaseDealPriceSqlTemplate = "SELECT\n" +
+        String ldQueryPurchaseDealPriceSqlTemplate = "SELECT\n" +
                 "\tsupplier_id,\n" +
                 "\tsum( deal_total_price ) \n" +
                 "FROM\n" +
@@ -215,14 +278,30 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
                 "\tAND supplier_id IN (%s) \n" +
                 "GROUP BY\n" +
                 "\tsupplier_id";
-        Map<String, BigDecimal> purchaseDealPriceStat = getSupplierPriceStatMap(purchaseDataSource, queryPurchaseDealPriceSqlTemplate, supplierIds);
+        Map<String, BigDecimal> ldPurchaseDealPriceStat = getSupplierPriceStatMap(purchaseDataSource, ldQueryPurchaseDealPriceSqlTemplate, supplierIds);
+
+        // 1.采购项目
+        String ycQueryPurchaseDealPriceSqlTemplate = "SELECT\n" +
+                "\tsupplier_id,\n" +
+                "\tsum( deal_total_price ) \n" +
+                "FROM\n" +
+                "\t`bmpfjz_supplier_project_bid` \n" +
+                "WHERE\n" +
+                "\tsupplier_bid_status = 6 \n" +
+                "\tand supplier_id in (%s)\n" +
+                "GROUP BY\n" +
+                "\tsupplier_id";
+        Map<String, BigDecimal> ycPurchaseDealPriceStat = getSupplierPriceStatMap(ycDataSource, ycQueryPurchaseDealPriceSqlTemplate, supplierIds);
+
         for (Map<String, Object> source : resultFromEs) {
-            BigDecimal bigDecimal = purchaseDealPriceStat.get(source.get(ID));
-            source.put(TOTAL_DEAL_PURCHASE_PRICE, bigDecimal == null ? BigDecimal.ZERO.longValue() : bigDecimal.longValue());
+            Object supplierId = source.get(ID);
+            BigDecimal ldTotalDealPurchasePrice = ldPurchaseDealPriceStat.get(supplierId) == null ? BigDecimal.ZERO : ldPurchaseDealPriceStat.get(supplierId);
+            BigDecimal ycTotalDealPurchasePrice = ycPurchaseDealPriceStat.get(supplierId) == null ? BigDecimal.ZERO : ycPurchaseDealPriceStat.get(supplierId);
+            source.put(TOTAL_DEAL_PURCHASE_PRICE, ldTotalDealPurchasePrice.add(ycTotalDealPurchasePrice));
         }
 
         // 竞价项目
-        String queryAuctionDealPriceSqlTemplate = "SELECT\n" +
+        String ldQueryAuctionDealPriceSqlTemplate = "SELECT\n" +
                 "\tsupplier_id,\n" +
                 "\tsum( deal_total_price ) \n" +
                 "FROM\n" +
@@ -232,14 +311,31 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
                 "\tAND supplier_id IN (%s) \n" +
                 "GROUP BY\n" +
                 "\tsupplier_id";
-        Map<String, BigDecimal> auctionDealPriceStat = getSupplierPriceStatMap(auctionDataSource, queryAuctionDealPriceSqlTemplate, supplierIds);
+        Map<String, BigDecimal> ldAuctionDealPriceStat = getSupplierPriceStatMap(auctionDataSource, ldQueryAuctionDealPriceSqlTemplate, supplierIds);
+
+        // 竞价项目
+        String ycQueryAuctionDealPriceSqlTemplate = "SELECT\n" +
+                "\tsupplier_id,\n" +
+                "\tsum( real_price ) \n" +
+                "FROM\n" +
+                "\tauction_bid_supplier \n" +
+                "WHERE\n" +
+                "\tbid_status = 1 \n" +
+                "\tAND real_price IS NOT NULL \n" +
+                "\tAND supplier_id IN (%s) \n" +
+                "GROUP BY\n" +
+                "\tsupplier_id";
+        Map<String, BigDecimal> ycAuctionDealPriceStat = getSupplierPriceStatMap(ycDataSource, ycQueryAuctionDealPriceSqlTemplate, supplierIds);
+
         for (Map<String, Object> source : resultFromEs) {
-            BigDecimal value = auctionDealPriceStat.get(source.get(ID));
-            source.put(TOTAL_DEAL_AUCTION_PRICE, value == null ? BigDecimal.ZERO.longValue() : value.longValue());
+            Object supplierId = source.get(ID);
+            BigDecimal ldAuctionDealPrice = ldAuctionDealPriceStat.get(supplierId) == null ? BigDecimal.ZERO : ldAuctionDealPriceStat.get(supplierId);
+            BigDecimal ycAuctionDealPrice = ycAuctionDealPriceStat.get(supplierId) == null ? BigDecimal.ZERO : ycAuctionDealPriceStat.get(supplierId);
+            source.put(TOTAL_DEAL_AUCTION_PRICE, ldAuctionDealPrice.add(ycAuctionDealPrice));
         }
 
         // 招标项目
-        String queryBidDealPriceSqlTemplate = "SELECT\n" +
+        String ldQueryBidDealPriceSqlTemplate = "SELECT\n" +
                 "\tsupplier_id,\n" +
                 "\tsum( win_bid_total_price ) \n" +
                 "FROM\n" +
@@ -249,16 +345,41 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
                 "\tAND supplier_id IN (%s) \n" +
                 "GROUP BY\n" +
                 "\tsupplier_id";
-        Map<String, BigDecimal> bidDealPriceStat = getSupplierPriceStatMap(tenderDataSource, queryBidDealPriceSqlTemplate, supplierIds);
+        Map<String, BigDecimal> ldBidDealPriceStat = getSupplierPriceStatMap(tenderDataSource, ldQueryBidDealPriceSqlTemplate, supplierIds);
+
+        // 招标项目
+        String ycQueryBidDealPriceSqlTemplate = "SELECT\n" +
+                "\tbd.BIDER_ID,\n" +
+                "--  bd.BIDER_NAME 供应商名称,\n" +
+                "CASE\n" +
+                "\t\n" +
+                "\tWHEN SUM( bd.BIDER_PRICE_UNE ) > 0 THEN\n" +
+                "\tSUM( bd.BIDER_PRICE_UNE ) ELSE 0 \n" +
+                "END \n" +
+                "FROM\n" +
+                "\tproj_inter_project pip\n" +
+                "\tINNER JOIN bid bd ON pip.id = bd.PROJECT_ID \n" +
+                "\tAND pip.COMPANY_ID = bd.COMPANY_ID \n" +
+                "WHERE\n" +
+                "\t bd.BIDER_ID IN (%s) \n" +
+                "\tAND pip.project_status IN ( 9, 11 ) \n" +
+                "GROUP BY\n" +
+                "bd.BIDER_ID";
+        Map<String, BigDecimal> ycBidDealPriceStat = getSupplierPriceStatMap(ycDataSource, ycQueryBidDealPriceSqlTemplate, supplierIds);
+
         for (Map<String, Object> source : resultFromEs) {
-            BigDecimal bigDecimal = bidDealPriceStat.get(source.get(ID));
-            source.put(TOTAL_DEAL_BID_PRICE, bigDecimal == null ? BigDecimal.ZERO.longValue() : bigDecimal.longValue());
-            if (bigDecimal == null) {
-                source.put(TOTAL_DEAL_PRICE, ((Long) source.get(TOTAL_DEAL_PURCHASE_PRICE)) + ((Long) source.get(TOTAL_DEAL_BID_PRICE)));
-            } else {
-                source.put(TOTAL_DEAL_PRICE, bigDecimal.longValue() + Long.valueOf(source.get(TOTAL_DEAL_PURCHASE_PRICE).toString()) + ((Long) source.get(TOTAL_DEAL_AUCTION_PRICE)));
-            }
+            Object supplierId = source.get(ID);
+            BigDecimal ldBidDealPrice = ldBidDealPriceStat.get(supplierId) == null ? BigDecimal.ZERO : ldBidDealPriceStat.get(supplierId);
+            BigDecimal ycBidDealPrice = ycBidDealPriceStat.get(supplierId) == null ? BigDecimal.ZERO : ycBidDealPriceStat.get(supplierId);
+            source.put(TOTAL_DEAL_BID_PRICE, ldBidDealPrice.add(ycBidDealPrice));
         }
+
+        resultFromEs.stream().forEach(map -> {
+            BigDecimal totalDealPurchasePrice = (BigDecimal) map.get(TOTAL_DEAL_PURCHASE_PRICE);
+            BigDecimal totalDealBidPrice = (BigDecimal) map.get(TOTAL_DEAL_BID_PRICE);
+            BigDecimal totalDealAuctionPrice = (BigDecimal) map.get(TOTAL_DEAL_AUCTION_PRICE);
+            map.put(TOTAL_DEAL_PRICE, totalDealPurchasePrice.add(totalDealBidPrice).add(totalDealAuctionPrice));
+        });
     }
 
     /**
@@ -268,7 +389,7 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
      * @param supplierIds
      */
     private void appendCooperatedPurchaserState(List<Map<String, Object>> resultFromEs, String supplierIds) {
-        String queryCooperatedPurchaserSqlTemplate = "select\n"
+        String ldQueryCooperatedPurchaserSqlTemplate = "select\n"
                 + "   count(1) AS totalCooperatedPurchaser,\n"
                 + "   supplier_id AS supplierId\n"
                 + "from\n"
@@ -276,10 +397,22 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
                 + "   WHERE symbiosis_status in (1,2) AND supplier_id in (%s)\n"
                 + "GROUP BY\n"
                 + "   supplier_id\n";
-        Map<String, Long> supplierStat = getSupplierStatMap(uniregDataSource, queryCooperatedPurchaserSqlTemplate, supplierIds);
+        Map<String, Long> ldSupplierStat = getSupplierStatMap(uniregDataSource, ldQueryCooperatedPurchaserSqlTemplate, supplierIds);
+
+        String ycQueryCooperatedPurchaserSqlTemplate = "select\n"
+                + "   count(1) AS totalCooperatedPurchaser,\n"
+                + "   supplier_id AS supplierId\n"
+                + "from\n"
+                + "   supplier\n"
+                + "   WHERE symbiosis_status in (1,2) AND supplier_id in (%s)\n"
+                + "GROUP BY\n"
+                + "   supplier_id\n";
+        Map<String, Long> ycSupplierStat = getSupplierStatMap(ycDataSource, ycQueryCooperatedPurchaserSqlTemplate, supplierIds);
         for (Map<String, Object> source : resultFromEs) {
-            Object value = supplierStat.get(source.get(ID));
-            source.put(TOTAL_COOPERATED_PURCHASER, (value == null ? 0 : value));
+            Object supplierId = source.get(ID);
+            Long ldSupplierCooperatePurchaser = ldSupplierStat.get(supplierId) == null ? 0L : ldSupplierStat.get(supplierId);
+            Long ycSupplierCooperatePurchaser = ycSupplierStat.get(supplierId) == null ? 0L : ycSupplierStat.get(supplierId);
+            source.put(TOTAL_COOPERATED_PURCHASER, ldSupplierCooperatePurchaser + ycSupplierCooperatePurchaser);
         }
     }
 

@@ -52,12 +52,15 @@ public abstract class AbstractSyncSupplierDataJobHandler extends JobHandler {
     @Qualifier("auctionDataSource")
     protected DataSource auctionDataSource;
 
+    @Autowired
+    @Qualifier("ycDataSource")
+    protected DataSource ycDataSource;
+
     @Value("${enterpriseSpaceFormat}")
     protected String enterpriseSpaceFormat;
 
     @Value("${enterpriseSpaceDetailFormat}")
     protected String enterpriseSpaceDetailFormat;
-
 
     protected String ID                          = "id";
     protected String USER_ID                     = "userId";
