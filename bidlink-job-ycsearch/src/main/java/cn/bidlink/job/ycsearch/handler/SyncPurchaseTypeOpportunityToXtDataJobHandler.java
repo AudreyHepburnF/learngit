@@ -66,7 +66,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
             lastSyncTime = lastSyncStartTime;
         }
 //        DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
-//        Timestamp lastSyncTime = new Timestamp(DateTime.parse("2018-12-17 17:10:00", dateTimeFormatter).getMillis());
+//        Timestamp lastSyncTime = new Timestamp(DateTime.parse("2018-12-18 15:20:10", dateTimeFormatter).getMillis());
         logger.info("采购项目商机同步时间,lastSyncTime：" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n"
                 + ",syncTime:" + new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
         syncPurchaseProjectDataService(lastSyncTime);

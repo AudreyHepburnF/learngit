@@ -161,14 +161,14 @@ public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler
 
     protected void doSyncProjectDataService(DataSource dataSource, String countSql, String querySql, List<Object> params) {
         long count = DBUtil.count(dataSource, countSql, params);
-        logger.debug("执行countSql : {}, params : {}，共{}条", countSql, params, count);
+        logger.info("执行countSql : {}, params : {}，共{}条", countSql, params, count);
         if (count > 0) {
             Timestamp currentDate = SyncTimeUtil.getCurrentDate();
             for (long i = 0; i < count; ) {
                 List<Object> paramsToUse = appendToParams(params, i);
                 // 查出符合条件的商机
                 List<Map<String, Object>> results = DBUtil.query(dataSource, querySql, paramsToUse);
-                logger.debug("执行querySql : {}, params : {}，共{}条", querySql, paramsToUse, results.size());
+                logger.info("执行querySql : {}, params : {}，共{}条", querySql, paramsToUse, results.size());
                 List<Map<String, Object>> resultToExecute = new ArrayList<>();
                 // 保存项目的采购品
                 Map<Long, Set<DirectoryEntity>> projectDirectoryMap = new LinkedHashMap<>();
