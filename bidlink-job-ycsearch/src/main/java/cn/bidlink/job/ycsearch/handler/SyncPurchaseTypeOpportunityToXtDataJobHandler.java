@@ -65,6 +65,8 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
         if (Objects.equals(SyncTimeUtil.GMT_TIME, lastSyncTime)) {
             lastSyncTime = lastSyncStartTime;
         }
+//        DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+//        Timestamp lastSyncTime = new Timestamp(DateTime.parse("2018-12-17 17:10:00", dateTimeFormatter).getMillis());
         logger.info("采购项目商机同步时间,lastSyncTime：" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n"
                 + ",syncTime:" + new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
         syncPurchaseProjectDataService(lastSyncTime);
@@ -101,7 +103,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
             for (SearchHit searchHit : searchHits) {
                 projectIds.add(Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID))));
             }
-            doFixExpiredAutoStopTypePurchaseProjectDataService(projectIds, lastSyncTime);
+            doFixExpiredAutoStopTypePurchaseProjectDataService(projectIds, SyncTimeUtil.getCurrentDate());
             scrollResp = elasticClient.getTransportClient().prepareSearchScroll(scrollResp.getScrollId())
                     .setScroll(new TimeValue(60000))
                     .execute().actionGet();
@@ -109,7 +111,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
         logger.info("修复自动截标商机结束");
     }
 
-    private void doFixExpiredAutoStopTypePurchaseProjectDataService(List<Long> projectIds, Timestamp lastSyncTime) {
+    private void doFixExpiredAutoStopTypePurchaseProjectDataService(List<Long> projectIds, Timestamp currentDate) {
         if (!CollectionUtils.isEmpty(projectIds)) {
             String countTemplateSql = "SELECT\n"
                     + "   count(1)\n"
@@ -158,7 +160,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
 
             String countSql = String.format(countTemplateSql, StringUtils.collectionToCommaDelimitedString(projectIds));
             String querySql = String.format(queryTemplateSql, StringUtils.collectionToCommaDelimitedString(projectIds));
-            doSyncProjectDataService(ycDataSource, countSql, querySql, Collections.singletonList((Object) lastSyncTime));
+            doSyncProjectDataService(ycDataSource, countSql, querySql, Collections.singletonList((Object) currentDate));
         }
     }
 
