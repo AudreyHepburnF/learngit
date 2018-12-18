@@ -19,10 +19,8 @@ import org.elasticsearch.search.SearchHits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;
@@ -44,10 +42,6 @@ public class SyncYcSupplierProjectDataJobHandler extends JobHandler /*implements
 
     @Autowired
     private ElasticClient elasticClient;
-
-    @Autowired
-    @Qualifier(value = "ycDataSource")
-    private DataSource ycDataSource;
 
     private   String ID                         = "id";
     private   String COMPANY_NAME               = "companyName";
@@ -76,19 +70,11 @@ public class SyncYcSupplierProjectDataJobHandler extends JobHandler /*implements
         do {
             SearchHits hits = response.getHits();
             if (hits.getTotalHits() > 0) {
-                List<Long> supplierIds = new ArrayList<>();
                 List<Map<String, Object>> resultFromEs = new ArrayList<>();
                 for (SearchHit hit : hits.getHits()) {
                     Map<String, Object> source = hit.getSource();
-                    supplierIds.add(Long.valueOf(String.valueOf(source.get("id"))));
                     resultFromEs.add(source);
                 }
-                String supplierIdsStr = StringUtils.collectionToCommaDelimitedString(supplierIds);
-                // cooperationPurchaserCount 合作采购商数量
-                this.appendCooperationPurchaser(resultFromEs, supplierIdsStr);
-
-                // 供应商采购项目和招标项目成交总金额
-                this.appendTradingVolume(resultFromEs, supplierIdsStr);
                 // 处理字段
                 List<Map<String, Object>> mapList = this.handlerColumn(resultFromEs);
                 batchInsert(mapList);
@@ -136,47 +122,6 @@ public class SyncYcSupplierProjectDataJobHandler extends JobHandler /*implements
             result.put(TOTAL_DEAL_PRICE, map.get(TOTAL_DEAL_PRICE));
             return result;
         }).collect(Collectors.toList());
-    }
-
-    private void appendTradingVolume(List<Map<String, Object>> resultFromEs, String supplierIdsStr) {
-        if (!StringUtils.isEmpty(supplierIdsStr)) {
-            // 1.采购项目
-            String querySqlTemplate = "SELECT\n" +
-                    "\tsum( deal_total_price ) ,\n" +
-                    "\tsupplier_id\n" +
-                    "FROM\n" +
-                    "\t`bmpfjz_supplier_project_bid` \n" +
-                    "WHERE\n" +
-                    "\tsupplier_bid_status = 6 \n" +
-                    "\tand supplier_id in (%s)\n" +
-                    "GROUP BY\n" +
-                    "\tsupplier_id";
-            Map<String, Long> supplierPurchaseVolume = this.getSupplierStatMap(ycDataSource, querySqlTemplate, supplierIdsStr);
-            for (Map<String, Object> resultMap : resultFromEs) {
-                Long purchaseVolume = supplierPurchaseVolume.get(Long.valueOf(String.valueOf(resultMap.get(ID))));
-                resultMap.put(TOTAL_DEAL_PRICE, purchaseVolume == null ? 0 : purchaseVolume);
-            }
-
-            // 2.招标项目
-        }
-    }
-
-    private void appendCooperationPurchaser(List<Map<String, Object>> resultFromEs, String supplierIds) {
-        if (!StringUtils.isEmpty(supplierIds)) {
-            String queryCooperatedPurchaserSqlTemplate = "select\n"
-                    + "   count(1) AS totalCooperatedPurchaser,\n"
-                    + "   supplier_id AS supplierId\n"
-                    + "from\n"
-                    + "   bsm_company_supplier_apply\n"
-                    + "   WHERE supplier_status in (2,3,4) AND supplier_id in (%s)\n"
-                    + "GROUP BY\n"
-                    + "   supplier_id\n";
-            Map<String, Long> supplierStat = this.getSupplierStatMap(ycDataSource, queryCooperatedPurchaserSqlTemplate, supplierIds);
-            for (Map<String, Object> source : resultFromEs) {
-                Object value = supplierStat.get(source.get(ID));
-                source.put(TOTAL_COOPERATED_PURCHASER, (value == null ? 0 : value));
-            }
-        }
     }
 
     private Map<String, Long> getSupplierStatMap(DataSource dataSource, String querySqlTemplate, String supplierIds) {
