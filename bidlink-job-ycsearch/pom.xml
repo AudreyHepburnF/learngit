@@ -255,7 +255,7 @@
                 <pom.unireg.db.username>appaccount</pom.unireg.db.username>
                 <pom.unireg.db.password>app!@#$4321</pom.unireg.db.password>
                 <!--pro_test数据源  -->
-                <pom.pro.db.url>yuecai-mysql.internal.cg-xt.com:3306/yc_pro?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
+                <pom.pro.db.url>jdbc:mariadb://yuecai-mysql.internal.cg-xt.com:3306/yc_pro?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
                 <pom.pro.db.username>dashuju</pom.pro.db.username>
                 <pom.pro.db.password>ixietong!@#$</pom.pro.db.password>
                 <!--pageview数据源  TODO 待修改-->
