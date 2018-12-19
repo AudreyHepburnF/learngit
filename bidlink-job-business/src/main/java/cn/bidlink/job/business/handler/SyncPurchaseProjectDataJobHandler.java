@@ -489,12 +489,13 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
             Map<Long, Long> ldCooperateSupplierCountMap = this.getTotal(uniregDataSource, ldQuerySqlTemplate, purchaserIdToString);
 
             String ycQuerySqlTemplate = "SELECT\n" +
-                    "\tcompany_id as companyId,\n" +
-                    "\tcount(1) as cooperateSupplierCount\n" +
+                    "\tcompany_id ,\n" +
+                    "\tcount( 1 )\n" +
                     "FROM\n" +
-                    "\t`supplier` \n" +
+                    "\tbsm_company_supplier \n" +
                     "WHERE\n" +
-                    "\tsymbiosis_status = 2 AND company_id in (%s)\n" +
+                    "\tcompany_id IN (%s) \n" +
+                    "\tAND supplier_status = 1 \n" +
                     "GROUP BY\n" +
                     "\tcompany_id";
             Map<Long, Long> ycCooperateSupplierCountMap = this.getTotal(ycDataSource, ycQuerySqlTemplate, purchaserIdToString);

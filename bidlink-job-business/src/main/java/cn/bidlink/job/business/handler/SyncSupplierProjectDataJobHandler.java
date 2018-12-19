@@ -399,14 +399,16 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
                 + "   supplier_id\n";
         Map<String, Long> ldSupplierStat = getSupplierStatMap(uniregDataSource, ldQueryCooperatedPurchaserSqlTemplate, supplierIds);
 
-        String ycQueryCooperatedPurchaserSqlTemplate = "select\n"
-                + "   count(1) AS totalCooperatedPurchaser,\n"
-                + "   supplier_id AS supplierId\n"
-                + "from\n"
-                + "   supplier\n"
-                + "   WHERE symbiosis_status in (1,2) AND supplier_id in (%s)\n"
-                + "GROUP BY\n"
-                + "   supplier_id\n";
+        String ycQueryCooperatedPurchaserSqlTemplate = "SELECT\n" +
+                "\tcount( 1 ),\n" +
+                "\tsupplier_id \n" +
+                "FROM\n" +
+                "\tbsm_company_supplier \n" +
+                "WHERE\n" +
+                "\tsupplier_id IN (%s)\n" +
+                "\tAND supplier_status = 1 \n" +
+                "GROUP BY\n" +
+                "\tsupplier_id";
         Map<String, Long> ycSupplierStat = getSupplierStatMap(ycDataSource, ycQueryCooperatedPurchaserSqlTemplate, supplierIds);
         for (Map<String, Object> source : resultFromEs) {
             Object supplierId = source.get(ID);

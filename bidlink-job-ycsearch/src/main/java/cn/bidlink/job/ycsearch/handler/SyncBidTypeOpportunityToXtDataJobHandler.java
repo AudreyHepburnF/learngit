@@ -132,6 +132,7 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
                 + "   pip.TENDER_MODE = 2\n"
                 + "AND pip.IS_PREQUALIFY = 2\n"
                 + "AND pip.bidding_Open_Flag = 1\n"
+                + "AND nb.TECHNICAL_ADVICE_CUT_TIME is not null\n"
                 + "AND pip.IS_TWO_STAGE = 1";
         // 两阶段
         String queryTwoStageSql = "SELECT\n"
@@ -166,6 +167,7 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
                 + "      AND pip.IS_PREQUALIFY = 2\n"
                 + "      AND pip.IS_TWO_STAGE = 1\n"
                 + "      AND pip.bidding_Open_Flag = 1\n"
+                + "      AND nb.TECHNICAL_ADVICE_CUT_TIME is not null\n"
                 + "      LIMIT ?,?\n"
                 + "   ) project\n"
                 + "JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
@@ -318,6 +320,7 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
                 + "         pip.TENDER_MODE = 1\n"
                 + "      AND pip.IS_PREQUALIFY = 2\n"
                 + "      AND pip.IS_TWO_STAGE = 1\n"
+                + "      AND  nb.TECHNICAL_ADVICE_CUT_TIME is not null\n"
                 + "      LIMIT ?,?\n"
                 + "   ) project\n"
                 + "JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
