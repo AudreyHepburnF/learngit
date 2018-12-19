@@ -98,7 +98,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                 String projectName = String.valueOf(resultFromEs.get("projectName"));
                 logger.info("商机项目id:{},项目名称:{}", projectId, projectName);
                 String projectCode = String.valueOf(resultFromEs.get("projectCode"));
-                Integer coreSupplierProject = Integer.valueOf(resultFromEs.get("isCore").toString());
+                Integer coreSupplierProject = resultFromEs.get("isCore") == null ? 0 : Integer.valueOf(resultFromEs.get("isCore").toString());
                 Integer status = Integer.valueOf(resultFromEs.get("status").toString());
                 // TODO 待采购商机数据添加bidStopType字段
                 Integer bidStopType = Integer.valueOf(resultFromEs.get("bidStopType").toString());
@@ -326,10 +326,10 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
             String querySqlTemplate = "SELECT DISTINCT\n" +
                     "\tsupplier_id \n" +
                     "FROM\n" +
-                    "\tsupplier \n" +
+                    "\tbsm_company_supplier \n" +
                     "WHERE\n" +
                     "\tcompany_id = ? \n" +
-                    "\tAND symbiosis_status = 3 \n" +
+                    "\tAND supplier_status = 3  \n" +
                     "\tAND supplier_id IN (%s)";
             String querySql = String.format(querySqlTemplate, StringUtils.collectionToCommaDelimitedString(supplierIds));
             logger.info("查询匹配商机订单中被拉黑的供应商,querySql:{},params:{}", querySql, purchaserId);
