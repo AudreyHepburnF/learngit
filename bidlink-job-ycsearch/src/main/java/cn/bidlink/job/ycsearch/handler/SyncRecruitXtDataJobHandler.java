@@ -69,6 +69,10 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.recruit",
                 QueryBuilders.boolQuery().must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE)));
 //        Timestamp lastSyncTime = new Timestamp(0);
+        Timestamp lastSyncStartTime = new Timestamp(new DateTime(new DateTime().getYear(), 1, 1, 0, 0, 0).getMillis());
+        if (Objects.equals(SyncTimeUtil.GMT_TIME, lastSyncTime)) {
+            lastSyncTime = lastSyncStartTime;
+        }
         logger.info("1.1 同步招募信息lastSyncTime:" + SyncTimeUtil.toDateString(lastSyncTime) + "\n" + ",syncTime:" + SyncTimeUtil.currentDateToString());
         syncRecruitDataService(lastSyncTime);
     }
