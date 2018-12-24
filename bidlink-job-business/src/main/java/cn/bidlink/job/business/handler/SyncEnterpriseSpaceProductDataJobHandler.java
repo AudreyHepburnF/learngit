@@ -111,7 +111,8 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends JobHandler /*imple
                 for (SearchHit hit : wfirstHits.getHits()) {
                     Map<String, Object> source = hit.getSource();
                     HashMap<String, Object> map = new HashMap<>(2);
-                    map.put("supplierId", source.get("supplierId"));
+                    Object supplierId = source.get("supplierId");
+                    map.put("supplierId", supplierId);
                     map.put("directoryName", source.get("directoryName"));
                     resultFromEs.add(map);
                 }
@@ -119,7 +120,7 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends JobHandler /*imple
                 BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
                 for (Map<String, Object> condition : resultFromEs) {
                     BoolQueryBuilder must = QueryBuilders.boolQuery().must(QueryBuilders.termQuery("companyId", condition.get("supplierId")))
-                            .must(QueryBuilders.wildcardQuery("productName", "*" + condition.get("directoryName") + "*"));
+                            .must(QueryBuilders.wildcardQuery("productNameNotAnalyzed", "*" + condition.get("directoryName") + "*"));
                     boolQuery.should(must);
                 }
 
