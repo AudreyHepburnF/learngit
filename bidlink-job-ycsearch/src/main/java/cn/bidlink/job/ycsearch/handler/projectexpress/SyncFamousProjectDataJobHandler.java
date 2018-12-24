@@ -158,9 +158,9 @@ public class SyncFamousProjectDataJobHandler extends JobHandler /*implements Ini
             mapList.forEach(map -> {
                 Object defaultDomain = purchaserDomainMap.get(Long.valueOf(map.get(PURCHASER_ID).toString()));
                 if (!Objects.isNull(defaultDomain)) {
-                    map.put(URL, defaultDomain
+                    map.put(URL, "http://" + defaultDomain
                             + "/portal_tenant/portal/app/companyInfo.htm?companyId="
-                            + "companyId=" + map.get(SUPPLIER_ID) + "&orderId=" + map.get(ID));
+                            + map.get(SUPPLIER_ID) + "&orderId=" + map.get(ID));
                 }
             });
         }

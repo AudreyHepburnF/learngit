@@ -127,7 +127,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
                 + ", syncTime : " + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
 //        syncTradeProductDataService(lastSyncTime);
 //        syncTradeBidProductDataService(lastSyncTime);
-        // FIXME 同步标王待沟通
+        // TODO 同步标王待沟通(当标王失效的时候,需要删除数据)
         syncProDataService(lastSyncTime);
         syncCenterDataService(lastSyncTime);
     }
