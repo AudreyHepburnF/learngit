@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @JobHander(value = "syncPurchaseDataJobHandler")
-public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandler/* implements InitializingBean */{
+public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandler /*implements InitializingBean*/ {
 
     private Integer SYNC_WAY_CREATE = 1;
     private Integer SYNC_WAY_UPDATE = 2;
@@ -108,6 +108,7 @@ public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandl
                 + "   trc.COMP_TYPE_STR AS compTypeStr,\n"
                 + "    trc.company_logo AS companyLogo,\n"
                 + "    trc.status AS status,\n"
+                + "    trc.web_type AS webType,\n"
                 + "   trc.company_site AS companySiteAlias\n"
                 + "FROM\n"
                 + "   t_reg_company trc\n"
@@ -140,6 +141,7 @@ public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandl
                 + "   trc.COMP_TYPE_STR AS compTypeStr,\n"
                 + "    trc.company_logo AS companyLogo,\n"
                 + "    trc.status AS status,\n"
+                + "    trc.web_type AS webType,\n"
                 + "   trc.company_site AS companySiteAlias\n"
                 + "FROM\n"
                 + "   t_reg_company trc\n"
