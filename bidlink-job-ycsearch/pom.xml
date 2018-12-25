@@ -259,7 +259,7 @@
                 <pom.pro.db.username>dashuju</pom.pro.db.username>
                 <pom.pro.db.password>ixietong!@#$</pom.pro.db.password>
                 <!--pageview数据源  TODO 待修改-->
-                <pom.pageview.db.url>jdbc:mariadb://testmariadb:3306/pageview?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pageview.db.url>
+                <pom.pageview.db.url>jdbc:mariadb://cloud-store-dashboard-mariadb.internal.cg-xt.com:3306/pageview?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pageview.db.url>
                 <pom.pageview.db.username>dashuju</pom.pageview.db.username>
                 <pom.pageview.db.password>ixietong!@#$</pom.pageview.db.password>
                 <!--console数据源   -->
