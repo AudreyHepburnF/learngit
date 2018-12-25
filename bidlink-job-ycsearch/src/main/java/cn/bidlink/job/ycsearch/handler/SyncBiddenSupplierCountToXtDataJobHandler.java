@@ -57,10 +57,13 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
     // 竞价项目
     protected int AUCTION_PROJECT_TYPE  = 3;
 
+    protected int RECRUIT_PROJECT_TYPE = 4;
+
     protected String ID                    = "id";
     protected String PROJECT_ID            = "projectId";
     protected String PURCHASE_ID           = "purchaseId";
     protected String BIDDEN_SUPPLIER_COUNT = "biddenSupplierCount";
+    protected String PROJECT_TYPE          = "projectType";
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
@@ -77,7 +80,8 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
     private void syncBiddenSupplierCountData() {
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
 //                .must(QueryBuilders.termQuery("status", 1))
-                .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE));  // 新平台
+                .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
+                .mustNot(QueryBuilders.termQuery(PROJECT_TYPE, RECRUIT_PROJECT_TYPE));  // 悦采
 
         Properties properties = elasticClient.getProperties();
         SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
