@@ -2,7 +2,6 @@ package cn.bidlink.job.ycsearch.handler;
 
 import cn.bidlink.job.common.constant.BusinessConstant;
 import cn.bidlink.job.common.utils.DBUtil;
-import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
@@ -62,10 +61,10 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
     }
 
     private void syncRecruitData() {
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.supplier_opportunity",
-                QueryBuilders.boolQuery().must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
-                        .must(QueryBuilders.termQuery(PROJECT_TYPE, RECRUIT_PROJECT_TYPE)));
-//        Timestamp lastSyncTime = new Timestamp(0);
+//        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.supplier_opportunity",
+//                QueryBuilders.boolQuery().must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
+//                        .must(QueryBuilders.termQuery(PROJECT_TYPE, RECRUIT_PROJECT_TYPE)));
+        Timestamp lastSyncTime = new Timestamp(0);
         Timestamp lastSyncStartTime = new Timestamp(new DateTime(new DateTime().getYear(), 1, 1, 0, 0, 0).getMillis());
         if (Objects.equals(SyncTimeUtil.GMT_TIME, lastSyncTime)) {
             lastSyncTime = lastSyncStartTime;
@@ -228,7 +227,7 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
 
                 // 添加区域
                 appendAreaStrToResult(mapList, purchaseIds);
-//                this.appendIndustry(mapList);
+                this.appendIndustry(mapList);
                 // 处理商机的状态
                 batchExecute(mapList);
                 i += pageSize;
