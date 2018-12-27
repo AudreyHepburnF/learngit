@@ -27,10 +27,7 @@ public class SyncNoticeToXtDataJobHandler extends AbstractSyncYcNoticeDataJobHan
     public ReturnT<String> execute(String... strings) throws Exception {
         SyncTimeUtil.setCurrentDate();
         logger.info("同步悦采采购公告开始");
-//        long startTime = System.currentTimeMillis();
         syncPurchaseNoticeData();
-//        long endTime = System.currentTimeMillis();
-//        System.out.println("同步时间差:" + (endTime - startTime));
         logger.info("同步悦采采购公告结束");
         return ReturnT.SUCCESS;
     }
@@ -38,7 +35,6 @@ public class SyncNoticeToXtDataJobHandler extends AbstractSyncYcNoticeDataJobHan
     private void syncPurchaseNoticeData() {
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.notice",
                 QueryBuilders.boolQuery()
-                        .must(QueryBuilders.termQuery(PROJECT_TYPE, PURCHASE_NOTICE_TYPE))
                         .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE)));
         Timestamp lastSyncStartTime = new Timestamp(new DateTime(new DateTime().getYear(), 1, 1, 0, 0, 0).getMillis());
         if (Objects.equals(SyncTimeUtil.GMT_TIME, lastSyncTime)) {
@@ -56,7 +52,7 @@ public class SyncNoticeToXtDataJobHandler extends AbstractSyncYcNoticeDataJobHan
                 "FROM\n" +
                 "\t`sync_bulletin` \n" +
                 "WHERE\n" +
-                "\topenrangetype = 1 and purchasemodel in (1,7,8)";
+                "\topenrangetype = 1 and purchasemodel in (1,7,8) and update_time > ?";
         String querySql = "SELECT\n" +
                 "\tid,\n" +
                 "\toriginprojectid AS projectId,\n" +
@@ -79,8 +75,8 @@ public class SyncNoticeToXtDataJobHandler extends AbstractSyncYcNoticeDataJobHan
                 "FROM\n" +
                 "\t`sync_bulletin` \n" +
                 "WHERE\n" +
-                "\t openrangetype = 1 and purchasemodel in (1,7,8) limit ?,?";
-        doSyncNoticeService(ycDataSource, countSql, querySql, Collections.emptyList());
+                "\t openrangetype = 1 and purchasemodel in (1,7,8) and update_time > ? limit ?,?";
+        doSyncNoticeService(ycDataSource, countSql, querySql, Collections.singletonList(lastSyncTime));
         logger.info("2.结束同步悦采公告数据");
     }
 
