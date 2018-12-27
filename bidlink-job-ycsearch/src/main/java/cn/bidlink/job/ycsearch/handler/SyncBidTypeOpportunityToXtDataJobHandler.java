@@ -61,9 +61,12 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
      * @param lastSyncTime
      */
     private void syncBiddingProjectDataService(Timestamp lastSyncTime) {
+        // 公开招标  1.什么都不需要 2.资格预审 3.两阶段
         syncNothingBiddingProjectDataService(lastSyncTime);
         syncPreQualifyBiddingProjectDataService(lastSyncTime);
         syncTwoStageBiddingProjectDataService(lastSyncTime);
+
+        // 邀请招标 1.什么都不需要 2.两阶段
         syncInviteOpenBiddingProjectDataService(lastSyncTime);
         syncInviteOpenTwoStageBiddingProjectDataService(lastSyncTime);
     }
@@ -170,7 +173,7 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
                 + "      AND nb.TECHNICAL_ADVICE_CUT_TIME is not null\n"
                 + "      LIMIT ?,?\n"
                 + "   ) project\n"
-                + "JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
+                + "LEFT JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
         doSyncProjectDataService(ycDataSource, countTwoStageSql, queryTwoStageSql, Collections.emptyList());
         logger.info("同步邀请招标公开两阶段招标项目的商机结束");
     }
@@ -323,7 +326,7 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
                 + "      AND  nb.TECHNICAL_ADVICE_CUT_TIME is not null\n"
                 + "      LIMIT ?,?\n"
                 + "   ) project\n"
-                + "JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
+                + "LEFT JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
         doSyncProjectDataService(ycDataSource, countTwoStageSql, queryTwoStageSql, Collections.emptyList());
         logger.info("同步两阶段招标项目的商机结束");
     }

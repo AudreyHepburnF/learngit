@@ -46,25 +46,20 @@ public class SyncNoticeToXtDataJobHandler extends AbstractSyncYcNoticeDataJobHan
         }
         logger.info("同步悦采采购公告 lastSyncTime:" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "/n" +
                 ", syncTime" + SyncTimeUtil.currentDateToString());
-        syncPurchaseUnderwayNoticeService(lastSyncTime);
+        syncYcNoticeService(lastSyncTime);
     }
 
-    private void syncPurchaseUnderwayNoticeService(Timestamp lastSyncTime) {
-        logger.info("同步原始公告和变更公告开始");
-        syncInsertPurchaseUnderwayNoticeService(lastSyncTime);
-        logger.info("同步原始公告和变更公告结束");
-    }
-
-    private void syncInsertPurchaseUnderwayNoticeService(Timestamp lastSyncTime) {
+    private void syncYcNoticeService(Timestamp lastSyncTime) {
+        logger.info("1.开始同步悦采公告数据");
         String countSql = "SELECT\n" +
                 "\tcount( 1 ) \n" +
                 "FROM\n" +
                 "\t`sync_bulletin` \n" +
                 "WHERE\n" +
-                "\topenrangetype = 1 and purchasemodel in (7,8)";
+                "\topenrangetype = 1 and purchasemodel in (1,7,8)";
         String querySql = "SELECT\n" +
                 "\tid,\n" +
-                "\tprojectcode AS projectId,\n" +
+                "\toriginprojectid AS projectId,\n" +
                 "\ttitle AS projectName,\n" +
                 "\tbidcode AS projectCode,\n" +
                 "\tenddate AS quoteStopTime,\n" +
@@ -79,12 +74,14 @@ public class SyncNoticeToXtDataJobHandler extends AbstractSyncYcNoticeDataJobHan
                 "\tbegindate AS createTime,\n" +
                 "\tpurchasemodel AS projectType,\n" +
                 "\tinfoType AS noticeType,\n" +
+                "\tcontent AS content,\n" +
                 "\tcompanyname AS companyName \n" +
                 "FROM\n" +
                 "\t`sync_bulletin` \n" +
                 "WHERE\n" +
-                "\t openrangetype = 1 and purchasemodel in (7,8) limit ?,?";
+                "\t openrangetype = 1 and purchasemodel in (1,7,8) limit ?,?";
         doSyncNoticeService(ycDataSource, countSql, querySql, Collections.emptyList());
+        logger.info("2.结束同步悦采公告数据");
     }
 
 //    @Override

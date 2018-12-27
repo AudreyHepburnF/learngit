@@ -97,6 +97,15 @@ public abstract class AbstractSyncYcNoticeDataJobHandler extends JobHandler {
             } else {
                 result.put(NOTICE_TYPE, SOURCE_NOTICE);
             }
+        } else if (Objects.equals(projectType, "1")) {
+            // 招标项目
+            result.put(PROJECT_TYPE, BID_NOTICE_TYPE);
+            if (Objects.equals(result.get(NOTICE_TYPE), "0108")) {
+                // 中标公告
+                result.put(NOTICE_TYPE, RESULT_NOTICE);
+            } else {
+                result.put(NOTICE_TYPE, SOURCE_NOTICE);
+            }
         }
         result.put(ID, String.valueOf(result.get(ID)));
         result.put(COMPANY_ID, String.valueOf(result.get(COMPANY_ID)));
