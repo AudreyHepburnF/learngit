@@ -53,7 +53,7 @@ public class SyncNoticeToXtDataJobHandler extends AbstractSyncYcNoticeDataJobHan
                 "FROM\n" +
                 "\t`sync_bulletin` \n" +
                 "WHERE\n" +
-                "\topenrangetype = 1 and purchasemodel in (1,7,8) and update_time > ?";
+                "\topenrangetype = 1 and purchasemodel in (1,7,8) and optstatus !=-1 update_time > ?";
         String querySql = "SELECT\n" +
                 "\tid,\n" +
                 "\toriginprojectid AS projectId,\n" +
@@ -76,7 +76,7 @@ public class SyncNoticeToXtDataJobHandler extends AbstractSyncYcNoticeDataJobHan
                 "FROM\n" +
                 "\t`sync_bulletin` \n" +
                 "WHERE\n" +
-                "\t openrangetype = 1 and purchasemodel in (1,7,8) and update_time > ? limit ?,?";
+                "\t openrangetype = 1 and purchasemodel in (1,7,8) and and optstatus !=-1 update_time > ? limit ?,?";
         doSyncNoticeService(ycDataSource, countSql, querySql, Collections.singletonList(lastSyncTime));
         logger.info("2.结束同步悦采公告数据");
     }
