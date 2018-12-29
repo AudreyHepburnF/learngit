@@ -166,7 +166,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                 + "WHERE\n"
                 + "   bpe.bid_result_show_type = 1\n"
                 + "AND bp.update_time > ?\n"
-                + "AND bp.project_status IN (5, 6, 10)";
+                + "AND bp.project_status >= 5";
         String queryUpdatedSql = "SELECT\n" +
                 "\tb.*,\n" +
                 "\tbpi.id AS directoryId,\n" +
@@ -195,7 +195,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                 "\t\tWHERE\n" +
                 "\t\t\tbpe.bid_result_show_type = 1 \n" +
                 "\t\t\tAND bp.update_time > ?\n" +
-                "\t\t\tAND bp.project_status IN ( 5, 6, 10 )\n" +
+                "\t\t\tAND bp.project_status >= 5\n" +
                 "\t\t\tLIMIT ?,?\n" +
                 "\t) b\n" +
                 "\tJOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id \n" +
