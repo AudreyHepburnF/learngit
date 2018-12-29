@@ -76,7 +76,7 @@ public class SyncNoticeToXtDataJobHandler extends AbstractSyncYcNoticeDataJobHan
                 "FROM\n" +
                 "\t`sync_bulletin` \n" +
                 "WHERE\n" +
-                "\t openrangetype = 1 and purchasemodel in (1,7,8) and and optstatus !=-1 and update_time > ? limit ?,?";
+                "\t openrangetype = 1 and purchasemodel in (1,7,8)  and optstatus !=-1 and update_time > ? limit ?,?";
         doSyncNoticeService(ycDataSource, countSql, querySql, Collections.singletonList(lastSyncTime));
         logger.info("2.结束同步悦采公告数据");
     }
