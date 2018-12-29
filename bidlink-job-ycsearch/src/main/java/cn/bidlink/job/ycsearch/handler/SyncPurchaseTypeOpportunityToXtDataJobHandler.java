@@ -82,12 +82,9 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
     private void fixExpiredAutoStopTypePurchaseProjectDataService(Timestamp lastSyncTime) {
         logger.info("修复自动截标商机开始");
         Properties properties = elasticClient.getProperties();
-        String currentTime = new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN);
         // 查询小于当前时间的自动截标
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-                .must(QueryBuilders.termQuery("status", 1))
                 .must(QueryBuilders.termQuery("projectType", PURCHASE_PROJECT_TYPE))
-                .must(QueryBuilders.rangeQuery("syncTime").lt(currentTime))
                 .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE));
 
         int batchSize = 100;
@@ -102,9 +99,10 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
             SearchHit[] searchHits = scrollResp.getHits().hits();
             List<Long> projectIds = new ArrayList<>();
             for (SearchHit searchHit : searchHits) {
-                projectIds.add(Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID))));
+                Long projectId = Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID)));
+                projectIds.add(projectId);
             }
-            doFixExpiredAutoStopTypePurchaseProjectDataService(projectIds, SyncTimeUtil.getCurrentDate());
+            doFixExpiredAutoStopTypePurchaseProjectDataService(projectIds);
             scrollResp = elasticClient.getTransportClient().prepareSearchScroll(scrollResp.getScrollId())
                     .setScroll(new TimeValue(60000))
                     .execute().actionGet();
@@ -112,7 +110,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
         logger.info("修复自动截标商机结束");
     }
 
-    private void doFixExpiredAutoStopTypePurchaseProjectDataService(List<Long> projectIds, Timestamp currentDate) {
+    private void doFixExpiredAutoStopTypePurchaseProjectDataService(List<Long> projectIds) {
         if (!CollectionUtils.isEmpty(projectIds)) {
             String countTemplateSql = "SELECT\n"
                     + "   count(1)\n"
@@ -120,7 +118,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                     + "   bmpfjz_project bp\n"
                     + "JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id\n"
                     + "WHERE\n"
-                    + "   bpe.bid_stop_type = 2 AND bpe.bid_stop_time < ? AND bpe.id IN (%s)";
+                    + "   bpe.id IN (%s)";
             String queryTemplateSql = "SELECT\n"
                     + "   b.*, bpi.`name` AS directoryName\n"
                     + "FROM\n"
@@ -152,16 +150,14 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                     + "         bmpfjz_project bp\n"
                     + "      JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id\n"
                     + "      WHERE\n"
-                    + "         bpe.bid_stop_type = 2\n"
-                    + "      AND bpe.bid_stop_time < ?\n"
-                    + "      AND bpe.id IN (%s)\n"
+                    + "      bpe.id IN (%s)\n"
                     + "      LIMIT ?,?\n"
                     + "   ) b\n"
                     + "JOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id order by bpi.create_time";
 
             String countSql = String.format(countTemplateSql, StringUtils.collectionToCommaDelimitedString(projectIds));
             String querySql = String.format(queryTemplateSql, StringUtils.collectionToCommaDelimitedString(projectIds));
-            doSyncProjectDataService(ycDataSource, countSql, querySql, Collections.singletonList((Object) currentDate));
+            doSyncProjectDataService(ycDataSource, countSql, querySql, Collections.emptyList());
         }
     }
 
@@ -259,7 +255,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
             }
         } else if (bidStopType == MANUAL_STOP_TYPE) {
             // 未截标就是商机
-            if (bidTrueStopTime == null && projectStatus == 5) {
+            if ((bidTrueStopTime == null || (bidTrueStopTime != null && bidTrueStopTime.after(new Date()))) && projectStatus == 5) {
                 result.put(STATUS, VALID_OPPORTUNITY_STATUS);
                 resultToExecute.add(appendIdToResult(result));
             } else {
