@@ -1,5 +1,6 @@
 package cn.bidlink.job.ycsearch.handler;
 
+import cn.bidlink.job.common.constant.BusinessConstant;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.AreaUtil;
 import cn.bidlink.job.common.utils.DBUtil;
@@ -9,6 +10,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.ValueFilter;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.deletebyquery.DeleteByQueryAction;
+import org.elasticsearch.action.deletebyquery.DeleteByQueryRequestBuilder;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -204,8 +209,47 @@ public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler
                 }
                 // 处理商机的状态
                 batchExecute(resultToExecute);
+
+                // 采购项目重建项目删除
+                if (this instanceof SyncPurchaseTypeOpportunityToXtDataJobHandler) {
+                    this.rebuildProjectDelete(resultToExecute);
+                }
                 i += pageSize;
             }
+        }
+    }
+
+    /**
+     * 项目重建删除项目和公告
+     *
+     * @param resultToExecute
+     */
+    protected void rebuildProjectDelete(List<Map<String, Object>> resultToExecute) {
+        if (!CollectionUtils.isEmpty(resultToExecute)) {
+            Set<Object> rebuildProjectIds = resultToExecute.stream()
+                    .filter(map -> Integer.valueOf(map.get(PROJECT_STATUS).toString()) < 5).map(map -> map.get(PROJECT_ID)).collect(Collectors.toSet());
+            deleteProjectAndNotice(rebuildProjectIds);
+        }
+    }
+
+    private void deleteProjectAndNotice(Set<Object> rebuildProjectIds) {
+        if (!CollectionUtils.isEmpty(rebuildProjectIds)) {
+            Properties properties = elasticClient.getProperties();
+            BoolQueryBuilder query = QueryBuilders.boolQuery();
+            query.must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE));
+            query.must(QueryBuilders.termQuery(PROJECT_TYPE, PURCHASE_PROJECT_TYPE));
+            rebuildProjectIds.forEach(rebuildProjectId -> query.should(QueryBuilders.termQuery(PROJECT_ID, rebuildProjectId)));
+            // 删除商机
+            DeleteByQueryRequestBuilder deleteRequest = new DeleteByQueryRequestBuilder(elasticClient.getTransportClient(), DeleteByQueryAction.INSTANCE)
+                    .setIndices(properties.getProperty("cluster.index")).setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
+                    .setQuery(query);
+            deleteRequest.execute().actionGet();
+
+            // 删除公告
+            DeleteByQueryRequestBuilder noticeDeleteRequest = new DeleteByQueryRequestBuilder(elasticClient.getTransportClient(), DeleteByQueryAction.INSTANCE)
+                    .setIndices(properties.getProperty("cluster.index")).setTypes(properties.getProperty("cluster.type.notice"))
+                    .setQuery(query);
+            noticeDeleteRequest.execute().actionGet();
         }
     }
 
