@@ -63,10 +63,10 @@ public class SyncNoticeToXtDataJobHandler extends AbstractSyncYcNoticeDataJobHan
                 "\tpubdate AS publishNoticeTime,\n" +
                 "\tprojectintroduction AS projectInfo,\n" +
                 "\tlinkman AS linkMan,\n" +
-                "\ttel AS linkTel,\n" +
-                "\tif(tel,1,0) as isShowTel,\n" +
-                "\tif(mobile,1,0) as isShowMobile,\n" +
-                "\tmobile AS linkPhone,\n" +
+                "\tmobile AS linkTel,\n" +
+                "\tif(mobile,1,0) as isShowTel,\n" +
+                "\tif(tel,1,0) as isShowMobile,\n" +
+                "\ttel AS linkPhone,\n" +
                 "\tcompanyid AS companyId,\n" +
                 "\tbegindate AS createTime,\n" +
                 "\tpurchasemodel AS projectType,\n" +
