@@ -234,6 +234,7 @@ public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler
 
     private void deleteProjectAndNotice(Set<Object> rebuildProjectIds) {
         if (!CollectionUtils.isEmpty(rebuildProjectIds)) {
+            logger.info("1.项目重建项目信息:{}", JSON.toJSONString(rebuildProjectIds));
             Properties properties = elasticClient.getProperties();
             BoolQueryBuilder query = QueryBuilders.boolQuery();
             query.must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE));
