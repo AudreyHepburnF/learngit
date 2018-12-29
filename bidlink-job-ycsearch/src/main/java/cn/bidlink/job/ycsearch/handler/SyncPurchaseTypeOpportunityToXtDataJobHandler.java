@@ -61,6 +61,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery("projectType", PURCHASE_PROJECT_TYPE))
                         .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE)));
+//        Timestamp lastSyncTime = new Timestamp(0);
         Timestamp lastSyncStartTime = new Timestamp(new DateTime(new DateTime().getYear(), 1, 1, 0, 0, 0).getMillis());
         if (Objects.equals(SyncTimeUtil.GMT_TIME, lastSyncTime)) {
             lastSyncTime = lastSyncStartTime;
@@ -176,7 +177,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                 + "WHERE\n"
                 + "   bpe.bid_result_show_type = 1\n"
                 + "AND bp.update_time > ?\n"
-                + "AND bp.project_status IN (5, 6, 10)";
+                + "AND bp.project_status >= 5 ";
         String queryUpdatedSql = "SELECT b.*, bpi.id AS directoryId, bpi.`name` AS directoryName FROM (SELECT\n"
                 + "   bp.comp_id AS purchaseId,\n"
                 + "   bp.comp_name AS purchaseName,\n"
@@ -207,7 +208,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                 + "WHERE\n"
                 + "   bpe.bid_result_show_type = 1\n"
                 + "AND bp.update_time > ?\n"
-                + "AND bp.project_status IN (5, 6, 10)\n"
+                + "AND bp.project_status >= 5\n"
                 + "LIMIT ?,\n"
                 + " ?) b JOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id order by bpi.id";
         doSyncProjectDataService(ycDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList((Object) lastSyncTime));
