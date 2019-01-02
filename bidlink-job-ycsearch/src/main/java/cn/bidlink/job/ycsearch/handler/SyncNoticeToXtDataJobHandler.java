@@ -9,6 +9,7 @@ import org.elasticsearch.action.deletebyquery.DeleteByQueryAction;
 import org.elasticsearch.action.deletebyquery.DeleteByQueryRequestBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.joda.time.DateTime;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -24,7 +25,7 @@ import java.util.Properties;
  */
 @Service
 @JobHander("syncNoticeToXtDataJobHandler")
-public class SyncNoticeToXtDataJobHandler extends AbstractSyncYcNoticeDataJobHandler /*implements InitializingBean*/ {
+public class SyncNoticeToXtDataJobHandler extends AbstractSyncYcNoticeDataJobHandler implements InitializingBean {
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
@@ -99,8 +100,8 @@ public class SyncNoticeToXtDataJobHandler extends AbstractSyncYcNoticeDataJobHan
         logger.info("2.结束同步悦采公告数据");
     }
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }
 }

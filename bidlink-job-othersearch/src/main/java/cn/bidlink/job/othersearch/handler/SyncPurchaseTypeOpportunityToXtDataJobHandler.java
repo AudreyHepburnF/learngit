@@ -79,12 +79,9 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
     private void fixExpiredAutoStopTypePurchaseProjectDataService(Timestamp lastSyncTime) {
         logger.info("修复自动截标商机开始");
         Properties properties = elasticClient.getProperties();
-        String currentTime = new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN);
         // 查询小于当前时间的自动截标
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-                .must(QueryBuilders.termQuery("status", 1))
-                .must(QueryBuilders.termQuery("projectType", PURCHASE_PROJECT_TYPE))
-                .must(QueryBuilders.rangeQuery("syncTime").lt(currentTime))
+                .must(QueryBuilders.termQuery(PROJECT_TYPE, PURCHASE_PROJECT_TYPE))
                 .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE));
 
         int batchSize = 100;
@@ -111,13 +108,21 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
 
     private void doFixExpiredAutoStopTypePurchaseProjectDataService(List<Long> projectIds, Timestamp currentDate) {
         if (!CollectionUtils.isEmpty(projectIds)) {
-            String countTemplateSql = "SELECT\n"
-                    + "   count(1)\n"
-                    + "FROM\n"
-                    + "   bmpfjz_project bp\n"
-                    + "JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id\n"
-                    + "WHERE\n"
-                    + "   bpe.bid_stop_type = 2 AND bpe.bid_stop_time < ? AND bpe.id IN (%s)";
+            String countTemplateSql = "SELECT\n" +
+                    " count( 1 ) \n" +
+                    "FROM\n" +
+                    " (\n" +
+                    "SELECT\n" +
+                    " bp.id AS projectId \n" +
+                    "FROM\n" +
+                    " bmpfjz_project bp\n" +
+                    " JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id \n" +
+                    "WHERE\n" +
+                    " bp.id IN (%s) \n" +
+                    " ) b\n" +
+                    " JOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id \n" +
+                    "ORDER BY\n" +
+                    " bpi.id";
             String queryTemplateSql = "SELECT\n"
                     + "   b.*, bpi.`name` AS directoryName\n"
                     + "FROM\n"
@@ -141,9 +146,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                     + "         bmpfjz_project bp\n"
                     + "      JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id\n"
                     + "      WHERE\n"
-                    + "         bpe.bid_stop_type = 2\n"
-                    + "      AND bpe.bid_stop_time < ?\n"
-                    + "      AND bpe.id IN (%s)\n"
+                    + "       bpe.id IN (%s)\n"
                     + "      LIMIT ?,?\n"
                     + "   ) b\n"
                     + "JOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id order by bpi.create_time";
@@ -160,45 +163,54 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
      * @param lastSyncTime
      */
     private void syncPurchaseProjectDataService(Timestamp lastSyncTime) {
-        String countUpdatedSql = "SELECT count(1) FROM\n"
-                + "   bmpfjz_project bp\n"
-                + "JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id\n"
-                + "WHERE\n"
-                + "   bpe.bid_result_show_type = 1\n"
-                + "AND bp.update_time > ?\n"
-                + "AND bp.project_status >= 5";
+        String countUpdatedSql = "SELECT\n" +
+                "     count(1)\n" +
+                "                FROM\n" +
+                "                  (\n" +
+                "                    SELECT\n" +
+                "                      bp.id AS projectId\n" +
+                "                    FROM\n" +
+                "                      bmpfjz_project bp\n" +
+                "                      JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id \n" +
+                "                    WHERE\n" +
+                "                      bpe.bid_result_show_type = 1 \n" +
+                "                      AND bp.update_time > ?\n" +
+                "                      AND bp.project_status >= 5\n" +
+                "                  ) b\n" +
+                "                  JOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id \n" +
+                "               ";
         String queryUpdatedSql = "SELECT\n" +
-                "\tb.*,\n" +
-                "\tbpi.id AS directoryId,\n" +
-                "\tbpi.`name` AS directoryName \n" +
+                "  b.*,\n" +
+                "  bpi.id AS directoryId,\n" +
+                "  bpi.`name` AS directoryName \n" +
                 "FROM\n" +
-                "\t(\n" +
-                "\t\tSELECT\n" +
-                "\t\t\tbp.comp_id AS purchaseId,\n" +
-                "\t\t\tbp.comp_name AS purchaseName,\n" +
-                "\t\t\tbp.id AS projectId,\n" +
-                "\t\t\tbp.`code` AS projectCode,\n" +
-                "\t\t\tbp.`name` AS projectName,\n" +
-                "\t\t\t1 AS openRangeType,\n" +
-                "\t\t\t0 AS isCore,\n" +
-                "\t\t\tbp.project_status AS projectStatus,\n" +
-                "\t\t\tbpe.bid_stop_type AS bidStopType,\n" +
-                "\t\t\tbpe.bid_stop_time AS bidStopTime,\n" +
-                "\t\t\tbpe.bid_true_stop_time AS bidTrueStopTime,\n" +
-                "\t\t\tbpe.link_man AS linkMan,\n" +
-                "\t\t\tbpe.link_phone AS linkPhone,\n" +
-                "\t\t\tbp.create_time AS createTime,\n" +
-                "\t\t\tbp.update_time AS updateTime \n" +
-                "\t\tFROM\n" +
-                "\t\t\tbmpfjz_project bp\n" +
-                "\t\t\tJOIN bmpfjz_project_ext bpe ON bp.id = bpe.id \n" +
-                "\t\tWHERE\n" +
-                "\t\t\tbpe.bid_result_show_type = 1 \n" +
-                "\t\t\tAND bp.update_time > ?\n" +
-                "\t\t\tAND bp.project_status >= 5\n" +
-                "\t\t\tLIMIT ?,?\n" +
-                "\t) b\n" +
-                "\tJOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id \n" +
+                "  (\n" +
+                "    SELECT\n" +
+                "      bp.comp_id AS purchaseId,\n" +
+                "      bp.comp_name AS purchaseName,\n" +
+                "      bp.id AS projectId,\n" +
+                "      bp.`code` AS projectCode,\n" +
+                "      bp.`name` AS projectName,\n" +
+                "      1 AS openRangeType,\n" +
+                "      0 AS isCore,\n" +
+                "      bp.project_status AS projectStatus,\n" +
+                "      bpe.bid_stop_type AS bidStopType,\n" +
+                "      bpe.bid_stop_time AS bidStopTime,\n" +
+                "      bpe.bid_true_stop_time AS bidTrueStopTime,\n" +
+                "      bpe.link_man AS linkMan,\n" +
+                "      bpe.link_phone AS linkPhone,\n" +
+                "      bp.create_time AS createTime,\n" +
+                "      bp.update_time AS updateTime \n" +
+                "    FROM\n" +
+                "      bmpfjz_project bp\n" +
+                "      JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id \n" +
+                "    WHERE\n" +
+                "      bpe.bid_result_show_type = 1 \n" +
+                "      AND bp.update_time > ?\n" +
+                "      AND bp.project_status >= 5\n" +
+                "      LIMIT ?,?\n" +
+                "  ) b\n" +
+                "  JOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id \n" +
                 "ORDER BY\n" +
                 "bpi.id";
         doSyncProjectDataService(siyouyunDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList((Object) lastSyncTime));
