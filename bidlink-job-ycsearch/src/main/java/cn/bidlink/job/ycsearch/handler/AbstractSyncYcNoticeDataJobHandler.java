@@ -52,6 +52,7 @@ public abstract class AbstractSyncYcNoticeDataJobHandler extends JobHandler {
     protected String APPROVE_STATUS            = "approveStatus";
     protected String RESULT_OPEN_RANGE         = "resultOpenRange";
     protected String PRICE_OPEN_RANGE          = "priceOpenRange";
+    protected String OPT_STATUS                = "optStatus";   // -1:删除状态
 
     protected Integer SOURCE_NOTICE        = 1; // 原始公告和变更公告
     protected Integer RESULT_NOTICE        = 2; // 结果公告

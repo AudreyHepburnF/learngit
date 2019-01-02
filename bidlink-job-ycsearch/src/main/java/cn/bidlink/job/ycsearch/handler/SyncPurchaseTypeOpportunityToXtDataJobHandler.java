@@ -118,13 +118,21 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
 
     private void doFixExpiredAutoStopTypePurchaseProjectDataService(List<Long> projectIds) {
         if (!CollectionUtils.isEmpty(projectIds)) {
-            String countTemplateSql = "SELECT\n"
-                    + "   count(1)\n"
-                    + "FROM\n"
-                    + "   bmpfjz_project bp\n"
-                    + "JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id\n"
-                    + "WHERE\n"
-                    + "   bpe.id IN (%s)";
+            String countTemplateSql = "SELECT\n" +
+                    " count( 1 ) \n" +
+                    "FROM\n" +
+                    " (\n" +
+                    "SELECT\n" +
+                    " bp.id AS projectId \n" +
+                    "FROM\n" +
+                    " bmpfjz_project bp\n" +
+                    " JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id \n" +
+                    "WHERE\n" +
+                    " bp.id IN (%s) \n" +
+                    " ) b\n" +
+                    " JOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id \n" +
+                    "ORDER BY\n" +
+                    " bpi.id;";
             String queryTemplateSql = "SELECT\n"
                     + "   b.*, bpi.`name` AS directoryName\n"
                     + "FROM\n"
@@ -173,13 +181,16 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
      * @param lastSyncTime
      */
     private void syncPurchaseProjectDataService(Timestamp lastSyncTime) {
-        String countUpdatedSql = "SELECT count(1) FROM\n"
-                + "   bmpfjz_project bp\n"
-                + "JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id\n"
-                + "WHERE\n"
-                + "   bpe.bid_result_show_type = 1\n"
-                + "AND bp.update_time > ?\n"
-                + "AND bp.project_status >= 5 ";
+        String countUpdatedSql = "SELECT count(1) FROM (SELECT\n"
+                +"                   bp.id AS projectId\n"
+                +"                FROM\n"
+                +"                   bmpfjz_project bp\n"
+                +"                JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id\n"
+                +"                WHERE\n"
+                +"                   bpe.bid_result_show_type = 1\n"
+                +"                AND bp.update_time > ?\n" +
+                "                AND bp.project_status >= 5\n" +
+                " ) b JOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id order by bpi.id";
         String queryUpdatedSql = "SELECT b.*, bpi.id AS directoryId, bpi.`name` AS directoryName FROM (SELECT\n"
                 + "   bp.comp_id AS purchaseId,\n"
                 + "   bp.comp_name AS purchaseName,\n"
