@@ -38,6 +38,11 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
     // 项目状态 撤项
     private int CANAL            = 10;
 
+    /**
+     * 项目状态 开标
+     */
+    private int OPEN_BID = 5;
+
     private String BID_STOP_TYPE      = "bidStopType";
     private String BID_STOP_TIME      = "bidStopTime";
     private String BID_TRUE_STOP_TIME = "bidTrueStopTime";
@@ -247,7 +252,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
         Timestamp bidTrueStopTime = (Timestamp) result.get(BID_TRUE_STOP_TIME);
         if (bidStopType == AUTO_STOP_TYPE) {
             // 判断时间未过期就是商机
-            if (bidStopTime != null && bidStopTime.after(currentDate) && projectStatus == 5) {
+            if (bidStopTime != null && bidStopTime.after(currentDate) && projectStatus == OPEN_BID) {
                 result.put(STATUS, VALID_OPPORTUNITY_STATUS);
                 resultToExecute.add(appendIdToResult(result));
             } else {
@@ -256,7 +261,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
             }
         } else if (bidStopType == MANUAL_STOP_TYPE) {
             // 未截标就是商机
-            if ((bidTrueStopTime == null || bidTrueStopTime.after(new Date())) && projectStatus == 5) {
+            if ((bidTrueStopTime == null || bidTrueStopTime.after(new Date())) && projectStatus == OPEN_BID) {
                 result.put(STATUS, VALID_OPPORTUNITY_STATUS);
                 resultToExecute.add(appendIdToResult(result));
             } else {
@@ -281,8 +286,8 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
         result.put(PROJECT_TYPE, PURCHASE_PROJECT_TYPE);
         // 老平台
         result.put(SOURCE, SOURCE_OLD);
-        // 是否展示(project_status=10 代表撤项,不展示)
-        if (Objects.equals(result.get(PROJECT_STATUS), CANAL)) {
+        // 是否展示(project_status=10 代表撤项,不展示  project_status < 5 项目不展示)
+        if (Objects.equals(result.get(PROJECT_STATUS), CANAL) || Integer.valueOf(result.get(PROJECT_STATUS).toString()) < OPEN_BID) {
             result.put(IS_SHOW, HIDDEN);
         } else {
             result.put(IS_SHOW, SHOW);
@@ -290,7 +295,6 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
         // 悦采
         result.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE);
     }
-
 
 
 //    @Override
