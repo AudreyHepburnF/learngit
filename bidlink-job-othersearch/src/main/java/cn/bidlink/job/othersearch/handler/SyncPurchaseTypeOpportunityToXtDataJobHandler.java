@@ -108,21 +108,13 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
 
     private void doFixExpiredAutoStopTypePurchaseProjectDataService(List<Long> projectIds, Timestamp currentDate) {
         if (!CollectionUtils.isEmpty(projectIds)) {
-            String countTemplateSql = "SELECT\n" +
-                    " count( 1 ) \n" +
-                    "FROM\n" +
-                    " (\n" +
-                    "SELECT\n" +
-                    " bp.id AS projectId \n" +
-                    "FROM\n" +
-                    " bmpfjz_project bp\n" +
-                    " JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id \n" +
-                    "WHERE\n" +
-                    " bp.id IN (%s) \n" +
-                    " ) b\n" +
-                    " JOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id \n" +
-                    "ORDER BY\n" +
-                    " bpi.id";
+            String countTemplateSql = "SELECT\n"
+                    + "   count(1)\n"
+                    + "FROM\n"
+                    + "   bmpfjz_project bp\n"
+                    + "JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id\n"
+                    + "WHERE\n"
+                    + "bpe.id IN (%s)";
             String queryTemplateSql = "SELECT\n"
                     + "   b.*, bpi.`name` AS directoryName\n"
                     + "FROM\n"
@@ -163,22 +155,13 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
      * @param lastSyncTime
      */
     private void syncPurchaseProjectDataService(Timestamp lastSyncTime) {
-        String countUpdatedSql = "SELECT\n" +
-                "     count(1)\n" +
-                "                FROM\n" +
-                "                  (\n" +
-                "                    SELECT\n" +
-                "                      bp.id AS projectId\n" +
-                "                    FROM\n" +
-                "                      bmpfjz_project bp\n" +
-                "                      JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id \n" +
-                "                    WHERE\n" +
-                "                      bpe.bid_result_show_type = 1 \n" +
-                "                      AND bp.update_time > ?\n" +
-                "                      AND bp.project_status >= 5\n" +
-                "                  ) b\n" +
-                "                  JOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id \n" +
-                "               ";
+        String countUpdatedSql = "SELECT count(1) FROM\n"
+                + "   bmpfjz_project bp\n"
+                + "JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id\n"
+                + "WHERE\n"
+                + "   bpe.bid_result_show_type = 1\n"
+                + "AND bp.update_time > ?\n"
+                + "AND bp.project_status >= 5";
         String queryUpdatedSql = "SELECT\n" +
                 "  b.*,\n" +
                 "  bpi.id AS directoryId,\n" +
