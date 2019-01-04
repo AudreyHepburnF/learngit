@@ -5,9 +5,15 @@ import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -49,6 +55,77 @@ public class SyncAuctionTypeOpportunityToXtDataJobHandler extends AbstractSyncYc
         }
         logger.info("开始同步悦采竞价项目lastSyncTime:" + SyncTimeUtil.toDateString(lastSyncTime) + ",\n" + "syncTime:" + SyncTimeUtil.toDateString(SyncTimeUtil.getCurrentDate()));
         syncAuctionProjectDataService(lastSyncTime);
+        // 修复竞价商机自动截止问题
+        fixExpiredYcAuctionTypeOpportunityData();
+    }
+
+    private void fixExpiredYcAuctionTypeOpportunityData() {
+        logger.info("2.开始修复竞价项目自动截止商机状态");
+        Properties properties = elasticClient.getProperties();
+        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+                .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
+                .setQuery(QueryBuilders.boolQuery()
+                        .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
+                        .must(QueryBuilders.termQuery(PROJECT_TYPE, AUCTION_PROJECT_TYPE))
+                ).setScroll(new TimeValue(60000))
+                .setSize(pageSize)
+                .execute().actionGet();
+        do {
+            SearchHits hits = response.getHits();
+            ArrayList<Long> projectIds = new ArrayList<>();
+            for (SearchHit hit : hits.getHits()) {
+                Map<String, Object> source = hit.getSource();
+                projectIds.add(Long.valueOf(source.get(PROJECT_ID).toString()));
+            }
+            doFixExpiredYcAuctionTypeOpportunityService(projectIds);
+
+            response = elasticClient.getTransportClient().prepareSearchScroll(response.getScrollId())
+                    .setScroll(new TimeValue(60000))
+                    .execute().actionGet();
+        } while (response.getHits().getHits().length != 0);
+
+    }
+
+    private void doFixExpiredYcAuctionTypeOpportunityService(ArrayList<Long> projectIds) {
+        if (!CollectionUtils.isEmpty(projectIds)) {
+            String countSqlTemplate = "SELECT\n"
+                    + "\tcount( 1 ) \n"
+                    + "FROM\n"
+                    + "\tauction_project \n"
+                    + "WHERE\n"
+                    + "\tid in (%s)";
+            String querySqlTempalte = "SELECT\n" +
+                    "\tp.*,\n" +
+                    "\tadi.id AS directoryId,\n" +
+                    "\tadi.directory_name AS directoryName \n" +
+                    "FROM\n" +
+                    "\t(\n" +
+                    "SELECT\n" +
+                    "\tap.comp_id AS purchaseId,\n" +
+                    "-- \tap. AS purchaseName,\n" +
+                    "\tap.id AS projectId,\n" +
+                    "\tap.project_code AS projectCode,\n" +
+                    "\tap.project_name AS projectName,\n" +
+                    "\tap.project_stats AS projectStatus,\n" +
+                    "\tap.create_time AS createTime,\n" +
+                    "\tap.update_time AS updateTime,\n" +
+                    "\tar.auction_end_time As quoteStopTime\n" +
+                    "FROM\n" +
+                    "\tauction_project ap\n" +
+                    "\tLEFT JOIN auction_rule ar ON ap.id = ar.project_id \n" +
+                    "WHERE\n" +
+                    "\tap.project_open_type = 1 \n" +
+                    "\tAND ap.id in (%s) \n" +
+                    "\tLIMIT ?,? \n" +
+                    "\t) p\n" +
+                    "\tJOIN auction_directory_info adi ON p.projectId = adi.project_id \n" +
+                    "ORDER BY\n" +
+                    "\tadi.id";
+            String projectIdsStr = StringUtils.collectionToCommaDelimitedString(projectIds);
+            String countSql = String.format(countSqlTemplate, projectIdsStr);
+            String querySql = String.format(querySqlTempalte, projectIdsStr);
+            doSyncProjectDataService(ycDataSource, countSql, querySql, Collections.emptyList());
+        }
     }
 
     private void syncAuctionProjectDataService(Timestamp lastSyncTime) {

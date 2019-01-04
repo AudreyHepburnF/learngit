@@ -49,9 +49,8 @@ public abstract class AbstractSyncYcNoticeDataJobHandler extends JobHandler {
     protected String PROJECT_NAME              = "projectName";
     protected String NOTICE_TYPE               = "noticeType";
     protected String SUB_PROJECT_ID            = "subProjectId";
-    protected String APPROVE_STATUS            = "approveStatus";
-    protected String RESULT_OPEN_RANGE         = "resultOpenRange";
-    protected String PRICE_OPEN_RANGE          = "priceOpenRange";
+    protected String IS_SHOW_TEL               = "isShowTel";
+    protected String IS_SHOW_MOBILE            = "isShowMobile";
     protected String OPT_STATUS                = "optStatus";   // -1:删除状态
 
     protected Integer SOURCE_NOTICE        = 1; // 原始公告和变更公告
@@ -90,8 +89,10 @@ public abstract class AbstractSyncYcNoticeDataJobHandler extends JobHandler {
                 result.put(NOTICE_TYPE, SOURCE_NOTICE);
             }
         } else if (Objects.equals(projectType, "7")) {
-            // 竞价项目
+            // 竞价项目 悦采竞价项目默认公开联系电话和固话
             result.put(PROJECT_TYPE, AUCTION_NOTICE_TYPE);
+            result.put(IS_SHOW_MOBILE, 1);
+            result.put(IS_SHOW_TEL, 1);
             if (Objects.equals(result.get(NOTICE_TYPE), "3")) {
                 // 结果公告
                 result.put(NOTICE_TYPE, RESULT_NOTICE);
