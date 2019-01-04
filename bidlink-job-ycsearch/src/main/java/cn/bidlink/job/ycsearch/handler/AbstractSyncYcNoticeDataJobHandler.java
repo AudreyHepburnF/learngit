@@ -52,6 +52,7 @@ public abstract class AbstractSyncYcNoticeDataJobHandler extends JobHandler {
     protected String LINK_PHONE                = "linkPhone";
     protected String LINK_TEL                  = "linkTel";
     protected String IS_SHOW_MOBILE            = "isShowMobile";
+    protected String IS_SHOW_TEL               = "isShowTel";
     protected String OPT_STATUS                = "optStatus";   // -1:删除状态
 
     protected Integer SOURCE_NOTICE        = 1; // 原始公告和变更公告
@@ -95,6 +96,7 @@ public abstract class AbstractSyncYcNoticeDataJobHandler extends JobHandler {
             result.put(IS_SHOW_MOBILE, 1);
             result.put(LINK_PHONE, result.get(LINK_TEL));
             result.remove(LINK_TEL);
+            result.remove(IS_SHOW_TEL);
             if (Objects.equals(result.get(NOTICE_TYPE), "3")) {
                 // 结果公告
                 result.put(NOTICE_TYPE, RESULT_NOTICE);

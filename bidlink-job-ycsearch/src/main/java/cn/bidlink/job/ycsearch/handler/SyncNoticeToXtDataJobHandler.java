@@ -74,6 +74,7 @@ public class SyncNoticeToXtDataJobHandler extends AbstractSyncYcNoticeDataJobHan
                 "\tpubdate AS publishNoticeTime,\n" +
                 "\tprojectintroduction AS projectInfo,\n" +
                 "\tlinkman AS linkMan,\n" +
+                "\temail AS linkMail,\n" +
                 "\tmobile AS linkTel,\n" +
                 "\tif(mobile,1,0) as isShowTel,\n" +
                 "\tif(tel,1,0) as isShowMobile,\n" +

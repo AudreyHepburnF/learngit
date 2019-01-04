@@ -177,7 +177,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                 + "   bmpfjz_project bp\n"
                 + "JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id\n"
                 + "WHERE\n"
-                + "   bpe.bid_result_show_type = 1\n"
+                + "   bpe.purchase_open_range_type = 1\n"
                 + "AND bp.update_time > ?\n"
                 + "AND bp.project_status >= 5 ";
         String queryUpdatedSql = "SELECT b.*, bpi.id AS directoryId, bpi.`name` AS directoryName FROM (SELECT\n"
@@ -208,7 +208,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                 + "   bmpfjz_project bp\n"
                 + "JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id\n"
                 + "WHERE\n"
-                + "   bpe.bid_result_show_type = 1\n"
+                + "   bpe.purchase_open_range_type = 1\n"
                 + "AND bp.update_time > ?\n"
                 + "AND bp.project_status >= 5\n"
                 + "LIMIT ?,\n"
