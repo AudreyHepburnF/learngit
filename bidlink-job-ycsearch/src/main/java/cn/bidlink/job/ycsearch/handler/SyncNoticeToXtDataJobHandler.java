@@ -80,7 +80,7 @@ public class SyncNoticeToXtDataJobHandler extends AbstractSyncYcNoticeDataJobHan
                 "\tif(tel,1,0) as isShowMobile,\n" +
                 "\ttel AS linkPhone,\n" +
                 "\tcompanyid AS companyId,\n" +
-                "\tbegindate AS createTime,\n" +
+                "\tpubdate AS createTime,\n" +
                 "\tpurchasemodel AS projectType,\n" +
                 "\tinfoType AS noticeType,\n" +
                 "\tcontent AS content,\n" +
