@@ -69,10 +69,6 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.recruit",
                 QueryBuilders.boolQuery().must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE)));
 //        Timestamp lastSyncTime = new Timestamp(0);
-        Timestamp lastSyncStartTime = new Timestamp(new DateTime(new DateTime().getYear(), 1, 1, 0, 0, 0).getMillis());
-        if (Objects.equals(SyncTimeUtil.GMT_TIME, lastSyncTime)) {
-            lastSyncTime = lastSyncStartTime;
-        }
         logger.info("1.1 同步招募信息lastSyncTime:" + SyncTimeUtil.toDateString(lastSyncTime) + "\n" + ",syncTime:" + SyncTimeUtil.currentDateToString());
         syncRecruitDataService(lastSyncTime);
     }
@@ -95,7 +91,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\tr.edate AS endDate,\n" +
                 "\tr.AREA_NAME AS areaName,\n" +
                 "\tr.AREA_LIMITE AS areaLimit,\n" +
-//                "\tr.QUALIFICATION_NAME AS qualificationName,\n" +
+                "\tr.QUALIFICATION_NAME AS qualificationName,\n" +
                 "\tr.PURCHASER_ID AS purchaseId,\n" +
 //                "\tr.PURCHASER AS purchaseName,\n" +
                 "\tr.status,\n" +
@@ -130,7 +126,8 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\tr.sdate AS startDate,\n" +
                 "\tr.edate AS endDate,\n" +
                 "\tr.AREA_LIMITE AS areaLimit,\n" +
-//                "\tr.QUALIFICATION_NAME AS qualificationName,\n" +
+                "\tr.AREA_NAME AS areaName,\n" +
+                "\tr.QUALIFICATION_NAME AS qualificationName,\n" +
                 "\tr.PURCHASER_ID AS purchaseId,\n" +
 //                "\tr.PURCHASER AS purchaseName,\n" +
                 "\tr.status,\n" +
