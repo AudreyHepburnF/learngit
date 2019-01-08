@@ -12,7 +12,6 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -31,7 +30,7 @@ import static cn.bidlink.job.common.utils.AreaUtil.queryAreaInfo;
  */
 @JobHander(value = "syncPurchaseTypeOpportunityToXtDataJobHandler")
 @Service
-public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOpportunityDataJobHandler implements InitializingBean {
+public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOpportunityDataJobHandler /*implements InitializingBean*/ {
     // 自动截标
     private int AUTO_STOP_TYPE   = 2;
     // 手动截标
@@ -99,9 +98,6 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
             List<Long> projectIds = new ArrayList<>();
             for (SearchHit searchHit : searchHits) {
                 Long projectId = Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID)));
-                if (!Objects.equals(projectId, 1590574881223737528L)) {
-                    continue;
-                }
                 projectIds.add(projectId);
             }
             doFixExpiredAutoStopTypePurchaseProjectDataService(projectIds);
@@ -294,8 +290,8 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
     }
 
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        execute();
-    }
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+//        execute();
+//    }
 }
