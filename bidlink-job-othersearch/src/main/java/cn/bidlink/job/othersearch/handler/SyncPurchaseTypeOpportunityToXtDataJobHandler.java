@@ -1,4 +1,4 @@
-package cn.bidlink.job.ycsearch.handler;
+package cn.bidlink.job.othersearch.handler;
 
 import cn.bidlink.job.common.constant.BusinessConstant;
 import cn.bidlink.job.common.utils.AreaUtil;
@@ -25,7 +25,7 @@ import static cn.bidlink.job.common.utils.AreaUtil.queryAreaInfo;
 /**
  * @author : <a href="mailto:zhihuizhou@ebnew.com">周治慧</a>
  * @version : Ver 1.0
- * @description :同步采购商机数据 悦采平台到隆道云 es中
+ * @description :同步采购商机数据 私有云到隆道云 es中
  * @date : 2018/09/03
  */
 @JobHander(value = "syncPurchaseTypeOpportunityToXtDataJobHandler")
@@ -37,11 +37,6 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
     private int MANUAL_STOP_TYPE = 1;
     // 项目状态 撤项
     private int CANAL            = 10;
-
-    /**
-     * 项目状态 开标
-     */
-    private int OPEN_BID = 5;
 
     private String BID_STOP_TYPE      = "bidStopType";
     private String BID_STOP_TIME      = "bidStopTime";
@@ -65,7 +60,11 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                 "cluster.type.supplier_opportunity",
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery("projectType", PURCHASE_PROJECT_TYPE))
-                        .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE)));
+                        .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.SIYOUYUN_SOURCE)));
+        Timestamp lastSyncStartTime = new Timestamp(new DateTime(new DateTime().getYear(), 1, 1, 0, 0, 0).getMillis());
+        if (Objects.equals(SyncTimeUtil.GMT_TIME, lastSyncTime)) {
+            lastSyncTime = lastSyncStartTime;
+        }
         logger.info("采购项目商机同步时间,lastSyncTime：" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n"
                 + ",syncTime:" + new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
         syncPurchaseProjectDataService(lastSyncTime);
@@ -82,10 +81,10 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
         Properties properties = elasticClient.getProperties();
         // 查询小于当前时间的自动截标
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-                .must(QueryBuilders.termQuery("projectType", PURCHASE_PROJECT_TYPE))
+                .must(QueryBuilders.termQuery(PROJECT_TYPE, PURCHASE_PROJECT_TYPE))
                 .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE));
 
-        int batchSize = 1000;
+        int batchSize = 100;
         SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(queryBuilder)
@@ -97,11 +96,9 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
             SearchHit[] searchHits = scrollResp.getHits().hits();
             List<Long> projectIds = new ArrayList<>();
             for (SearchHit searchHit : searchHits) {
-                Long projectId = Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID)));
-                projectIds.add(projectId);
+                projectIds.add(Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID))));
             }
-            doFixExpiredAutoStopTypePurchaseProjectDataService(projectIds);
-
+            doFixExpiredAutoStopTypePurchaseProjectDataService(projectIds, SyncTimeUtil.getCurrentDate());
             scrollResp = elasticClient.getTransportClient().prepareSearchScroll(scrollResp.getScrollId())
                     .setScroll(new TimeValue(60000))
                     .execute().actionGet();
@@ -109,7 +106,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
         logger.info("修复自动截标商机结束");
     }
 
-    private void doFixExpiredAutoStopTypePurchaseProjectDataService(List<Long> projectIds) {
+    private void doFixExpiredAutoStopTypePurchaseProjectDataService(List<Long> projectIds, Timestamp currentDate) {
         if (!CollectionUtils.isEmpty(projectIds)) {
             String countTemplateSql = "SELECT\n"
                     + "   count(1)\n"
@@ -117,7 +114,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                     + "   bmpfjz_project bp\n"
                     + "JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id\n"
                     + "WHERE\n"
-                    + "   bpe.id IN (%s)";
+                    + "bpe.id IN (%s)";
             String queryTemplateSql = "SELECT\n"
                     + "   b.*, bpi.`name` AS directoryName\n"
                     + "FROM\n"
@@ -127,36 +124,28 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                     + "   bp.id AS projectId,\n"
                     + "   bp.`code` AS projectCode,\n"
                     + "   bp.`name` AS projectName,\n"
-                    + "   bpe.purchase_open_range_type AS openRangeType,\n"
-                    + "   IFNULL(bp.is_core,0) AS isCore,\n"
+                    + "   1 AS openRangeType,\n"
+                    + "   0 AS isCore,\n"
                     + "   bp.project_status AS projectStatus,\n"
                     + "   bpe.bid_stop_type AS bidStopType,\n"
                     + "   bpe.bid_stop_time AS bidStopTime,\n"
                     + "   bpe.bid_true_stop_time AS bidTrueStopTime,\n"
-                    //                               + "   bpe.area_str AS areaStr,\n"
                     + "   bpe.link_man AS linkMan,\n"
-                    + "   CASE\n"
-                    + "WHEN bpe.is_show_mobile = 1 THEN\n"
-                    + "   bpe.link_phone\n"
-                    + "WHEN bpe.is_show_tel = 1 THEN\n"
-                    + "   bpe.link_tel\n"
-                    + "ELSE\n"
-                    + "   NULL\n"
-                    + "END AS linkPhone,\n"
-                    + " bp.create_time AS createTime,\n"
-                    + " bp.update_time AS updateTime\n"
+                    + "   bpe.link_phone AS linkPhone,\n"
+                    + "   bp.create_time AS createTime,\n"
+                    + "   bp.update_time AS updateTime\n"
                     + "      FROM\n"
                     + "         bmpfjz_project bp\n"
                     + "      JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id\n"
                     + "      WHERE\n"
-                    + "      bpe.id IN (%s)\n"
+                    + "       bpe.id IN (%s)\n"
                     + "      LIMIT ?,?\n"
                     + "   ) b\n"
                     + "JOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id order by bpi.create_time";
 
             String countSql = String.format(countTemplateSql, StringUtils.collectionToCommaDelimitedString(projectIds));
             String querySql = String.format(queryTemplateSql, StringUtils.collectionToCommaDelimitedString(projectIds));
-            doSyncProjectDataService(ycDataSource, countSql, querySql, Collections.emptyList());
+            doSyncProjectDataService(siyouyunDataSource, countSql, querySql, Collections.singletonList((Object) currentDate));
         }
     }
 
@@ -170,43 +159,44 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                 + "   bmpfjz_project bp\n"
                 + "JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id\n"
                 + "WHERE\n"
-                + "   bpe.purchase_open_range_type = 1\n"
+                + "   bpe.bid_result_show_type = 1\n"
                 + "AND bp.update_time > ?\n"
-                + "AND bp.project_status >= 5 ";
-        String queryUpdatedSql = "SELECT b.*, bpi.id AS directoryId, bpi.`name` AS directoryName FROM (SELECT\n"
-                + "   bp.comp_id AS purchaseId,\n"
-                + "   bp.comp_name AS purchaseName,\n"
-                + "   bp.id AS projectId,\n"
-                + "   bp.`code` AS projectCode,\n"
-                + "   bp.`name` AS projectName,\n"
-                + "   bpe.purchase_open_range_type AS openRangeType,\n"
-                + "   IFNULL(bp.is_core,0) AS isCore,\n"
-                + "   bp.project_status AS projectStatus,\n"
-                + "   bpe.bid_stop_type AS bidStopType,\n"
-                + "   bpe.bid_stop_time AS bidStopTime,\n"
-                + "   bpe.bid_true_stop_time AS bidTrueStopTime,\n"
-//                                 + "   bpe.area_str AS areaStr,\n"
-                + "   bpe.link_man AS linkMan,\n"
-                + "   CASE\n"
-                + "WHEN bpe.is_show_mobile = 1 THEN\n"
-                + "   bpe.link_phone\n"
-                + "WHEN bpe.is_show_tel = 1 THEN\n"
-                + "   bpe.link_tel\n"
-                + "ELSE\n"
-                + "   NULL\n"
-                + "END AS linkPhone,\n"
-                + " bp.create_time AS createTime,\n"
-                + " bp.update_time AS updateTime\n"
-                + "FROM\n"
-                + "   bmpfjz_project bp\n"
-                + "JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id\n"
-                + "WHERE\n"
-                + "   bpe.purchase_open_range_type = 1\n"
-                + "AND bp.update_time > ?\n"
-                + "AND bp.project_status >= 5\n"
-                + "LIMIT ?,\n"
-                + " ?) b JOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id order by bpi.id";
-        doSyncProjectDataService(ycDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList((Object) lastSyncTime));
+                + "AND bp.project_status >= 5";
+        String queryUpdatedSql = "SELECT\n" +
+                "  b.*,\n" +
+                "  bpi.id AS directoryId,\n" +
+                "  bpi.`name` AS directoryName \n" +
+                "FROM\n" +
+                "  (\n" +
+                "    SELECT\n" +
+                "      bp.comp_id AS purchaseId,\n" +
+                "      bp.comp_name AS purchaseName,\n" +
+                "      bp.id AS projectId,\n" +
+                "      bp.`code` AS projectCode,\n" +
+                "      bp.`name` AS projectName,\n" +
+                "      1 AS openRangeType,\n" +
+                "      0 AS isCore,\n" +
+                "      bp.project_status AS projectStatus,\n" +
+                "      bpe.bid_stop_type AS bidStopType,\n" +
+                "      bpe.bid_stop_time AS bidStopTime,\n" +
+                "      bpe.bid_true_stop_time AS bidTrueStopTime,\n" +
+                "      bpe.link_man AS linkMan,\n" +
+                "      bpe.link_phone AS linkPhone,\n" +
+                "      bp.create_time AS createTime,\n" +
+                "      bp.update_time AS updateTime \n" +
+                "    FROM\n" +
+                "      bmpfjz_project bp\n" +
+                "      JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id \n" +
+                "    WHERE\n" +
+                "      bpe.bid_result_show_type = 1 \n" +
+                "      AND bp.update_time > ?\n" +
+                "      AND bp.project_status >= 5\n" +
+                "      LIMIT ?,?\n" +
+                "  ) b\n" +
+                "  JOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id \n" +
+                "ORDER BY\n" +
+                "bpi.id";
+        doSyncProjectDataService(siyouyunDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList((Object) lastSyncTime));
     }
 
     @Override
@@ -245,7 +235,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
         Timestamp bidTrueStopTime = (Timestamp) result.get(BID_TRUE_STOP_TIME);
         if (bidStopType == AUTO_STOP_TYPE) {
             // 判断时间未过期就是商机
-            if (bidStopTime != null && bidStopTime.after(currentDate) && projectStatus == OPEN_BID) {
+            if (bidStopTime != null && bidStopTime.after(currentDate) && projectStatus == 5) {
                 result.put(STATUS, VALID_OPPORTUNITY_STATUS);
                 resultToExecute.add(appendIdToResult(result));
             } else {
@@ -254,7 +244,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
             }
         } else if (bidStopType == MANUAL_STOP_TYPE) {
             // 未截标就是商机
-            if ((bidTrueStopTime == null || bidTrueStopTime.after(new Date()) || Objects.equals(bidTrueStopTime, bidStopTime)) && projectStatus == OPEN_BID) {
+            if (bidTrueStopTime == null && projectStatus == 5) {
                 result.put(STATUS, VALID_OPPORTUNITY_STATUS);
                 resultToExecute.add(appendIdToResult(result));
             } else {
@@ -279,14 +269,14 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
         result.put(PROJECT_TYPE, PURCHASE_PROJECT_TYPE);
         // 老平台
         result.put(SOURCE, SOURCE_OLD);
-        // 是否展示(project_status=10 代表撤项,不展示  project_status < 5 项目不展示)
-        if (Objects.equals(result.get(PROJECT_STATUS), CANAL) || Integer.valueOf(result.get(PROJECT_STATUS).toString()) < OPEN_BID) {
+        // 是否展示(project_status=10 代表撤项,不展示)
+        if (Objects.equals(result.get(PROJECT_STATUS), CANAL)) {
             result.put(IS_SHOW, HIDDEN);
         } else {
             result.put(IS_SHOW, SHOW);
         }
         // 悦采
-        result.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE);
+        result.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.SIYOUYUN_SOURCE);
     }
 
 

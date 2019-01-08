@@ -60,6 +60,10 @@
       "purchaseId": {
         "type": "string",
         "index": "not_analyzed"
+      },
+      "qualificationName": {
+        "type": "string",
+        "index": "not_analyzed"
       }
     }
   }

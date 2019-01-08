@@ -16,6 +16,7 @@
         <module>bidlink-job-purchase-synergy</module>
         <module>bidlink-job-report</module>
         <module>bidlink-job-ycsearch</module>
+        <module>bidlink-job-othersearch</module>
     </modules>
 
     <properties>

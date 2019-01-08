@@ -1,4 +1,4 @@
-package cn.bidlink.job.ycsearch.handler;
+package cn.bidlink.job.othersearch.handler;
 
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.AreaUtil;
@@ -19,11 +19,8 @@ import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static cn.bidlink.job.common.utils.AreaUtil.queryAreaInfo;
 
@@ -45,20 +42,14 @@ public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler
     protected DataSource uniregDataSource;
 
     @Autowired
-    @Qualifier("ycDataSource")
-    protected DataSource ycDataSource;
+    @Qualifier("siyouyunDataSource")
+    protected DataSource siyouyunDataSource;
     // 有效的商机
     protected int    VALID_OPPORTUNITY_STATUS   = 1;
     // 无效的商机
     protected int    INVALID_OPPORTUNITY_STATUS = -1;
-    // 招标项目类型
-    protected int    BIDDING_PROJECT_TYPE       = 1;
     // 采购项目类型
     protected int    PURCHASE_PROJECT_TYPE      = 2;
-    // 竞价项目类型
-    protected int    AUCTION_PROJECT_TYPE       = 3;
-    // 招募类型
-    protected int    RECRUIT_PROJECT_TYPE       = 4;
     // 新平台数据
     protected String SOURCE_NEW                 = "new";
     // 老平台数据
@@ -81,7 +72,6 @@ public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler
     protected String DIRECTORY_NAME_NOT_ANALYZED = "directoryNameNotAnalyzed";
     protected String PURCHASE_NAME               = "purchaseName";
     protected String PURCHASE_NAME_NOT_ANALYZED  = "purchaseNameNotAnalyzed";
-    protected String PROJECT_CODE                = "projectCode";
     protected String PROJECT_NAME                = "projectName";
     protected String PROJECT_NAME_NOT_ANALYZED   = "projectNameNotAnalyzed";
     protected String PROJECT_STATUS              = "projectStatus";
@@ -92,11 +82,6 @@ public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler
     protected String FIRST_DIRECTORY_NAME        = "firstDirectoryName";
     protected String DIRECTORY_NAME_COUNT        = "directoryNameCount";
     protected String QUOTE_STOP_TIME             = "quoteStopTime";
-    protected String PROCESS_STATUS              = "processStatus";
-    protected String AREA                        = "area";
-    protected String CODE                        = "code";
-    protected String CITY                        = "city";
-    protected String COUNTY                      = "county";
     protected String PROVINCE                    = "province";
     // 数据来源，new表示新平台，old表示老平台
     protected String SOURCE                      = "source";
@@ -199,73 +184,11 @@ public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler
                     purchaseIds.add((Long) result.get(PURCHASE_ID));
                     refresh(result, projectDirectoryMap);
                 }
-                if (this instanceof SyncBidTypeOpportunityToXtDataJobHandler) {
-                    this.appendCompanyTenantSite(resultToExecute);
-                }
                 // 处理商机的状态
                 batchExecute(resultToExecute);
-
                 i += pageSize;
             }
         }
-    }
-
-//    /**
-//     * 项目重建删除项目和公告
-//     *
-//     * @param resultToExecute
-//     */
-//    protected void rebuildProjectDelete(List<Map<String, Object>> resultToExecute) {
-//        if (!CollectionUtils.isEmpty(resultToExecute)) {
-//            Set<Object> rebuildProjectIds = resultToExecute.stream()
-//                    .filter(map -> Integer.valueOf(map.get(PROJECT_STATUS).toString()) < 5).map(map -> map.get(PROJECT_ID)).collect(Collectors.toSet());
-//            deleteProjectAndNotice(rebuildProjectIds);
-//        }
-//    }
-//
-//    private void deleteProjectAndNotice(Set<Object> rebuildProjectIds) {
-//        if (!CollectionUtils.isEmpty(rebuildProjectIds)) {
-//            logger.info("1.项目重建项目信息:{}", JSON.toJSONString(rebuildProjectIds));
-//            Properties properties = elasticClient.getProperties();
-//            BoolQueryBuilder query = QueryBuilders.boolQuery();
-//            query.must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE));
-//            query.must(QueryBuilders.termQuery(PROJECT_TYPE, PURCHASE_PROJECT_TYPE));
-//            rebuildProjectIds.forEach(rebuildProjectId -> query.should(QueryBuilders.termQuery(PROJECT_ID, rebuildProjectId)));
-//            // 删除商机
-//            DeleteByQueryRequestBuilder deleteRequest = new DeleteByQueryRequestBuilder(elasticClient.getTransportClient(), DeleteByQueryAction.INSTANCE)
-//                    .setIndices(properties.getProperty("cluster.index")).setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
-//                    .setQuery(query);
-//            deleteRequest.execute().actionGet();
-//
-//            // 删除公告
-//            DeleteByQueryRequestBuilder noticeDeleteRequest = new DeleteByQueryRequestBuilder(elasticClient.getTransportClient(), DeleteByQueryAction.INSTANCE)
-//                    .setIndices(properties.getProperty("cluster.index")).setTypes(properties.getProperty("cluster.type.notice"))
-//                    .setQuery(query);
-//            noticeDeleteRequest.execute().actionGet();
-//        }
-//    }
-
-    private void appendCompanyTenantSite(List<Map<String, Object>> resultToExecute) {
-        Set<Long> companyIds = resultToExecute.stream().map(map -> Long.valueOf(map.get("purchaseId").toString())).collect(Collectors.toSet());
-        String querySqlTemplate = "SELECT\n" +
-                "\tid AS companyId,\n" +
-                "\tTENANT_SITE AS tenantSite \n" +
-                "FROM\n" +
-                "\tt_reg_company \n" +
-                "WHERE\n" +
-                "\tid IN (%s)";
-        String querySql = String.format(querySqlTemplate, StringUtils.collectionToCommaDelimitedString(companyIds));
-        Map<Long, Object> tenantSiteMap = DBUtil.query(uniregDataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Long, Object>>() {
-            @Override
-            public Map<Long, Object> execute(ResultSet resultSet) throws SQLException {
-                Map<Long, Object> map = new HashMap<>();
-                while (resultSet.next()) {
-                    map.put(resultSet.getLong(1), resultSet.getString(2));
-                }
-                return map;
-            }
-        });
-        resultToExecute.forEach(map -> map.put("tenantSite", tenantSiteMap.get(Long.valueOf(map.get("purchaseId").toString()))));
     }
 
     /**
@@ -285,7 +208,7 @@ public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler
                     // 添加不分词的areaStr
                     result.put(AREA_STR_NOT_ANALYZED, result.get(AREA_STR));
                     result.put(REGION, areaInfo.getRegion());
-                    if (Objects.isNull(result.get(PURCHASE_NAME))) {
+                    if (result.get(PURCHASE_NAME) == null) {
                         // 如果项目采购商公司名称为空 取中心库
                         result.put(PURCHASE_NAME, areaInfo.getPurchaseName());
                     }
@@ -378,7 +301,7 @@ public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler
                         .setDoc(JSON.toJSONString(result, new ValueFilter() {
                             @Override
                             public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof java.util.Date) {
+                                if (propertyValue instanceof Date) {
                                     return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
                                 } else {
                                     return propertyValue;
