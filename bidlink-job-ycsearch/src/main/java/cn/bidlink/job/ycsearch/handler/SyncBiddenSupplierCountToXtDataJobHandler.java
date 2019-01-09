@@ -201,7 +201,7 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
                 + "   project_id AS projectId,\n"
                 + "   count(supplier_id) AS biddenSupplierCount\n"
                 + "FROM\n"
-                + "   (SELECT comp_id, project_id, supplier_id FROM auction_bid_supplier WHERE comp_id IS NOT NULL AND (%s)) s\n"
+                + "   (SELECT comp_id, project_id, DISTINCT(supplier_id) FROM auction_bid_supplier WHERE comp_id IS NOT NULL AND (%s)) s\n"
                 + "GROUP BY\n"
                 + "   comp_id,\n"
                 + "   project_id;\n"
