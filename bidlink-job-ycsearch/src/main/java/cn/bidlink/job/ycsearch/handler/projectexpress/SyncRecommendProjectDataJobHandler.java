@@ -18,6 +18,7 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.sort.SortOrder;
@@ -62,6 +63,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
     protected DataSource ycDataSource;
 
     private String  PROJECT_TYPE          = "projectType";
+    private String  UPDATE_TIME           = "updateTime";
     private Integer PURCHASE_PROJECT_TYPE = 2;
     private Integer CANAL_STATUS          = 10;
 
@@ -81,7 +83,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                 .setQuery(QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
                         .must(QueryBuilders.termQuery(PROJECT_TYPE, PURCHASE_PROJECT_TYPE))
-                        .must(QueryBuilders.rangeQuery(SYNC_TIME).gte(SyncTimeUtil.toDateString(getZeroTime())))
+                        .must(QueryBuilders.rangeQuery(UPDATE_TIME).gte(SyncTimeUtil.toDateString(getZeroTime())))
                 )
                 .addSort("createTime", SortOrder.ASC)
                 .setSize(pageSize)
@@ -131,7 +133,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                     if (!CollectionUtils.isEmpty(directoryNames)) {
                         for (String directoryName : directoryNames) {
                             // 根据采购商机采购品匹配供应商项目直通车
-                            List<Map<String, Object>> recommendSuppliersForOneDirectorys = this.getRecommendSuppliersOrders(directoryName);
+                            List<Map<String, Object>> recommendSuppliersForOneDirectorys = this.getRecommendSuppliersOrders(directoryName, resultFromEs.get("updateTime").toString());
                             logger.info("根据采购品匹配到项目订单,recommendSuppliersForOneDirectorys:{}", JSON.toJSONString(recommendSuppliersForOneDirectorys));
                             if (!CollectionUtils.isEmpty(recommendSuppliersForOneDirectorys)) {
                                 for (Map<String, Object> map : recommendSuppliersForOneDirectorys) {
@@ -517,10 +519,11 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
      * shiyongren 查询需要推荐的供应商订单信息
      *
      * @param queryStr
+     * @param updateTime
      * @return
      * @author : <a href="mailto:shiyongren@ebnew.com">shiyongren</a>  2017年5月10日 下午3:02:22
      */
-    private List<Map<String, Object>> getRecommendSuppliersOrders(String queryStr) {
+    private List<Map<String, Object>> getRecommendSuppliersOrders(String queryStr, String updateTime) {
         //支付状态10 支付成功
         QueryBuilder paidStatusBuilder = QueryBuilders.termQuery("paidStatus", 10);
         //订单状态5 订单生效
@@ -531,14 +534,16 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
         QueryBuilder keyWordsBuilder = QueryBuilders.matchQuery("keywords", queryStr);
 
         //每天限制2次匹配
-//        QueryBuilder matchMarkBuilder = QueryBuilders.rangeQuery("matchMark").lt(getZeroTimeLongValue() + 2L);
+        QueryBuilder matchMarkBuilder = QueryBuilders.rangeQuery("matchMark").lt(getZeroTimeLongValue() + 2L);
 
-
+        // 推荐项目需要在订单创建之后
+        RangeQueryBuilder updateTimeBuilder = QueryBuilders.rangeQuery("createTime").lt(updateTime);
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.must(paidStatusBuilder)
                 .must(orderStatusBuilder)
                 .must(esOrderStatusBuilder)
-//                .must(matchMarkBuilder)
+                .must(matchMarkBuilder)
+                .must(updateTimeBuilder)
                 .must(keyWordsBuilder);
 
         Properties properties = elasticClient.getProperties();
