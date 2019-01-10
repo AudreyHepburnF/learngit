@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Properties;
 
 /**
@@ -38,6 +39,10 @@ public class SyncNoticeToXtDataJobHandler extends AbstractSyncYcNoticeDataJobHan
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.notice",
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE)));
+        Timestamp lastSyncStartTime = new Timestamp(new DateTime(new DateTime().getYear() - 1, 1, 1, 0, 0, 0).getMillis());
+        if (Objects.equals(SyncTimeUtil.GMT_TIME, lastSyncTime)) {
+            lastSyncTime = lastSyncStartTime;
+        }
         logger.info("同步悦采采购公告 lastSyncTime:" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "/n" +
                 ", syncTime" + SyncTimeUtil.currentDateToString());
         syncYcNoticeService(lastSyncTime);
