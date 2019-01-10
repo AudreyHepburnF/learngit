@@ -2,6 +2,7 @@ package cn.bidlink.job.ycsearch.handler;
 
 import cn.bidlink.job.common.constant.BusinessConstant;
 import cn.bidlink.job.common.utils.DBUtil;
+import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
@@ -10,7 +11,6 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,14 +61,9 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
     }
 
     private void syncRecruitData() {
-//        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.supplier_opportunity",
-//                QueryBuilders.boolQuery().must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
-//                        .must(QueryBuilders.termQuery(PROJECT_TYPE, RECRUIT_PROJECT_TYPE)));
-        Timestamp lastSyncTime = new Timestamp(0);
-        Timestamp lastSyncStartTime = new Timestamp(new DateTime(new DateTime().getYear(), 1, 1, 0, 0, 0).getMillis());
-        if (Objects.equals(SyncTimeUtil.GMT_TIME, lastSyncTime)) {
-            lastSyncTime = lastSyncStartTime;
-        }
+        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.supplier_opportunity",
+                QueryBuilders.boolQuery().must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
+                        .must(QueryBuilders.termQuery(PROJECT_TYPE, RECRUIT_PROJECT_TYPE)));
         logger.info("1.1 同步招募信息lastSyncTime:" + SyncTimeUtil.toDateString(lastSyncTime) + "\n" + ",syncTime:" + SyncTimeUtil.currentDateToString());
         this.syncRecruitDataService(lastSyncTime);
         // 修复有限期招募商机的数据

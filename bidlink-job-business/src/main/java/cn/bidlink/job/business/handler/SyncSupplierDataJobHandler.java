@@ -261,7 +261,52 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
         logger.info("同步供应商开始");
         doInsertedSupplierData(lastSyncTime);
         doUpdatedSupplierData(lastSyncTime);
+        doUpdatedSupplierUserData(lastSyncTime);
         logger.info("同步供应商结束");
+    }
+
+    private void doUpdatedSupplierUserData(Timestamp lastSyncTime) {
+        String countUpdatedSql = "SELECT count(1) FROM t_reg_company trc JOIN t_reg_user tru ON trc.id = tru.COMPANY_ID and trc.type = 13 WHERE tru.UPDATE_TIME > ?";
+        String queryUpdatedSql = "SELECT\n"
+                + "   trc.id,\n"
+                + "   trc.`NAME` AS companyName,\n"
+                + "   trc.NAME_ENGLISH AS companyNameEn,\n"
+                + "   trc.AREA AS area,\n"
+                + "   trc.ZONE_STR AS zoneStr,\n"
+                + "   trc.ADDRESS AS address,\n"
+                + "   trc.BIDAUTH_EXPIRES AS bidAuthExpires,\n"
+                + "   trc.BIDAUTH_FTIME AS bidAuthFtime,\n"
+                + "   trc.BIDAUTH_STATUS AS bidAuthStatus,\n"
+                + "   trc.BIDAUTH_TIME AS bidAuthTime,\n"
+                + "   trc.company_site AS companySite,\n"
+                + "   trc.WWW_STATION AS wwwStation,\n"
+                + "   trc.COMP_TYPE AS companyType,\n"
+                + "   trcct.`NAME` AS companyTypStr,\n"
+                + "   trc.FUND AS fund,\n"
+                + "   trc.FUNDUNIT AS fundUnit,\n"
+                + "   trc.INDUSTRY AS industryCode,\n"
+                + "   trc.company_logo AS companyLogo,\n"
+                + "   trc.MAIN_PRODUCT AS mainProduct,\n"
+                + "   trc.WORKPATTERN AS workPattern,\n"
+                + "   trc.TEL AS tel,\n"
+                + "   trc.CONTACT AS contact,\n"
+                + "   trc.CREATE_TIME AS createTime,\n"
+                + "   trc.UPDATE_TIME AS updateTime,\n"
+                + "   trc.WEB_TYPE AS webType,\n"
+                + "   trc.status AS status,\n"
+                + "   tru.LOGIN_NAME AS loginName,\n"
+                + "   tru.`NAME` AS supplierName,\n"
+                + "   tru.MOBILE AS mobile,\n"
+                + "   tru.id AS userId,\n"
+                + "\ttrc.core_status AS coreStatus \n"
+                + "FROM\n"
+                + "   t_reg_company trc\n"
+                + "JOIN t_reg_user tru ON trc.id = tru.COMPANY_ID and trc.type = 13\n"
+                + "LEFT JOIN t_reg_code_comp_type trcct ON trc.COMP_TYPE = trcct.ID\n"
+                + "WHERE tru.UPDATE_TIME > ?\n"
+                + "GROUP BY trc.ID\n"
+                + "LIMIT ?,?";
+        doSyncSupplierData(countUpdatedSql, queryUpdatedSql, lastSyncTime, SYNC_WAY_UPDATE);
     }
 
     private void doInsertedSupplierData(Timestamp lastSyncTime) {
