@@ -25,7 +25,6 @@ import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * @author <a href="mailto:zhihuizhou@ebnew.com">wisdom</a>
@@ -79,7 +78,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "FROM\n" +
                 "\t`recruit` \n" +
                 "WHERE\n" +
-                "\t`STATUS` > 1 AND DEL_FLAG = 1  \n" +
+                "\tDEL_FLAG = 1  \n" +
                 "\tAND CREATE_TIME > ?";
 
         String insertQuerySql = "SELECT\n" +
@@ -104,8 +103,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\t`recruit` r\n" +
                 "\tLEFT JOIN recruit_files rf ON r.ID = rf.RECRUIT_ID \n" +
                 "WHERE\n" +
-                "\t`STATUS` > 1 \n" +
-                "\tAND r.DEL_FLAG = 1 and r.create_time > ?\n" +
+                "\tr.DEL_FLAG = 1 and r.create_time > ?\n" +
                 "GROUP BY\n" +
                 "\tr.ID limit ?,?";
         doSncRecruitDataService(recruitDataSource, insertCountSql, insertQuerySql, Collections.singletonList(lastSyncTime));
@@ -115,7 +113,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "FROM\n" +
                 "\t`recruit` \n" +
                 "WHERE\n" +
-                "\t`STATUS` > 1 AND DEL_FLAG = 1 \n" +
+                "\tDEL_FLAG = 1 \n" +
                 "\tAND update_time > ?";
 
         String updateQuerySql = "SELECT\n" +
@@ -140,8 +138,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\t`recruit` r\n" +
                 "\tLEFT JOIN recruit_files rf ON r.ID = rf.RECRUIT_ID \n" +
                 "WHERE\n" +
-                "\t`STATUS` > 1 \n" +
-                "\tAND r.DEL_FLAG = 1 and r.update_time > ?\n" +
+                "\tr.DEL_FLAG = 1 and r.update_time > ?\n" +
                 "GROUP BY\n" +
                 "\tr.ID limit ?,?";
         doSncRecruitDataService(recruitDataSource, updateCountSql, updateQuerySql, Collections.singletonList(lastSyncTime));
@@ -168,12 +165,6 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
     }
 
     private void refresh(Map<String, Object> map) {
-        Object status = map.get(STATUS);
-        if (!Objects.isNull(status) && Objects.equals(status, UNDERWAY)) {
-            map.put(STATUS, VALID_OPPORTUNITY_STATUS);
-        } else {
-            map.put(STATUS, INVALID_OPPORTUNITY_STATUS);
-        }
         map.put(PURCHASE_ID, String.valueOf(map.get(PURCHASE_ID)));
         map.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
         map.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE);
