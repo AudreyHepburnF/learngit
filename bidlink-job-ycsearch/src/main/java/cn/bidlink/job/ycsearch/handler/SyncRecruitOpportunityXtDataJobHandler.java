@@ -51,6 +51,8 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
 
     private int UNDERWAY = 2;
 
+    private int STOP_RECRUIT = 3;
+
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
         SyncTimeUtil.setCurrentDate();
@@ -284,6 +286,11 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
         if (!Objects.isNull(isShow) && Objects.equals(isShow, 1)) {
             map.put(IS_SHOW, SHOW);
         } else {
+            map.put(IS_SHOW, HIDDEN);
+        }
+        // 是否停止招募
+        if (Objects.equals(status, STOP_RECRUIT)) {
+            // 不展示
             map.put(IS_SHOW, HIDDEN);
         }
         map.put(PROJECT_NAME_NOT_ANALYZED, map.get(PROJECT_NAME));
