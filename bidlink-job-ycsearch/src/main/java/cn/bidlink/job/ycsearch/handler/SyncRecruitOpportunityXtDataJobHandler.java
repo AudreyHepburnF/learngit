@@ -69,7 +69,7 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
         logger.info("1.1 同步招募信息lastSyncTime:" + SyncTimeUtil.toDateString(lastSyncTime) + "\n" + ",syncTime:" + SyncTimeUtil.currentDateToString());
         this.syncRecruitDataService(lastSyncTime);
         // 修复有限期招募商机的数据
-        this.fixedLimitRecruitTypeDataService();
+//        this.fixedLimitRecruitTypeDataService();
     }
 
     private void fixedLimitRecruitTypeDataService() {
@@ -144,8 +144,7 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
                 "FROM\n" +
                 "\t`recruit` \n" +
                 "WHERE\n" +
-                "\t`STATUS` > 1 \n" +
-                "\tAND CREATE_TIME > ?";
+                "\t`STATUS` > 1 \n";
 
         String insertQuerySql = "SELECT\n" +
                 "\tid AS id,\n" +
@@ -168,40 +167,40 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
                 "\t`recruit` \n" +
                 "WHERE\n" +
                 "\t`STATUS` > 1 \n" +
-                "\tAND CREATE_TIME > ? limit ?,?";
-        doSncRecruitDataService(recruitDataSource, insertCountSql, insertQuerySql, Collections.singletonList(lastSyncTime));
+                "\tlimit ?,?";
+        doSncRecruitDataService(recruitDataSource, insertCountSql, insertQuerySql, Collections.emptyList());
 
-        String updateCountSql = "SELECT\n" +
-                "\tcount( 1 ) \n" +
-                "FROM\n" +
-                "\t`recruit` \n" +
-                "WHERE\n" +
-                "\t`STATUS` > 1 \n" +
-                "\tAND update_time > ?";
-
-        String updateQuerySql = "SELECT\n" +
-                "\tid AS id,\n" +
-                "\tid AS projectId,\n" +
-                "\tTITLE AS projectName,\n" +
-                "\tsdate as quoteStartTime,\n" +
-                "\tedate as quoteStopTime,\n" +
-                "\tAPPLY_COUNT AS biddenSupplierCount,\n" +
-//                "\tAREA AS areaCode,\n" +
-//                "\tAREA_NAME AS areaStr,\n" +
-//                "\tOPERATE_MODE_NAME as compTypeStr,\n" +
-                "\tPURCHASER_ID AS purchaseId,\n" +
-                "\tPURCHASER AS purchaseName,\n" +
-                "\tstatus,\n" +
-                "\tendless,\n" +
-                "\tDEL_FLAG AS isShow,\n" +
-                "\tCREATE_TIME AS createTime,\n" +
-                "\tUPDATE_TIME AS updateTime \n" +
-                "FROM\n" +
-                "\t`recruit` \n" +
-                "WHERE\n" +
-                "\t`STATUS` > 1 \n" +
-                "\tAND update_time > ? limit ?,?";
-        doSncRecruitDataService(recruitDataSource, updateCountSql, updateQuerySql, Collections.singletonList(lastSyncTime));
+//        String updateCountSql = "SELECT\n" +
+//                "\tcount( 1 ) \n" +
+//                "FROM\n" +
+//                "\t`recruit` \n" +
+//                "WHERE\n" +
+//                "\t`STATUS` > 1 \n" +
+//                "\tAND update_time > ?";
+//
+//        String updateQuerySql = "SELECT\n" +
+//                "\tid AS id,\n" +
+//                "\tid AS projectId,\n" +
+//                "\tTITLE AS projectName,\n" +
+//                "\tsdate as quoteStartTime,\n" +
+//                "\tedate as quoteStopTime,\n" +
+//                "\tAPPLY_COUNT AS biddenSupplierCount,\n" +
+////                "\tAREA AS areaCode,\n" +
+////                "\tAREA_NAME AS areaStr,\n" +
+////                "\tOPERATE_MODE_NAME as compTypeStr,\n" +
+//                "\tPURCHASER_ID AS purchaseId,\n" +
+//                "\tPURCHASER AS purchaseName,\n" +
+//                "\tstatus,\n" +
+//                "\tendless,\n" +
+//                "\tDEL_FLAG AS isShow,\n" +
+//                "\tCREATE_TIME AS createTime,\n" +
+//                "\tUPDATE_TIME AS updateTime \n" +
+//                "FROM\n" +
+//                "\t`recruit` \n" +
+//                "WHERE\n" +
+//                "\t`STATUS` > 1 \n" +
+//                "\tAND update_time > ? limit ?,?";
+//        doSncRecruitDataService(recruitDataSource, updateCountSql, updateQuerySql, Collections.singletonList(lastSyncTime));
     }
 
     private void doSncRecruitDataService(DataSource dataSource, String countSql, String querySql, List<Object> params) {
