@@ -340,7 +340,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                 public List<Long> execute(ResultSet resultSet) throws SQLException {
                     ArrayList<Long> supplierIds = new ArrayList<>();
                     while (resultSet.next()) {
-                        long supplierId = resultSet.getLong(0);
+                        long supplierId = resultSet.getLong(1);
                         supplierIds.add(supplierId);
                     }
                     return supplierIds;
