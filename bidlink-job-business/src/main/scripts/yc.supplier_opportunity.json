@@ -133,6 +133,9 @@
       },
       "platformSource": {
         "type": "integer"
+      },
+      "bidProjectType": {
+        "type": "integer"
       }
     }
   }

@@ -245,7 +245,7 @@
                 <pom.log.level>INFO</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
                 <!--悦采数据源 -->
-                <pom.yuecai.db.url>jdbc:mysql://yuecai-mysql.internal.cg-xt.com:3306/nyc?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yuecai.db.url>
+                <pom.yuecai.db.url>jdbc:mysql://yuecai-mysql-slave.internal.cg-xt.com:3306/nyc?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yuecai.db.url>
                 <pom.yuecai.db.username>dashuju</pom.yuecai.db.username>
                 <pom.yuecai.db.password>ixietong!@#$</pom.yuecai.db.password>
                 <!--中心库数据源-->
@@ -255,7 +255,7 @@
                 <pom.unireg.db.username>appaccount</pom.unireg.db.username>
                 <pom.unireg.db.password>app!@#$4321</pom.unireg.db.password>
                 <!--pro_test数据源  -->
-                <pom.pro.db.url>jdbc:mariadb://yuecai-mysql.internal.cg-xt.com:3306/yc_pro?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
+                <pom.pro.db.url>jdbc:mariadb://yuecai-mysql-slave.internal.cg-xt.com:3306/yc_pro?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
                 <pom.pro.db.username>dashuju</pom.pro.db.username>
                 <pom.pro.db.password>ixietong!@#$</pom.pro.db.password>
                 <!--pageview数据源  TODO 待修改-->
@@ -263,11 +263,11 @@
                 <pom.pageview.db.username>dashuju</pom.pageview.db.username>
                 <pom.pageview.db.password>ixietong!@#$</pom.pageview.db.password>
                 <!--console数据源   -->
-                <pom.console.db.url>jdbc:mariadb://yuecai-mysql.internal.cg-xt.com:3306/console?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.console.db.url>
+                <pom.console.db.url>jdbc:mariadb://yuecai-mysql-slave.internal.cg-xt.com:3306/console?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.console.db.url>
                 <pom.console.db.username>dashuju</pom.console.db.username>
                 <pom.console.db.password>ixietong!@#$</pom.console.db.password>
                 <!--悦采pro_test recruit数据源 -->
-                <pom.recruit.db.url>jdbc:mariadb://yuecai-mysql.internal.cg-xt.com:3306/yc_pro?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.recruit.db.url>
+                <pom.recruit.db.url>jdbc:mariadb://yuecai-mysql-slave.internal.cg-xt.com:3306/yc_pro?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.recruit.db.url>
                 <pom.recruit.db.username>dashuju</pom.recruit.db.username>
                 <pom.recruit.db.password>ixietong!@#$</pom.recruit.db.password>
                 <!--供应商企业空间-->

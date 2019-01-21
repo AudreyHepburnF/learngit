@@ -265,12 +265,12 @@
                 <pom.api.db.password>ixietong!@#$</pom.api.db.password>
 
                 <!--标王 -->
-                <pom.pro.db.url>jdbc:mariadb://yuecai-mysql.internal.cg-xt.com:3306/yc_pro?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
+                <pom.pro.db.url>jdbc:mariadb://yuecai-mysql-slave.internal.cg-xt.com:3306/yc_pro?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
                 <pom.pro.db.username>dashuju</pom.pro.db.username>
                 <pom.pro.db.password>ixietong!@#$</pom.pro.db.password>
 
                 <!--悦采数据源 -->
-                <pom.yuecai.db.url>jdbc:mysql://yuecai-mysql.internal.cg-xt.com:3306/nyc?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yuecai.db.url>
+                <pom.yuecai.db.url>jdbc:mysql://yuecai-mysql-slave.internal.cg-xt.com:3306/nyc?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yuecai.db.url>
                 <pom.yuecai.db.username>dashuju</pom.yuecai.db.username>
                 <pom.yuecai.db.password>ixietong!@#$</pom.yuecai.db.password>
                 <!--供应商企业空间-->

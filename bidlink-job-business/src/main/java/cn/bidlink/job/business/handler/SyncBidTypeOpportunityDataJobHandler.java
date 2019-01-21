@@ -10,7 +10,6 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
-import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -53,8 +52,8 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery(PROJECT_TYPE, BIDDING_PROJECT_TYPE))
                         .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE)));
-        logger.info("招标项目商机同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss"));
-//        Timestamp lastSyncTime = SyncTimeUtil.GMT_TIME;
+        logger.info("招标项目商机同步 lastSyncTime:" + SyncTimeUtil.toDateString(lastSyncTime), ",\n syncTime:" + SyncTimeUtil.currentDateToString());
+//        Timestamp lastSyncTime = new Timestamp(SyncTimeUtil.toStringDate("2019-01-18 14:50:00").getTime());
         syncBiddingProjectDataService(lastSyncTime);
         // 修复招标项目 截止时间到后,商机状态
         fixExpiredBiddingProjectDataService();
@@ -101,7 +100,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                     + "FROM\n"
                     + "   bid_sub_project\n"
                     + "WHERE\n"
-                    + "   is_bid_open = 1 AND node > 1 AND approve_status = 2 AND  id in (%s) AND bid_endtime < ?";
+                    + "   is_bid_open = 1 AND approve_status = 2 AND  id in (%s) AND bid_endtime < ?";
             String queryTemplateSql = "SELECT\n" +
                     "\tproject.*,\n" +
                     "\tbpi.id AS directoryId,\n" +
@@ -116,7 +115,12 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                     "\tbsp.company_id AS purchaseId,\n" +
                     "\tbsp.company_name AS purchaseName,\n" +
                     "\tbsp.create_time AS createTime,\n" +
-                    "\tbsp.node,\n" +
+                    "\tcase \n" +
+                    "\tWHEN project_type in (1,2,3) THEN\n" +
+                    "\t\tbsp.node\n" +
+                    "\tELSE\n" +
+                    "\t\tbsp.negotiation_node\n" +
+                    "END as node,\n" +
                     "\tbsp.bid_open_time AS bidOpenTime,\n" +
                     "\tbsp.bid_endtime AS quoteStopTime,\n" +
                     "\tbsp.sys_id AS sourceId,\n" +
@@ -145,17 +149,129 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
     }
 
     /**
-     * 同步招标项目
+     * 同步招标项目  bid_project_type  11:采购商招标 21:机构招标资格预审 22:机构招标无资格预审 31:竞争性谈判 41:竞争性磋商
      *
      * @param lastSyncTime
      */
     private void syncBiddingProjectDataService(Timestamp lastSyncTime) {
+        // 采购商版本
+        syncCGBiddingProjectDataService(lastSyncTime);
+        // 机构版招标项目
+        // 1.公开无资格预审
+        syncJGBiddingOpenNoPrequalificationProjectDataService(lastSyncTime);
+        // 2.公开有资格预审,只同步资格预审的项目
+        syncJGBiddingOpenPrequalificationProjectDataService(lastSyncTime);
+        // 3.邀请招标
+        syncJGBiddingInviteProjectDataService(lastSyncTime);
+        // 4.竞争性谈判
+        syncJGCompetitiveNegotiationsProjectDataService(lastSyncTime);
+        // 5.竞争性磋商
+        syncJGCompetitiveConsultationProjectDataService(lastSyncTime);
+
+
+    }
+
+    private void syncJGCompetitiveConsultationProjectDataService(Timestamp lastSyncTime) {
         String countUpdatedSql = "SELECT\n"
                 + "   count(1)\n"
                 + "FROM\n"
                 + "   bid_sub_project\n"
                 + "WHERE\n"
-                + "   is_bid_open = 1 AND node > 1 AND approve_status = 2 AND update_time > ?";
+                + "   is_bid_open = 1 AND negotiation_node > 1 AND approve_status = 2 and project_type = 4 AND update_time > ?";
+        String queryUpdatedSql = "SELECT\n" +
+                "\tproject.*,\n" +
+                "\tbpi.id AS directoryId,\n" +
+                "\tbpi.`name` AS directoryName \n" +
+                "FROM\n" +
+                "\t(\n" +
+                "SELECT\n" +
+                "\tbsp.id AS projectId,\n" +
+                "\tbsp.project_code AS projectCode,\n" +
+                "\tbsp.project_name AS projectName,\n" +
+                "\tbsp.project_status AS projectStatus,\n" +
+                "\tbsp.company_id AS purchaseId,\n" +
+                "\tbsp.company_name AS purchaseName,\n" +
+                "\tbsp.create_time AS createTime,\n" +
+                "\tbsp.negotiation_node as node,\n" +
+                "\t41 as bidProjectType,\n" +
+                "\tbsp.bid_open_time AS bidOpenTime,\n" +
+                "\tbsp.bid_endtime AS quoteStopTime,\n" +
+                "\tbsp.sys_id AS sourceId,\n" +
+                "\tbsp.update_time AS updateTime,\n" +
+                "\tbp.province,\n" +
+                "\tbp.zone_str AS areaStr, \n" +
+                "\tbp.bid_type AS bidType, \n" +
+                "\tbp.industry_name AS industryStr \n" +
+                "FROM\n" +
+                "\tbid_sub_project bsp\n" +
+                "\tLEFT JOIN bid_project bp ON bsp.project_id = bp.id \n" +
+                "\tAND bsp.company_id = bp.company_id \n" +
+                "WHERE\n" +
+                "\tis_bid_open = 1 \n" +
+                "\tAND negotiation_node > 1 \n" +
+                "\tAND bsp.approve_status = 2\n" +
+                "\tAND bsp.project_type = 4\n" +
+                "\tAND bsp.update_time > ? and bsp.bid_endtime is not null\n" +
+                "\tLIMIT ?,? \n" +
+                "\t) project\n" +
+                "\tLEFT JOIN bid_project_item bpi ON project.projectId = bpi.sub_project_id";
+        doSyncProjectDataService(tenderDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList(((Object) lastSyncTime)), INSERT_OPERATION);
+    }
+
+    private void syncJGCompetitiveNegotiationsProjectDataService(Timestamp lastSyncTime) {
+        String countUpdatedSql = "SELECT\n"
+                + "   count(1)\n"
+                + "FROM\n"
+                + "   bid_sub_project\n"
+                + "WHERE\n"
+                + "   is_bid_open = 1 AND negotiation_node > 1 AND approve_status = 2 and project_type = 3 AND update_time > ?";
+        String queryUpdatedSql = "SELECT\n" +
+                "\tproject.*,\n" +
+                "\tbpi.id AS directoryId,\n" +
+                "\tbpi.`name` AS directoryName \n" +
+                "FROM\n" +
+                "\t(\n" +
+                "SELECT\n" +
+                "\tbsp.id AS projectId,\n" +
+                "\tbsp.project_code AS projectCode,\n" +
+                "\tbsp.project_name AS projectName,\n" +
+                "\tbsp.project_status AS projectStatus,\n" +
+                "\tbsp.company_id AS purchaseId,\n" +
+                "\tbsp.company_name AS purchaseName,\n" +
+                "\tbsp.create_time AS createTime,\n" +
+                "\tbsp.negotiation_node as node,\n" +
+                "\t31 as bidProjectType,\n" +
+                "\tbsp.bid_open_time AS bidOpenTime,\n" +
+                "\tbsp.bid_endtime AS quoteStopTime,\n" +
+                "\tbsp.sys_id AS sourceId,\n" +
+                "\tbsp.update_time AS updateTime,\n" +
+                "\tbp.province,\n" +
+                "\tbp.zone_str AS areaStr, \n" +
+                "\tbp.bid_type AS bidType, \n" +
+                "\tbp.industry_name AS industryStr \n" +
+                "FROM\n" +
+                "\tbid_sub_project bsp\n" +
+                "\tLEFT JOIN bid_project bp ON bsp.project_id = bp.id \n" +
+                "\tAND bsp.company_id = bp.company_id \n" +
+                "WHERE\n" +
+                "\tis_bid_open = 1 \n" +
+                "\tAND negotiation_node > 1 \n" +
+                "\tAND bsp.approve_status = 2\n" +
+                "\tAND bsp.project_type = 3\n" +
+                "\tAND bsp.update_time > ? and bsp.bid_endtime is not null\n" +
+                "\tLIMIT ?,? \n" +
+                "\t) project\n" +
+                "\tLEFT JOIN bid_project_item bpi ON project.projectId = bpi.sub_project_id";
+        doSyncProjectDataService(tenderDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList(((Object) lastSyncTime)), INSERT_OPERATION);
+    }
+
+    private void syncJGBiddingInviteProjectDataService(Timestamp lastSyncTime) {
+        String countUpdatedSql = "SELECT\n"
+                + "   count(1)\n"
+                + "FROM\n"
+                + "   bid_sub_project\n"
+                + "WHERE\n"
+                + "   is_bid_open = 1 AND node > 1 AND approve_status = 2 and project_type = 2 AND bid_type = 2 AND update_time > ?";
         String queryUpdatedSql = "SELECT\n" +
                 "\tproject.*,\n" +
                 "\tbpi.id AS directoryId,\n" +
@@ -171,6 +287,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                 "\tbsp.company_name AS purchaseName,\n" +
                 "\tbsp.create_time AS createTime,\n" +
                 "\tbsp.node,\n" +
+                "\t22 as bidProjectType,\n" +
                 "\tbsp.bid_open_time AS bidOpenTime,\n" +
                 "\tbsp.bid_endtime AS quoteStopTime,\n" +
                 "\tbsp.sys_id AS sourceId,\n" +
@@ -187,6 +304,154 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                 "\tis_bid_open = 1 \n" +
                 "\tAND node > 1 \n" +
                 "\tAND bsp.approve_status = 2\n" +
+                "\tAND bsp.bid_type = 2\n" +
+                "\tAND bsp.project_type = 2\n" +
+                "\tAND bsp.update_time > ? and bsp.bid_endtime is not null\n" +
+                "\tLIMIT ?,? \n" +
+                "\t) project\n" +
+                "\tLEFT JOIN bid_project_item bpi ON project.projectId = bpi.sub_project_id";
+        doSyncProjectDataService(tenderDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList(((Object) lastSyncTime)), INSERT_OPERATION);
+    }
+
+    private void syncJGBiddingOpenPrequalificationProjectDataService(Timestamp lastSyncTime) {
+        String countUpdatedSql = "SELECT\n"
+                + "   count(1)\n"
+                + "FROM\n"
+                + "   bid_sub_project\n"
+                + "WHERE\n"
+                + "   is_bid_open = 1 AND node > 1 AND approve_status = 2 and project_type = 2 AND is_need_prequa =1 and is_prequa_project_data=1 AND bid_type = 1 AND update_time > ?";
+        String queryUpdatedSql = "SELECT\n" +
+                "\tproject.*,\n" +
+                "\tbpi.id AS directoryId,\n" +
+                "\tbpi.`name` AS directoryName \n" +
+                "FROM\n" +
+                "\t(\n" +
+                "SELECT\n" +
+                "\tbsp.id AS projectId,\n" +
+                "\tbsp.project_code AS projectCode,\n" +
+                "\tbsp.project_name AS projectName,\n" +
+                "\tbsp.project_status AS projectStatus,\n" +
+                "\tbsp.company_id AS purchaseId,\n" +
+                "\tbsp.company_name AS purchaseName,\n" +
+                "\tbsp.create_time AS createTime,\n" +
+                "\tbsp.node,\n" +
+                "\t21 as bidProjectType,\n" +
+                "\tbsp.bid_open_time AS bidOpenTime,\n" +
+                "\tbsp.bid_endtime AS quoteStopTime,\n" +
+                "\tbsp.sys_id AS sourceId,\n" +
+                "\tbsp.update_time AS updateTime,\n" +
+                "\tbp.province,\n" +
+                "\tbp.zone_str AS areaStr, \n" +
+                "\tbp.bid_type AS bidType, \n" +
+                "\tbp.industry_name AS industryStr \n" +
+                "FROM\n" +
+                "\tbid_sub_project bsp\n" +
+                "\tLEFT JOIN bid_project bp ON bsp.project_id = bp.id \n" +
+                "\tAND bsp.company_id = bp.company_id \n" +
+                "WHERE\n" +
+                "\tis_bid_open = 1 \n" +
+                "\tAND node > 1 \n" +
+                "\tAND bsp.approve_status = 2\n" +
+                "\tAND bsp.project_type = 2\n" +
+                "\tAND bsp.bid_type = 1\n" +
+                "\tAND bsp.is_need_prequa =1\n" +
+                "\tAND bsp.is_prequa_project_data =1\n" +
+                "\tAND bsp.update_time > ? and bsp.bid_endtime is not null\n" +
+                "\tLIMIT ?,? \n" +
+                "\t) project\n" +
+                "\tLEFT JOIN bid_project_item bpi ON project.projectId = bpi.sub_project_id";
+        doSyncProjectDataService(tenderDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList(((Object) lastSyncTime)), INSERT_OPERATION);
+    }
+
+    private void syncJGBiddingOpenNoPrequalificationProjectDataService(Timestamp lastSyncTime) {
+        String countUpdatedSql = "SELECT\n"
+                + "   count(1)\n"
+                + "FROM\n"
+                + "   bid_sub_project\n"
+                + "WHERE\n"
+                + "   is_bid_open = 1 AND node > 1 AND bid_type = 1 and approve_status = 2 AND project_type = 2 AND is_need_prequa =2 AND update_time > ?";
+        String queryUpdatedSql = "SELECT\n" +
+                "\tproject.*,\n" +
+                "\tbpi.id AS directoryId,\n" +
+                "\tbpi.`name` AS directoryName \n" +
+                "FROM\n" +
+                "\t(\n" +
+                "SELECT\n" +
+                "\tbsp.id AS projectId,\n" +
+                "\tbsp.project_code AS projectCode,\n" +
+                "\tbsp.project_name AS projectName,\n" +
+                "\tbsp.project_status AS projectStatus,\n" +
+                "\tbsp.company_id AS purchaseId,\n" +
+                "\tbsp.company_name AS purchaseName,\n" +
+                "\tbsp.create_time AS createTime,\n" +
+                "\tbsp.node,\n" +
+                "\t22 as bidProjectType,\n" +
+                "\tbsp.bid_open_time AS bidOpenTime,\n" +
+                "\tbsp.bid_endtime AS quoteStopTime,\n" +
+                "\tbsp.sys_id AS sourceId,\n" +
+                "\tbsp.update_time AS updateTime,\n" +
+                "\tbp.province,\n" +
+                "\tbp.zone_str AS areaStr, \n" +
+                "\tbp.bid_type AS bidType, \n" +
+                "\tbp.industry_name AS industryStr \n" +
+                "FROM\n" +
+                "\tbid_sub_project bsp\n" +
+                "\tLEFT JOIN bid_project bp ON bsp.project_id = bp.id \n" +
+                "\tAND bsp.company_id = bp.company_id \n" +
+                "WHERE\n" +
+                "\tis_bid_open = 1 \n" +
+                "\tAND node > 1 \n" +
+                "\tAND bsp.approve_status = 2\n" +
+                "\tAND bsp.bid_type = 1\n" +
+                "\tAND bsp.project_type = 2\n" +
+                "\tAND bsp.is_need_prequa =2\n" +
+                "\tAND bsp.update_time > ? and bsp.bid_endtime is not null\n" +
+                "\tLIMIT ?,? \n" +
+                "\t) project\n" +
+                "\tLEFT JOIN bid_project_item bpi ON project.projectId = bpi.sub_project_id";
+        doSyncProjectDataService(tenderDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList(((Object) lastSyncTime)), INSERT_OPERATION);
+    }
+
+    private void syncCGBiddingProjectDataService(Timestamp lastSyncTime) {
+        String countUpdatedSql = "SELECT\n"
+                + "   count(1)\n"
+                + "FROM\n"
+                + "   bid_sub_project\n"
+                + "WHERE\n"
+                + "   is_bid_open = 1 AND node > 1 AND approve_status = 2 and project_type = 1 AND update_time > ?";
+        String queryUpdatedSql = "SELECT\n" +
+                "\tproject.*,\n" +
+                "\tbpi.id AS directoryId,\n" +
+                "\tbpi.`name` AS directoryName \n" +
+                "FROM\n" +
+                "\t(\n" +
+                "SELECT\n" +
+                "\tbsp.id AS projectId,\n" +
+                "\tbsp.project_code AS projectCode,\n" +
+                "\tbsp.project_name AS projectName,\n" +
+                "\tbsp.project_status AS projectStatus,\n" +
+                "\tbsp.company_id AS purchaseId,\n" +
+                "\tbsp.company_name AS purchaseName,\n" +
+                "\tbsp.create_time AS createTime,\n" +
+                "\tbsp.node,\n" +
+                "\t11 as bidProjectType,\n" +
+                "\tbsp.bid_open_time AS bidOpenTime,\n" +
+                "\tbsp.bid_endtime AS quoteStopTime,\n" +
+                "\tbsp.sys_id AS sourceId,\n" +
+                "\tbsp.update_time AS updateTime,\n" +
+                "\tbp.province,\n" +
+                "\tbp.zone_str AS areaStr, \n" +
+                "\tbp.bid_type AS bidType, \n" +
+                "\tbp.industry_name AS industryStr \n" +
+                "FROM\n" +
+                "\tbid_sub_project bsp\n" +
+                "\tLEFT JOIN bid_project bp ON bsp.project_id = bp.id \n" +
+                "\tAND bsp.company_id = bp.company_id \n" +
+                "WHERE\n" +
+                "\tis_bid_open = 1 \n" +
+                "\tAND node > 1 \n" +
+                "\tAND bsp.approve_status = 2\n" +
+                "\tAND bsp.project_type = 1\n" +
                 "\tAND bsp.update_time > ? and bsp.bid_endtime is not null\n" +
                 "\tLIMIT ?,? \n" +
                 "\t) project\n" +
