@@ -1,5 +1,6 @@
 package cn.bidlink.job.business.handler;
 
+import cn.bidlink.job.common.constant.BusinessConstant;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
@@ -33,7 +34,9 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
 
     private void syncBidNoticeData() {
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.notice",
-                QueryBuilders.termQuery(PROJECT_TYPE, BID_NOTICE_TYPE));
+                QueryBuilders.boolQuery()
+                        .must(QueryBuilders.termQuery(PROJECT_TYPE, BID_NOTICE_TYPE))
+                        .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE)));
 //        Timestamp lastSyncTime = SyncTimeUtil.GMT_TIME;
         logger.info("同步新平台招标公告 lastSyncTime:" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n" +
                 ", syncTime" + new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
@@ -153,6 +156,7 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
                 "\tbid_bail AS bidBail,\n" +
                 "\tis_bail_free AS bailFree,\n" +
                 "\tput_file_type AS putFileType,\n" +
+                "\tput_file_address AS putFileAddress,\n" +
                 "\tbid_open_time AS bidOpenTime,\n" +
                 "\tbid_open_address AS bidOpenAddress,\n" +
                 "\tremarks AS remarks,\n" +
@@ -207,6 +211,7 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
                 "\tis_bail_free AS bailFree,\n" +
                 "\tbid_bail AS bidBail,\n" +
                 "\tput_file_type AS putFileType,\n" +
+                "\tput_file_address AS putFileAddress,\n" +
                 "\tbid_open_time AS bidOpenTime,\n" +
                 "\tbid_open_address AS bidOpenAddress,\n" +
                 "\tremarks AS remarks,\n" +
