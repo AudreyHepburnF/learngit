@@ -138,6 +138,10 @@
                 <pom.yuecai.db.url>jdbc:mariadb://testmariadb:3305/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yuecai.db.url>
                 <pom.yuecai.db.username>develop</pom.yuecai.db.username>
                 <pom.yuecai.db.password>123123</pom.yuecai.db.password>
+                <!--crm数据源 TODO 没有dev和test环境-->
+                <pom.crm.db.url>jdbc:mariadb://127.0.0.1:3306/xxl-job?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.crm.db.url>
+                <pom.crm.db.username>root</pom.crm.db.username>
+                <pom.crm.db.password>root</pom.crm.db.password>
                 <!--供应商企业空间-->
                 <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
@@ -204,6 +208,10 @@
                 <pom.yuecai.db.url>jdbc:mariadb://testmariadb:3305/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yuecai.db.url>
                 <pom.yuecai.db.username>develop</pom.yuecai.db.username>
                 <pom.yuecai.db.password>123123</pom.yuecai.db.password>
+                <!--crm数据源 TODO 没有dev和test环境-->
+                <pom.crm.db.url>jdbc:mariadb://sales-management.internal.cg-xt.com:3306/crm?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.crm.db.url>
+                <pom.crm.db.username>dashuju</pom.crm.db.username>
+                <pom.crm.db.password>ixietong!@#$</pom.crm.db.password>
                 <!--供应商企业空间-->
                 <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
@@ -273,6 +281,11 @@
                 <pom.yuecai.db.url>jdbc:mysql://yuecai-mysql-slave.internal.cg-xt.com:3306/nyc?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yuecai.db.url>
                 <pom.yuecai.db.username>dashuju</pom.yuecai.db.username>
                 <pom.yuecai.db.password>ixietong!@#$</pom.yuecai.db.password>
+
+                <!--crm数据源 -->
+                <pom.crm.db.url>jdbc:mariadb://sales-management.internal.cg-xt.com:3306/crm?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.crm.db.url>
+                <pom.crm.db.username>dashuju</pom.crm.db.username>
+                <pom.crm.db.password>ixietong!@#$</pom.crm.db.password>
                 <!--供应商企业空间-->
                 <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
