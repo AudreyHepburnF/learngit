@@ -21,6 +21,11 @@ public class DBUtil {
         return (long) results.get(0).values().iterator().next();
     }
 
+    public static Object max(DataSource dataSource, String sql, List<Object> params) {
+        List<Map<String, Object>> results = query(dataSource, sql, params);
+        return results.get(0).values().iterator().next();
+    }
+
     public static List<Map<String, Object>> query(DataSource dataSource, String sql, List<Object> params) {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
