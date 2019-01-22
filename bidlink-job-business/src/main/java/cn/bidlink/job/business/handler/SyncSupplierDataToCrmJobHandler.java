@@ -97,6 +97,7 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tu.MOBILE,\n" +
                 "\tu.LOGIN_NAME,\n" +
                 "\tu.FAX,\n" +
+                "\tu.name as link_man,\n" +
                 "\tu.EMAIL \n" +
                 "FROM\n" +
                 "\tt_reg_company t\n" +
@@ -147,6 +148,7 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tu.MOBILE,\n" +
                 "\tu.LOGIN_NAME,\n" +
                 "\tu.FAX,\n" +
+                "\tu.name as link_man,\n" +
                 "\tu.EMAIL \n" +
                 "FROM\n" +
                 "\tt_reg_company t\n" +
@@ -197,6 +199,7 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tu.MOBILE,\n" +
                 "\tu.LOGIN_NAME,\n" +
                 "\tu.FAX,\n" +
+                "\tu.name as link_man,\n" +
                 "\tu.EMAIL \n" +
                 "FROM\n" +
                 "\tt_reg_company t\n" +

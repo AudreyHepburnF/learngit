@@ -149,7 +149,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
     }
 
     /**
-     * 同步招标项目  bid_project_type  11:采购商招标 21:机构招标资格预审 22:机构招标无资格预审 31:竞争性谈判 41:竞争性磋商
+     * 同步招标项目  bid_project_type  11:采购商招标 21:机构招标资格预审 22:机构招标无资格预审 32:竞争性谈判 42:竞争性磋商
      *
      * @param lastSyncTime
      */
@@ -193,7 +193,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                 "\tbsp.company_name AS purchaseName,\n" +
                 "\tbsp.create_time AS createTime,\n" +
                 "\tbsp.negotiation_node as node,\n" +
-                "\t41 as bidProjectType,\n" +
+                "\t42 as bidProjectType,\n" +
                 "\tbsp.bid_open_time AS bidOpenTime,\n" +
                 "\tbsp.bid_endtime AS quoteStopTime,\n" +
                 "\tbsp.sys_id AS sourceId,\n" +
@@ -240,7 +240,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                 "\tbsp.company_name AS purchaseName,\n" +
                 "\tbsp.create_time AS createTime,\n" +
                 "\tbsp.negotiation_node as node,\n" +
-                "\t31 as bidProjectType,\n" +
+                "\t32 as bidProjectType,\n" +
                 "\tbsp.bid_open_time AS bidOpenTime,\n" +
                 "\tbsp.bid_endtime AS quoteStopTime,\n" +
                 "\tbsp.sys_id AS sourceId,\n" +

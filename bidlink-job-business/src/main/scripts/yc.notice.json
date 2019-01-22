@@ -209,6 +209,10 @@
       },
       "optStatus": {
         "type": "integer"
+      },
+      "putFileAddress": {
+        "type": "string",
+        "index": "not_analyzed"
       }
     }
   }
