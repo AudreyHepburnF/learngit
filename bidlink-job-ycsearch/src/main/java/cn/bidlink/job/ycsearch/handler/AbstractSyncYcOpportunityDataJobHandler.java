@@ -3,7 +3,6 @@ package cn.bidlink.job.ycsearch.handler;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.AreaUtil;
 import cn.bidlink.job.common.utils.DBUtil;
-import cn.bidlink.job.common.utils.RegionUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.ValueFilter;
@@ -330,12 +329,6 @@ public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler
         result.put(PURCHASE_ID, String.valueOf(result.get(PURCHASE_ID)));
         result.put(SOURCE_ID, String.valueOf(result.get(SOURCE_ID)));
         result.put(AREA_STR_NOT_ANALYZED, result.get(AREA_STR));
-        // 区域处理
-        String province = String.valueOf(result.get(PROVINCE));
-        if (province != null && province.length() > 2) {
-            String region = RegionUtil.regionMap.get(province.substring(0, 2));
-            result.put(REGION, region);
-        }
     }
 
     /**
