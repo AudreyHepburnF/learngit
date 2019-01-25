@@ -1,9 +1,11 @@
 package cn.bidlink.job.ycsearch.handler;
 
 import cn.bidlink.job.common.constant.BusinessConstant;
+import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
 
@@ -38,13 +40,13 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
      * 同步商机数据，分为采购商机和招标商机
      */
     private void syncOpportunityData() {
-//        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
-//                "cluster.index",
-//                "cluster.type.supplier_opportunity",
-//                QueryBuilders.boolQuery()
-//                        .must(QueryBuilders.termQuery("projectType", BIDDING_PROJECT_TYPE))
-//                        .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE)));
-        Timestamp lastSyncTime = new Timestamp(0);
+        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
+                "cluster.index",
+                "cluster.type.supplier_opportunity",
+                QueryBuilders.boolQuery()
+                        .must(QueryBuilders.termQuery("projectType", BIDDING_PROJECT_TYPE))
+                        .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE)));
+//        Timestamp lastSyncTime = new Timestamp(0);
         Timestamp lastSyncStartTime = new Timestamp(new DateTime(new DateTime().getYear() - 1, 1, 1, 0, 0, 0).getMillis());
         if (Objects.equals(SyncTimeUtil.GMT_TIME, lastSyncTime)) {
             lastSyncTime = lastSyncStartTime;
