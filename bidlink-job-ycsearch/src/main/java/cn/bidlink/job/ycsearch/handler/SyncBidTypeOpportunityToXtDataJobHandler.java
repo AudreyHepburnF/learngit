@@ -45,7 +45,7 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
 //                        .must(QueryBuilders.termQuery("projectType", BIDDING_PROJECT_TYPE))
 //                        .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE)));
         Timestamp lastSyncTime = new Timestamp(0);
-        Timestamp lastSyncStartTime = new Timestamp(new DateTime(new DateTime().getYear() - 1, 1, 1, 0, 0, 0).getMillis());
+        Timestamp lastSyncStartTime = new Timestamp(new DateTime(new DateTime().getYear(), 1, 1, 0, 0, 0).getMillis());
         if (Objects.equals(SyncTimeUtil.GMT_TIME, lastSyncTime)) {
             lastSyncTime = lastSyncStartTime;
         }
