@@ -1,11 +1,9 @@
 package cn.bidlink.job.ycsearch.handler;
 
 import cn.bidlink.job.common.constant.BusinessConstant;
-import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
 
@@ -40,14 +38,14 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
      * 同步商机数据，分为采购商机和招标商机
      */
     private void syncOpportunityData() {
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
-                "cluster.index",
-                "cluster.type.supplier_opportunity",
-                QueryBuilders.boolQuery()
-                        .must(QueryBuilders.termQuery("projectType", BIDDING_PROJECT_TYPE))
-                        .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE)));
-//        Timestamp lastSyncTime = new Timestamp(0);
-        Timestamp lastSyncStartTime = new Timestamp(new DateTime(new DateTime().getYear() - 1, 1, 1, 0, 0, 0).getMillis());
+//        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
+//                "cluster.index",
+//                "cluster.type.supplier_opportunity",
+//                QueryBuilders.boolQuery()
+//                        .must(QueryBuilders.termQuery("projectType", BIDDING_PROJECT_TYPE))
+//                        .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE)));
+        Timestamp lastSyncTime = new Timestamp(0);
+        Timestamp lastSyncStartTime = new Timestamp(new DateTime(new DateTime().getYear(), 1, 1, 0, 0, 0).getMillis());
         if (Objects.equals(SyncTimeUtil.GMT_TIME, lastSyncTime)) {
             lastSyncTime = lastSyncStartTime;
         }
@@ -84,7 +82,7 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
                 + "AND pip.IS_PREQUALIFY = 2\n"
                 + "AND pip.IS_TWO_STAGE = 2\n"
                 + "AND pip.bidding_Open_Flag = 1\n"
-                + "AND nb.BID_ENDTIME IS NOT NULL and pip.update_time > ?";
+                + "AND nb.BID_ENDTIME IS NOT NULL and pip.create_time > ?";
         String queryNothingSql = "SELECT\n"
                 + "    project.ID AS projectId,\n"
                 + "    project.PROJECT_NUMBER AS projectCode,\n"
@@ -117,7 +115,7 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
                 + "      AND pip.IS_PREQUALIFY = 2\n"
                 + "      AND pip.IS_TWO_STAGE = 2\n"
                 + "      AND pip.bidding_Open_Flag = 1\n"
-                + "      AND pip.update_time > ?\n"
+                + "      AND pip.create_time > ?\n"
                 + "      AND nb.BID_ENDTIME IS NOT NULL"
                 + "      LIMIT ?,?\n"
                 + "   ) project\n"
@@ -137,7 +135,7 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
                 + "   pip.TENDER_MODE = 2\n"
                 + "AND pip.IS_PREQUALIFY = 2\n"
                 + "AND pip.bidding_Open_Flag = 1\n"
-                + "AND pip.update_time > ?\n"
+                + "AND pip.create_time > ?\n"
                 + "AND nb.TECHNICAL_ADVICE_CUT_TIME is not null\n"
                 + "AND pip.IS_TWO_STAGE = 1";
         // 两阶段
@@ -173,7 +171,7 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
                 + "      AND pip.IS_PREQUALIFY = 2\n"
                 + "      AND pip.IS_TWO_STAGE = 1\n"
                 + "      AND pip.bidding_Open_Flag = 1\n"
-                + "      AND pip.update_time > ?\n"
+                + "      AND pip.create_time > ?\n"
                 + "      AND nb.TECHNICAL_ADVICE_CUT_TIME is not null\n"
                 + "      LIMIT ?,?\n"
                 + "   ) project\n"
@@ -193,7 +191,7 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
                 + "   pip.TENDER_MODE = 1\n"
                 + "AND pip.IS_PREQUALIFY = 2\n"
                 + "AND pip.IS_TWO_STAGE = 2\n"
-                + "AND pip.update_time > ?\n"
+                + "AND pip.create_time > ?\n"
                 + "AND nb.BID_ENDTIME IS NOT NULL";
         // 什么都不需要
         String queryNothingSql = "SELECT\n"
@@ -227,7 +225,7 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
                 + "         pip.TENDER_MODE = 1\n"
                 + "      AND pip.IS_PREQUALIFY = 2\n"
                 + "      AND pip.IS_TWO_STAGE = 2\n"
-                + "      AND pip.update_time > ?\n"
+                + "      AND pip.create_time > ?\n"
                 + "      AND nb.BID_ENDTIME IS NOT NULL"
                 + "      LIMIT ?,?\n"
                 + "   ) project\n"
@@ -246,7 +244,7 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
                 + "WHERE\n"
                 + "   pip.TENDER_MODE = 1\n"
                 + "AND pip.IS_PREQUALIFY = 1\n"
-                + "AND pip.update_time > ?\n"
+                + "AND pip.create_time > ?\n"
                 + "AND pip.IS_TWO_STAGE = 2";
         // 资格预审
         String queryPreQualifySql = "SELECT\n"
@@ -281,7 +279,7 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
                 + "   pip.TENDER_MODE = 1\n"
                 + "AND pip.IS_PREQUALIFY = 1\n"
                 + "AND pip.IS_TWO_STAGE = 2\n"
-                + "AND pip.update_time > ?\n"
+                + "AND pip.create_time > ?\n"
                 + "LIMIT ?,?\n"
                 + ") project\n"
                 + "LEFT JOIN proj_procurement_product product ON project.ID = product.PROJECT_ID";
@@ -299,7 +297,7 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
                 + "WHERE\n"
                 + "   pip.TENDER_MODE = 1\n"
                 + "AND pip.IS_PREQUALIFY = 2\n"
-                + "AND pip.update_time > ?\n"
+                + "AND pip.create_time > ?\n"
                 + "AND pip.IS_TWO_STAGE = 1";
         // 两阶段
         String queryTwoStageSql = "SELECT\n"
@@ -333,7 +331,7 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
                 + "         pip.TENDER_MODE = 1\n"
                 + "      AND pip.IS_PREQUALIFY = 2\n"
                 + "      AND pip.IS_TWO_STAGE = 1\n"
-                + "      AND pip.update_time > ?\n"
+                + "      AND pip.create_time > ?\n"
                 + "      AND  nb.TECHNICAL_ADVICE_CUT_TIME is not null\n"
                 + "      LIMIT ?,?\n"
                 + "   ) project\n"
