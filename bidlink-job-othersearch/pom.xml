@@ -165,7 +165,6 @@
                 <pom.cluster.name>elasticsearch</pom.cluster.name>
                 <pom.cluster.index>longdaoyun_test</pom.cluster.index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
-                <pom.cluster.type.notice>notice</pom.cluster.type.notice>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
@@ -192,13 +191,10 @@
                 <pom.center.db.username>dashuju</pom.center.db.username>
                 <pom.center.db.password>ixietong!@#$</pom.center.db.password>
                 <!--es配置-->
-                <pom.cluster.host>192.168.4.88:9300</pom.cluster.host>
+                <pom.cluster.host>192.168.4.88:9300,192.168.4.60:9300</pom.cluster.host>
                 <pom.cluster.name>dc</pom.cluster.name>
                 <pom.cluster.index>ixietong_opportunity</pom.cluster.index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
-                <pom.cluster.type.notice>notice</pom.cluster.type.notice>
-                <pom.cluster.zhouzhihui_index>zhihuizhou_test</pom.cluster.zhouzhihui_index>
-                <pom.cluster.type.demo>user</pom.cluster.type.demo>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>

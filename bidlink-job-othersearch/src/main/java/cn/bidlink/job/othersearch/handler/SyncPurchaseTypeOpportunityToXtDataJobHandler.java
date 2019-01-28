@@ -1,7 +1,6 @@
 package cn.bidlink.job.othersearch.handler;
 
 import cn.bidlink.job.common.constant.BusinessConstant;
-import cn.bidlink.job.common.utils.AreaUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
@@ -18,8 +17,6 @@ import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.util.*;
-
-import static cn.bidlink.job.common.utils.AreaUtil.queryAreaInfo;
 
 
 /**
@@ -82,9 +79,10 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
         // 查询小于当前时间的自动截标
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
                 .must(QueryBuilders.termQuery(PROJECT_TYPE, PURCHASE_PROJECT_TYPE))
-                .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.SIYOUYUN_SOURCE));
+                .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.SIYOUYUN_SOURCE))
+                .must(QueryBuilders.termQuery(BID_STOP_TYPE, AUTO_STOP_TYPE));
 
-        int batchSize = 1000;
+        int batchSize = 100;
         SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(queryBuilder)
@@ -197,23 +195,6 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                 "ORDER BY\n" +
                 "bpi.id";
         doSyncProjectDataService(siyouyunDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList((Object) lastSyncTime));
-    }
-
-    @Override
-    protected void appendAreaStrToResult(List<Map<String, Object>> resultToExecute, Set<Long> purchaseIds) {
-        if (purchaseIds.size() > 0) {
-            Map<Long, AreaUtil.AreaInfo> areaMap = queryAreaInfo(uniregDataSource, purchaseIds);
-            for (Map<String, Object> result : resultToExecute) {
-                Long purchaseId = Long.valueOf(String.valueOf(result.get(PURCHASE_ID)));
-                AreaUtil.AreaInfo areaInfo = areaMap.get(purchaseId);
-                if (areaInfo != null) {
-                    result.put(AREA_STR, areaInfo.getAreaStr());
-                    // 添加不分词的areaStr
-                    result.put(AREA_STR_NOT_ANALYZED, result.get(AREA_STR));
-                    result.put(REGION, areaInfo.getRegion());
-                }
-            }
-        }
     }
 
     /**
