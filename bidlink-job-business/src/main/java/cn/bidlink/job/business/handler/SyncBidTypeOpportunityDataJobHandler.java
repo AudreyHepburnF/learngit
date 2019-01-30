@@ -133,10 +133,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                     "\tLEFT JOIN bid_project bp ON bsp.project_id = bp.id \n" +
                     "\tAND bsp.company_id = bp.company_id \n" +
                     "WHERE\n" +
-                    "\tis_bid_open = 1 \n" +
-                    "\tAND node > 1 \n" +
-                    "\tAND bsp.approve_status = 2\n" +
-                    "\tAND bsp.id in (%s) \n" +
+                    "\t bsp.id in (%s) \n" +
                     "\tAND bsp.bid_endtime < ? \n" +
                     "\tLIMIT ?,? \n" +
                     "\t) project\n" +
