@@ -116,7 +116,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                     "\tbsp.company_name AS purchaseName,\n" +
                     "\tbsp.create_time AS createTime,\n" +
                     "\tcase \n" +
-                    "\tWHEN project_type in (1,2,3) THEN\n" +
+                    "\tWHEN bsp.project_type in (1,2,3) THEN\n" +
                     "\t\tbsp.node\n" +
                     "\tELSE\n" +
                     "\t\tbsp.negotiation_node\n" +
