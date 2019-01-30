@@ -53,36 +53,40 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
 
     private void syncUpdateBidDecidedNotice(Timestamp lastSyncTime) {
         String countSql = "SELECT\n" +
-                "\tcount(1) \n" +
+                "\tcount( 1 ) \n" +
                 "FROM\n" +
-                "\tbid_decided_notice \n" +
+                "\tbid_decided_notice bdn\n" +
+                "\tLEFT JOIN bid_sub_project bsp ON bdn.sub_project_id = bsp.id \n" +
                 "WHERE\n" +
-                "\tis_publish = 1 \n" +
-                "\tAND approve_status = 2 \n" +
-                "\tAND update_time > ?";
+                "\tbdn.is_publish = 1 \n" +
+                "\tAND bdn.approve_status = 2 \n" +
+                "\tAND bsp.is_public_winbid_notice = 1 \n" +
+                "\tAND bdn.update_time > ?";
         String querySql = "SELECT\n" +
-                "\tid,\n" +
-                "\tproject_id AS projectId,\n" +
-                "\tsub_project_id AS subProjectId,\n" +
-                "\tproject_name AS projectName,\n" +
-                "\tproject_code AS projectCode,\n" +
-                "\ttender_name AS tenderName,\n" +
-                "\tbid_type AS bidType,\n" +
-                "\tis_have_wibider AS isHaveWibider,\n" +
-                "\tsupplier_name AS supplierNameNotAnalyzed,\n" +
-                "\tlink_man AS linkMan,\n" +
-                "\tlink_phone AS linkPhone,\n" +
-                "\tlink_tel AS linkTel,\n" +
-                "\tlink_mail AS linkMail,\n" +
-                "\tcreate_time AS createTime,\n" +
-                "\tcompany_id AS companyId\n" +
+                "\tbdn.id,\n" +
+                "\tbdn.project_id AS projectId,\n" +
+                "\tbdn.sub_project_id AS subProjectId,\n" +
+                "\tbdn.project_name AS projectName,\n" +
+                "\tbdn.project_code AS projectCode,\n" +
+                "\tbdn.tender_name AS tenderName,\n" +
+                "\tbdn.bid_type AS bidType,\n" +
+                "\tbdn.is_have_wibider AS isHaveWibider,\n" +
+                "\tbdn.supplier_name AS supplierNameNotAnalyzed,\n" +
+                "\tbdn.link_man AS linkMan,\n" +
+                "\tbdn.link_phone AS linkPhone,\n" +
+                "\tbdn.link_tel AS linkTel,\n" +
+                "\tbdn.link_mail AS linkMail,\n" +
+                "\tbdn.create_time AS createTime,\n" +
+                "\tbdn.company_id AS companyId \n" +
                 "FROM\n" +
-                "\t`bid_decided_notice` \n" +
+                "\t`bid_decided_notice` bdn\n" +
+                "\tLEFT JOIN bid_sub_project bsp ON bdn.sub_project_id = bsp.id \n" +
                 "WHERE\n" +
-                "\tis_publish = 1 \n" +
-                "\tAND approve_status = 2 \n" +
-                "\tAND update_time >?\n" +
-                "\tLIMIT ?,?";
+                "\tbdn.is_publish = 1 \n" +
+                "\tAND bdn.approve_status = 2 \n" +
+                "\tAND bdn.update_time >? \n" +
+                "\tAND bsp.is_public_winbid_notice = 1 \n" +
+                "\tLIMIT ?,?;";
         ArrayList<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
         doSyncNoticeService(tenderDataSource, countSql, querySql, params, RESULT_NOTICE);
@@ -90,36 +94,40 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
 
     private void syncInsertBidDecidedNotice(Timestamp lastSyncTime) {
         String countSql = "SELECT\n" +
-                "\tcount(1) \n" +
+                "\tcount( 1 ) \n" +
                 "FROM\n" +
-                "\tbid_decided_notice \n" +
+                "\tbid_decided_notice bdn\n" +
+                "\tLEFT JOIN bid_sub_project bsp ON bdn.sub_project_id = bsp.id \n" +
                 "WHERE\n" +
-                "\tis_publish = 1 \n" +
-                "\tAND approve_status= 2 \n" +
-                "\tAND create_time > ?";
+                "\tbdn.is_publish = 1 \n" +
+                "\tAND bdn.approve_status = 2 \n" +
+                "\tAND bsp.is_public_winbid_notice = 1 \n" +
+                "\tAND bdn.create_time > ?";
         String querySql = "SELECT\n" +
-                "\tid,\n" +
-                "\tproject_id AS projectId,\n" +
-                "\tsub_project_id AS subProjectId,\n" +
-                "\tproject_name AS projectName,\n" +
-                "\tproject_code AS projectCode,\n" +
-                "\ttender_name AS tenderName,\n" +
-                "\tbid_type AS bidType,\n" +
-                "\tis_have_wibider AS isHaveWibider,\n" +
-                "\tsupplier_name AS supplierNameNotAnalyzed,\n" +
-                "\tlink_man AS linkMan,\n" +
-                "\tlink_phone AS linkPhone,\n" +
-                "\tlink_tel AS linkTel,\n" +
-                "\tlink_mail AS linkMail,\n" +
-                "\tcreate_time AS createTime,\n" +
-                "\tcompany_id AS companyId\n" +
+                "\tbdn.id,\n" +
+                "\tbdn.project_id AS projectId,\n" +
+                "\tbdn.sub_project_id AS subProjectId,\n" +
+                "\tbdn.project_name AS projectName,\n" +
+                "\tbdn.project_code AS projectCode,\n" +
+                "\tbdn.tender_name AS tenderName,\n" +
+                "\tbdn.bid_type AS bidType,\n" +
+                "\tbdn.is_have_wibider AS isHaveWibider,\n" +
+                "\tbdn.supplier_name AS supplierNameNotAnalyzed,\n" +
+                "\tbdn.link_man AS linkMan,\n" +
+                "\tbdn.link_phone AS linkPhone,\n" +
+                "\tbdn.link_tel AS linkTel,\n" +
+                "\tbdn.link_mail AS linkMail,\n" +
+                "\tbdn.create_time AS createTime,\n" +
+                "\tbdn.company_id AS companyId \n" +
                 "FROM\n" +
-                "\t`bid_decided_notice` \n" +
+                "\t`bid_decided_notice` bdn\n" +
+                "\tLEFT JOIN bid_sub_project bsp ON bdn.sub_project_id = bsp.id \n" +
                 "WHERE\n" +
-                "\tis_publish = 1 \n" +
-                "\tAND approve_status= 2 \n" +
-                "\tAND create_time >?\n" +
-                "\tLIMIT ?,?";
+                "\tbdn.is_publish = 1 \n" +
+                "\tAND bdn.approve_status = 2 \n" +
+                "\tAND bdn.create_time >? \n" +
+                "\tAND bsp.is_public_winbid_notice = 1 \n" +
+                "\tLIMIT ?,?;";
         ArrayList<Object> params = new ArrayList<>();
         params.add(lastSyncTime);
         doSyncNoticeService(tenderDataSource, countSql, querySql, params, RESULT_NOTICE);
