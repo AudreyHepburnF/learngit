@@ -69,6 +69,7 @@ public class SyncAuctionTypeOpportunityToXtDataJobHandler extends AbstractSyncYc
                         .must(QueryBuilders.termQuery(PROJECT_TYPE, AUCTION_PROJECT_TYPE))
                 ).setScroll(new TimeValue(60000))
                 .setSize(pageSize)
+                .setFetchSource(new String[]{PROJECT_ID}, null)
                 .execute().actionGet();
         do {
             SearchHits hits = response.getHits();

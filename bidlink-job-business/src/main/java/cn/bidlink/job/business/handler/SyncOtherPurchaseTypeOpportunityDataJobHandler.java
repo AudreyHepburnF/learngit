@@ -59,6 +59,7 @@ public class SyncOtherPurchaseTypeOpportunityDataJobHandler extends AbstractSync
                         .must(QueryBuilders.termQuery(PROJECT_TYPE, PURCHASE_PROJECT_TYPE))
                         .must(QueryBuilders.rangeQuery(SyncTimeUtil.SYNC_TIME).lte(currentDate)))
                 .setScroll(new TimeValue(60000))
+                .setFetchSource(new String[]{PROJECT_ID}, null)
                 .setSize(batchSize)
                 .execute().actionGet();
 

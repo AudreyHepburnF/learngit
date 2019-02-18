@@ -71,6 +71,8 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
     protected String PROJECT_ID            = "projectId";
     protected String PURCHASE_ID           = "purchaseId";
     protected String BIDDEN_SUPPLIER_COUNT = "biddenSupplierCount";
+    protected String PROJECT_TYPE          = "projectType";
+    protected String BID_PROJECT_TYPE      = "bidProjectType";
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
@@ -94,6 +96,7 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(queryBuilder)
                 .setScroll(new TimeValue(60000))
+                .setFetchSource(new String[]{PROJECT_ID, PURCHASE_ID, PROJECT_TYPE, BID_PROJECT_TYPE}, null)
                 .setSize(pageSize)
                 .get();
         int i = 0;
@@ -105,27 +108,38 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
             // 招标项目
             List<Map<String, Object>> bidProjectSource = new ArrayList<>();
             Set<Pair> bidProjectPairs = new HashSet<>();
+            // 资格预审项目
+            List<Map<String, Object>> prequalificationBidProjectSource = new ArrayList<>();
+            Set<Pair> prequalificationBidProjectPairs = new HashSet<>();
             // 竞价项目
             List<Map<String, Object>> auctionProjectSource = new ArrayList<>();
             Set<Pair> auctionProjectPairs = new HashSet<>();
 
             for (SearchHit searchHit : searchHits) {
-                Integer projectType = (Integer) searchHit.getSource().get("projectType");
+                Map<String, Object> source = searchHit.getSource();
+                Integer projectType = (Integer) source.get(PROJECT_TYPE);
                 if (projectType != null) {
                     if (projectType == PURCHASE_PROJECT_TYPE) {
-                        purchaseProjectSource.add(searchHit.getSource());
-                        Long projectId = Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID)));
-                        Long companyId = Long.valueOf(String.valueOf(searchHit.getSource().get(PURCHASE_ID)));
+                        purchaseProjectSource.add(source);
+                        Long projectId = Long.valueOf(String.valueOf(source.get(PROJECT_ID)));
+                        Long companyId = Long.valueOf(String.valueOf(source.get(PURCHASE_ID)));
                         purchaseProjectPairs.add(new Pair(companyId, projectId));
                     } else if (projectType == BIDDING_PROJECT_TYPE) {
-                        bidProjectSource.add(searchHit.getSource());
-                        Long projectId = Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID)));
-                        Long companyId = Long.valueOf(String.valueOf(searchHit.getSource().get(PURCHASE_ID)));
-                        bidProjectPairs.add(new Pair(companyId, projectId));
+                        Long projectId = Long.valueOf(String.valueOf(source.get(PROJECT_ID)));
+                        Long companyId = Long.valueOf(String.valueOf(source.get(PURCHASE_ID)));
+                        Integer bidProjectType = Integer.valueOf(source.get(BID_PROJECT_TYPE).toString());
+                        if (Objects.equals(bidProjectType, 21)) {
+                            // 资格预审的招标项目
+                            prequalificationBidProjectSource.add(source);
+                            prequalificationBidProjectPairs.add(new Pair(companyId, projectId));
+                        } else {
+                            bidProjectSource.add(source);
+                            bidProjectPairs.add(new Pair(companyId, projectId));
+                        }
                     } else if (projectType == AUCTION_PROJECT_TYPE) {
-                        auctionProjectSource.add(searchHit.getSource());
-                        Long projectId = Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID)));
-                        Long companyId = Long.valueOf(String.valueOf(searchHit.getSource().get(PURCHASE_ID)));
+                        auctionProjectSource.add(source);
+                        Long projectId = Long.valueOf(String.valueOf(source.get(PROJECT_ID)));
+                        Long companyId = Long.valueOf(String.valueOf(source.get(PURCHASE_ID)));
                         auctionProjectPairs.add(new Pair(companyId, projectId));
                     }
                 }
@@ -139,6 +153,10 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
                 syncData(tenderDataSource, bidProjectSource, getBidProjectCountSql(bidProjectPairs));
             }
 
+            if (prequalificationBidProjectPairs.size() > 0) {
+                syncData(tenderDataSource, prequalificationBidProjectSource, getPrequalificationBidProjectCountSql(prequalificationBidProjectPairs));
+            }
+
             if (auctionProjectPairs.size() > 0) {
                 syncData(auctionDataSource, auctionProjectSource, getAuctionProjectCountSql(auctionProjectPairs));
             }
@@ -146,6 +164,32 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
                     .setScroll(new TimeValue(60000))
                     .execute().actionGet();
         } while (scrollResp.getHits().getHits().length != 0);
+    }
+
+    private String getPrequalificationBidProjectCountSql(Set<Pair> projectPairs) {
+        String querySqlTemplate = "SELECT\n"
+                + "   company_id AS purchaseId,\n"
+                + "   sub_project_id AS projectId,\n"
+                + "   count(supplier_id) AS biddenSupplierCount\n"
+                + "FROM\n"
+                + "   (SELECT company_id, sub_project_id, supplier_id FROM bid_prequalification_supplier WHERE bid_status = 1 AND(%s)) s\n"
+                + "GROUP BY\n"
+                + "   company_id,\n"
+                + "   sub_project_id";
+        int index = 0;
+        StringBuilder whereConditionBuilder = new StringBuilder();
+        for (Pair projectPair : projectPairs) {
+            if (index > 0) {
+                whereConditionBuilder.append(" OR ");
+            }
+            whereConditionBuilder.append("(company_id=").append(projectPair.companyId)
+                    .append(" AND sub_project_id=")
+                    .append(projectPair.projectId)
+                    .append(") ");
+            index++;
+        }
+
+        return String.format(querySqlTemplate, whereConditionBuilder.toString());
     }
 
     private String getPurchaseProjectCountSql(Set<Pair> projectPairs) {
