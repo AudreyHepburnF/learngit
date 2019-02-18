@@ -88,6 +88,7 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(queryBuilder)
                 .setScroll(new TimeValue(60000))
+                .setFetchSource(new String[]{PROJECT_ID, PURCHASE_ID, PROJECT_TYPE}, null)
                 .setSize(pageSize)
                 .get();
         int i = 0;
@@ -104,7 +105,7 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
             Set<Pair> auctionProjectPairs = new HashSet<>();
 
             for (SearchHit searchHit : searchHits) {
-                Integer projectType = (Integer) searchHit.getSource().get("projectType");
+                Integer projectType = (Integer) searchHit.getSource().get(PROJECT_TYPE);
                 if (projectType != null) {
                     if (projectType == PURCHASE_PROJECT_TYPE) {
                         purchaseProjectSource.add(searchHit.getSource());

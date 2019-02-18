@@ -71,6 +71,8 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
     protected String PROJECT_ID            = "projectId";
     protected String PURCHASE_ID           = "purchaseId";
     protected String BIDDEN_SUPPLIER_COUNT = "biddenSupplierCount";
+    protected String PROJECT_TYPE          = "projectType";
+    protected String BID_PROJECT_TYPE      = "bidProjectType";
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
@@ -94,6 +96,7 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(queryBuilder)
                 .setScroll(new TimeValue(60000))
+                .setFetchSource(new String[]{PROJECT_ID, PURCHASE_ID, PROJECT_TYPE, BID_PROJECT_TYPE}, null)
                 .setSize(pageSize)
                 .get();
         int i = 0;
@@ -114,7 +117,7 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
 
             for (SearchHit searchHit : searchHits) {
                 Map<String, Object> source = searchHit.getSource();
-                Integer projectType = (Integer) source.get("projectType");
+                Integer projectType = (Integer) source.get(PROJECT_TYPE);
                 if (projectType != null) {
                     if (projectType == PURCHASE_PROJECT_TYPE) {
                         purchaseProjectSource.add(source);
@@ -124,7 +127,7 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
                     } else if (projectType == BIDDING_PROJECT_TYPE) {
                         Long projectId = Long.valueOf(String.valueOf(source.get(PROJECT_ID)));
                         Long companyId = Long.valueOf(String.valueOf(source.get(PURCHASE_ID)));
-                        Integer bidProjectType = Integer.valueOf(source.get("bidProjectType").toString());
+                        Integer bidProjectType = Integer.valueOf(source.get(BID_PROJECT_TYPE).toString());
                         if (Objects.equals(bidProjectType, 21)) {
                             // 资格预审的招标项目
                             prequalificationBidProjectSource.add(source);

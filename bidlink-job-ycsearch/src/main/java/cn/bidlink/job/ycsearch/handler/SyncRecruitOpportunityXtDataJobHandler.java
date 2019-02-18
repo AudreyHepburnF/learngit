@@ -83,6 +83,7 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
                         .must(QueryBuilders.termQuery(ENDLESS, LIMIT))
                         .must(QueryBuilders.rangeQuery(QUOTE_STOP_TIME).lte(SyncTimeUtil.currentDateToString()))
                 ).setScroll(new TimeValue(60000))
+                .setFetchSource(new String[]{ID}, null)
                 .setSize(pageSize)
                 .execute().actionGet();
         do {

@@ -95,6 +95,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(queryBuilder)
                 .setScroll(new TimeValue(60000))
+                .setFetchSource(new String[]{PROJECT_ID}, null)
                 .setSize(batchSize)
                 .get();
 
