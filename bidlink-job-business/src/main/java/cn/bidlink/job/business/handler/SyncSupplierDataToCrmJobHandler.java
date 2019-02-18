@@ -1,6 +1,5 @@
 package cn.bidlink.job.business.handler;
 
-import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
@@ -27,9 +26,6 @@ import java.util.*;
 public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements InitializingBean*/ {
 
     @Autowired
-    private ElasticClient elasticClient;
-
-    @Autowired
     @Qualifier(value = "uniregDataSource")
     private DataSource uniregDataSource;
 
@@ -49,7 +45,7 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
     }
 
     private void syncSupplierDataToCrm() {
-        String queryMaxLastSyncTime = "select max(sync_time) from t_reg_supplier";
+         String queryMaxLastSyncTime = "select max(sync_time) from t_reg_supplier";
         Timestamp lastSyncTime = (Timestamp) DBUtil.max(crmDataSource, queryMaxLastSyncTime, null);
         if (lastSyncTime == null || Objects.equals(lastSyncTime, SyncTimeUtil.GMT_TIME)) {
             lastSyncTime = new Timestamp(SyncTimeUtil.toStringDate("2019-01-18 14:24:00").getTime());
@@ -65,7 +61,7 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tt_reg_company t\n" +
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
-                "\tt.TYPE = 13 \n" +
+                "\tt.TYPE in (12,13) \n" +
                 "\tAND t.WEB_TYPE <> 'YUECAI' \n" +
                 "\tAND t.CREATE_TIME > ?\n";
         String createQuerySql = "SELECT\n" +
@@ -103,7 +99,7 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tt_reg_company t\n" +
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
-                "\tt.TYPE = 13 \n" +
+                "\tt.TYPE in (12,13) \n" +
                 "\tAND t.WEB_TYPE <> 'YUECAI' \n" +
                 "\tAND t.CREATE_TIME > ?\n" +
                 "ORDER BY\n" +
@@ -116,7 +112,7 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tt_reg_company t\n" +
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
-                "\tt.TYPE = 13 \n" +
+                "\tt.TYPE in (12,13) \n" +
                 "\tAND t.WEB_TYPE <> 'YUECAI' \n" +
                 "\tAND t.UPDATE_TIME > ?\n";
         String updateQuerySql = "SELECT\n" +
@@ -154,7 +150,7 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tt_reg_company t\n" +
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
-                "\tt.TYPE = 13 \n" +
+                "\tt.TYPE in (12,13) \n" +
                 "\tAND t.WEB_TYPE <> 'YUECAI' \n" +
                 "\tAND t.UPDATE_TIME > ?\n" +
                 "ORDER BY\n" +
@@ -167,7 +163,7 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tt_reg_company t\n" +
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
-                "\tt.TYPE = 13 \n" +
+                "\tt.TYPE in (12,13) \n" +
                 "\tAND t.WEB_TYPE <> 'YUECAI' \n" +
                 "\tAND u.UPDATE_TIME > ?\n";
         String updateUserQuerySql = "SELECT\n" +
@@ -205,7 +201,7 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tt_reg_company t\n" +
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
-                "\tt.TYPE = 13 \n" +
+                "\tt.TYPE in (12,13) \n" +
                 "\tAND t.WEB_TYPE <> 'YUECAI' \n" +
                 "\tAND u.UPDATE_TIME > ?\n" +
                 "ORDER BY\n" +
