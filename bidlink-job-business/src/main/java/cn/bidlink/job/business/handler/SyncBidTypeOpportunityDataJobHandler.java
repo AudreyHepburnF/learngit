@@ -69,7 +69,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE))
                 .must(QueryBuilders.termQuery(PROJECT_TYPE, BIDDING_PROJECT_TYPE))
                 .must(QueryBuilders.rangeQuery(SyncTimeUtil.SYNC_TIME).lte(currentDate));
-        int batchSize = 1000;
+        int batchSize = 100;
         Properties properties = elasticClient.getProperties();
         SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
