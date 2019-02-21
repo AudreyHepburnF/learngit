@@ -62,13 +62,14 @@ public class SyncAuctionTypeOpportunityToXtDataJobHandler extends AbstractSyncYc
     private void fixExpiredYcAuctionTypeOpportunityData() {
         logger.info("2.开始修复竞价项目自动截止商机状态");
         Properties properties = elasticClient.getProperties();
+        int batchSize = 100;
         SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
                         .must(QueryBuilders.termQuery(PROJECT_TYPE, AUCTION_PROJECT_TYPE))
                 ).setScroll(new TimeValue(60000))
-                .setSize(pageSize)
+                .setSize(batchSize)
                 .setFetchSource(new String[]{PROJECT_ID}, null)
                 .execute().actionGet();
         do {
@@ -95,7 +96,7 @@ public class SyncAuctionTypeOpportunityToXtDataJobHandler extends AbstractSyncYc
                     + "\tauction_project \n"
                     + "WHERE\n"
                     + "\tid in (%s)";
-            String querySqlTempalte = "SELECT\n" +
+            String querySqlTemplate = "SELECT\n" +
                     "\tp.*,\n" +
                     "\tadi.id AS directoryId,\n" +
                     "\tadi.directory_name AS directoryName \n" +
@@ -124,7 +125,7 @@ public class SyncAuctionTypeOpportunityToXtDataJobHandler extends AbstractSyncYc
                     "\tadi.id";
             String projectIdsStr = StringUtils.collectionToCommaDelimitedString(projectIds);
             String countSql = String.format(countSqlTemplate, projectIdsStr);
-            String querySql = String.format(querySqlTempalte, projectIdsStr);
+            String querySql = String.format(querySqlTemplate, projectIdsStr);
             doSyncProjectDataService(ycDataSource, countSql, querySql, Collections.emptyList());
         }
     }
