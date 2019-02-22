@@ -79,17 +79,16 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
      */
     private void syncBiddenSupplierCountData() {
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-//                .must(QueryBuilders.termQuery("status", 1))
                 .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
                 .mustNot(QueryBuilders.termQuery(PROJECT_TYPE, RECRUIT_PROJECT_TYPE));  // 悦采
 
+        int batchInsert = 100;
         Properties properties = elasticClient.getProperties();
         SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(queryBuilder)
                 .setScroll(new TimeValue(60000))
-                .setFetchSource(new String[]{ID, PROJECT_ID, PURCHASE_ID, PROJECT_TYPE}, null)
-                .setSize(pageSize)
+                .setSize(batchInsert)
                 .get();
         int i = 0;
         do {
@@ -265,10 +264,10 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> result : resultsToUpdate) {
                 bulkRequest.add(elasticClient.getTransportClient()
-                        .prepareUpdate(elasticClient.getProperties().getProperty("cluster.index"),
+                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
                                 elasticClient.getProperties().getProperty("cluster.type.supplier_opportunity"),
                                 String.valueOf(result.get(ID)))
-                        .setDoc(JSON.toJSONString(result, new ValueFilter() {
+                        .setSource(JSON.toJSONString(result, new ValueFilter() {
                             @Override
                             public Object process(Object object, String propertyName, Object propertyValue) {
                                 if (propertyValue instanceof Date) {
