@@ -62,7 +62,6 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
                 "\tt.TYPE in (12,13) \n" +
-                "\tAND t.WEB_TYPE <> 'YUECAI' \n" +
                 "\tAND t.CREATE_TIME > ?\n";
         String createQuerySql = "SELECT\n" +
                 "\tt.NAME,\n" +
@@ -100,7 +99,6 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
                 "\tt.TYPE in (12,13) \n" +
-                "\tAND t.WEB_TYPE <> 'YUECAI' \n" +
                 "\tAND t.CREATE_TIME > ?\n" +
                 "ORDER BY\n" +
                 "\tt.CREATE_TIME ASC  limit ?,?";
@@ -113,7 +111,6 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
                 "\tt.TYPE in (12,13) \n" +
-                "\tAND t.WEB_TYPE <> 'YUECAI' \n" +
                 "\tAND t.UPDATE_TIME > ?\n";
         String updateQuerySql = "SELECT\n" +
                 "\tt.NAME,\n" +
@@ -151,7 +148,6 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
                 "\tt.TYPE in (12,13) \n" +
-                "\tAND t.WEB_TYPE <> 'YUECAI' \n" +
                 "\tAND t.UPDATE_TIME > ?\n" +
                 "ORDER BY\n" +
                 "\tt.CREATE_TIME ASC  limit ?,?";
@@ -164,7 +160,6 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
                 "\tt.TYPE in (12,13) \n" +
-                "\tAND t.WEB_TYPE <> 'YUECAI' \n" +
                 "\tAND u.UPDATE_TIME > ?\n";
         String updateUserQuerySql = "SELECT\n" +
                 "\tt.NAME,\n" +
@@ -202,7 +197,6 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
                 "\tt.TYPE in (12,13) \n" +
-                "\tAND t.WEB_TYPE <> 'YUECAI' \n" +
                 "\tAND u.UPDATE_TIME > ?\n" +
                 "ORDER BY\n" +
                 "\tt.CREATE_TIME ASC  limit ?,?";

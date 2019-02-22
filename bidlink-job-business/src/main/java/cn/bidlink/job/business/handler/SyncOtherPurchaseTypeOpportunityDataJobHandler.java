@@ -50,7 +50,7 @@ public class SyncOtherPurchaseTypeOpportunityDataJobHandler extends AbstractSync
     private void fixExpiredOtherPurchaseTypeOpportunityDataService() {
         logger.info("开始修复采购商机截止时间");
         Properties properties = elasticClient.getProperties();
-        int batchSize = 1000;
+        int batchSize = 100;
         String currentDate = SyncTimeUtil.currentDateToString();
         SearchResponse scrollResponse = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
