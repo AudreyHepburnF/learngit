@@ -106,10 +106,6 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
 
             for (SearchHit searchHit : searchHits) {
                 Integer projectType = (Integer) searchHit.getSource().get(PROJECT_TYPE);
-                Long id = Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID)));
-                if (id != 1619475358652825768L) {
-                    continue;
-                }
                 if (projectType != null) {
                     if (projectType == PURCHASE_PROJECT_TYPE) {
                         purchaseProjectSource.add(searchHit.getSource());
