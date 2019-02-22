@@ -80,6 +80,7 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
     private void syncBiddenSupplierCountData() {
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
                 .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
+                .must(QueryBuilders.termQuery("status", 1))
                 .mustNot(QueryBuilders.termQuery(PROJECT_TYPE, RECRUIT_PROJECT_TYPE));  // 悦采
 
         int batchInsert = 100;
