@@ -88,7 +88,7 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(queryBuilder)
                 .setScroll(new TimeValue(60000))
-                .setFetchSource(new String[]{PROJECT_ID, PURCHASE_ID, PROJECT_TYPE}, null)
+                .setFetchSource(new String[]{ID, PROJECT_ID, PURCHASE_ID, PROJECT_TYPE}, null)
                 .setSize(pageSize)
                 .get();
         int i = 0;
@@ -106,6 +106,10 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
 
             for (SearchHit searchHit : searchHits) {
                 Integer projectType = (Integer) searchHit.getSource().get(PROJECT_TYPE);
+                Long id = Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID)));
+                if (id != 1619475358652825768L) {
+                    continue;
+                }
                 if (projectType != null) {
                     if (projectType == PURCHASE_PROJECT_TYPE) {
                         purchaseProjectSource.add(searchHit.getSource());
@@ -265,10 +269,10 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> result : resultsToUpdate) {
                 bulkRequest.add(elasticClient.getTransportClient()
-                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
+                        .prepareUpdate(elasticClient.getProperties().getProperty("cluster.index"),
                                 elasticClient.getProperties().getProperty("cluster.type.supplier_opportunity"),
                                 String.valueOf(result.get(ID)))
-                        .setSource(JSON.toJSONString(result, new ValueFilter() {
+                        .setDoc(JSON.toJSONString(result, new ValueFilter() {
                             @Override
                             public Object process(Object object, String propertyName, Object propertyValue) {
                                 if (propertyValue instanceof Date) {
