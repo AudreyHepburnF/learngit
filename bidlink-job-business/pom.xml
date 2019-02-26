@@ -122,6 +122,10 @@
                 <pom.auction.db.url>jdbc:mariadb://testmariadb:3306/auction?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.auction.db.url>
                 <pom.auction.db.username>dashuju</pom.auction.db.username>
                 <pom.auction.db.password>ixietong!@#$</pom.auction.db.password>
+                <!--协同平台拍卖数据源-->
+                <pom.vendue.db.url>jdbc:mariadb://testmariadb:3306/vendue?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.vendue.db.url>
+                <pom.vendue.db.username>dashuju</pom.vendue.db.username>
+                <pom.vendue.db.password>ixietong!@#$</pom.vendue.db.password>
                 <!--协同平台中心库数据源-->
                 <pom.unireg.db.url>jdbc:mariadb://testmariadb:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
                 <pom.unireg.db.username>dashuju</pom.unireg.db.username>

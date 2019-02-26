@@ -46,6 +46,10 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected DataSource auctionDataSource;
 
     @Autowired
+    @Qualifier("vendueDataSource")
+    protected DataSource vendueDataSource;
+
+    @Autowired
     @Qualifier("uniregDataSource")
     protected DataSource uniregDataSource;
 
@@ -64,6 +68,8 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
     protected int PURCHASE_PROJECT_TYPE      = 2;
     // 竞价项目类型
     protected int AUCTION_PROJECT_TYPE       = 3;
+    // 拍卖项目类型
+    protected int SALE_PROJECT_TYPE          = 5;
 
     protected int INSERT_OPERATION = 1;
     protected int UPDATE_OPERATION = 2;

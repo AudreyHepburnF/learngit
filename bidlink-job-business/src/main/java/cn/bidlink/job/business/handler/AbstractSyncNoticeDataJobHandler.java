@@ -46,6 +46,10 @@ public abstract class AbstractSyncNoticeDataJobHandler extends JobHandler {
     protected DataSource auctionDataSource;
 
     @Autowired
+    @Qualifier("vendueDataSource")
+    protected DataSource vendueDataSource;
+
+    @Autowired
     @Qualifier("apiDataSource")
     protected DataSource apiDataSource;
 
@@ -71,6 +75,7 @@ public abstract class AbstractSyncNoticeDataJobHandler extends JobHandler {
     protected Integer BID_NOTICE_TYPE      = 1; // 招标公告
     protected Integer PURCHASE_NOTICE_TYPE = 2; // 采购公告
     protected Integer AUCTION_NOTICE_TYPE  = 3; // 竞价公告
+    protected Integer SALE_NOTICE_TYPE     = 5; // 拍卖公告
 
 
     protected void doSyncNoticeService(DataSource dataSource, String countSql, String querySql, List<Object> params, Integer noticeType) {
