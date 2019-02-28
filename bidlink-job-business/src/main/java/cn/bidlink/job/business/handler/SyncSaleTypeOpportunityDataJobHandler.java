@@ -186,11 +186,9 @@ public class SyncSaleTypeOpportunityDataJobHandler extends AbstractSyncOpportuni
     @Override
     protected void parseOpportunity(Timestamp currentDate, List<Map<String, Object>> resultToExecute, Map<String, Object> result) {
         // 项目拍卖中
-        int SALE_NODE = 3;
-        int node = (int) result.get(NODE);
         Timestamp quoteStopTime = (Timestamp) result.get(QUOTE_STOP_TIME);
         // 小于截止时间且待截标且拍卖中，则为商机，否则不是商机
-        if (currentDate.before(quoteStopTime) && node == SALE_NODE) {
+        if (currentDate.before(quoteStopTime)) {
             result.put(STATUS, VALID_OPPORTUNITY_STATUS);
         } else {
             result.put(STATUS, INVALID_OPPORTUNITY_STATUS);
