@@ -61,7 +61,7 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tt_reg_company t\n" +
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
-                "\tt.TYPE in (12,13) and (t.is_test != 1 and t.name not like \"%必联%\" and t.name not like \"%测试%\")\n" +
+                "\tt.TYPE in (12,13) and (t.is_test = 0 or t.is_test is null and t.name not like \"%必联%\" and t.name not like \"%测试%\")\n" +
                 "\tAND t.CREATE_TIME > ?\n";
         String createQuerySql = "SELECT\n" +
                 "\tt.NAME,\n" +
@@ -98,7 +98,7 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tt_reg_company t\n" +
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
-                "\tt.TYPE in (12,13) and (t.is_test != 1 and t.name not like \"%必联%\" and t.name not like \"%测试%\")\n" +
+                "\tt.TYPE in (12,13) and (t.is_test = 0 or t.is_test is null and t.name not like \"%必联%\" and t.name not like \"%测试%\")\n" +
                 "\tAND t.CREATE_TIME > ?\n" +
                 "ORDER BY\n" +
                 "\tt.CREATE_TIME ASC  limit ?,?";
@@ -110,7 +110,7 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tt_reg_company t\n" +
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
-                "\tt.TYPE in (12,13) and (t.is_test != 1 and t.name not like \"%必联%\" and t.name not like \"%测试%\")\n" +
+                "\tt.TYPE in (12,13) and (t.is_test = 0 or t.is_test is null and t.name not like \"%必联%\" and t.name not like \"%测试%\")\n" +
                 "\tAND t.UPDATE_TIME > ?\n";
         String updateQuerySql = "SELECT\n" +
                 "\tt.NAME,\n" +
@@ -147,7 +147,7 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tt_reg_company t\n" +
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
-                "\tt.TYPE in (12,13) and (t.is_test != 1 and t.name not like \"%必联%\" and t.name not like \"%测试%\")\n" +
+                "\tt.TYPE in (12,13) and (t.is_test = 0 or t.is_test is null and t.name not like \"%必联%\" and t.name not like \"%测试%\")\n" +
                 "\tAND t.UPDATE_TIME > ?\n" +
                 "ORDER BY\n" +
                 "\tt.CREATE_TIME ASC  limit ?,?";
@@ -159,7 +159,7 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tt_reg_company t\n" +
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
-                "\tt.TYPE in (12,13) and (t.is_test != 1 and t.name not like \"%必联%\" and t.name not like \"%测试%\")\n" +
+                "\tt.TYPE in (12,13) and (t.is_test = 0 or t.is_test is null and t.name not like \"%必联%\" and t.name not like \"%测试%\")\n" +
                 "\tAND u.UPDATE_TIME > ?\n";
         String updateUserQuerySql = "SELECT\n" +
                 "\tt.NAME,\n" +
@@ -196,7 +196,7 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tt_reg_company t\n" +
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
-                "\tt.TYPE in (12,13) and (t.is_test != 1 and t.name not like \"%必联%\" and t.name not like \"%测试%\")\n" +
+                "\tt.TYPE in (12,13) and (t.is_test = 0 or t.is_test is null and t.name not like \"%必联%\" and t.name not like \"%测试%\")\n" +
                 "\tAND u.UPDATE_TIME > ?\n" +
                 "ORDER BY\n" +
                 "\tt.CREATE_TIME ASC  limit ?,?";
