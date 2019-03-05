@@ -57,6 +57,10 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
     @Qualifier("auctionDataSource")
     protected DataSource auctionDataSource;
 
+    @Autowired
+    @Qualifier("vendueDataSource")
+    protected DataSource vendueDataSource;
+
     @Value("${pageSize}")
     protected int pageSize;
 
@@ -66,6 +70,9 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
     protected int PURCHASE_PROJECT_TYPE = 2;
     // 竞价项目
     protected int AUCTION_PROJECT_TYPE  = 3;
+
+    // 拍卖项目
+    protected int SALE_PROJECT_TYPE = 5;
 
     protected String ID                    = "id";
     protected String PROJECT_ID            = "projectId";
@@ -114,6 +121,9 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
             // 竞价项目
             List<Map<String, Object>> auctionProjectSource = new ArrayList<>();
             Set<Pair> auctionProjectPairs = new HashSet<>();
+            // 拍卖项目
+            List<Map<String, Object>> saleProjectSource = new ArrayList<>();
+            Set<Pair> saleProjectPairs = new HashSet<>();
 
             for (SearchHit searchHit : searchHits) {
                 Map<String, Object> source = searchHit.getSource();
@@ -141,6 +151,11 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
                         Long projectId = Long.valueOf(String.valueOf(source.get(PROJECT_ID)));
                         Long companyId = Long.valueOf(String.valueOf(source.get(PURCHASE_ID)));
                         auctionProjectPairs.add(new Pair(companyId, projectId));
+                    } else if (projectType == SALE_PROJECT_TYPE) {
+                        saleProjectSource.add(source);
+                        Long projectId = Long.valueOf(String.valueOf(source.get(PROJECT_ID)));
+                        Long companyId = Long.valueOf(String.valueOf(source.get(PURCHASE_ID)));
+                        saleProjectPairs.add(new Pair(companyId, projectId));
                     }
                 }
             }
@@ -159,6 +174,10 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
 
             if (auctionProjectPairs.size() > 0) {
                 syncData(auctionDataSource, auctionProjectSource, getAuctionProjectCountSql(auctionProjectPairs));
+            }
+
+            if (saleProjectPairs.size() > 0) {
+                syncData(vendueDataSource, saleProjectSource, getSaleProjectCountSql(saleProjectPairs));
             }
             scrollResp = elasticClient.getTransportClient().prepareSearchScroll(scrollResp.getScrollId())
                     .setScroll(new TimeValue(60000))
@@ -259,6 +278,33 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
         int index = 0;
         StringBuilder whereConditionBuilder = new StringBuilder();
         for (Pair projectPair : auctionProjectPair) {
+            if (index > 0) {
+                whereConditionBuilder.append(" OR ");
+            }
+            whereConditionBuilder.append("(company_id=").append(projectPair.companyId)
+                    .append(" AND project_id=")
+                    .append(projectPair.projectId)
+                    .append(") ");
+            index++;
+        }
+
+        return String.format(querySqlTemplate, whereConditionBuilder.toString());
+    }
+
+    private String getSaleProjectCountSql(Set<Pair> saleProjectPairs) {
+        String querySqlTemplate = "SELECT\n"
+                + "   company_id AS purchaseId,\n"
+                + "   project_id AS projectId,\n"
+                + "   count(supplier_id) AS biddenSupplierCount\n"
+                + "FROM\n"
+                + "   (SELECT company_id, project_id, supplier_id FROM vendue_supplier_project WHERE company_id IS NOT NULL AND (%s)) s\n"
+                + "GROUP BY\n"
+                + "   company_id,\n"
+                + "   project_id;\n"
+                + "\n";
+        int index = 0;
+        StringBuilder whereConditionBuilder = new StringBuilder();
+        for (Pair projectPair : saleProjectPairs) {
             if (index > 0) {
                 whereConditionBuilder.append(" OR ");
             }

@@ -112,4 +112,35 @@ public abstract class AbstractSyncPurchaseDataJobHandler extends JobHandler {
             }
         }
     }
+
+    protected void batchInsertAndUpdate(List<Map<String, Object>> purchases) {
+//        System.out.println("=============" + purchases);
+        if (!CollectionUtils.isEmpty(purchases)) {
+            BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
+            for (Map<String, Object> purchase : purchases) {
+                bulkRequest.add(elasticClient.getTransportClient()
+                        .prepareUpdate(elasticClient.getProperties().getProperty("cluster.index"),
+                                elasticClient.getProperties().getProperty("cluster.type.purchase"),
+                                String.valueOf(purchase.get(ID)))
+                        .setDocAsUpsert(true)
+                        .setDoc(JSON.toJSONString(purchase, new ValueFilter() {
+                            @Override
+                            public Object process(Object object, String propertyName, Object propertyValue) {
+                                if (propertyValue instanceof Date) {
+                                    //是date类型按指定日期格式转换
+                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
+                                } else {
+
+                                    return propertyValue;
+                                }
+                            }
+                        })));
+            }
+            BulkResponse response = bulkRequest.execute().actionGet();
+            //是否失败
+            if (response.hasFailures()) {
+                logger.error(response.buildFailureMessage());
+            }
+        }
+    }
 }
