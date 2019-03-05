@@ -10,6 +10,7 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -28,7 +29,7 @@ import java.util.*;
  */
 @JobHander(value = "syncBidTypeOpportunityDataJobHandler")
 @Service
-public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunityDataJobHandler /*implements InitializingBean*/ {
+public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunityDataJobHandler implements InitializingBean {
 
     private String OPEN_RANGE_TYPE = "openRangeType";
     private String NODE            = "node";
@@ -165,8 +166,105 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
         syncJGCompetitiveNegotiationsProjectDataService(lastSyncTime);
         // 5.竞争性磋商
         syncJGCompetitiveConsultationProjectDataService(lastSyncTime);
+        // 6.单一性来源
+        syncJGSingleSourceProjectDataService(lastSyncTime);
+        // 7.询价
+        syncJGEnquiryProjectDataService(lastSyncTime);
 
+    }
 
+    private void syncJGEnquiryProjectDataService(Timestamp lastSyncTime) {
+        String countUpdatedSql = "SELECT\n"
+                + "   count(1)\n"
+                + "FROM\n"
+                + "   bid_sub_project\n"
+                + "WHERE\n"
+                + "   is_bid_open = 1 AND negotiation_node > 1 AND approve_status = 2 and project_type = 6 AND update_time > ?";
+        String queryUpdatedSql = "SELECT\n" +
+                "\tproject.*,\n" +
+                "\tbpi.id AS directoryId,\n" +
+                "\tbpi.`name` AS directoryName \n" +
+                "FROM\n" +
+                "\t(\n" +
+                "SELECT\n" +
+                "\tbsp.id AS projectId,\n" +
+                "\tbsp.project_code AS projectCode,\n" +
+                "\tbsp.project_name AS projectName,\n" +
+                "\tbsp.project_status AS projectStatus,\n" +
+                "\tbsp.company_id AS purchaseId,\n" +
+                "\tbsp.company_name AS purchaseName,\n" +
+                "\tbsp.create_time AS createTime,\n" +
+                "\tbsp.negotiation_node as node,\n" +
+                "\t62 as bidProjectType,\n" +
+                "\tbsp.bid_open_time AS bidOpenTime,\n" +
+                "\tbsp.bid_endtime AS quoteStopTime,\n" +
+                "\tbsp.sys_id AS sourceId,\n" +
+                "\tbsp.update_time AS updateTime,\n" +
+                "\tbp.province,\n" +
+                "\tbp.zone_str AS areaStr, \n" +
+                "\tbp.bid_type AS bidType, \n" +
+                "\tbp.industry_name AS industryStr \n" +
+                "FROM\n" +
+                "\tbid_sub_project bsp\n" +
+                "\tLEFT JOIN bid_project bp ON bsp.project_id = bp.id \n" +
+                "\tAND bsp.company_id = bp.company_id \n" +
+                "WHERE\n" +
+                "\tis_bid_open = 1 \n" +
+                "\tAND negotiation_node > 1 \n" +
+                "\tAND bsp.approve_status = 2\n" +
+                "\tAND bsp.project_type = 6\n" +
+                "\tAND bsp.update_time > ? and bsp.bid_endtime is not null\n" +
+                "\tLIMIT ?,? \n" +
+                "\t) project\n" +
+                "\tLEFT JOIN bid_project_item bpi ON project.projectId = bpi.sub_project_id";
+        doSyncProjectDataService(tenderDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList(((Object) lastSyncTime)), INSERT_OPERATION);
+    }
+
+    private void syncJGSingleSourceProjectDataService(Timestamp lastSyncTime) {
+        String countUpdatedSql = "SELECT\n"
+                + "   count(1)\n"
+                + "FROM\n"
+                + "   bid_sub_project\n"
+                + "WHERE\n"
+                + "   is_bid_open = 1 AND negotiation_node > 1 AND approve_status = 2 and project_type = 5 AND update_time > ?";
+        String queryUpdatedSql = "SELECT\n" +
+                "\tproject.*,\n" +
+                "\tbpi.id AS directoryId,\n" +
+                "\tbpi.`name` AS directoryName \n" +
+                "FROM\n" +
+                "\t(\n" +
+                "SELECT\n" +
+                "\tbsp.id AS projectId,\n" +
+                "\tbsp.project_code AS projectCode,\n" +
+                "\tbsp.project_name AS projectName,\n" +
+                "\tbsp.project_status AS projectStatus,\n" +
+                "\tbsp.company_id AS purchaseId,\n" +
+                "\tbsp.company_name AS purchaseName,\n" +
+                "\tbsp.create_time AS createTime,\n" +
+                "\tbsp.negotiation_node as node,\n" +
+                "\t52 as bidProjectType,\n" +
+                "\tbsp.bid_open_time AS bidOpenTime,\n" +
+                "\tbsp.bid_endtime AS quoteStopTime,\n" +
+                "\tbsp.sys_id AS sourceId,\n" +
+                "\tbsp.update_time AS updateTime,\n" +
+                "\tbp.province,\n" +
+                "\tbp.zone_str AS areaStr, \n" +
+                "\tbp.bid_type AS bidType, \n" +
+                "\tbp.industry_name AS industryStr \n" +
+                "FROM\n" +
+                "\tbid_sub_project bsp\n" +
+                "\tLEFT JOIN bid_project bp ON bsp.project_id = bp.id \n" +
+                "\tAND bsp.company_id = bp.company_id \n" +
+                "WHERE\n" +
+                "\tis_bid_open = 1 \n" +
+                "\tAND negotiation_node > 1 \n" +
+                "\tAND bsp.approve_status = 2\n" +
+                "\tAND bsp.project_type = 5\n" +
+                "\tAND bsp.update_time > ? and bsp.bid_endtime is not null\n" +
+                "\tLIMIT ?,? \n" +
+                "\t) project\n" +
+                "\tLEFT JOIN bid_project_item bpi ON project.projectId = bpi.sub_project_id";
+        doSyncProjectDataService(tenderDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList(((Object) lastSyncTime)), INSERT_OPERATION);
     }
 
     private void syncJGCompetitiveConsultationProjectDataService(Timestamp lastSyncTime) {
@@ -490,8 +588,8 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
     }
 
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }
 }

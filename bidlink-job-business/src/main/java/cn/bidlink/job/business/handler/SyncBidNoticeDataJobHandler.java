@@ -183,6 +183,7 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
                 "\tsub_project_id AS subProjectId,\n" +
                 "\tgain_file_type AS gainFileType,\n" +
                 "\tfile_gain_address AS fileGainAddress, \n" +
+                "\tmajor_argument_suggestion AS majorArgumentSuggestion, \n" +
                 "\tcreate_time AS createTime \n" +
                 "FROM\n" +
                 "\tbid_notice_history \n" +
@@ -237,6 +238,7 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
                 "\tnotice_publish_time AS noticePublishTime,\n" +
                 "\tsub_project_id AS subProjectId,\n" +
                 "\tgain_file_type AS gainFileType,\n" +
+                "\tmajor_argument_suggestion AS majorArgumentSuggestion, \n" +
                 "\tfile_gain_address AS fileGainAddress, \n" +
                 "\tcreate_time AS createTime \n" +
                 "FROM\n" +

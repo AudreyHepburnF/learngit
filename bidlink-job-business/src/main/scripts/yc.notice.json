@@ -213,6 +213,10 @@
       "putFileAddress": {
         "type": "string",
         "index": "not_analyzed"
+      },
+      "majorArgumentSuggestion": {
+        "type": "string",
+        "index": "not_analyzed"
       }
     }
   }
