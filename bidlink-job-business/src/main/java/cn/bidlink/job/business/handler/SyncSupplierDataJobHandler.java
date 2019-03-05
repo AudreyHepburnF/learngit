@@ -20,7 +20,6 @@ import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.regex.Matcher;
-import java.util.stream.Collectors;
 
 import static cn.bidlink.job.common.utils.DBUtil.query;
 
@@ -436,33 +435,14 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
                 // 添加企业空间 FIXME 企业空间待更换数据源
                 appendEnterpriseSpaceToResult(resultToExecute, supplierIdList);
                 // 插入数据保存,更新数据获取供应商交易信息
-                appendSupplierTradingInfo(resultToExecute, supplierIdList, syncWay);
+                appendSupplierTradingInfo(resultToExecute, syncWay);
             }
         }
     }
 
-    private void appendSupplierTradingInfo(List<Map<String, Object>> resultToExecute, Set<Long> supplierIds, Integer syncWay) {
+    private void appendSupplierTradingInfo(List<Map<String, Object>> resultToExecute, Integer syncWay) {
         if (Objects.equals(SYNC_WAY_UPDATE, syncWay)) {
-            SearchResponse response = elasticClient.getTransportClient().prepareSearch(elasticClient.getProperties().getProperty("cluster.index"))
-                    .setTypes(elasticClient.getProperties().getProperty("cluster.type.supplier"))
-                    .setQuery(QueryBuilders.termsQuery("id", supplierIds))
-                    .setSize(supplierIds.size())
-                    .execute().actionGet();
-            List<Map<String, Object>> resultFromEs = new ArrayList<>();
-            for (SearchHit hit : response.getHits().getHits()) {
-                resultFromEs.add(hit.getSource());
-            }
-
-            // 拷贝企业最新数据
-            List<Map<String, Object>> mapList = resultFromEs.stream()
-                    .map(esMap -> resultToExecute.stream()
-                            .filter(map -> Objects.equals(map.get(ID), esMap.get(ID)))
-                            .findFirst().map(map -> {
-                                esMap.putAll(map);
-                                return esMap;
-                            }).orElse(null)
-                    ).filter(Objects::nonNull).collect(Collectors.toList());
-            batchExecute(mapList);
+            batchAndUpdateExecute(resultToExecute);
         } else {
             batchExecute(resultToExecute);
         }

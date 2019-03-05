@@ -4,15 +4,11 @@ import cn.bidlink.job.common.constant.BusinessConstant;
 import cn.bidlink.job.common.utils.*;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:zhihuizhou@ebnew.com">zhouzhihui</a>
@@ -188,7 +184,7 @@ public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandl
                     purchaser.put(DATA_STATUS, ValidateUtil.checkDataComplete(purchaser, ValidateUtil.PURCHASER));
                 }
                 // 添加采购商交易量信息,从es中查询
-                appendPurchaseTradingInfo(purchasers, purchaserIds, syncWay);
+                appendPurchaseTradingInfo(purchasers, syncWay);
             }
         }
     }
@@ -197,32 +193,11 @@ public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandl
      * 当更新企业数据时
      *
      * @param purchasers
-     * @param purchaserIds
      * @param syncWay      2:更新企业数据
      */
-    private void appendPurchaseTradingInfo(List<Map<String, Object>> purchasers, HashSet<Long> purchaserIds, Integer syncWay) {
+    private void appendPurchaseTradingInfo(List<Map<String, Object>> purchasers, Integer syncWay) {
         if (SYNC_WAY_UPDATE.equals(syncWay)) {
-            SearchResponse response = elasticClient.getTransportClient().prepareSearch(elasticClient.getProperties().getProperty("cluster.index"))
-                    .setTypes(elasticClient.getProperties().getProperty("cluster.type.purchase"))
-                    .setQuery(QueryBuilders.termsQuery("id", purchaserIds))
-                    .setSize(purchaserIds.size())
-                    .execute().actionGet();
-            List<Map<String, Object>> resultFromEs = new ArrayList<>();
-            for (SearchHit hit : response.getHits().getHits()) {
-                resultFromEs.add(hit.getSource());
-            }
-
-            // 拷贝最新的企业数据
-            List<Map<String, Object>> mapList = resultFromEs.stream()
-                    .map(esMap -> purchasers.stream()
-                            .filter(m -> Objects.equals(m.get("id"), esMap.get("id")))
-                            .findFirst().map(m -> {
-                                esMap.putAll(m);
-                                return esMap;
-                            }).orElse(null))
-                    .filter(Objects::nonNull).collect(Collectors.toList());
-            batchInsert(mapList);
-
+            batchInsertAndUpdate(purchasers);
         } else {
             batchInsert(purchasers);
         }
@@ -263,7 +238,7 @@ public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandl
         result.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
 
         //添加平台来源
-        result.put(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.IXIETONG_SOURCE);
+        result.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE);
     }
 
 //    @Override
