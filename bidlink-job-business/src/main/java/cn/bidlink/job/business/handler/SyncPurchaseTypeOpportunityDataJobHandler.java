@@ -60,7 +60,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
                 SyncTimeUtil.toDateString(SyncTimeUtil.getCurrentDate()));
         syncPurchaseProjectDataService(lastSyncTime);
         // 修复商机状态
-        fixExpiredPurchaseTypeOpportunityData();
+//        fixExpiredPurchaseTypeOpportunityData();
     }
 
     /**

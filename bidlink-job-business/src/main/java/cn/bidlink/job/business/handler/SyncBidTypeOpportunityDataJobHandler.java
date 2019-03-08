@@ -57,7 +57,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
 //        Timestamp lastSyncTime = new Timestamp(SyncTimeUtil.toStringDate("2019-01-18 14:50:00").getTime());
         syncBiddingProjectDataService(lastSyncTime);
         // 修复招标项目 截止时间到后,商机状态
-        fixExpiredBiddingProjectDataService();
+//        fixExpiredBiddingProjectDataService();
     }
 
     /**

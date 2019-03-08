@@ -56,7 +56,7 @@ public class SyncAuctionTypeOpportunityToXtDataJobHandler extends AbstractSyncYc
         logger.info("开始同步悦采竞价项目lastSyncTime:" + SyncTimeUtil.toDateString(lastSyncTime) + ",\n" + "syncTime:" + SyncTimeUtil.toDateString(SyncTimeUtil.getCurrentDate()));
         syncAuctionProjectDataService(lastSyncTime);
         // 修复竞价商机自动截止问题
-        fixExpiredYcAuctionTypeOpportunityData();
+//        fixExpiredYcAuctionTypeOpportunityData();
     }
 
     private void fixExpiredYcAuctionTypeOpportunityData() {

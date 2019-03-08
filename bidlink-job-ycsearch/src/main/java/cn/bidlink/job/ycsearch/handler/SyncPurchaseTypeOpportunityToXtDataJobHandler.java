@@ -73,7 +73,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
         logger.info("采购项目商机同步时间,lastSyncTime：" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n"
                 + ",syncTime:" + new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
         syncPurchaseProjectDataService(lastSyncTime);
-        fixExpiredAutoStopTypePurchaseProjectDataService(lastSyncTime);
+//        fixExpiredAutoStopTypePurchaseProjectDataService(lastSyncTime);
     }
 
     /**

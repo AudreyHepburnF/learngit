@@ -53,7 +53,7 @@ public class SyncSaleTypeOpportunityDataJobHandler extends AbstractSyncOpportuni
                 SyncTimeUtil.currentDateToString());
         syncSaleProjectDataService(lastSyncTime);
 //         修复商机状态
-        fixExpiredSaleTypeOpportunityData();
+//        fixExpiredSaleTypeOpportunityData();
     }
 
     /**

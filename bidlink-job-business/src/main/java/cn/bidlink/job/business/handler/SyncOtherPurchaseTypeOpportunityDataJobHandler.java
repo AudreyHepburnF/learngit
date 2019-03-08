@@ -44,7 +44,7 @@ public class SyncOtherPurchaseTypeOpportunityDataJobHandler extends AbstractSync
         logger.info("同步第三方平台采购商机lastSyncTime:" + SyncTimeUtil.toDateString(lastSyncTime) + "\n" + ",syncTime:" + SyncTimeUtil.currentDateToString());
         syncOtherPurchaseOpportunityDataService(lastSyncTime);
         // 修复采购商机时间截止
-        fixExpiredOtherPurchaseTypeOpportunityDataService();
+//        fixExpiredOtherPurchaseTypeOpportunityDataService();
     }
 
     private void fixExpiredOtherPurchaseTypeOpportunityDataService() {
