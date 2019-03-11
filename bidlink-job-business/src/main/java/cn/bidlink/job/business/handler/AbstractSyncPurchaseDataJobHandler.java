@@ -55,7 +55,7 @@ public abstract class AbstractSyncPurchaseDataJobHandler extends JobHandler {
     protected String COMPANY_ID                 = "companyId";
     protected String PURCHASE_TRADING_VOLUME    = "purchaseTradingVolume";
     protected String BID_TRADING_VOLUME         = "bidTradingVolume";
-    protected String AUCTION_TRADING_VOLUME_STR = "auctionTradingVolumeStr";
+    protected String AUCTION_TRADING_VOLUME     = "auctionTradingVolume";
     protected String TRADING_VOLUME             = "tradingVolume";
     protected String LONG_TRADING_VOLUME        = "longTradingVolume";
     protected String COMPANY_SITE_ALIAS         = "companySiteAlias";
@@ -89,21 +89,10 @@ public abstract class AbstractSyncPurchaseDataJobHandler extends JobHandler {
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> purchase : purchases) {
                 bulkRequest.add(elasticClient.getTransportClient()
-                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
+                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.purchase_index"),
                                 elasticClient.getProperties().getProperty("cluster.type.purchase"),
                                 String.valueOf(purchase.get(ID)))
-                        .setSource(JSON.toJSONString(purchase, new ValueFilter() {
-                            @Override
-                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof Date) {
-                                    //是date类型按指定日期格式转换
-                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                } else {
-
-                                    return propertyValue;
-                                }
-                            }
-                        })));
+                        .setSource(SyncTimeUtil.handlerDate(purchase)));
             }
             BulkResponse response = bulkRequest.execute().actionGet();
             //是否失败

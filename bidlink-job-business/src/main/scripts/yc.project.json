@@ -4,20 +4,16 @@
   "project": {
     "properties": {
       "companyId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "name": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "id": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "totalPrice": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "longTotalPrice": {
         "type": "long"

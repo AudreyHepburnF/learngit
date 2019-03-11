@@ -39,7 +39,7 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
         logger.info("同步供应商参与的项目统计开始");
         Properties properties = elasticClient.getProperties();
         int pageSizeToUse = 2 * pageSize;
-        SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+        SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.supplier_index"))
                 .setTypes(properties.getProperty("cluster.type.supplier"))
                 .setScroll(new TimeValue(60000))
                 .setSize(pageSizeToUse)
@@ -47,12 +47,12 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
 
         int pageNumberToUse = 0;
         do {
-            SearchHit[] searchHits = scrollResp.getHits().hits();
+            SearchHit[] searchHits = scrollResp.getHits().getHits();
             Set<String> supplierIds = new HashSet<>();
             List<Map<String, Object>> resultFromEs = new ArrayList<>();
             for (SearchHit searchHit : searchHits) {
                 supplierIds.add(searchHit.getId());
-                resultFromEs.add(searchHit.getSource());
+                resultFromEs.add(searchHit.getSourceAsMap());
             }
 
             String supplierIdToString = StringUtils.collectionToCommaDelimitedString(supplierIds);

@@ -32,7 +32,7 @@ public class SyncSaleNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandl
     }
 
     private void syncSaleNoticeData() {
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.notice",
+        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.notice_index", "cluster.type.notice",
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE))
                         .must(QueryBuilders.termQuery(PROJECT_TYPE, SALE_NOTICE_TYPE)));

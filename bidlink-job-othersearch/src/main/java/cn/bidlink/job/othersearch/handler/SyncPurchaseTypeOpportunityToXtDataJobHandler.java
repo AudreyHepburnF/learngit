@@ -95,7 +95,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
             SearchHit[] searchHits = scrollResp.getHits().hits();
             List<Long> projectIds = new ArrayList<>();
             for (SearchHit searchHit : searchHits) {
-                projectIds.add(Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID))));
+                projectIds.add(Long.valueOf(String.valueOf(searchHit.getSourceAsMap().get(PROJECT_ID))));
             }
             doFixExpiredAutoStopTypePurchaseProjectDataService(projectIds, SyncTimeUtil.getCurrentDate());
             scrollResp = elasticClient.getTransportClient().prepareSearchScroll(scrollResp.getScrollId())

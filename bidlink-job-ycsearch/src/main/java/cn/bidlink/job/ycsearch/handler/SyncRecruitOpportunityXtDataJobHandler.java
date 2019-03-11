@@ -90,7 +90,7 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
             SearchHits hits = response.getHits();
             List<String> ids = new ArrayList<>();
             for (SearchHit hit : hits.getHits()) {
-                Map<String, Object> source = hit.getSource();
+                Map<String, Object> source = hit.getSourceAsMap();
                 ids.add(source.get(ID).toString());
             }
             this.doFixedLimitRecruitTypeDataService(ids);

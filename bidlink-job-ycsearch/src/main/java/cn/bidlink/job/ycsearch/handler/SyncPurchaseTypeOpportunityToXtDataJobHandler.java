@@ -103,7 +103,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
             SearchHit[] searchHits = scrollResp.getHits().hits();
             List<Long> projectIds = new ArrayList<>();
             for (SearchHit searchHit : searchHits) {
-                Long projectId = Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID)));
+                Long projectId = Long.valueOf(String.valueOf(searchHit.getSourceAsMap().get(PROJECT_ID)));
                 projectIds.add(projectId);
             }
             doFixExpiredAutoStopTypePurchaseProjectDataService(projectIds);

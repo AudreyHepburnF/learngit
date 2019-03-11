@@ -1,10 +1,9 @@
 package cn.bidlink.job.common.es;
 
-import com.floragunn.searchguard.ssl.SearchGuardSSLPlugin;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.plugin.deletebyquery.DeleteByQueryPlugin;
+import org.elasticsearch.common.transport.TransportAddress;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -12,7 +11,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.stereotype.Repository;
 
-import java.net.InetSocketAddress;
+import java.net.InetAddress;
 import java.util.Properties;
 
 /**
@@ -22,7 +21,7 @@ import java.util.Properties;
  * @date : 2017/4/27
  */
 @Repository
-public class ElasticClient implements InitializingBean{
+public class ElasticClient implements InitializingBean {
     private Logger logger = LoggerFactory.getLogger(ElasticClient.class);
     private TransportClient transportClient;
     private Properties      properties;
@@ -41,7 +40,7 @@ public class ElasticClient implements InitializingBean{
         properties = PropertiesLoaderUtils.loadProperties(new ClassPathResource("elasticsearch.properties"));
         boolean searchGuardEnable = Boolean.parseBoolean(properties.getProperty("searchguard.enable"));
         if (searchGuardEnable) {
-            Settings settings = Settings.settingsBuilder()
+            Settings settings = Settings.builder()
                     .put("cluster.name", properties.getProperty("cluster.name"))
                     .put("client.transport.sniff", true)
                     .put("path.home", ".")
@@ -54,22 +53,17 @@ public class ElasticClient implements InitializingBean{
                     .put("searchguard.ssl.transport.keystore_password", properties.getProperty("searchguard.ssl.transport.keystore_password"))
                     .put("searchguard.ssl.transport.truststore_password", properties.getProperty("searchguard.ssl.transport.truststore_password"))
                     .build();
-            transportClient = TransportClient.builder()
-                    .settings(settings)
-                    .addPlugin(SearchGuardSSLPlugin.class)
-                    .addPlugin(DeleteByQueryPlugin.class)
-                    .build();
+
+            transportClient = new PreBuiltTransportClient(settings);
+
         } else {
-            Settings settings = Settings.settingsBuilder()
+            Settings settings = Settings.builder()
                     .put("cluster.name", properties.getProperty("cluster.name"))
-                    .put("client.transport.sniff", true)
-                    .put("path.home", ".")
-                    .put("path.conf", properties.getProperty("path.conf"))
+//                    .put("client.transport.sniff", true)
+//                    .put("path.home", ".")
+//                    .put("path.conf", properties.getProperty("path.conf"))
                     .build();
-            transportClient = TransportClient.builder()
-                    .addPlugin(DeleteByQueryPlugin.class)
-                    .settings(settings)
-                    .build();
+            transportClient = new PreBuiltTransportClient(settings);
         }
 
         String[] hosts = properties.getProperty("cluster.host").split(",");
@@ -77,9 +71,9 @@ public class ElasticClient implements InitializingBean{
             if (host.contains(":")) {
                 String ip = host.split(":")[0];
                 int port = Integer.parseInt(host.split(":")[1]);
-                transportClient.addTransportAddress(new InetSocketTransportAddress(new InetSocketAddress(ip, port)));
+                transportClient.addTransportAddress(new TransportAddress((InetAddress.getByName(ip)), port));
             } else {
-                transportClient.addTransportAddress(new InetSocketTransportAddress(new InetSocketAddress(host, 9300)));
+                transportClient.addTransportAddress(new TransportAddress((InetAddress.getByName(host)), 9300));
             }
         }
     }

@@ -76,7 +76,7 @@ public class SyncAuctionTypeOpportunityToXtDataJobHandler extends AbstractSyncYc
             SearchHits hits = response.getHits();
             ArrayList<Long> projectIds = new ArrayList<>();
             for (SearchHit hit : hits.getHits()) {
-                Map<String, Object> source = hit.getSource();
+                Map<String, Object> source = hit.getSourceAsMap();
                 projectIds.add(Long.valueOf(source.get(PROJECT_ID).toString()));
             }
             doFixExpiredYcAuctionTypeOpportunityService(projectIds);

@@ -5,18 +5,15 @@ import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.deletebyquery.DeleteByQueryAction;
-import org.elasticsearch.action.deletebyquery.DeleteByQueryRequestBuilder;
-import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryAction;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.joda.time.DateTime;
@@ -62,10 +59,6 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     @Autowired
     @Qualifier("proDataSource")
     private DataSource proDataSource;
-
-//    @Autowired
-//    @Qualifier("ycDataSource")
-//    private DataSource ycDataSource;
 
     @Autowired
     @Qualifier("uniregDataSource")
@@ -122,7 +115,7 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     // 供应商产品关系（1、报价产品；2、中标产品；3、标王关键词；4、主营产品：）
     private void syncProductData() {
 //        Timestamp lastSyncTime = new Timestamp(0);
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.supplier_product", null);
+        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.supplier_product_index", "cluster.type.supplier_product", null);
         logger.info("供应商产品数据同步时间：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss") + "\n"
                 + ", syncTime : " + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
 //        syncTradeProductDataService(lastSyncTime);
@@ -351,16 +344,13 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
      * @param supplierId
      */
     private void deleteOldMainProduct(String supplierId) {
-        DeleteByQueryResponse deleteByQueryResponse = new DeleteByQueryRequestBuilder(elasticClient.getTransportClient(), DeleteByQueryAction.INSTANCE)
-                .setIndices(elasticClient.getProperties().getProperty("cluster.index"))
-                .setTypes(elasticClient.getProperties().getProperty("cluster.type.supplier_product"))
-                .setQuery(QueryBuilders.boolQuery()
+        BulkByScrollResponse response = DeleteByQueryAction.INSTANCE.newRequestBuilder(elasticClient.getTransportClient())
+                .filter(QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery(SUPPLIER_DIRECTORY_REL, MAIN_PRODUCT_DIRECTORY_REL))
-                        .must(QueryBuilders.termQuery(SUPPLIER_ID, supplierId))
-                )
-                .execute()
-                .actionGet();
-        if (deleteByQueryResponse.getTotalFailed() > 0) {
+                        .must(QueryBuilders.termQuery(SUPPLIER_ID, supplierId)))
+                .source(elasticClient.getProperties().getProperty("cluster.supplier_product_index"))
+                .get();
+        if (!CollectionUtils.isEmpty(response.getBulkFailures())) {
             logger.error("清理主营产品历史数据失败！");
         }
     }
@@ -420,14 +410,14 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
 
     private Map<String, Map<String, Object>> queryDirectoryNamesBySupplierId(Long supplierId) {
         SearchResponse response = elasticClient.getTransportClient()
-                .prepareSearch(elasticClient.getProperties().getProperty("cluster.index"))
+                .prepareSearch(elasticClient.getProperties().getProperty("cluster.supplier_product_index"))
                 .setTypes(elasticClient.getProperties().getProperty("cluster.type.supplier_product"))
                 .setQuery(QueryBuilders.termQuery(SUPPLIER_ID, supplierId))
                 .execute().actionGet();
         SearchHits hits = response.getHits();
         Map<String, Map<String, Object>> directoryNameMap = new HashMap<>();
-        for (SearchHit searchHit : hits.hits()) {
-            Map<String, Object> source = searchHit.getSource();
+        for (SearchHit searchHit : hits.getHits()) {
+            Map<String, Object> source = searchHit.getSourceAsMap();
             directoryNameMap.put(String.valueOf(source.get(DIRECTORY_NAME)), source);
         }
         return directoryNameMap;
@@ -451,19 +441,10 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> result : resultsToUpdate) {
                 bulkRequest.add(elasticClient.getTransportClient()
-                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
+                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.supplier_product_index"),
                                 elasticClient.getProperties().getProperty("cluster.type.supplier_product"),
                                 String.valueOf(result.get(ID)))
-                        .setSource(JSON.toJSONString(result, new ValueFilter() {
-                            @Override
-                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof java.util.Date) {
-                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                } else {
-                                    return propertyValue;
-                                }
-                            }
-                        })));
+                        .setSource(SyncTimeUtil.handlerDate(result)));
             }
             BulkResponse response = bulkRequest.execute().actionGet();
             if (response.hasFailures()) {

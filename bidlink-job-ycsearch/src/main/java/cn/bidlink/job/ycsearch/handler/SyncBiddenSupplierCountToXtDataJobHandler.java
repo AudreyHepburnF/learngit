@@ -105,22 +105,22 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
             Set<Pair> auctionProjectPairs = new HashSet<>();
 
             for (SearchHit searchHit : searchHits) {
-                Integer projectType = (Integer) searchHit.getSource().get(PROJECT_TYPE);
+                Integer projectType = (Integer) searchHit.getSourceAsMap().get(PROJECT_TYPE);
                 if (projectType != null) {
                     if (projectType == PURCHASE_PROJECT_TYPE) {
-                        purchaseProjectSource.add(searchHit.getSource());
-                        Long projectId = Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID)));
-                        Long companyId = Long.valueOf(String.valueOf(searchHit.getSource().get(PURCHASE_ID)));
+                        purchaseProjectSource.add(searchHit.getSourceAsMap());
+                        Long projectId = Long.valueOf(String.valueOf(searchHit.getSourceAsMap().get(PROJECT_ID)));
+                        Long companyId = Long.valueOf(String.valueOf(searchHit.getSourceAsMap().get(PURCHASE_ID)));
                         purchaseProjectPairs.add(new Pair(companyId, projectId));
                     } else if (projectType == BIDDING_PROJECT_TYPE) {
-                        bidProjectSource.add(searchHit.getSource());
-                        Long projectId = Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID)));
-                        Long companyId = Long.valueOf(String.valueOf(searchHit.getSource().get(PURCHASE_ID)));
+                        bidProjectSource.add(searchHit.getSourceAsMap());
+                        Long projectId = Long.valueOf(String.valueOf(searchHit.getSourceAsMap().get(PROJECT_ID)));
+                        Long companyId = Long.valueOf(String.valueOf(searchHit.getSourceAsMap().get(PURCHASE_ID)));
                         bidProjectPairs.add(new Pair(companyId, projectId));
                     } else if (projectType == AUCTION_PROJECT_TYPE) {
-                        auctionProjectSource.add(searchHit.getSource());
-                        Long projectId = Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID)));
-                        Long companyId = Long.valueOf(String.valueOf(searchHit.getSource().get(PURCHASE_ID)));
+                        auctionProjectSource.add(searchHit.getSourceAsMap());
+                        Long projectId = Long.valueOf(String.valueOf(searchHit.getSourceAsMap().get(PROJECT_ID)));
+                        Long companyId = Long.valueOf(String.valueOf(searchHit.getSourceAsMap().get(PURCHASE_ID)));
                         auctionProjectPairs.add(new Pair(companyId, projectId));
                     }
                 }

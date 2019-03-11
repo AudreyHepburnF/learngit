@@ -72,7 +72,7 @@ public class SyncYcSupplierProjectDataJobHandler extends JobHandler /*implements
             if (hits.getTotalHits() > 0) {
                 List<Map<String, Object>> resultFromEs = new ArrayList<>();
                 for (SearchHit hit : hits.getHits()) {
-                    Map<String, Object> source = hit.getSource();
+                    Map<String, Object> source = hit.getSourceAsMap();
                     resultFromEs.add(source);
                 }
                 // 处理字段

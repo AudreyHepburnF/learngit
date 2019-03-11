@@ -83,7 +83,7 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends JobHandler /*imple
 
     private void syncEnterpriseSpaceData() {
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
-                "cluster.index",
+                "cluster..enterprise_space_product_index",
                 "cluster.type.enterprise_space_product",
                 null);
         logger.info("企业空间同步lastTime:" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss") + "\n" +
@@ -98,7 +98,7 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends JobHandler /*imple
     private void fixedProductWfirstStatus() {
         Properties properties = elasticClient.getProperties();
         // 回滚标王数据
-        SearchResponse wfirstResponse = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+        SearchResponse wfirstResponse = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster..enterprise_space_product_index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_product"))
                 .setQuery(QueryBuilders.termQuery("supplierDirectoryRel", 3))
                 .setScroll(new TimeValue(60000))
@@ -109,7 +109,7 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends JobHandler /*imple
             if (wfirstHits.getTotalHits() > 0) {
                 List<Map<String, Object>> resultFromEs = new ArrayList<>();
                 for (SearchHit hit : wfirstHits.getHits()) {
-                    Map<String, Object> source = hit.getSource();
+                    Map<String, Object> source = hit.getSourceAsMap();
                     HashMap<String, Object> map = new HashMap<>(2);
                     Object supplierId = source.get("supplierId");
                     map.put("supplierId", supplierId);
@@ -125,7 +125,7 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends JobHandler /*imple
                 }
 
                 // 回滚包含标王的产品数据,更新产品
-                SearchResponse productResponse = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+                SearchResponse productResponse = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster..enterprise_space_product_index"))
                         .setTypes(properties.getProperty("cluster.type.enterprise_space_product"))
                         .setScroll(new TimeValue(60000))
                         .setQuery(boolQuery)
@@ -135,7 +135,7 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends JobHandler /*imple
                 do {
                     if (productHits.getTotalHits() > 0) {
                         List<Map<String, Object>> mapList = Arrays.stream(productHits.getHits()).map(searchHit -> {
-                            Map<String, Object> source = searchHit.getSource();
+                            Map<String, Object> source = searchHit.getSourceAsMap();
                             source.put(WFIRST_STATUS, BINDING_WFIRST);
                             return source;
                         }).collect(Collectors.toList());
@@ -161,7 +161,7 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends JobHandler /*imple
             Properties properties = elasticClient.getProperties();
             for (Map<String, Object> map : mapList) {
                 prepareBulk.add(elasticClient.getTransportClient().prepareUpdate(
-                        properties.getProperty("cluster.index"), properties.getProperty("cluster.type.enterprise_space_product"),
+                        properties.getProperty("cluster..enterprise_space_product_index"), properties.getProperty("cluster.type.enterprise_space_product"),
                         String.valueOf(map.get(ID))
                 ).setDoc(JSON.toJSONString(map, new ValueFilter() {
                     @Override
@@ -363,21 +363,10 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends JobHandler /*imple
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> product : products) {
                 bulkRequest.add(elasticClient.getTransportClient()
-                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
+                        .prepareIndex(elasticClient.getProperties().getProperty("cluster..enterprise_space_product_index"),
                                 elasticClient.getProperties().getProperty("cluster.type.enterprise_space_product"),
                                 String.valueOf(product.get(ID)))
-                        .setSource(JSON.toJSONString(product, new ValueFilter() {
-                            @Override
-                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof java.util.Date) {
-                                    // 是date类型按指定日期格式转换
-                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                } else {
-
-                                    return propertyValue;
-                                }
-                            }
-                        })));
+                        .setSource(SyncTimeUtil.handlerDate(product)));
             }
             BulkResponse response = bulkRequest.execute().actionGet();
             // 是否失败

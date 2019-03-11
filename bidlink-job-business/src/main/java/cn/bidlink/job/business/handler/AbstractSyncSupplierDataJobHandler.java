@@ -65,6 +65,7 @@ public abstract class AbstractSyncSupplierDataJobHandler extends JobHandler {
     protected String ID                          = "id";
     protected String USER_ID                     = "userId";
     protected String CORE                        = "core";
+    protected String CORE_STATUS                 = "coreStatus";
     protected String AREA_STR                    = "areaStr";
     protected String AREA_STR_NOT_ANALYZED       = "areaStrNotAnalyzed";
     protected String ZONE_STR                    = "zoneStr";
@@ -121,19 +122,10 @@ public abstract class AbstractSyncSupplierDataJobHandler extends JobHandler {
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> result : resultsToUpdate) {
                 bulkRequest.add(elasticClient.getTransportClient()
-                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
+                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.supplier_index"),
                                 elasticClient.getProperties().getProperty("cluster.type.supplier"),
                                 String.valueOf(result.get(ID)))
-                        .setSource(JSON.toJSONString(result, new ValueFilter() {
-                            @Override
-                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof java.util.Date) {
-                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                } else {
-                                    return propertyValue;
-                                }
-                            }
-                        })));
+                        .setSource(SyncTimeUtil.handlerDate(result)));
             }
 
             BulkResponse response = bulkRequest.execute().actionGet();

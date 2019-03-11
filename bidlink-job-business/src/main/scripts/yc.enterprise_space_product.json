@@ -4,43 +4,37 @@
   "enterprise_space_product": {
     "properties": {
       "id": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "companyId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "picFile": {
-        "type": "string"
+        "type": "text"
       },
       "productName": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": "ik_max_word"
       },
       "companyName": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": "ik_max_word"
       },
       "zoneStr": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": "ik_max_word"
       },
       "zoneStrNotAnalyzed": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "spec": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "trademark": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "model": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "state": {
         "type": "integer"
@@ -62,8 +56,7 @@
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "productNameNotAnalyzed": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "createTime": {
         "type": "date",

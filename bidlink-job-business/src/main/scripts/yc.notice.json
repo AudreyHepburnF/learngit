@@ -4,20 +4,17 @@
   "notice": {
     "properties": {
       "companyId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "companyNameNotAnalyzed": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "createTime": {
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "id": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "isShowMobile": {
         "type": "integer"
@@ -26,16 +23,16 @@
         "type": "integer"
       },
       "linkMail": {
-        "type": "string"
+        "type": "text"
       },
       "linkMan": {
-        "type": "string"
+        "type": "text"
       },
       "linkPhone": {
-        "type": "string"
+        "type": "text"
       },
       "linkTel": {
-        "type": "string"
+        "type": "text"
       },
       "noticeType": {
         "type": "integer"
@@ -44,22 +41,19 @@
         "type": "integer"
       },
       "projectCode": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "projectId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "projectInfo": {
-        "type": "string"
+        "type": "text"
       },
       "projectNameNotAnalyzed": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "project_info": {
-        "type": "string"
+        "type": "text"
       },
       "publishNoticeTime": {
         "type": "date",
@@ -84,16 +78,13 @@
         "type": "long"
       },
       "bidBail": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "bidDescribe": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "bidDocMoney": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "bidDocOverTime": {
         "type": "date",
@@ -108,8 +99,7 @@
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "bidOpenAddress": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "bidOpenTime": {
         "type": "date",
@@ -119,15 +109,14 @@
         "type": "integer"
       },
       "companyName": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": "ik_max_word"
       },
       "docFree": {
         "type": "long"
       },
       "fileGainAddress": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "gainFileType": {
         "type": "integer"
@@ -158,8 +147,8 @@
         "type": "integer"
       },
       "projectName": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": "ik_max_word"
       },
       "putFileType": {
         "type": "integer"
@@ -168,51 +157,43 @@
         "type": "integer"
       },
       "qualification": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "remarks": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "subProjectId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "supplierNameNotAnalyzed": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "tenderName": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "unit": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "fileName": {
-        "type": "string"
+        "type": "text"
       },
       "md5": {
-        "type": "string"
+        "type": "text"
       },
       "bidUrl": {
-        "type": "string"
+        "type": "text"
       },
       "platformSource": {
         "type": "integer"
       },
       "content": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "optStatus": {
         "type": "integer"
       },
       "putFileAddress": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       }
     }
   }

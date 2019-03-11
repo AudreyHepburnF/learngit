@@ -4,20 +4,18 @@
   "supplier": {
     "properties": {
       "address": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": "ik_max_word"
       },
       "areaCode": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "areaStr": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": "ik_max_word"
       },
       "areaStrNotAnalyzed": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "bidAuthExpires": {
         "type": "date",
@@ -35,38 +33,30 @@
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "companyLogo": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "companyName": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": "ik_max_word"
       },
       "companyNameEn": {
-        "type": "string",
-        "analyzer": "standard"
+        "type": "text"
       },
       "companyNameNotAnalyzed": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "companySite": {
-        "type": "string",
-        "analyzer": "standard"
-      },
-      "companyTypStr": {
-        "type": "string"
+        "type": "text"
       },
       "companyType": {
         "type": "integer"
       },
       "companyTypeStr": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "contact": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": "ik_max_word"
       },
       "core": {
         "type": "integer"
@@ -79,67 +69,57 @@
         "type": "integer"
       },
       "enterpriseSpace": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "enterpriseSpaceActive": {
         "type": "integer"
       },
       "enterpriseSpaceDetail": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "fund": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "fundUnit": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "id": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "industryCode": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "industryStr": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": "ik_max_word"
       },
       "loginName": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": "ik_max_word"
       },
       "mainProduct": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": "ik_max_word"
       },
       "mainProductNotAnalyzed": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "mobile": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "region": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "supplierName": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": "ik_max_word"
       },
       "syncTime": {
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "tel": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "totalBidProject": {
         "type": "long"
@@ -188,29 +168,28 @@
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "webType": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "workPattern": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "wwwStation": {
-        "type": "string",
-        "analyzer": "standard"
+        "type": "text"
       },
       "zoneCode": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "zoneStr": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": "ik_max_word"
       },
       "platformSource": {
         "type": "integer"
       },
       "status": {
+        "type": "long"
+      },
+      "userId": {
         "type": "long"
       },
       "dataStatus": {

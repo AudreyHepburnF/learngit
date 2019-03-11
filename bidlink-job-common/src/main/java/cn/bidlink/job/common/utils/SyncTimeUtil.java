@@ -1,11 +1,14 @@
 package cn.bidlink.job.common.utils;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.ValueFilter;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * @author : <a href="mailto:zikaifeng@ebnew.com">冯子恺</a>
@@ -79,5 +82,16 @@ public class SyncTimeUtil {
                 .minusSeconds(dateTime.getSecondOfMinute())
                 .minusMillis(dateTime.getMillisOfSecond());
         return zeroTime.toDate().getTime();
+    }
+
+    public static Map<String, Object> handlerDate(Map<String, Object> result) {
+        String jsonMap = JSON.toJSONString(result, (ValueFilter) (Object object, String propertyName, Object propertyValue) -> {
+            if (propertyValue instanceof Date) {
+                return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
+            } else {
+                return propertyValue;
+            }
+        });
+        return JSON.parseObject(jsonMap, Map.class);
     }
 }

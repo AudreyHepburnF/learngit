@@ -78,7 +78,7 @@ public class SyncFamousProjectPageViewDataJobHandler extends JobHandler /*implem
             SearchHits hits = response.getHits();
             List<Map<String, Object>> resultFromEs = new ArrayList<>();
             for (SearchHit hit : hits.getHits()) {
-                resultFromEs.add(hit.getSource());
+                resultFromEs.add(hit.getSourceAsMap());
             }
             // 添加点击访问量
             appendHitCount(resultFromEs);

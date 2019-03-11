@@ -4,8 +4,7 @@
   "supplier_product": {
     "properties": {
       "companyLogo": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "core": {
         "type": "integer"
@@ -15,27 +14,24 @@
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "directoryName": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": "ik_max_word"
       },
       "directoryNameNotAnalyzed": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "id": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "supplierDirectoryRel": {
         "type": "integer"
       },
       "supplierId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "text"
       },
       "supplierName": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": "ik_max_word"
       },
       "syncTime": {
         "type": "date",

@@ -5,8 +5,6 @@ import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -23,7 +21,6 @@ import org.springframework.util.DigestUtils;
 import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +32,7 @@ import java.util.Map;
  */
 @Service
 @JobHander("syncDealPurchaseSupplierDataJobHandler")
-public class SyncDealPurchaseSupplierDataJobHandler extends JobHandler /*implements InitializingBean*/ {
+public class SyncDealPurchaseSupplierDataJobHandler extends JobHandler /*implements InitializingBean */{
 
     @Autowired
     private ElasticClient elasticClient;
@@ -75,7 +72,7 @@ public class SyncDealPurchaseSupplierDataJobHandler extends JobHandler /*impleme
     }
 
     private void syncDealPurchaseSupplier() {
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.deal_supplier", null);
+        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.deal_supplier_index", "cluster.type.deal_supplier", null);
         logger.info("同步成交供应商lastSyncTime:" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + ",\n" + "syncTime:"
                 + new DateTime().toString(SyncTimeUtil.DATE_TIME_PATTERN));
         syncDealPurchaseSupplierService(lastSyncTime);
@@ -200,15 +197,10 @@ public class SyncDealPurchaseSupplierDataJobHandler extends JobHandler /*impleme
         if (!CollectionUtils.isEmpty(mapList)) {
             BulkRequestBuilder requestBuilder = elasticClient.getTransportClient().prepareBulk();
             mapList.forEach(map -> requestBuilder.add(elasticClient.getTransportClient().prepareIndex(
-                    elasticClient.getProperties().getProperty("cluster.index"),
+                    elasticClient.getProperties().getProperty("cluster.deal_supplier_index"),
                     elasticClient.getProperties().getProperty("cluster.type.deal_supplier")
                     , String.valueOf(map.get(ID))
-            ).setSource(JSON.toJSONString(map, (ValueFilter) (object, propertyKey, propertyValue) -> {
-                if (propertyValue instanceof Date) {
-                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                }
-                return propertyValue;
-            }))));
+            ).setSource(SyncTimeUtil.handlerDate(map))));
 
             BulkResponse bulkResponse = requestBuilder.execute().actionGet();
             if (bulkResponse.hasFailures()) {
