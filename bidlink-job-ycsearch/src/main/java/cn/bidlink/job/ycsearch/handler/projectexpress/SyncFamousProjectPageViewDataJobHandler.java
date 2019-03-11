@@ -5,8 +5,6 @@ import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import cn.bidlink.job.ycsearch.handler.JobHandler;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -18,6 +16,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -40,7 +39,7 @@ import static cn.bidlink.job.common.utils.SyncTimeUtil.getZeroTime;
  */
 @Service
 @JobHander(value = "syncFamousProjectPageViewDataJobHandler")
-public class SyncFamousProjectPageViewDataJobHandler extends JobHandler /*implements InitializingBean*/ {
+public class SyncFamousProjectPageViewDataJobHandler extends JobHandler implements InitializingBean {
 
     private Logger logger = LoggerFactory.getLogger(SyncFamousProjectPageViewDataJobHandler.class);
 
@@ -67,7 +66,7 @@ public class SyncFamousProjectPageViewDataJobHandler extends JobHandler /*implem
 
     private void syncFamousProjectPageViewData() {
         Properties properties = elasticClient.getProperties();
-        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.express_index"))
+        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.project_express_traffic_statistic_index"))
                 .setTypes(properties.getProperty("cluster.type.project_express_traffic_statistic"))
                 .setQuery(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
                 .setScroll(new TimeValue(60000))
@@ -97,18 +96,10 @@ public class SyncFamousProjectPageViewDataJobHandler extends JobHandler /*implem
             Properties properties = elasticClient.getProperties();
             BulkRequestBuilder requestBuilder = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> map : mapList) {
-                requestBuilder.add(elasticClient.getTransportClient().prepareIndex(properties.getProperty("cluster.express_index"),
+                requestBuilder.add(elasticClient.getTransportClient().prepareIndex(properties.getProperty("cluster.project_express_traffic_statistic_index"),
                         properties.getProperty("cluster.type.project_express_traffic_statistic"))
                         .setId(String.valueOf(map.get(ID)))
-                        .setSource(JSON.toJSONString(map, new ValueFilter() {
-                            @Override
-                            public Object process(Object object, String propertyKey, Object propertyValue) {
-                                if (propertyValue instanceof Date) {
-                                    return SyncTimeUtil.toDateString(propertyValue);
-                                }
-                                return propertyValue;
-                            }
-                        }))
+                        .setSource(SyncTimeUtil.handlerDate(map))
                 );
                 BulkResponse response = requestBuilder.execute().actionGet();
                 if (response.hasFailures()) {
@@ -165,8 +156,8 @@ public class SyncFamousProjectPageViewDataJobHandler extends JobHandler /*implem
         });
     }
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }
 }

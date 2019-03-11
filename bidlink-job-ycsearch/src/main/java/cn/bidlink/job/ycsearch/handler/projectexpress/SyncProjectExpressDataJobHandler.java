@@ -6,8 +6,6 @@ import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import cn.bidlink.job.ycsearch.handler.JobHandler;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -15,6 +13,7 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,10 @@ import org.springframework.util.CollectionUtils;
 
 import javax.sql.DataSource;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author <a href="mailto:zhihuizhou@ebnew.com">wisdom</a>
@@ -32,7 +34,7 @@ import java.util.*;
  */
 @Service
 @JobHander(value = "syncProjectExpressDataJobHandler")
-public class SyncProjectExpressDataJobHandler extends JobHandler /*implements InitializingBean*/ {
+public class SyncProjectExpressDataJobHandler extends JobHandler implements InitializingBean {
 
     private Logger logger = LoggerFactory.getLogger(SyncProjectExpressDataJobHandler.class);
 
@@ -64,7 +66,7 @@ public class SyncProjectExpressDataJobHandler extends JobHandler /*implements In
     }
 
     private void syncProjectExpressData() {
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.express_index", "cluster.type.project_express",
+        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.project_express_index", "cluster.type.project_express",
                 QueryBuilders.boolQuery().must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
         );
 //        Timestamp lastSyncTime = new Timestamp(0);
@@ -176,17 +178,9 @@ public class SyncProjectExpressDataJobHandler extends JobHandler /*implements In
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> map : mapList) {
                 bulkRequest.add(elasticClient.getTransportClient()
-                        .prepareUpdate(elasticClient.getProperties().getProperty("cluster.express_index")
+                        .prepareUpdate(elasticClient.getProperties().getProperty("cluster.project_express_index")
                                 , elasticClient.getProperties().getProperty("cluster.type.project_express"), String.valueOf(map.get(ID)))
-                        .setDoc(JSON.toJSONString(map, new ValueFilter() {
-                            @Override
-                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof Date) {
-                                    return SyncTimeUtil.toDateString(propertyValue);
-                                }
-                                return propertyValue;
-                            }
-                        })).setDocAsUpsert(true));
+                        .setDoc(SyncTimeUtil.handlerDate(map)).setDocAsUpsert(true));
             }
             BulkResponse response = bulkRequest.execute().actionGet();
             if (response.hasFailures()) {
@@ -218,8 +212,8 @@ public class SyncProjectExpressDataJobHandler extends JobHandler /*implements In
         map.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
     }
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }
 }

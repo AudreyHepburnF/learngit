@@ -65,7 +65,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
     }
 
     private void syncRecruitData() {
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.recruit",
+        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.recruit_index", "cluster.type.recruit",
                 QueryBuilders.boolQuery().must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE)));
 //        Timestamp lastSyncTime = new Timestamp(0);
         logger.info("1.1 同步招募信息lastSyncTime:" + SyncTimeUtil.toDateString(lastSyncTime) + "\n" + ",syncTime:" + SyncTimeUtil.currentDateToString());
@@ -180,7 +180,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> result : resultsToUpdate) {
                 bulkRequest.add(elasticClient.getTransportClient()
-                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
+                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.recruit_index"),
                                 elasticClient.getProperties().getProperty("cluster.type.recruit"),
                                 String.valueOf(result.get(ID)))
                         .setSource(JSON.toJSONString(result, new ValueFilter() {

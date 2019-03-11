@@ -5,10 +5,6 @@ import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.handler.annotation.JobHander;
-import org.elasticsearch.action.deletebyquery.DeleteByQueryAction;
-import org.elasticsearch.action.deletebyquery.DeleteByQueryRequestBuilder;
-import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,15 +41,15 @@ public class ClearProductReportJobHandler extends IJobHandler /*implements Initi
     }
 
     private void clearProductReport() {
-        DeleteByQueryResponse response = new DeleteByQueryRequestBuilder(elasticClient.getTransportClient(), DeleteByQueryAction.INSTANCE)
-                .setIndices(elasticClient.getProperties().getProperty("cluster.index"))
-                .setTypes(elasticClient.getProperties().getProperty("cluster.type.product_report"))
-                .setQuery(QueryBuilders.termQuery(IS_SALES, OFF_SALES))
-                .execute()
-                .actionGet();
-        if (response.getTotalFailed() > 0) {
-            logger.error("清理下架的行情产品报告失败！");
-        }
+//        DeleteByQueryResponse response = new DeleteByQueryRequestBuilder(elasticClient.getTransportClient(), DeleteByQueryAction.INSTANCE)
+//                .setIndices(elasticClient.getProperties().getProperty("cluster.index"))
+//                .setTypes(elasticClient.getProperties().getProperty("cluster.type.product_report"))
+//                .setQuery(QueryBuilders.termQuery(IS_SALES, OFF_SALES))
+//                .execute()
+//                .actionGet();
+//        if (response.getTotalFailed() > 0) {
+//            logger.error("清理下架的行情产品报告失败！");
+//        }
     }
 
 //    @Override

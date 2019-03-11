@@ -5,8 +5,6 @@ import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import cn.bidlink.job.ycsearch.handler.JobHandler;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -18,6 +16,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -36,7 +35,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @JobHander(value = "syncYcSupplierProjectDataJobHandler")
-public class SyncYcSupplierProjectDataJobHandler extends JobHandler /*implements InitializingBean*/ {
+public class SyncYcSupplierProjectDataJobHandler extends JobHandler implements InitializingBean {
 
     private Logger logger = LoggerFactory.getLogger(SyncYcSupplierProjectDataJobHandler.class);
 
@@ -61,7 +60,7 @@ public class SyncYcSupplierProjectDataJobHandler extends JobHandler /*implements
 
     private void syncYcSupplierProjectData() {
         Properties properties = elasticClient.getProperties();
-        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.supplier_index"))
                 .setTypes(properties.getProperty("cluster.type.supplier"))
                 .setQuery(QueryBuilders.termQuery(BusinessConstant.WEB_TYPE, BusinessConstant.YUECAI))
                 .setScroll(new TimeValue(60000))
@@ -90,18 +89,10 @@ public class SyncYcSupplierProjectDataJobHandler extends JobHandler /*implements
             Properties properties = elasticClient.getProperties();
             BulkRequestBuilder requestBuilder = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> map : mapList) {
-                requestBuilder.add(elasticClient.getTransportClient().prepareIndex(properties.getProperty("cluster.express_index"),
+                requestBuilder.add(elasticClient.getTransportClient().prepareIndex(properties.getProperty("cluster.supplier_express_index"),
                         properties.getProperty("cluster.type.supplier_express"))
                         .setId(String.valueOf(map.get(ID)))
-                        .setSource(JSON.toJSONString(map, new ValueFilter() {
-                            @Override
-                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof Date) {
-                                    return SyncTimeUtil.toDateString(propertyValue);
-                                }
-                                return propertyValue;
-                            }
-                        }))
+                        .setSource(SyncTimeUtil.handlerDate(map))
                 );
             }
             BulkResponse response = requestBuilder.execute().actionGet();
@@ -138,8 +129,8 @@ public class SyncYcSupplierProjectDataJobHandler extends JobHandler /*implements
         });
     }
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }
 }

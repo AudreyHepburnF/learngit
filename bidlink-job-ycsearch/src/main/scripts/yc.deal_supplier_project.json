@@ -4,51 +4,42 @@
   "deal_supplier_project": {
     "properties": {
       "id": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "companyId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "companyName": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": " ik_max_word"
       },
       "companyNameNotAnalyzed": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "supplierId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "supplierNameNotAnalyzed": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "projectId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "projectType": {
         "type": "integer"
       },
       "projectName": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": "ik_max_word"
       },
       "projectNameNotAnalyzed": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "projectCode": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "dealTotalPrice": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "doubleDealTotalPrice": {
         "type": "double"

@@ -19,7 +19,6 @@ import org.elasticsearch.search.SearchHits;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,9 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -50,7 +47,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @JobHander(value = "syncProductDataJobHandler")
 @Service
-public class SyncSupplierProductDataJobHandler extends IJobHandler implements InitializingBean {
+public class SyncSupplierProductDataJobHandler extends IJobHandler /*implements InitializingBean*/ {
     private Logger logger = LoggerFactory.getLogger(SyncSupplierProductDataJobHandler.class);
 
     @Autowired
@@ -88,20 +85,20 @@ public class SyncSupplierProductDataJobHandler extends IJobHandler implements In
     private AtomicLong      atomicLong;
     private ExecutorService executorService;
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        semaphore = new Semaphore(threadNum);
-        atomicLong = new AtomicLong(0);
-        executorService = Executors.newFixedThreadPool(threadNum, new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable r) {
-                Thread t = new Thread(r, "syncSupplierProduct-thread-" + atomicLong.getAndIncrement());
-                t.setDaemon(true);
-                return t;
-            }
-        });
-//        execute();
-    }
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+//        semaphore = new Semaphore(threadNum);
+//        atomicLong = new AtomicLong(0);
+//        executorService = Executors.newFixedThreadPool(threadNum, new ThreadFactory() {
+//            @Override
+//            public Thread newThread(Runnable r) {
+//                Thread t = new Thread(r, "syncSupplierProduct-thread-" + atomicLong.getAndIncrement());
+//                t.setDaemon(true);
+//                return t;
+//            }
+//        });
+////        execute();
+//    }
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {

@@ -4,16 +4,15 @@
   "supplier_express": {
     "properties": {
       "areaStr": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": "ik_max_word"
       },
       "companyName": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": "ik_max_word"
       },
       "id": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "totalCooperatedPurchaser": {
         "type": "long"
@@ -22,8 +21,8 @@
         "type": "long"
       },
       "mainProduct": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": "ik_max_word"
       }
     }
   }

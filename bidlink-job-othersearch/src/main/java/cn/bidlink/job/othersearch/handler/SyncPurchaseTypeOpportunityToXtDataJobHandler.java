@@ -92,7 +92,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                 .get();
 
         do {
-            SearchHit[] searchHits = scrollResp.getHits().hits();
+            SearchHit[] searchHits = scrollResp.getHits().getHits();
             List<Long> projectIds = new ArrayList<>();
             for (SearchHit searchHit : searchHits) {
                 projectIds.add(Long.valueOf(String.valueOf(searchHit.getSourceAsMap().get(PROJECT_ID))));

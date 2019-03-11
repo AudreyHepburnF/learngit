@@ -4,24 +4,19 @@
   "project_express_traffic_statistic": {
     "properties": {
       "id": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "supplierId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "supplierName": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "purchaserId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "purchaserName": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "paidStatusTime": {
         "type": "date",
@@ -32,12 +27,10 @@
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "orderCode": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "url": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "syncTime": {
         "type": "date",
