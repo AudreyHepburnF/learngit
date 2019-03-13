@@ -82,7 +82,7 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
                 .get();
         int i = 0;
         do {
-            SearchHit[] searchHits = scrollResp.getHits().hits();
+            SearchHit[] searchHits = scrollResp.getHits().getHits();
             // 采购项目
             List<Map<String, Object>> purchaseProjectSource = new ArrayList<>();
             Set<Pair> purchaseProjectPairs = new HashSet<>();

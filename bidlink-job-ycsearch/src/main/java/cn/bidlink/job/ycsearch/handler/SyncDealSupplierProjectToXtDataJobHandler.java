@@ -5,8 +5,6 @@ import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -16,6 +14,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -30,7 +29,7 @@ import java.util.*;
 
 @Service
 @JobHander("syncDealSupplierProjectToXtDataJobHandler")
-public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler /*implements InitializingBean*/ {
+public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler implements InitializingBean {
 
     private Logger logger = LoggerFactory.getLogger(SyncDealSupplierProjectToXtDataJobHandler.class);
     @Autowired
@@ -285,19 +284,10 @@ public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler /*impl
             BulkRequestBuilder bulkRequestBuilder = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> projectInfo : mapList) {
                 bulkRequestBuilder.add(elasticClient.getTransportClient().prepareIndex(
-                        elasticClient.getProperties().getProperty("cluster.index"),
+                        elasticClient.getProperties().getProperty("cluster.deal_supplier_project_index"),
                         elasticClient.getProperties().getProperty("cluster.type.deal_supplier_project"),
                         String.valueOf(projectInfo.get(ID)))
-                        .setSource(JSON.toJSONString(projectInfo, new ValueFilter() {
-                            @Override
-                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof java.util.Date) {
-                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                } else {
-                                    return propertyValue;
-                                }
-                            }
-                        }))
+                        .setSource(SyncTimeUtil.handlerDate(projectInfo))
                 );
             }
             BulkResponse response = bulkRequestBuilder.execute().actionGet();
@@ -369,11 +359,11 @@ public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler /*impl
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
         queryBuilder.must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
                 .must(QueryBuilders.termQuery(PROJECT_TYPE, projectType));
-        return ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.deal_supplier_project", queryBuilder);
+        return ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.deal_supplier_project_index", "cluster.type.deal_supplier_project", queryBuilder);
     }
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }
 }

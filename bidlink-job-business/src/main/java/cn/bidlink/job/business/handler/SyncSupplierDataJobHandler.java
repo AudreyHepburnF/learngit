@@ -9,7 +9,6 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -32,17 +31,17 @@ import static cn.bidlink.job.common.utils.DBUtil.query;
  */
 @JobHander(value = "syncSupplierDataJobHandler")
 @Service
-public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandler implements InitializingBean {
+public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandler /*implements InitializingBean*/ {
 
     private Integer SYNC_WAY_CREATE = 1;
     private Integer SYNC_WAY_UPDATE = 2;
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        pageSize = 1000;
-        industryCodeMap = initIndustryCodeMap();
-        execute();
-    }
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+//        pageSize = 1000;
+//        industryCodeMap = initIndustryCodeMap();
+//        execute();
+//    }
 
     private Map<String, String> initIndustryCodeMap() {
         String queryIndustrySql = "SELECT code, name_cn, name_en, type from t_reg_code_trade_class";

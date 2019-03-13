@@ -8,20 +8,17 @@
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "id": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "projectName": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": "ik_max_word"
       },
       "projectId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "content": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "startDate": {
         "type": "date",
@@ -41,7 +38,7 @@
         "type": "integer"
       },
       "areaName": {
-        "type": "string"
+        "type": "keyword"
       },
       "syncTime": {
         "type": "date",
@@ -52,18 +49,16 @@
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "fileName": {
-        "type": "string"
+        "type": "keyword"
       },
       "md5": {
-        "type": "string"
+        "type": "keyword"
       },
       "purchaseId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "qualificationName": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       }
     }
   }

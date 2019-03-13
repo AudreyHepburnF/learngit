@@ -4,44 +4,35 @@
   "project_express": {
     "properties": {
       "id": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "userName": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "supplierId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "supplierName": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "productCode": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "productName": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "orderStatus": {
-        "type": "integer",
-        "index": "not_analyzed"
+        "type": "integer"
       },
       "esOrderStatus": {
-        "type": "integer",
-        "index": "not_analyzed"
+        "type": "integer"
       },
       "orderStatusTime": {
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "paidStatus": {
-        "type": "integer",
-        "index": "not_analyzed"
+        "type": "integer"
       },
       "paidStatusTime": {
         "type": "date",
@@ -64,24 +55,20 @@
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "createUserId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "orderCode": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "keywords": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": "ik_max_word"
       },
       "matchTimes": {
-        "type": "integer",
-        "index": "not_analyzed"
+        "type": "integer"
       },
       "alreadyMatchTimes": {
-        "type": "integer",
-        "index": "not_analyzed"
+        "type": "integer"
       },
       "latestMatchTime": {
         "type": "date",

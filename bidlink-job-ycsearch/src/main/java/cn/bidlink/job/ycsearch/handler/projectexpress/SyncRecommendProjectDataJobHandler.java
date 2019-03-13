@@ -6,7 +6,6 @@ import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import cn.bidlink.job.ycsearch.handler.JobHandler;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -24,6 +23,7 @@ import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -48,7 +48,7 @@ import static cn.bidlink.job.common.utils.SyncTimeUtil.getZeroTimeLongValue;
  */
 @Service
 @JobHander(value = "syncRecommendProjectDataJobHandler")
-public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements InitializingBean*/ {
+public class SyncRecommendProjectDataJobHandler extends JobHandler implements InitializingBean {
 
     private Logger logger = LoggerFactory.getLogger(SyncRecommendProjectDataJobHandler.class);
 
@@ -79,7 +79,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
 
     private void syncRecommendProjectData() {
         Properties properties = elasticClient.getProperties();
-        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.supplier_opportunity_index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
@@ -272,9 +272,9 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                             recommendRecords.add(recommendRecord);
                         }
                         logger.info("保存项目直通车订单数据:{}", recommendSupplierOrders);
-                        insertBatchToEs(recommendSupplierOrders, properties.getProperty("cluster.express_index"), properties.getProperty("cluster.type.project_express"));
+                        insertBatchToEs(recommendSupplierOrders, properties.getProperty("cluster.project_express_index"), properties.getProperty("cluster.type.project_express"));
                         logger.info("保存供应商项目直通车匹配到的项目信息:{}", recommendRecords);
-                        insertBatchToEs(recommendRecords, properties.getProperty("cluster.express_index"), properties.getProperty("cluster.type.project_express_supplier_recommend_record"));
+                        insertBatchToEs(recommendRecords, properties.getProperty("cluster.project_express_supplier_recommend_record_index"), properties.getProperty("cluster.type.project_express_supplier_recommend_record"));
                     }
                 }
             }
@@ -285,7 +285,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
     }
 
     private Map<String, Object> getSupplierInfo(Long supplierId) {
-        SearchResponse response = elasticClient.getTransportClient().prepareSearch("cluster.index")
+        SearchResponse response = elasticClient.getTransportClient().prepareSearch("cluster.supplier_index")
                 .setTypes("cluster.type.supplier")
                 .setQuery(QueryBuilders.termQuery("id", String.valueOf(supplierId)))
                 .execute().actionGet();
@@ -310,7 +310,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
      */
     private boolean checkRecommendProjectDuplication(String recommendProjectId) {
         Properties properties = elasticClient.getProperties();
-        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.express_index"))  //悦采索引
+        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.project_express_supplier_recommend_record_index"))  //悦采索引
                 .setTypes(properties.getProperty("cluster.type.project_express_supplier_recommend_record"))
                 .setQuery(QueryBuilders.termQuery("id", recommendProjectId))
                 .execute().actionGet();
@@ -358,15 +358,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
             for (Map<String, Object> map : mapList) {
                 bulkRequest.add(elasticClient.getTransportClient().prepareIndex(index, type)
                         .setId(String.valueOf(map.get("id")))
-                        .setSource(JSON.toJSONString(map, new ValueFilter() {
-                            @Override
-                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof Date) {
-                                    return SyncTimeUtil.toDateString(propertyValue);
-                                }
-                                return propertyValue;
-                            }
-                        }))
+                        .setSource(SyncTimeUtil.handlerDate(map))
                 );
             }
 //            bulkRequest.(true);
@@ -399,7 +391,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
             boolQueryBuilder.must(QueryBuilders.termQuery("purchaserId", purchaserId));
         }
         Properties properties = elasticClient.getProperties();
-        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.express_index"))  //悦采索引
+        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.project_express_supplier_recommend_record_index"))  //悦采索引
                 .setTypes(properties.getProperty("cluster.type.project_express_supplier_recommend_record"))
                 .setQuery(boolQueryBuilder) //设置查询条件
                 .setFrom(0).setSize(10000) //设置分页属性
@@ -434,7 +426,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.must(orderCodeBuilder);
         Properties properties = elasticClient.getProperties();
-        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.express_index"))  //悦采索引
+        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.project_express_index"))  //悦采索引
                 .setTypes(properties.getProperty("cluster.type.project_express"))
                 .setQuery(boolQueryBuilder) //设置查询条件
                 .setFrom(0).setSize(10000) //设置分页属性
@@ -470,7 +462,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
             bsProjectExpresses.add(res);
         }
 
-        insertBatchToEs(bsProjectExpresses, properties.getProperty("cluster.express_index"), properties.getProperty("cluster.type.project_express"));
+        insertBatchToEs(bsProjectExpresses, properties.getProperty("cluster.project_express_index"), properties.getProperty("cluster.type.project_express"));
 
     }
 
@@ -556,7 +548,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                 .must(keyWordsBuilder);
 
         Properties properties = elasticClient.getProperties();
-        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.express_index"))  //悦采索引
+        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.project_express_index"))  //悦采索引
                 .setTypes(properties.getProperty("cluster.type.project_express"))
                 .setQuery(boolQueryBuilder) //设置查询条件
                 .setFrom(0).setSize(10000) //设置分页属性
@@ -599,8 +591,8 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
         return false;
     }
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }
 }

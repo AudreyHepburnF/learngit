@@ -6,8 +6,6 @@ import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import cn.bidlink.job.ycsearch.handler.JobHandler;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -67,7 +65,7 @@ public class SyncFamousProjectDataJobHandler extends JobHandler /*implements Ini
 
     private void syncFamousProjectData() {
 //        Timestamp lastSyncTime = new Timestamp(0);
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.express_index", "cluster.type.project_express_traffic_statistic",
+        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.project_express_traffic_statistic_index", "cluster.type.project_express_traffic_statistic",
                 QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE));
         logger.info("0.同步名企直通车lastSyncTime:" + SyncTimeUtil.toDateString(lastSyncTime) + ",\n" + "syncTime:" + SyncTimeUtil.currentDateToString());
         syncFamousProjectDataService(lastSyncTime);
@@ -183,21 +181,9 @@ public class SyncFamousProjectDataJobHandler extends JobHandler /*implements Ini
             Properties properties = elasticClient.getProperties();
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> map : mapList) {
-                bulkRequest.add(elasticClient.getTransportClient().prepareUpdate(properties.getProperty("cluster.express_index"),
+                bulkRequest.add(elasticClient.getTransportClient().prepareUpdate(properties.getProperty("cluster.project_express_traffic_statistic_index"),
                         properties.getProperty("cluster.type.project_express_traffic_statistic"), String.valueOf(map.get(ID)))
-                        .setDoc(JSON.toJSONString(map, new ValueFilter() {
-                            @Override
-                            public Object process(Object object, String propertyKey, Object propertyValue) {
-                                if (propertyValue instanceof Date) {
-                                    return SyncTimeUtil.toDateString(propertyValue);
-                                }
-                                return propertyValue;
-                            }
-                        }))
-                        // 更新数据时,没有则插入
-                        .setDocAsUpsert(true)
-                )
-                ;
+                        .setDoc(SyncTimeUtil.handlerDate(map)).setDocAsUpsert(true));
             }
             BulkResponse bulkResponse = bulkRequest.execute().actionGet();
             if (bulkResponse.hasFailures()) {
@@ -207,8 +193,8 @@ public class SyncFamousProjectDataJobHandler extends JobHandler /*implements Ini
 
     }
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+/*    @Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }*/
 }
