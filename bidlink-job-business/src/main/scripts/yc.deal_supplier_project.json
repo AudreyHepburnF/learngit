@@ -1,60 +1,57 @@
-// 方式1：直接在head界面操作，longdaoyun_test/deal_supplier_project/_mapping POST
-// 方式2：curl -XPOST http://dcsearch.api.yuecai.com/longdaoyun_test/deal_supplier_project/_mapping -d'
+// 方式1：直接在head界面操作，deal_supplier_project/deal_supplier_project/_mapping PUT
 {
-  "deal_supplier_project": {
-    "properties": {
-      "id": {
-        "type": "keyword"
-      },
-      "companyId": {
-        "type": "keyword"
-      },
-      "companyName": {
-        "type": "text",
-        "analyzer": "ik_max_word"
-      },
-      "companyNameNotAnalyzed": {
-        "type": "keyword"
-      },
-      "supplierId": {
-        "type": "keyword"
-      },
-      "supplierNameNotAnalyzed": {
-        "type": "keyword"
-      },
-      "projectId": {
-        "type": "keyword"
-      },
-      "projectType": {
-        "type": "integer"
-      },
-      "projectName": {
-        "type": "text",
-        "analyzer": "ik_max_word"
-      },
-      "projectNameNotAnalyzed": {
-        "type": "keyword"
-      },
-      "projectCode": {
-        "type": "keyword"
-      },
-      "dealTotalPrice": {
-        "type": "keyword"
-      },
-      "doubleDealTotalPrice": {
-        "type": "double"
-      },
-      "dealTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "syncTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "platformSource": {
-        "type": "integer"
-      }
+  "properties": {
+    "id": {
+      "type": "keyword"
+    },
+    "companyId": {
+      "type": "keyword"
+    },
+    "companyName": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "companyNameNotAnalyzed": {
+      "type": "keyword"
+    },
+    "supplierId": {
+      "type": "keyword"
+    },
+    "supplierNameNotAnalyzed": {
+      "type": "keyword"
+    },
+    "projectId": {
+      "type": "keyword"
+    },
+    "projectType": {
+      "type": "integer"
+    },
+    "projectName": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "projectNameNotAnalyzed": {
+      "type": "keyword"
+    },
+    "projectCode": {
+      "type": "keyword"
+    },
+    "dealTotalPrice": {
+      "type": "keyword"
+    },
+    "doubleDealTotalPrice": {
+      "type": "double"
+    },
+    "dealTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "syncTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "platformSource": {
+      "type": "integer"
     }
   }
 }

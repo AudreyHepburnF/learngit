@@ -15,7 +15,6 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,7 +34,7 @@ import java.util.*;
  */
 @JobHander("syncBiddenSupplierCountToXtDataJobHandler")
 @Service
-public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler implements InitializingBean {
+public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*implements InitializingBean*/ {
     private Logger logger = LoggerFactory.getLogger(SyncBiddenSupplierCountToXtDataJobHandler.class);
 
     @Autowired
@@ -305,8 +304,8 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler implem
         }
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        execute();
-    }
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+//        execute();
+//    }
 }

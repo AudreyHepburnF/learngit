@@ -1,65 +1,62 @@
-// 方式1：直接在head界面操作，yc_v1/supplier_opportunity/_mapping POST
-// 方式2：curl -XPOST http://dcsearch.api.yuecai.com/yc_v1/supplier_opportunity/_mapping -d'
+// 方式1：直接在head界面操作，recruit/recruit/_mapping PUT
 {
-  "recruit": {
-    "properties": {
-      "createTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "id": {
-        "type": "keyword"
-      },
-      "projectName": {
-        "type": "text",
-        "analyzer": "ik_max_word"
-      },
-      "projectId": {
-        "type": "keyword"
-      },
-      "content": {
-        "type": "keyword"
-      },
-      "startDate": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "endDate": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "status": {
-        "type": "long"
-      },
-      "endless": {
-        "type": "integer"
-      },
-      "areaLimit": {
-        "type": "integer"
-      },
-      "areaName": {
-        "type": "keyword"
-      },
-      "syncTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "updateTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "fileName": {
-        "type": "keyword"
-      },
-      "md5": {
-        "type": "keyword"
-      },
-      "purchaseId": {
-        "type": "keyword"
-      },
-      "qualificationName": {
-        "type": "keyword"
-      }
+  "properties": {
+    "createTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "id": {
+      "type": "keyword"
+    },
+    "projectName": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "projectId": {
+      "type": "keyword"
+    },
+    "content": {
+      "type": "keyword"
+    },
+    "startDate": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "endDate": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "status": {
+      "type": "long"
+    },
+    "endless": {
+      "type": "integer"
+    },
+    "areaLimit": {
+      "type": "integer"
+    },
+    "areaName": {
+      "type": "keyword"
+    },
+    "syncTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "updateTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "fileName": {
+      "type": "keyword"
+    },
+    "md5": {
+      "type": "keyword"
+    },
+    "purchaseId": {
+      "type": "keyword"
+    },
+    "qualificationName": {
+      "type": "keyword"
     }
   }
 }

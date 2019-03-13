@@ -1,200 +1,197 @@
-// 方式1：直接在head界面操作，yc_v1/supplier/_mapping POST
-// 方式2：curl -XPOST http://dcsearch.api.yuecai.com/yc_v1/supplier/_mapping -d'
+// 方式1：直接在head界面操作，supplier/supplier/_mapping PUT
 {
-  "supplier": {
-    "properties": {
-      "address": {
-        "type": "text",
-        "analyzer": "ik_max_word"
-      },
-      "areaCode": {
-        "type": "keyword"
-      },
-      "areaStr": {
-        "type": "text",
-        "analyzer": "ik_max_word"
-      },
-      "areaStrNotAnalyzed": {
-        "type": "keyword"
-      },
-      "bidAuthExpires": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "bidAuthFtime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "bidAuthStatus": {
-        "type": "integer"
-      },
-      "bidAuthTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "companyLogo": {
-        "type": "keyword"
-      },
-      "companyName": {
-        "type": "text",
-        "analyzer": "ik_max_word"
-      },
-      "companyNameEn": {
-        "type": "keyword"
-      },
-      "companyNameNotAnalyzed": {
-        "type": "keyword"
-      },
-      "companySite": {
-        "type": "keyword"
-      },
-      "companyType": {
-        "type": "integer"
-      },
-      "companyTypeStr": {
-        "type": "keyword"
-      },
-      "contact": {
-        "type": "text",
-        "analyzer": "ik_max_word"
-      },
-      "core": {
-        "type": "integer"
-      },
-      "createTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "creditRating": {
-        "type": "integer"
-      },
-      "enterpriseSpace": {
-        "type": "keyword"
-      },
-      "enterpriseSpaceActive": {
-        "type": "integer"
-      },
-      "enterpriseSpaceDetail": {
-        "type": "keyword"
-      },
-      "fund": {
-        "type": "keyword"
-      },
-      "fundUnit": {
-        "type": "keyword"
-      },
-      "id": {
-        "type": "keyword"
-      },
-      "industryCode": {
-        "type": "keyword"
-      },
-      "industryStr": {
-        "type": "text",
-        "analyzer": "ik_max_word"
-      },
-      "loginName": {
-        "type": "text",
-        "analyzer": "ik_max_word"
-      },
-      "mainProduct": {
-        "type": "text",
-        "analyzer": "ik_max_word"
-      },
-      "mainProductNotAnalyzed": {
-        "type": "keyword"
-      },
-      "mobile": {
-        "type": "keyword"
-      },
-      "region": {
-        "type": "keyword"
-      },
-      "supplierName": {
-        "type": "text",
-        "analyzer": "ik_max_word"
-      },
-      "syncTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "tel": {
-        "type": "keyword"
-      },
-      "totalBidProject": {
-        "type": "long"
-      },
-      "totalDealBidProject": {
-        "type": "long"
-      },
-      "totalDealBidPrice": {
-        "type": "long"
-      },
-      "totalPurchaseProject": {
-        "type": "long"
-      },
-      "totalDealPurchaseProject": {
-        "type": "long"
-      },
-      "totalDealPurchasePrice": {
-        "type": "long"
-      },
-      "totalAuctionProject": {
-        "type": "long"
-      },
-      "totalDealAuctionProject": {
-        "type": "long"
-      },
-      "totalDealAuctionPrice": {
-        "type": "long"
-      },
-      "totalCooperatedPurchaser": {
-        "type": "long"
-      },
-      "totalDealProject": {
-        "type": "long"
-      },
-      "totalDealPrice": {
-        "type": "long"
-      },
-      "totalProduct": {
-        "type": "long"
-      },
-      "totalProject": {
-        "type": "long"
-      },
-      "updateTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "webType": {
-        "type": "keyword"
-      },
-      "workPattern": {
-        "type": "keyword"
-      },
-      "wwwStation": {
-        "type": "keyword"
-      },
-      "zoneCode": {
-        "type": "keyword"
-      },
-      "zoneStr": {
-        "type": "text",
-        "analyzer": "ik_max_word"
-      },
-      "platformSource": {
-        "type": "integer"
-      },
-      "status": {
-        "type": "long"
-      },
-      "userId": {
-        "type": "long"
-      },
-      "dataStatus": {
-        "type": "integer"
-      }
+  "properties": {
+    "address": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "areaCode": {
+      "type": "keyword"
+    },
+    "areaStr": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "areaStrNotAnalyzed": {
+      "type": "keyword"
+    },
+    "bidAuthExpires": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "bidAuthFtime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "bidAuthStatus": {
+      "type": "integer"
+    },
+    "bidAuthTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "companyLogo": {
+      "type": "keyword"
+    },
+    "companyName": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "companyNameEn": {
+      "type": "keyword"
+    },
+    "companyNameNotAnalyzed": {
+      "type": "keyword"
+    },
+    "companySite": {
+      "type": "keyword"
+    },
+    "companyType": {
+      "type": "integer"
+    },
+    "companyTypeStr": {
+      "type": "keyword"
+    },
+    "contact": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "core": {
+      "type": "integer"
+    },
+    "createTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "creditRating": {
+      "type": "integer"
+    },
+    "enterpriseSpace": {
+      "type": "keyword"
+    },
+    "enterpriseSpaceActive": {
+      "type": "integer"
+    },
+    "enterpriseSpaceDetail": {
+      "type": "keyword"
+    },
+    "fund": {
+      "type": "keyword"
+    },
+    "fundUnit": {
+      "type": "keyword"
+    },
+    "id": {
+      "type": "keyword"
+    },
+    "industryCode": {
+      "type": "keyword"
+    },
+    "industryStr": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "loginName": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "mainProduct": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "mainProductNotAnalyzed": {
+      "type": "keyword"
+    },
+    "mobile": {
+      "type": "keyword"
+    },
+    "region": {
+      "type": "keyword"
+    },
+    "supplierName": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "syncTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "tel": {
+      "type": "keyword"
+    },
+    "totalBidProject": {
+      "type": "long"
+    },
+    "totalDealBidProject": {
+      "type": "long"
+    },
+    "totalDealBidPrice": {
+      "type": "long"
+    },
+    "totalPurchaseProject": {
+      "type": "long"
+    },
+    "totalDealPurchaseProject": {
+      "type": "long"
+    },
+    "totalDealPurchasePrice": {
+      "type": "long"
+    },
+    "totalAuctionProject": {
+      "type": "long"
+    },
+    "totalDealAuctionProject": {
+      "type": "long"
+    },
+    "totalDealAuctionPrice": {
+      "type": "long"
+    },
+    "totalCooperatedPurchaser": {
+      "type": "long"
+    },
+    "totalDealProject": {
+      "type": "long"
+    },
+    "totalDealPrice": {
+      "type": "long"
+    },
+    "totalProduct": {
+      "type": "long"
+    },
+    "totalProject": {
+      "type": "long"
+    },
+    "updateTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "webType": {
+      "type": "keyword"
+    },
+    "workPattern": {
+      "type": "keyword"
+    },
+    "wwwStation": {
+      "type": "keyword"
+    },
+    "zoneCode": {
+      "type": "keyword"
+    },
+    "zoneStr": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "platformSource": {
+      "type": "integer"
+    },
+    "status": {
+      "type": "long"
+    },
+    "userId": {
+      "type": "long"
+    },
+    "dataStatus": {
+      "type": "integer"
     }
   }
 }

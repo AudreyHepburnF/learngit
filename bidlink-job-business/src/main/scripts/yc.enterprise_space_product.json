@@ -1,70 +1,67 @@
-// 方式1：直接在head界面操作，ixietong_opportunity/enterprise_space_product/_mapping POST
-// 方式2：curl -XPOST http://dcsearch.api.yuecai.com/yc_test/enterprise_space_product/_mapping -d'
+// 方式1：直接在head界面操作，enterprise_space_product/enterprise_space_product/_mapping PUT
 {
-  "enterprise_space_product": {
-    "properties": {
-      "id": {
-        "type": "keyword"
-      },
-      "companyId": {
-        "type": "keyword"
-      },
-      "picFile": {
-        "type": "keyword"
-      },
-      "productName": {
-        "type": "text",
-        "analyzer": "ik_max_word"
-      },
-      "companyName": {
-        "type": "text",
-        "analyzer": "ik_max_word"
-      },
-      "zoneStr": {
-        "type": "text",
-        "analyzer": "ik_max_word"
-      },
-      "zoneStrNotAnalyzed": {
-        "type": "keyword"
-      },
-      "spec": {
-        "type": "keyword"
-      },
-      "trademark": {
-        "type": "keyword"
-      },
-      "model": {
-        "type": "keyword"
-      },
-      "state": {
-        "type": "integer"
-      },
-      "noticeState": {
-        "type": "integer"
-      },
-      "core": {
-        "type": "integer"
-      },
-      "isDel": {
-        "type": "integer"
-      },
-      "wfirstStatus": {
-        "type": "integer"
-      },
-      "syncTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "productNameNotAnalyzed": {
-        "type": "keyword"
-      },
-      "createTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "platformSource": {
-        "type": "integer"
-      }
+  "properties": {
+    "id": {
+      "type": "keyword"
+    },
+    "companyId": {
+      "type": "keyword"
+    },
+    "picFile": {
+      "type": "keyword"
+    },
+    "productName": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "companyName": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "zoneStr": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "zoneStrNotAnalyzed": {
+      "type": "keyword"
+    },
+    "spec": {
+      "type": "keyword"
+    },
+    "trademark": {
+      "type": "keyword"
+    },
+    "model": {
+      "type": "keyword"
+    },
+    "state": {
+      "type": "integer"
+    },
+    "noticeState": {
+      "type": "integer"
+    },
+    "core": {
+      "type": "integer"
+    },
+    "isDel": {
+      "type": "integer"
+    },
+    "wfirstStatus": {
+      "type": "integer"
+    },
+    "syncTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "productNameNotAnalyzed": {
+      "type": "keyword"
+    },
+    "createTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "platformSource": {
+      "type": "integer"
     }
   }
 }

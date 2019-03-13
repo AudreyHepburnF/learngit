@@ -11,7 +11,6 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -27,7 +26,7 @@ import java.util.*;
  */
 @Service
 @JobHander(value = "syncAuctionTypeOpportunityToXtDataJobHandler")
-public class SyncAuctionTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOpportunityDataJobHandler implements InitializingBean {
+public class SyncAuctionTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOpportunityDataJobHandler /*implements InitializingBean*/ {
 
     // 待归档
     private int WAIT_ARCHIVE = 4;
@@ -235,8 +234,8 @@ public class SyncAuctionTypeOpportunityToXtDataJobHandler extends AbstractSyncYc
         result.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE);
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        execute();
-    }
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+//        execute();
+//    }
 }

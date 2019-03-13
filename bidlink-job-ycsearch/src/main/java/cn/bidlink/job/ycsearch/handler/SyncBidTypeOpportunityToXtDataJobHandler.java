@@ -5,7 +5,6 @@ import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -20,7 +19,7 @@ import java.util.*;
  */
 @JobHander(value = "syncBidTypeOpportunityToXtDataJobHandler")
 @Service
-public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOpportunityDataJobHandler implements InitializingBean {
+public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOpportunityDataJobHandler /*implements InitializingBean*/ {
     private String END_TIME        = "endTime";
     private String OPEN_RANGE_TYPE = "openRangeType";
     // 撤项
@@ -378,8 +377,8 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
         }
     }
 
-    @Override
+    /*@Override
     public void afterPropertiesSet() throws Exception {
         execute();
-    }
+    }*/
 }

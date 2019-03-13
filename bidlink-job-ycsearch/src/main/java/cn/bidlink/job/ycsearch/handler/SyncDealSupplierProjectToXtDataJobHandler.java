@@ -14,7 +14,6 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -29,7 +28,7 @@ import java.util.*;
 
 @Service
 @JobHander("syncDealSupplierProjectToXtDataJobHandler")
-public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler implements InitializingBean {
+public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler /*implements InitializingBean*/ {
 
     private Logger logger = LoggerFactory.getLogger(SyncDealSupplierProjectToXtDataJobHandler.class);
     @Autowired
@@ -362,8 +361,8 @@ public class SyncDealSupplierProjectToXtDataJobHandler extends JobHandler implem
         return ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.deal_supplier_project_index", "cluster.type.deal_supplier_project", queryBuilder);
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        execute();
-    }
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+//        execute();
+//    }
 }

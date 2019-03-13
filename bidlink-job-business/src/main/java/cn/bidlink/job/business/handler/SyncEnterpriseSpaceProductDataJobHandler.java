@@ -98,11 +98,12 @@ public class SyncEnterpriseSpaceProductDataJobHandler extends JobHandler /*imple
     private void fixedProductWfirstStatus() {
         Properties properties = elasticClient.getProperties();
         // 回滚标王数据
-        SearchResponse wfirstResponse = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster..enterprise_space_product_index"))
+        SearchResponse wfirstResponse = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.supplier_product_index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_product"))
                 .setQuery(QueryBuilders.termQuery("supplierDirectoryRel", 3))
                 .setScroll(new TimeValue(60000))
                 .setSize(pageSize)
+                .setFetchSource(new String[]{"supplierId", "directoryName"}, null)
                 .execute().actionGet();
         do {
             SearchHits wfirstHits = wfirstResponse.getHits();

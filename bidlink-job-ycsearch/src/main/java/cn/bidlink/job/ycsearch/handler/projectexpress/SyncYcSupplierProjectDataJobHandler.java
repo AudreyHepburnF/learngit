@@ -16,7 +16,6 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -35,7 +34,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @JobHander(value = "syncYcSupplierProjectDataJobHandler")
-public class SyncYcSupplierProjectDataJobHandler extends JobHandler implements InitializingBean {
+public class SyncYcSupplierProjectDataJobHandler extends JobHandler /*implements InitializingBean*/ {
 
     private Logger logger = LoggerFactory.getLogger(SyncYcSupplierProjectDataJobHandler.class);
 
@@ -60,11 +59,12 @@ public class SyncYcSupplierProjectDataJobHandler extends JobHandler implements I
 
     private void syncYcSupplierProjectData() {
         Properties properties = elasticClient.getProperties();
+        int pageUseSize = 1000;
         SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.supplier_index"))
                 .setTypes(properties.getProperty("cluster.type.supplier"))
                 .setQuery(QueryBuilders.termQuery(BusinessConstant.WEB_TYPE, BusinessConstant.YUECAI))
                 .setScroll(new TimeValue(60000))
-                .setSize(pageSize)
+                .setSize(pageUseSize)
                 .execute().actionGet();
         do {
             SearchHits hits = response.getHits();
@@ -129,8 +129,8 @@ public class SyncYcSupplierProjectDataJobHandler extends JobHandler implements I
         });
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        execute();
-    }
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+//        execute();
+//    }
 }

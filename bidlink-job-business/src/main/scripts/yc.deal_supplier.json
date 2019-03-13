@@ -1,48 +1,45 @@
-// 方式1：直接在head界面操作，yc_v1/supplier_product/_mapping POST
-// 方式2：curl -XPOST http://dcsearch.api.yuecai.com/yc_v1/supplier_product/_mapping -d'
+// 方式1：直接在head界面操作，deal_supplier/deal_supplier/_mapping PUT
 {
-  "deal_supplier": {
-    "properties": {
-      "id": {
-        "type": "keyword"
-      },
-      "companyId": {
-        "type": "keyword"
-      },
-      "projectId": {
-        "type": "keyword"
-      },
-      "supplierId": {
-        "type": "keyword"
-      },
-      "supplierName": {
-        "type": "text",
-        "analyzer": "ik_max_word"
-      },
-      "supplierNameNotAnalyzed": {
-        "type": "keyword"
-      },
-      "linkManNotAnalyzed": {
-        "type": "keyword"
-      },
-      "linkPhoneNotAnalyzed": {
-        "type": "keyword"
-      },
-      "syncTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "updateTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "createTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "platformSource": {
-        "type": "integer"
-      }
+  "properties": {
+    "id": {
+      "type": "keyword"
+    },
+    "companyId": {
+      "type": "keyword"
+    },
+    "projectId": {
+      "type": "keyword"
+    },
+    "supplierId": {
+      "type": "keyword"
+    },
+    "supplierName": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "supplierNameNotAnalyzed": {
+      "type": "keyword"
+    },
+    "linkManNotAnalyzed": {
+      "type": "keyword"
+    },
+    "linkPhoneNotAnalyzed": {
+      "type": "keyword"
+    },
+    "syncTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "updateTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "createTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "platformSource": {
+      "type": "integer"
     }
   }
 }
