@@ -8,7 +8,7 @@
         "analyzer": "ik_max_word"
       },
       "areaStrNotAnalyzed": {
-        "type": "text"
+        "type": "keyword"
       },
       "biddenSupplierCount": {
         "type": "integer"
@@ -18,7 +18,7 @@
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "directoryId": {
-        "type": "text"
+        "type": "keyword"
       },
       "directoryName": {
         "type": "text",
@@ -28,22 +28,22 @@
         "type": "integer"
       },
       "directoryNameNotAnalyzed": {
-        "type": "text"
+        "type": "keyword"
       },
       "firstDirectoryName": {
-        "type": "text"
+        "type": "keyword"
       },
       "id": {
-        "type": "text"
+        "type": "keyword"
       },
       "isCore": {
         "type": "integer"
       },
       "linkMan": {
-        "type": "text"
+        "type": "keyword"
       },
       "linkPhone": {
-        "type": "text"
+        "type": "keyword"
       },
       "node": {
         "type": "integer"
@@ -55,17 +55,17 @@
         "type": "integer"
       },
       "projectCode": {
-        "type": "text"
+        "type": "keyword"
       },
       "projectId": {
-        "type": "text"
+        "type": "keyword"
       },
       "projectName": {
         "type": "text",
         "analyzer": "ik_max_word"
       },
       "projectNameNotAnalyzed": {
-        "type": "text"
+        "type": "keyword"
       },
       "projectStatus": {
         "type": "integer"
@@ -74,24 +74,24 @@
         "type": "integer"
       },
       "purchaseId": {
-        "type": "text"
+        "type": "keyword"
       },
       "purchaseName": {
         "type": "text",
         "analyzer": "ik_max_word"
       },
       "purchaseNameNotAnalyzed": {
-        "type": "text"
+        "type": "keyword"
       },
       "quoteStopTime": {
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "region": {
-        "type": "text"
+        "type": "keyword"
       },
       "sourceId": {
-        "type": "text"
+        "type": "keyword"
       },
       "status": {
         "type": "integer"
@@ -125,10 +125,10 @@
         "type": "integer"
       },
       "tenantSite": {
-        "type": "text"
+        "type": "keyword"
       },
       "compTypeStr": {
-        "type": "text"
+        "type": "keyword"
       },
       "quoteStartTime": {
         "type": "date",

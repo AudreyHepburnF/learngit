@@ -4,26 +4,26 @@
   "deal_supplier_project": {
     "properties": {
       "id": {
-        "type": "text"
+        "type": "keyword"
       },
       "companyId": {
-        "type": "text"
+        "type": "keyword"
       },
       "companyName": {
         "type": "text",
         "analyzer": "ik_max_word"
       },
       "companyNameNotAnalyzed": {
-        "type": "text"
+        "type": "keyword"
       },
       "supplierId": {
-        "type": "text"
+        "type": "keyword"
       },
       "supplierNameNotAnalyzed": {
-        "type": "text"
+        "type": "keyword"
       },
       "projectId": {
-        "type": "text"
+        "type": "keyword"
       },
       "projectType": {
         "type": "integer"
@@ -33,13 +33,13 @@
         "analyzer": "ik_max_word"
       },
       "projectNameNotAnalyzed": {
-        "type": "text"
+        "type": "keyword"
       },
       "projectCode": {
-        "type": "text"
+        "type": "keyword"
       },
       "dealTotalPrice": {
-        "type": "text"
+        "type": "keyword"
       },
       "doubleDealTotalPrice": {
         "type": "double"

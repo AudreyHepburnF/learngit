@@ -4,17 +4,17 @@
   "notice": {
     "properties": {
       "companyId": {
-        "type": "text"
+        "type": "keyword"
       },
       "companyNameNotAnalyzed": {
-        "type": "text"
+        "type": "keyword"
       },
       "createTime": {
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "id": {
-        "type": "text"
+        "type": "keyword"
       },
       "isShowMobile": {
         "type": "integer"
@@ -23,16 +23,16 @@
         "type": "integer"
       },
       "linkMail": {
-        "type": "text"
+        "type": "keyword"
       },
       "linkMan": {
-        "type": "text"
+        "type": "keyword"
       },
       "linkPhone": {
-        "type": "text"
+        "type": "keyword"
       },
       "linkTel": {
-        "type": "text"
+        "type": "keyword"
       },
       "noticeType": {
         "type": "integer"
@@ -41,19 +41,19 @@
         "type": "integer"
       },
       "projectCode": {
-        "type": "text"
+        "type": "keyword"
       },
       "projectId": {
-        "type": "text"
+        "type": "keyword"
       },
       "projectInfo": {
-        "type": "text"
+        "type": "keyword"
       },
       "projectNameNotAnalyzed": {
-        "type": "text"
+        "type": "keyword"
       },
       "project_info": {
-        "type": "text"
+        "type": "keyword"
       },
       "publishNoticeTime": {
         "type": "date",
@@ -78,13 +78,13 @@
         "type": "long"
       },
       "bidBail": {
-        "type": "text"
+        "type": "keyword"
       },
       "bidDescribe": {
-        "type": "text"
+        "type": "keyword"
       },
       "bidDocMoney": {
-        "type": "text"
+        "type": "keyword"
       },
       "bidDocOverTime": {
         "type": "date",
@@ -99,7 +99,7 @@
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "bidOpenAddress": {
-        "type": "text"
+        "type": "keyword"
       },
       "bidOpenTime": {
         "type": "date",
@@ -116,7 +116,7 @@
         "type": "long"
       },
       "fileGainAddress": {
-        "type": "text"
+        "type": "keyword"
       },
       "gainFileType": {
         "type": "integer"
@@ -157,43 +157,43 @@
         "type": "integer"
       },
       "qualification": {
-        "type": "text"
+        "type": "keyword"
       },
       "remarks": {
-        "type": "text"
+        "type": "keyword"
       },
       "subProjectId": {
-        "type": "text"
+        "type": "keyword"
       },
       "supplierNameNotAnalyzed": {
-        "type": "text"
+        "type": "keyword"
       },
       "tenderName": {
-        "type": "text"
+        "type": "keyword"
       },
       "unit": {
-        "type": "text"
+        "type": "keyword"
       },
       "fileName": {
-        "type": "text"
+        "type": "keyword"
       },
       "md5": {
-        "type": "text"
+        "type": "keyword"
       },
       "bidUrl": {
-        "type": "text"
+        "type": "keyword"
       },
       "platformSource": {
         "type": "integer"
       },
       "content": {
-        "type": "text"
+        "type": "keyword"
       },
       "optStatus": {
         "type": "integer"
       },
       "putFileAddress": {
-        "type": "text"
+        "type": "keyword"
       }
     }
   }

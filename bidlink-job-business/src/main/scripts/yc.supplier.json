@@ -8,14 +8,14 @@
         "analyzer": "ik_max_word"
       },
       "areaCode": {
-        "type": "text"
+        "type": "keyword"
       },
       "areaStr": {
         "type": "text",
         "analyzer": "ik_max_word"
       },
       "areaStrNotAnalyzed": {
-        "type": "text"
+        "type": "keyword"
       },
       "bidAuthExpires": {
         "type": "date",
@@ -33,26 +33,26 @@
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "companyLogo": {
-        "type": "text"
+        "type": "keyword"
       },
       "companyName": {
         "type": "text",
         "analyzer": "ik_max_word"
       },
       "companyNameEn": {
-        "type": "text"
+        "type": "keyword"
       },
       "companyNameNotAnalyzed": {
-        "type": "text"
+        "type": "keyword"
       },
       "companySite": {
-        "type": "text"
+        "type": "keyword"
       },
       "companyType": {
         "type": "integer"
       },
       "companyTypeStr": {
-        "type": "text"
+        "type": "keyword"
       },
       "contact": {
         "type": "text",
@@ -69,25 +69,25 @@
         "type": "integer"
       },
       "enterpriseSpace": {
-        "type": "text"
+        "type": "keyword"
       },
       "enterpriseSpaceActive": {
         "type": "integer"
       },
       "enterpriseSpaceDetail": {
-        "type": "text"
+        "type": "keyword"
       },
       "fund": {
-        "type": "text"
+        "type": "keyword"
       },
       "fundUnit": {
-        "type": "text"
+        "type": "keyword"
       },
       "id": {
-        "type": "text"
+        "type": "keyword"
       },
       "industryCode": {
-        "type": "text"
+        "type": "keyword"
       },
       "industryStr": {
         "type": "text",
@@ -102,13 +102,13 @@
         "analyzer": "ik_max_word"
       },
       "mainProductNotAnalyzed": {
-        "type": "text"
+        "type": "keyword"
       },
       "mobile": {
-        "type": "text"
+        "type": "keyword"
       },
       "region": {
-        "type": "text"
+        "type": "keyword"
       },
       "supplierName": {
         "type": "text",
@@ -119,7 +119,7 @@
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "tel": {
-        "type": "text"
+        "type": "keyword"
       },
       "totalBidProject": {
         "type": "long"
@@ -168,16 +168,16 @@
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "webType": {
-        "type": "text"
+        "type": "keyword"
       },
       "workPattern": {
-        "type": "text"
+        "type": "keyword"
       },
       "wwwStation": {
-        "type": "text"
+        "type": "keyword"
       },
       "zoneCode": {
-        "type": "text"
+        "type": "keyword"
       },
       "zoneStr": {
         "type": "text",

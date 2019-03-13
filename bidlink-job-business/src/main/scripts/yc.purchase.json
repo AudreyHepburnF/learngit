@@ -8,32 +8,32 @@
         "analyzer": "ik_max_word"
       },
       "areaStrNotAnalyzed": {
-        "type": "text"
+        "type": "keyword"
       },
       "bidProjectCount": {
         "type": "long"
       },
       "bidTradingVolume": {
-        "type": "text"
+        "type": "keyword"
       },
       "compTypeStr": {
-        "type": "text"
+        "type": "keyword"
       },
       "companySiteAlias": {
-        "type": "text"
+        "type": "keyword"
       },
       "id": {
-        "type": "text"
+        "type": "keyword"
       },
       "industry": {
-        "type": "text"
+        "type": "keyword"
       },
       "industryStr": {
         "type": "text",
         "analyzer": "ik_max_word"
       },
       "industryStrNotAnalyzed": {
-        "type": "text"
+        "type": "keyword"
       },
       "longTradingVolume": {
         "type": "long"
@@ -46,48 +46,48 @@
         "analyzer": "ik_max_word"
       },
       "purchaseNameNotAnalyzed": {
-        "type": "text"
+        "type": "keyword"
       },
       "purchaseProjectCount": {
         "type": "long"
       },
       "purchaseTradingVolume": {
-        "type": "text"
+        "type": "keyword"
       },
       "region": {
-        "type": "text"
+        "type": "keyword"
       },
       "syncTime": {
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "tradingVolume": {
-        "type": "text"
+        "type": "keyword"
       },
       "wwwStationAlias": {
-        "type": "text"
+        "type": "keyword"
       },
       "zoneStr": {
         "type": "text",
         "analyzer": "ik_max_word"
       },
       "zoneStrNotAnalyzed": {
-        "type": "text"
+        "type": "keyword"
       },
       "cooperateSupplierCount": {
         "type": "long"
       },
       "auctionTradingVolume": {
-        "type": "text"
+        "type": "keyword"
       },
       "auctionProjectCount": {
         "type": "long"
       },
       "companyLogo": {
-        "type": "text"
+        "type": "keyword"
       },
       "webType": {
-        "type": "text"
+        "type": "keyword"
       },
       "directoryName": {
         "type": "text",

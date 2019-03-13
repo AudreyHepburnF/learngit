@@ -4,29 +4,29 @@
   "deal_supplier": {
     "properties": {
       "id": {
-        "type": "text"
+        "type": "keyword"
       },
       "companyId": {
-        "type": "text"
+        "type": "keyword"
       },
       "projectId": {
-        "type": "text"
+        "type": "keyword"
       },
       "supplierId": {
-        "type": "text"
+        "type": "keyword"
       },
       "supplierName": {
         "type": "text",
         "analyzer": "ik_max_word"
       },
       "supplierNameNotAnalyzed": {
-        "type": "text"
+        "type": "keyword"
       },
       "linkManNotAnalyzed": {
-        "type": "text"
+        "type": "keyword"
       },
       "linkPhoneNotAnalyzed": {
-        "type": "text"
+        "type": "keyword"
       },
       "syncTime": {
         "type": "date",
