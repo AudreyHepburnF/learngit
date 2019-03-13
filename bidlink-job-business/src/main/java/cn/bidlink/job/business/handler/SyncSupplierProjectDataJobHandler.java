@@ -38,10 +38,11 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
     private void syncSupplierProjectData() {
         logger.info("同步供应商参与的项目统计开始");
         Properties properties = elasticClient.getProperties();
-        int pageSizeToUse = 2 * pageSize;
+        int pageSizeToUse = 1000;
         SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
                 .setTypes(properties.getProperty("cluster.type.supplier"))
                 .setScroll(new TimeValue(60000))
+                .setFetchSource(new String[]{ID}, null)
                 .setSize(pageSizeToUse)
                 .get();
 
