@@ -32,8 +32,8 @@ public class ElasticClientUtil {
         if (Double.isInfinite(syncTime) || Double.isNaN(syncTime)) {
             return new Timestamp(0);
         } else {
-            // es默认的时区是UTC
-            return new Timestamp((long) syncTime - 8 * 3600 * 1000);
+            // es默认的时区是UTC  多减一个小时,防止拉去数据时间临界值问题
+            return new Timestamp((long) syncTime - 8 * 3600 * 1000 - 1 * 3600 * 1000);
         }
     }
 }
