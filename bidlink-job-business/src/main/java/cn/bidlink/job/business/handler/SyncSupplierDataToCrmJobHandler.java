@@ -45,7 +45,7 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
     }
 
     private void syncSupplierDataToCrm() {
-        String queryMaxLastSyncTime = "select max(sync_time) from t_reg_supplier";
+         String queryMaxLastSyncTime = "select max(sync_time) from t_reg_supplier";
         Timestamp lastSyncTime = (Timestamp) DBUtil.max(crmDataSource, queryMaxLastSyncTime, null);
         if (lastSyncTime == null || Objects.equals(lastSyncTime, SyncTimeUtil.GMT_TIME)) {
             lastSyncTime = new Timestamp(SyncTimeUtil.toStringDate("2019-01-18 14:24:00").getTime());
