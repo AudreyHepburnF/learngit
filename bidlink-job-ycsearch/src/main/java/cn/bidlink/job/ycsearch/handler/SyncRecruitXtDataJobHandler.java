@@ -5,14 +5,11 @@ import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,13 +42,6 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
     @Autowired
     private ElasticClient elasticClient;
 
-    // 有效的商机
-    private int VALID_OPPORTUNITY_STATUS   = 1;
-    // 无效的商机
-    private int INVALID_OPPORTUNITY_STATUS = -1;
-    private int UNDERWAY                   = 2;
-
-    private String STATUS      = "status";
     private String PURCHASE_ID = "purchaseId";
     private String ID          = "id";
 
@@ -183,16 +173,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                         .prepareIndex(elasticClient.getProperties().getProperty("cluster.recruit_index"),
                                 elasticClient.getProperties().getProperty("cluster.type.recruit"),
                                 String.valueOf(result.get(ID)))
-                        .setSource(JSON.toJSONString(result, new ValueFilter() {
-                            @Override
-                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof java.util.Date) {
-                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                } else {
-                                    return propertyValue;
-                                }
-                            }
-                        })));
+                        .setSource(SyncTimeUtil.handlerDate(result)));
             }
 
             BulkResponse response = bulkRequest.execute().actionGet();
