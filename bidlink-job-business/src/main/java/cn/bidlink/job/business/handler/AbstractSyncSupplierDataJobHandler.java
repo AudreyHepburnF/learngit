@@ -171,4 +171,32 @@ public abstract class AbstractSyncSupplierDataJobHandler extends JobHandler {
             }
         }
     }
+
+    protected void batchUpdateExecute(List<Map<String, Object>> resultsToUpdate) {
+//        System.out.println("size : " + resultsToUpdate);
+        if (!CollectionUtils.isEmpty(resultsToUpdate)) {
+            BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
+            for (Map<String, Object> result : resultsToUpdate) {
+                bulkRequest.add(elasticClient.getTransportClient()
+                        .prepareUpdate(elasticClient.getProperties().getProperty("cluster.index"),
+                                elasticClient.getProperties().getProperty("cluster.type.supplier"),
+                                String.valueOf(result.get(ID)))
+                        .setDoc(JSON.toJSONString(result, new ValueFilter() {
+                            @Override
+                            public Object process(Object object, String propertyName, Object propertyValue) {
+                                if (propertyValue instanceof java.util.Date) {
+                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
+                                } else {
+                                    return propertyValue;
+                                }
+                            }
+                        })));
+            }
+
+            BulkResponse response = bulkRequest.execute().actionGet();
+            if (response.hasFailures()) {
+                logger.error(response.buildFailureMessage());
+            }
+        }
+    }
 }

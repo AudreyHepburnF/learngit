@@ -69,7 +69,7 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
             appendSupplierProductStat(resultFromEs, supplierIdToString);
 
             // 保存到es
-            batchExecute(resultFromEs);
+            batchUpdateExecute(resultFromEs);
             scrollResp = elasticClient.getTransportClient().prepareSearchScroll(scrollResp.getScrollId())
                     .setScroll(new TimeValue(60000))
                     .execute().actionGet();
