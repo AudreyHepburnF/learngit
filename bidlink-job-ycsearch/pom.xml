@@ -141,7 +141,7 @@
                     http://{0}.testspace.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}
                 </pom.supplier.enterpriseSpaceDetailFormat>
                 <!--es配置 -->
-                <pom.cluster.host>100.100.0.165:9300</pom.cluster.host>
+                <pom.cluster.host>100.100.0.122:9301</pom.cluster.host>
                 <pom.cluster.name>elasticsearch</pom.cluster.name>
                 <pom.cluster.supplier_index>supplier</pom.cluster.supplier_index>
                 <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
@@ -219,7 +219,7 @@
                     http://{0}.testspace.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}
                 </pom.supplier.enterpriseSpaceDetailFormat>
                 <!--es配置 -->
-                <pom.cluster.host>100.100.0.122:9300</pom.cluster.host>
+                <pom.cluster.host>100.100.0.122:9301</pom.cluster.host>
                 <pom.cluster.name>elasticsearch</pom.cluster.name>
                 <pom.cluster.supplier_index>supplier</pom.cluster.supplier_index>
                 <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
