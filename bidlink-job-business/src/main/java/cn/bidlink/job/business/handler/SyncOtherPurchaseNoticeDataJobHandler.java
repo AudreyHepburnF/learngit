@@ -33,7 +33,7 @@ public class SyncOtherPurchaseNoticeDataJobHandler extends AbstractSyncNoticeDat
     }
 
     private void syncPurchaseNoticeData() {
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.notice",
+        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.notice_index", "cluster.type.notice",
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery(PROJECT_TYPE, PURCHASE_NOTICE_TYPE))
                         .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.OTHER_SOURCE)));

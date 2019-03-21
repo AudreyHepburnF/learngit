@@ -1,119 +1,104 @@
-// 方式1：直接在head界面操作，yc_test/purchase/_mapping POST
-// 方式2：curl -XPOST http://dcsearch.api.yuecai.com/yc_test/purchase/_mapping -d'
+// 方式1：直接在head界面操作，purchase/purchase/_mapping PUT
 {
-  "purchase": {
-    "properties": {
-      "areaStr": {
-        "type": "string",
-        "analyzer": "ik"
-      },
-      "areaStrNotAnalyzed": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "bidProjectCount": {
-        "type": "long"
-      },
-      "bidTradingVolume": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "compTypeStr": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "companySiteAlias": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "id": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "industry": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "industryStr": {
-        "type": "string",
-        "analyzer": "ik"
-      },
-      "industryStrNotAnalyzed": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "longTradingVolume": {
-        "type": "long"
-      },
-      "projectCount": {
-        "type": "long"
-      },
-      "purchaseName": {
-        "type": "string",
-        "analyzer": "ik"
-      },
-      "purchaseNameNotAnalyzed": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "purchaseProjectCount": {
-        "type": "long"
-      },
-      "purchaseTradingVolume": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "region": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "syncTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "tradingVolume": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "wwwStationAlias": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "zoneStr": {
-        "type": "string",
-        "analyzer": "ik"
-      },
-      "zoneStrNotAnalyzed": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "cooperateSupplierCount": {
-        "type": "long"
-      },
-      "auctionTradingVolumeStr": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "auctionProjectCount": {
-        "type": "long"
-      },
-      "companyLogo": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "directoryName": {
-        "type": "string",
-        "analyzer": "ik"
-      },
-      "platformSource": {
-        "type": "integer"
-      },
-      "status": {
-        "type": "long"
-      },
-      "dataStatus": {
-        "type": "integer"
-      }
+  "properties": {
+    "areaStr": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "areaStrNotAnalyzed": {
+      "type": "keyword"
+    },
+    "bidProjectCount": {
+      "type": "long"
+    },
+    "bidTradingVolume": {
+      "type": "keyword"
+    },
+    "compTypeStr": {
+      "type": "keyword"
+    },
+    "companySiteAlias": {
+      "type": "keyword"
+    },
+    "id": {
+      "type": "keyword"
+    },
+    "industry": {
+      "type": "keyword"
+    },
+    "industryStr": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "industryStrNotAnalyzed": {
+      "type": "keyword"
+    },
+    "longTradingVolume": {
+      "type": "long"
+    },
+    "projectCount": {
+      "type": "long"
+    },
+    "purchaseName": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "purchaseNameNotAnalyzed": {
+      "type": "keyword"
+    },
+    "purchaseProjectCount": {
+      "type": "long"
+    },
+    "purchaseTradingVolume": {
+      "type": "keyword"
+    },
+    "region": {
+      "type": "keyword"
+    },
+    "syncTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "tradingVolume": {
+      "type": "keyword"
+    },
+    "wwwStationAlias": {
+      "type": "keyword"
+    },
+    "zoneStr": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "zoneStrNotAnalyzed": {
+      "type": "keyword"
+    },
+    "cooperateSupplierCount": {
+      "type": "long"
+    },
+    "auctionTradingVolume": {
+      "type": "keyword"
+    },
+    "auctionProjectCount": {
+      "type": "long"
+    },
+    "companyLogo": {
+      "type": "keyword"
+    },
+    "webType": {
+      "type": "keyword"
+    },
+    "directoryName": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "platformSource": {
+      "type": "integer"
+    },
+    "status": {
+      "type": "integer"
+    },
+    "dataStatus": {
+      "type": "integer"
     }
   }
 }

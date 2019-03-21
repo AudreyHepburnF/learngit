@@ -33,7 +33,7 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
     }
 
     private void syncBidNoticeData() {
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.notice",
+        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.notice_index", "cluster.type.notice",
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery(PROJECT_TYPE, BID_NOTICE_TYPE))
                         .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE)));
@@ -260,8 +260,8 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
         result.put(PROJECT_TYPE, BID_NOTICE_TYPE);
     }
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+    /*@Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }*/
 }

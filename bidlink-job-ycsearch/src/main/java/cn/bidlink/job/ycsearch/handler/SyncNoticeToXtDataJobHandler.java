@@ -5,16 +5,16 @@ import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
-import org.elasticsearch.action.deletebyquery.DeleteByQueryAction;
-import org.elasticsearch.action.deletebyquery.DeleteByQueryRequestBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryAction;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.Objects;
-import java.util.Properties;
 
 /**
  * @author <a href="mailto:zhihuizhou@ebnew.com">zhouzhihui</a>
@@ -36,7 +36,7 @@ public class SyncNoticeToXtDataJobHandler extends AbstractSyncYcNoticeDataJobHan
     }
 
     private void syncPurchaseNoticeData() {
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.notice",
+        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.notice_index", "cluster.type.notice",
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE)));
         Timestamp lastSyncStartTime = new Timestamp(new DateTime(new DateTime().getYear() - 1, 1, 1, 0, 0, 0).getMillis());
@@ -51,15 +51,15 @@ public class SyncNoticeToXtDataJobHandler extends AbstractSyncYcNoticeDataJobHan
     }
 
     private void deleteRebuildProjectNoticeService() {
-        Properties properties = elasticClient.getProperties();
-        DeleteByQueryRequestBuilder deleteByQueryRequestBuilder = new DeleteByQueryRequestBuilder(elasticClient.getTransportClient(), DeleteByQueryAction.INSTANCE)
-                .setIndices(properties.getProperty("cluster.index"))
-                .setTypes(properties.getProperty("cluster.type.notice"))
-                .setQuery(QueryBuilders.boolQuery()
+        BulkByScrollResponse response = DeleteByQueryAction.INSTANCE.newRequestBuilder(elasticClient.getTransportClient())
+                .filter(QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
-                        .must(QueryBuilders.termQuery(OPT_STATUS, -1))
-                );
-        deleteByQueryRequestBuilder.execute().actionGet();
+                        .must(QueryBuilders.termQuery(OPT_STATUS, -1)))
+                .source(elasticClient.getProperties().getProperty("cluster.notice_index"))
+                .get();
+        if (CollectionUtils.isEmpty(response.getBulkFailures())) {
+            logger.error("删除悦采撤项项目公告数据失败");
+        }
     }
 
     private void syncYcNoticeService(Timestamp lastSyncTime) {
@@ -99,8 +99,8 @@ public class SyncNoticeToXtDataJobHandler extends AbstractSyncYcNoticeDataJobHan
         logger.info("2.结束同步悦采公告数据");
     }
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+/*    @Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }*/
 }

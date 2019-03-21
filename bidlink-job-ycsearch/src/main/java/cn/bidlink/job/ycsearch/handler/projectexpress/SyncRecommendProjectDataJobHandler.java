@@ -6,19 +6,18 @@ import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import cn.bidlink.job.ycsearch.handler.JobHandler;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.deletebyquery.DeleteByQueryAction;
-import org.elasticsearch.action.deletebyquery.DeleteByQueryRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryAction;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.sort.SortOrder;
@@ -37,7 +36,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 
-import static cn.bidlink.job.common.utils.SyncTimeUtil.*;
+import static cn.bidlink.job.common.utils.SyncTimeUtil.getZeroTime;
+import static cn.bidlink.job.common.utils.SyncTimeUtil.getZeroTimeLongValue;
 
 /**
  * @author <a href="mailto:zhihuizhou@ebnew.com">wisdom</a>
@@ -78,7 +78,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
 
     private void syncRecommendProjectData() {
         Properties properties = elasticClient.getProperties();
-        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.supplier_opportunity_index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
@@ -92,7 +92,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
         do {
             SearchHits hits = response.getHits();
             for (SearchHit hit : hits.getHits()) {
-                Map<String, Object> resultFromEs = hit.getSource();
+                Map<String, Object> resultFromEs = hit.getSourceAsMap();
                 Integer projectStatus = Integer.valueOf(resultFromEs.get("projectStatus").toString());
                 Long projectId = Long.valueOf(resultFromEs.get("projectId").toString());
                 Long purchaserId = Long.valueOf(resultFromEs.get("purchaseId").toString());
@@ -271,9 +271,9 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                             recommendRecords.add(recommendRecord);
                         }
                         logger.info("保存项目直通车订单数据:{}", recommendSupplierOrders);
-                        insertBatchToEs(recommendSupplierOrders, properties.getProperty("cluster.express_index"), properties.getProperty("cluster.type.project_express"));
+                        insertBatchToEs(recommendSupplierOrders, properties.getProperty("cluster.project_express_index"), properties.getProperty("cluster.type.project_express"));
                         logger.info("保存供应商项目直通车匹配到的项目信息:{}", recommendRecords);
-                        insertBatchToEs(recommendRecords, properties.getProperty("cluster.express_index"), properties.getProperty("cluster.type.project_express_supplier_recommend_record"));
+                        insertBatchToEs(recommendRecords, properties.getProperty("cluster.project_express_supplier_recommend_record_index"), properties.getProperty("cluster.type.project_express_supplier_recommend_record"));
                     }
                 }
             }
@@ -284,14 +284,14 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
     }
 
     private Map<String, Object> getSupplierInfo(Long supplierId) {
-        SearchResponse response = elasticClient.getTransportClient().prepareSearch("cluster.index")
+        SearchResponse response = elasticClient.getTransportClient().prepareSearch("cluster.supplier_index")
                 .setTypes("cluster.type.supplier")
                 .setQuery(QueryBuilders.termQuery("id", String.valueOf(supplierId)))
                 .execute().actionGet();
         SearchHits hits = response.getHits();
         Map<String, Object> map = new HashMap<>(2);
         if (hits.getTotalHits() > 0) {
-            Map<String, Object> source = hits.getHits()[0].getSource();
+            Map<String, Object> source = hits.getHits()[0].getSourceAsMap();
             map.put("linkMan", source.get("contact"));
             map.put("linkPhone", source.get("tel"));
         } else {
@@ -309,7 +309,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
      */
     private boolean checkRecommendProjectDuplication(String recommendProjectId) {
         Properties properties = elasticClient.getProperties();
-        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.express_index"))  //悦采索引
+        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.project_express_supplier_recommend_record_index"))  //悦采索引
                 .setTypes(properties.getProperty("cluster.type.project_express_supplier_recommend_record"))
                 .setQuery(QueryBuilders.termQuery("id", recommendProjectId))
                 .execute().actionGet();
@@ -357,18 +357,10 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
             for (Map<String, Object> map : mapList) {
                 bulkRequest.add(elasticClient.getTransportClient().prepareIndex(index, type)
                         .setId(String.valueOf(map.get("id")))
-                        .setSource(JSON.toJSONString(map, new ValueFilter() {
-                            @Override
-                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof Date) {
-                                    return SyncTimeUtil.toDateString(propertyValue);
-                                }
-                                return propertyValue;
-                            }
-                        }))
+                        .setSource(SyncTimeUtil.handlerDate(map))
                 );
             }
-            bulkRequest.setRefresh(true);
+//            bulkRequest.(true);
             BulkResponse response = bulkRequest.execute().actionGet();
             if (response.hasFailures()) {
                 logger.error("保存项目直通车数据到es失败,错误信息:{}", response.buildFailureMessage());
@@ -398,7 +390,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
             boolQueryBuilder.must(QueryBuilders.termQuery("purchaserId", purchaserId));
         }
         Properties properties = elasticClient.getProperties();
-        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.express_index"))  //悦采索引
+        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.project_express_supplier_recommend_record_index"))  //悦采索引
                 .setTypes(properties.getProperty("cluster.type.project_express_supplier_recommend_record"))
                 .setQuery(boolQueryBuilder) //设置查询条件
                 .setFrom(0).setSize(10000) //设置分页属性
@@ -416,7 +408,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
         }
 
         for (SearchHit hit : hits.getHits()) {
-            Map<String, Object> res = hit.getSource();
+            Map<String, Object> res = hit.getSourceAsMap();
             recommendProjects.add(res);
         }
         return recommendProjects;
@@ -433,7 +425,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.must(orderCodeBuilder);
         Properties properties = elasticClient.getProperties();
-        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.express_index"))  //悦采索引
+        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.project_express_index"))  //悦采索引
                 .setTypes(properties.getProperty("cluster.type.project_express"))
                 .setQuery(boolQueryBuilder) //设置查询条件
                 .setFrom(0).setSize(10000) //设置分页属性
@@ -453,7 +445,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
         Date now = new Date();
 
         for (SearchHit hit : hits.getHits()) {
-            Map<String, Object> res = hit.getSource();
+            Map<String, Object> res = hit.getSourceAsMap();
             Object matchTimesObj = res.get("productCode");
             Object alreadyMatchTimesObj = res.get("alreadyMatchTimes");
             if (matchTimesObj == null || alreadyMatchTimesObj == null) {
@@ -469,7 +461,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
             bsProjectExpresses.add(res);
         }
 
-        insertBatchToEs(bsProjectExpresses, properties.getProperty("cluster.express_index"), properties.getProperty("cluster.type.project_express"));
+        insertBatchToEs(bsProjectExpresses, properties.getProperty("cluster.project_express_index"), properties.getProperty("cluster.type.project_express"));
 
     }
 
@@ -492,26 +484,34 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                 boolQueryBuilder.must(QueryBuilders.termQuery("purchaserId", purchaserId));
             }
             Properties properties = elasticClient.getProperties();
-            DeleteByQueryRequestBuilder builder = new DeleteByQueryRequestBuilder(elasticClient.getTransportClient(), DeleteByQueryAction.INSTANCE)
-                    .setIndices(properties.getProperty("cluster.express_index")).setTypes(properties.getProperty("cluster.type.project_express_supplier_recommend_record"))
-                    .setQuery(boolQueryBuilder);
-
-            builder.execute().actionGet();
-
-            // 更新其中一条数据
-            SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.express_index")).setTypes(properties.getProperty("cluster.type.project_express_supplier_recommend_record"))
-                    .setSize(1).execute().actionGet();
-            SearchHits hits = response.getHits();
-            if (hits.getTotalHits() > 0) {
-                Map<String, Object> source = hits.getHits()[0].getSource();
-                source.put(SYNC_TIME, SyncTimeUtil.currentDateToString());
-                elasticClient.getTransportClient().prepareUpdate(properties.getProperty("cluster.express_index"), properties.getProperty("cluster.type.project_express_supplier_recommend_record"), String.valueOf(source.get("id")))
-                        .setDoc(source)
-                        .execute().actionGet();
+            BulkByScrollResponse scrollResponse = DeleteByQueryAction.INSTANCE.newRequestBuilder(elasticClient.getTransportClient())
+                    .filter(boolQueryBuilder)
+                    .source(properties.getProperty("cluster.express_index"))
+                    .get();
+            if (CollectionUtils.isEmpty(scrollResponse.getBulkFailures())) {
+                logger.error("删除es中匹配的老数据失败");
             }
+
+//            DeleteByQueryRequestBuilder builder = new DeleteByQueryRequestBuilder(elasticClient.getTransportClient(), DeleteByQueryAction.INSTANCE)
+//                    .setIndices(properties.getProperty("cluster.express_index")).setTypes(properties.getProperty("cluster.type.project_express_supplier_recommend_record"))
+//                    .setQuery(boolQueryBuilder);
+//
+//            builder.execute().actionGet();
+
+//            // 更新其中一条数据
+//            SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.express_index")).setTypes(properties.getProperty("cluster.type.project_express_supplier_recommend_record"))
+//                    .setSize(1).execute().actionGet();
+//            SearchHits hits = response.getHits();
+//            if (hits.getTotalHits() > 0) {
+//                Map<String, Object> source = hits.getHits()[0].getSourceAsMap();
+//                source.put(SYNC_TIME, SyncTimeUtil.currentDateToString());
+//                elasticClient.getTransportClient().prepareUpdate(properties.getProperty("cluster.express_index"), properties.getProperty("cluster.type.project_express_supplier_recommend_record"), String.valueOf(source.get("id")))
+//                        .setDoc(source)
+//                        .execute().actionGet();
         } catch (Exception e) {
             logger.error("项目直通车数据从ElasticSearch删除失败: " + e.getMessage(), e);
         }
+
     }
 
 
@@ -547,7 +547,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                 .must(keyWordsBuilder);
 
         Properties properties = elasticClient.getProperties();
-        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.express_index"))  //悦采索引
+        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.project_express_index"))  //悦采索引
                 .setTypes(properties.getProperty("cluster.type.project_express"))
                 .setQuery(boolQueryBuilder) //设置查询条件
                 .setFrom(0).setSize(10000) //设置分页属性
@@ -566,7 +566,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
 
 
         for (SearchHit hit : hits.getHits()) {
-            Map<String, Object> res = hit.getSource();
+            Map<String, Object> res = hit.getSourceAsMap();
             bsProjectExpresses.add(res);
         }
         return bsProjectExpresses;
@@ -590,8 +590,8 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
         return false;
     }
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+    /*@Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }*/
 }

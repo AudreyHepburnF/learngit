@@ -61,7 +61,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
      */
     private void syncOpportunityData() {
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
-                "cluster.index",
+                "cluster.supplier_opportunity_index",
                 "cluster.type.supplier_opportunity",
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery("projectType", PURCHASE_PROJECT_TYPE))
@@ -91,7 +91,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                 .must(QueryBuilders.termQuery(BID_STOP_TYPE, AUTO_STOP_TYPE));
 
         int batchSize = 100;
-        SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+        SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.supplier_opportunity_index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(queryBuilder)
                 .setScroll(new TimeValue(60000))
@@ -100,10 +100,10 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                 .get();
 
         do {
-            SearchHit[] searchHits = scrollResp.getHits().hits();
+            SearchHit[] searchHits = scrollResp.getHits().getHits();
             List<Long> projectIds = new ArrayList<>();
             for (SearchHit searchHit : searchHits) {
-                Long projectId = Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID)));
+                Long projectId = Long.valueOf(String.valueOf(searchHit.getSourceAsMap().get(PROJECT_ID)));
                 projectIds.add(projectId);
             }
             doFixExpiredAutoStopTypePurchaseProjectDataService(projectIds);

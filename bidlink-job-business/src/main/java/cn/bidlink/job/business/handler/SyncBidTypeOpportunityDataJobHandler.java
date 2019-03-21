@@ -10,7 +10,6 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -29,7 +28,7 @@ import java.util.*;
  */
 @JobHander(value = "syncBidTypeOpportunityDataJobHandler")
 @Service
-public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunityDataJobHandler implements InitializingBean {
+public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunityDataJobHandler /*implements InitializingBean*/ {
 
     private String OPEN_RANGE_TYPE = "openRangeType";
     private String NODE            = "node";
@@ -48,7 +47,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
      */
     private void syncOpportunityData() {
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
-                "cluster.index",
+                "cluster.opportunity_index",
                 "cluster.type.supplier_opportunity",
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery(PROJECT_TYPE, BIDDING_PROJECT_TYPE))
@@ -72,7 +71,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                 .must(QueryBuilders.rangeQuery(SyncTimeUtil.SYNC_TIME).lte(currentDate));
         int batchSize = 100;
         Properties properties = elasticClient.getProperties();
-        SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+        SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.opportunity_index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(queryBuilder)
                 .setScroll(new TimeValue(60000))
@@ -83,7 +82,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
             SearchHit[] hits = scrollResp.getHits().getHits();
             List<Long> projectIds = new ArrayList<>();
             for (SearchHit hit : hits) {
-                projectIds.add(Long.valueOf(hit.getSource().get("projectId").toString()));
+                projectIds.add(Long.valueOf(hit.getSourceAsMap().get("projectId").toString()));
             }
             doFixExpiredBiddingProjectDataService(projectIds);
             scrollResp = elasticClient.getTransportClient().prepareSearchScroll(scrollResp.getScrollId())
@@ -563,6 +562,8 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
         result.put(PROJECT_TYPE, BIDDING_PROJECT_TYPE);
         // 公开类型，默认为1
         result.put(OPEN_RANGE_TYPE, 1);
+        // 移除编码
+        result.remove(PROVINCE);
         //添加平台来源
         result.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE);
     }
@@ -588,8 +589,8 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
     }
 
 
-    @Override
+    /*@Override
     public void afterPropertiesSet() throws Exception {
         execute();
-    }
+    }*/
 }

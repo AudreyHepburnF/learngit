@@ -1,142 +1,139 @@
-// 方式1：直接在head界面操作，yc_v1/supplier_opportunity/_mapping POST
-// 方式2：curl -XPOST http://dcsearch.api.yuecai.com/yc_v1/supplier_opportunity/_mapping -d'
+// 方式1：直接在head界面操作，supplier_opportunity/supplier_opportunity/_mapping PUT
 {
-  "supplier_opportunity": {
-    "properties": {
-      "areaStr": {
-        "type": "string",
-        "analyzer": "ik"
-      },
-      "areaStrNotAnalyzed": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "biddenSupplierCount": {
-        "type": "integer"
-      },
-      "createTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "directoryId": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "directoryName": {
-        "type": "string",
-        "analyzer": "ik"
-      },
-      "directoryNameCount": {
-        "type": "integer"
-      },
-      "directoryNameNotAnalyzed": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "firstDirectoryName": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "id": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "isCore": {
-        "type": "integer"
-      },
-      "linkMan": {
-        "type": "string"
-      },
-      "linkPhone": {
-        "type": "string"
-      },
-      "node": {
-        "type": "long"
-      },
-      "openRangeType": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "processStatus": {
-        "type": "long"
-      },
-      "projectCode": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "projectId": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "projectName": {
-        "type": "string",
-        "analyzer": "ik"
-      },
-      "projectNameNotAnalyzed": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "projectStatus": {
-        "type": "long"
-      },
-      "projectType": {
-        "type": "integer"
-      },
-      "purchaseId": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "purchaseName": {
-        "type": "string",
-        "analyzer": "ik"
-      },
-      "purchaseNameNotAnalyzed": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "quoteStopTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "region": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "sourceId": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "status": {
-        "type": "long"
-      },
-      "isShow": {
-        "type": "integer"
-      },
-      "syncTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "updateTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "bidOpenTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "industryStr": {
-        "type": "string",
-        "analyzer": "ik"
-      },
-      "bidType": {
-        "type": "integer"
-      },
-      "platformSource": {
-        "type": "integer"
-      },
-      "bidProjectType": {
-        "type": "integer"
-      }
+  "properties": {
+    "areaStr": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "areaStrNotAnalyzed": {
+      "type": "keyword"
+    },
+    "biddenSupplierCount": {
+      "type": "integer"
+    },
+    "createTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "directoryId": {
+      "type": "keyword"
+    },
+    "directoryName": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "directoryNameCount": {
+      "type": "integer"
+    },
+    "directoryNameNotAnalyzed": {
+      "type": "keyword"
+    },
+    "firstDirectoryName": {
+      "type": "keyword"
+    },
+    "id": {
+      "type": "keyword"
+    },
+    "isCore": {
+      "type": "integer"
+    },
+    "linkMan": {
+      "type": "keyword"
+    },
+    "linkPhone": {
+      "type": "keyword"
+    },
+    "node": {
+      "type": "integer"
+    },
+    "openRangeType": {
+      "type": "integer"
+    },
+    "processStatus": {
+      "type": "integer"
+    },
+    "projectCode": {
+      "type": "keyword"
+    },
+    "projectId": {
+      "type": "keyword"
+    },
+    "projectName": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "projectNameNotAnalyzed": {
+      "type": "keyword"
+    },
+    "projectStatus": {
+      "type": "integer"
+    },
+    "projectType": {
+      "type": "integer"
+    },
+    "purchaseId": {
+      "type": "keyword"
+    },
+    "purchaseName": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "purchaseNameNotAnalyzed": {
+      "type": "keyword"
+    },
+    "quoteStopTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "region": {
+      "type": "keyword"
+    },
+    "sourceId": {
+      "type": "keyword"
+    },
+    "status": {
+      "type": "integer"
+    },
+    "isShow": {
+      "type": "integer"
+    },
+    "syncTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "updateTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "bidOpenTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "industryStr": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "bidType": {
+      "type": "integer"
+    },
+    "platformSource": {
+      "type": "integer"
+    },
+    "bidProjectType": {
+      "type": "integer"
+    },
+    "tenantSite": {
+      "type": "keyword"
+    },
+    "compTypeStr": {
+      "type": "keyword"
+    },
+    "quoteStartTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "endless": {
+      "type": "integer"
     }
   }
 }

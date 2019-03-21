@@ -377,8 +377,8 @@ public class SyncBidTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOppo
         }
     }
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+    /*@Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }*/
 }

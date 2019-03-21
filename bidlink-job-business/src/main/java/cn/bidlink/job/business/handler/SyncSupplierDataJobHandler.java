@@ -9,7 +9,6 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -32,17 +31,17 @@ import static cn.bidlink.job.common.utils.DBUtil.query;
  */
 @JobHander(value = "syncSupplierDataJobHandler")
 @Service
-public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandler implements InitializingBean {
+public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandler /*implements InitializingBean*/ {
 
     private Integer SYNC_WAY_CREATE = 1;
     private Integer SYNC_WAY_UPDATE = 2;
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        pageSize = 1000;
-        industryCodeMap = initIndustryCodeMap();
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+//        pageSize = 1000;
+//        industryCodeMap = initIndustryCodeMap();
 //        execute();
-    }
+//    }
 
     private Map<String, String> initIndustryCodeMap() {
         String queryIndustrySql = "SELECT code, name_cn, name_en, type from t_reg_code_trade_class";
@@ -76,7 +75,7 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
     }
 
     private void syncSupplierData() {
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.supplier", null);
+        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.supplier_index", "cluster.type.supplier", null);
         logger.info("供应商数据同步时间lastSyncTime：" + new DateTime(lastSyncTime).toString("yyyy-MM-dd HH:mm:ss") + "\n"
                 + ", syncTime : " + new DateTime(SyncTimeUtil.getCurrentDate()).toString("yyyy-MM-dd HH:mm:ss"));
         syncSupplierDataService(lastSyncTime);
@@ -136,7 +135,7 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
     private List<Map<String, Object>> updateEnterpriseSpaceActive(Map<String, Object> enterpriseSpaceInfoMap) {
         Properties properties = elasticClient.getProperties();
         SearchResponse searchResponse = elasticClient.getTransportClient()
-                .prepareSearch(properties.getProperty("cluster.index"))
+                .prepareSearch(properties.getProperty("cluster.supplier_index"))
                 .setTypes(properties.getProperty("cluster.type.supplier"))
                 .setQuery(QueryBuilders.termsQuery(ID, enterpriseSpaceInfoMap.keySet()))
                 .setFrom(0)
@@ -148,8 +147,8 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
         List<Map<String, Object>> suppliers = new ArrayList<>();
         long totalHits = hits.getTotalHits();
         if (totalHits > 0) {
-            for (SearchHit searchHit : hits.hits()) {
-                Map<String, Object> source = searchHit.getSource();
+            for (SearchHit searchHit : hits.getHits()) {
+                Map<String, Object> source = searchHit.getSourceAsMap();
                 Object enterpriseSpaceActive = enterpriseSpaceInfoMap.get(source.get(ID));
                 doUpdateEnterpriseSpace(source, enterpriseSpaceActive);
                 refresh(source);
@@ -229,7 +228,7 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
 //    private List<Map<String, Object>> updateSupplierCoreStatus(Map<String, Object> supplierCoreStatusMap) {
 //        Properties properties = elasticClient.getProperties();
 //        SearchResponse searchResponse = elasticClient.getTransportClient()
-//                .prepareSearch(properties.getProperty("cluster.index"))
+//                .prepareSearch(properties.getProperty("cluster.supplier_index"))
 //                .setTypes(properties.getProperty("cluster.type.supplier"))
 //                .setQuery(QueryBuilders.termsQuery(ID, supplierCoreStatusMap.keySet()))
 //                .setFrom(0)
@@ -242,7 +241,7 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
 //        long totalHits = hits.getTotalHits();
 //        if (totalHits > 0) {
 //            for (SearchHit searchHit : hits.hits()) {
-//                Map<String, Object> source = searchHit.getSource();
+//                Map<String, Object> source = searchHit.getSourceAsMap();
 //                source.put(CORE, supplierCoreStatusMap.get(source.get(ID)));
 //                refresh(source);
 //                suppliers.add(source);
@@ -280,7 +279,7 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
                 + "   trc.company_site AS companySite,\n"
                 + "   trc.WWW_STATION AS wwwStation,\n"
                 + "   trc.COMP_TYPE AS companyType,\n"
-                + "   trcct.`NAME` AS companyTypStr,\n"
+                + "   trcct.`NAME` AS companyTypeStr,\n"
                 + "   trc.FUND AS fund,\n"
                 + "   trc.FUNDUNIT AS fundUnit,\n"
                 + "   trc.INDUSTRY AS industryCode,\n"
@@ -324,7 +323,7 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
                 "\ttrc.company_site AS companySite,\n" +
                 "\ttrc.WWW_STATION AS wwwStation,\n" +
                 "\ttrc.COMP_TYPE AS companyType,\n" +
-                "\ttrcct.`NAME` AS companyTypStr,\n" +
+                "\ttrcct.`NAME` AS companyTypeStr,\n" +
                 "\ttrc.FUND AS fund,\n" +
                 "\ttrc.FUNDUNIT AS fundUnit,\n" +
                 "\ttrc.INDUSTRY AS industryCode,\n" +
@@ -371,7 +370,7 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
                 + "   trc.company_site AS companySite,\n"
                 + "   trc.WWW_STATION AS wwwStation,\n"
                 + "   trc.COMP_TYPE AS companyType,\n"
-                + "   trcct.`NAME` AS companyTypStr,\n"
+                + "   trcct.`NAME` AS companyTypeStr,\n"
                 + "   trc.FUND AS fund,\n"
                 + "   trc.FUNDUNIT AS fundUnit,\n"
                 + "   trc.INDUSTRY AS industryCode,\n"
@@ -478,10 +477,11 @@ public class SyncSupplierDataJobHandler extends AbstractSyncSupplierDataJobHandl
         resultToUse.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
         resultToUse.put(USER_ID, convertToString(resultToUse.get(USER_ID)));
         // 核心供状态
-        Object coreStatus = resultToUse.get("coreStatus");
+        Object coreStatus = resultToUse.get(CORE_STATUS);
         resultToUse.put(CORE, coreStatus == null ? 0 : Integer.valueOf(String.valueOf(coreStatus).substring(0, 1)));
 
         //添加平台来源
+        resultToUse.remove(CORE_STATUS);
         resultToUse.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE);
     }
 

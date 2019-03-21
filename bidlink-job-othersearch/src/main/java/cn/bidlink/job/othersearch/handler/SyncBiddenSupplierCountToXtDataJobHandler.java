@@ -82,16 +82,16 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
                 .get();
         int i = 0;
         do {
-            SearchHit[] searchHits = scrollResp.getHits().hits();
+            SearchHit[] searchHits = scrollResp.getHits().getHits();
             // 采购项目
             List<Map<String, Object>> purchaseProjectSource = new ArrayList<>();
             Set<Pair> purchaseProjectPairs = new HashSet<>();
             for (SearchHit searchHit : searchHits) {
-                Integer projectType = (Integer) searchHit.getSource().get("projectType");
+                Integer projectType = (Integer) searchHit.getSourceAsMap().get("projectType");
                 if (projectType != null) {
-                    purchaseProjectSource.add(searchHit.getSource());
-                    Long projectId = Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID)));
-                    Long companyId = Long.valueOf(String.valueOf(searchHit.getSource().get(PURCHASE_ID)));
+                    purchaseProjectSource.add(searchHit.getSourceAsMap());
+                    Long projectId = Long.valueOf(String.valueOf(searchHit.getSourceAsMap().get(PROJECT_ID)));
+                    Long companyId = Long.valueOf(String.valueOf(searchHit.getSourceAsMap().get(PURCHASE_ID)));
                     purchaseProjectPairs.add(new Pair(companyId, projectId));
                 }
 

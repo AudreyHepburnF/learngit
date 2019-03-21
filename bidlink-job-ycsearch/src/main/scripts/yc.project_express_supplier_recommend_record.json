@@ -25,18 +25,17 @@
         "type": "integer"
       },
       "id": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "keywords": {
-        "type": "string",
-        "analyzer": "ik"
+        "type": "text",
+        "analyzer": "ik_max_word"
       },
       "linkMan": {
-        "type": "string"
+        "type": "keyword"
       },
       "linkPhone": {
-        "type": "string"
+        "type": "keyword"
       },
       "matchedDate": {
         "type": "date",
@@ -47,41 +46,34 @@
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "matchedProducts": {
-        "type": "string"
+        "type": "keyword"
       },
       "orderCode": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "projectCode": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "projectId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "projectName": {
-        "type": "string"
+        "type": "keyword"
       },
       "projectStatus": {
         "type": "integer"
       },
       "purchaserId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "purchaserName": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "supplierId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "supplierName": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       }
     }
   }

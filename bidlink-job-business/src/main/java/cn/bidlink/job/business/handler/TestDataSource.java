@@ -22,7 +22,7 @@ import java.util.Map;
  */
 @JobHander(value = "testDataSource")
 @Service
-public class TestDataSource extends IJobHandler {
+public class TestDataSource extends IJobHandler /*implements InitializingBean*/{
     private Logger logger = LoggerFactory.getLogger(TestDataSource.class);
 
     @Autowired
@@ -51,5 +51,8 @@ public class TestDataSource extends IJobHandler {
         logger.info("测试enterpriseSpaceDataSource结束");
     }
 
-
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+//        execute();
+//    }
 }

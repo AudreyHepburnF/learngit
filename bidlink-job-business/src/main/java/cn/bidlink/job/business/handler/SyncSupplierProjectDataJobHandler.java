@@ -48,12 +48,12 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
 
         int pageNumberToUse = 0;
         do {
-            SearchHit[] searchHits = scrollResp.getHits().hits();
+            SearchHit[] searchHits = scrollResp.getHits().getHits();
             Set<String> supplierIds = new HashSet<>();
             List<Map<String, Object>> resultFromEs = new ArrayList<>();
             for (SearchHit searchHit : searchHits) {
                 supplierIds.add(searchHit.getId());
-                resultFromEs.add(searchHit.getSource());
+                resultFromEs.add(searchHit.getSourceAsMap());
             }
 
             String supplierIdToString = StringUtils.collectionToCommaDelimitedString(supplierIds);

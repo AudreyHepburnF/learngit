@@ -48,7 +48,7 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
         logger.info("同步采购商项目和交易额统计开始");
         Properties properties = elasticClient.getProperties();
         int pageSizeToUse = 2 * pageSize;
-        SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+        SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.purchase_index"))
                 .setTypes(properties.getProperty("cluster.type.purchase"))
                 .setScroll(new TimeValue(60000))
                 .setSize(pageSizeToUse)
@@ -60,8 +60,8 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
             ArrayList<String> purchaserIds = new ArrayList<>();
             List<Map<String, Object>> resultFromEs = new ArrayList<>();
             for (SearchHit hit : hits.getHits()) {
-                purchaserIds.add(((String) hit.getSource().get(ID)));
-                resultFromEs.add(hit.getSource());
+                purchaserIds.add(((String) hit.getSourceAsMap().get(ID)));
+                resultFromEs.add(hit.getSourceAsMap());
             }
 
             String purchaserIdToString = StringUtils.collectionToCommaDelimitedString(purchaserIds);
@@ -111,12 +111,12 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
                 // 交易量
                 BigDecimal purchaseTradingVolume = (BigDecimal) purchaser.get(PURCHASE_TRADING_VOLUME);
                 BigDecimal biddingTradingVolume = (BigDecimal) purchaser.get(BID_TRADING_VOLUME);
-                BigDecimal auctionTradingVolume = (BigDecimal) purchaser.get(AUCTION_TRADING_VOLUME_STR);
+                BigDecimal auctionTradingVolume = (BigDecimal) purchaser.get(AUCTION_TRADING_VOLUME);
                 BigDecimal tradingVolume = purchaseTradingVolume.add(biddingTradingVolume).add(auctionTradingVolume);
                 purchaser.put(LONG_TRADING_VOLUME, tradingVolume.longValue());
                 purchaser.put(PURCHASE_TRADING_VOLUME, purchaseTradingVolume.toString());
                 purchaser.put(BID_TRADING_VOLUME, purchaseTradingVolume.toString());
-                purchaser.put(AUCTION_TRADING_VOLUME_STR, auctionTradingVolume.toString());
+                purchaser.put(AUCTION_TRADING_VOLUME, auctionTradingVolume.toString());
                 purchaser.put(TRADING_VOLUME, tradingVolume.toString());
             }
         }
@@ -256,7 +256,7 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
         if (!StringUtils.isEmpty(purchaserIdToString)) {
             String ldQuerySqlTemplate = "SELECT\n" +
                     "\tap.company_id AS companyId ,\n" +
-                    "\tsum( ape.deal_total_price ) AS auctionTradingVolumeStr\n" +
+                    "\tsum( ape.deal_total_price ) AS auctionTradingVolume\n" +
                     "FROM\n" +
                     "\tauction_project ap\n" +
                     "\tLEFT JOIN auction_project_ext ape ON ap.id = ape.id \n" +
@@ -271,7 +271,7 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
 
             String ycQuerySqlTemplate = "SELECT\n" +
                     "\tap.comp_id AS companyId ,\n" +
-                    "\tsum( ap.deal_total_price ) AS auctionTradingVolumeStr\n" +
+                    "\tsum( ap.deal_total_price ) AS auctionTradingVolume\n" +
                     "FROM\n" +
                     "\tauction_project ap\n" +
                     "WHERE\n" +
@@ -296,7 +296,7 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
             } else if (Objects.equals(projectType, BIDDING_PROJECT_TYPE)) {
                 map.put(BID_TRADING_VOLUME, ldProjectVolume.add(ycProjectVolume));
             } else if (Objects.equals(projectType, AUCTION_PROJECT_TYPE)) {
-                map.put(AUCTION_TRADING_VOLUME_STR, ldProjectVolume.add(ycProjectVolume));
+                map.put(AUCTION_TRADING_VOLUME, ldProjectVolume.add(ycProjectVolume));
             }
         }
     }
@@ -554,8 +554,8 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
         }
     }
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+    /*@Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }*/
 }

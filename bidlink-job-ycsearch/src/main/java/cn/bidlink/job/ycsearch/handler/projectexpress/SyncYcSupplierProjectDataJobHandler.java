@@ -5,8 +5,6 @@ import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import cn.bidlink.job.ycsearch.handler.JobHandler;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -61,18 +59,19 @@ public class SyncYcSupplierProjectDataJobHandler extends JobHandler /*implements
 
     private void syncYcSupplierProjectData() {
         Properties properties = elasticClient.getProperties();
-        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+        int pageUseSize = 1000;
+        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.supplier_index"))
                 .setTypes(properties.getProperty("cluster.type.supplier"))
                 .setQuery(QueryBuilders.termQuery(BusinessConstant.WEB_TYPE, BusinessConstant.YUECAI))
                 .setScroll(new TimeValue(60000))
-                .setSize(pageSize)
+                .setSize(pageUseSize)
                 .execute().actionGet();
         do {
             SearchHits hits = response.getHits();
             if (hits.getTotalHits() > 0) {
                 List<Map<String, Object>> resultFromEs = new ArrayList<>();
                 for (SearchHit hit : hits.getHits()) {
-                    Map<String, Object> source = hit.getSource();
+                    Map<String, Object> source = hit.getSourceAsMap();
                     resultFromEs.add(source);
                 }
                 // 处理字段
@@ -90,18 +89,10 @@ public class SyncYcSupplierProjectDataJobHandler extends JobHandler /*implements
             Properties properties = elasticClient.getProperties();
             BulkRequestBuilder requestBuilder = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> map : mapList) {
-                requestBuilder.add(elasticClient.getTransportClient().prepareIndex(properties.getProperty("cluster.express_index"),
+                requestBuilder.add(elasticClient.getTransportClient().prepareIndex(properties.getProperty("cluster.supplier_express_index"),
                         properties.getProperty("cluster.type.supplier_express"))
                         .setId(String.valueOf(map.get(ID)))
-                        .setSource(JSON.toJSONString(map, new ValueFilter() {
-                            @Override
-                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof Date) {
-                                    return SyncTimeUtil.toDateString(propertyValue);
-                                }
-                                return propertyValue;
-                            }
-                        }))
+                        .setSource(SyncTimeUtil.handlerDate(map))
                 );
             }
             BulkResponse response = requestBuilder.execute().actionGet();

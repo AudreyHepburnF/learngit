@@ -63,7 +63,7 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
     }
 
     private void syncRecruitData() {
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.supplier_opportunity",
+        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.supplier_opportunity_index", "cluster.type.supplier_opportunity",
                 QueryBuilders.boolQuery().must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
                         .must(QueryBuilders.termQuery(PROJECT_TYPE, RECRUIT_PROJECT_TYPE)));
         logger.info("1.1 同步招募信息lastSyncTime:" + SyncTimeUtil.toDateString(lastSyncTime) + "\n" + ",syncTime:" + SyncTimeUtil.currentDateToString());
@@ -75,7 +75,7 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
     private void fixedLimitRecruitTypeDataService() {
         logger.info("1.开始修复招募商机数据截止时间到后商机状态");
         Properties properties = elasticClient.getProperties();
-        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.supplier_opportunity_index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
@@ -90,7 +90,7 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
             SearchHits hits = response.getHits();
             List<String> ids = new ArrayList<>();
             for (SearchHit hit : hits.getHits()) {
-                Map<String, Object> source = hit.getSource();
+                Map<String, Object> source = hit.getSourceAsMap();
                 ids.add(source.get(ID).toString());
             }
             this.doFixedLimitRecruitTypeDataService(ids);
