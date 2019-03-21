@@ -2,11 +2,8 @@ package cn.bidlink.job.business.handler;
 
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.ValueFilter;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +11,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.CollectionUtils;
 
 import javax.sql.DataSource;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -112,18 +108,7 @@ public abstract class AbstractSyncPurchaseDataJobHandler extends JobHandler {
                                 elasticClient.getProperties().getProperty("cluster.type.purchase"),
                                 String.valueOf(purchase.get(ID)))
                         .setDocAsUpsert(true)
-                        .setDoc(JSON.toJSONString(purchase, new ValueFilter() {
-                            @Override
-                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof Date) {
-                                    //是date类型按指定日期格式转换
-                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                } else {
-
-                                    return propertyValue;
-                                }
-                            }
-                        })));
+                        .setDoc(SyncTimeUtil.handlerDate(purchase)));
             }
             BulkResponse response = bulkRequest.execute().actionGet();
             //是否失败

@@ -145,16 +145,7 @@ public abstract class AbstractSyncSupplierDataJobHandler extends JobHandler {
                                 elasticClient.getProperties().getProperty("cluster.type.supplier"),
                                 String.valueOf(result.get(ID)))
                         .setDocAsUpsert(true)
-                        .setDoc(JSON.toJSONString(result, new ValueFilter() {
-                            @Override
-                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof java.util.Date) {
-                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                } else {
-                                    return propertyValue;
-                                }
-                            }
-                        })));
+                        .setDoc(SyncTimeUtil.handlerDate(result)));
             }
 
             BulkResponse response = bulkRequest.execute().actionGet();
