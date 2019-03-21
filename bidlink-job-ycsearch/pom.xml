@@ -223,17 +223,26 @@
                 <pom.cluster.name>elasticsearch</pom.cluster.name>
                 <pom.cluster.supplier_index>supplier</pom.cluster.supplier_index>
                 <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
+                <pom.cluster.recruit_index>recruit</pom.cluster.recruit_index>
                 <pom.cluster.type.recruit>recruit</pom.cluster.type.recruit>
+                <pom.cluster.supplier_opportunity_index>supplier_opportunity</pom.cluster.supplier_opportunity_index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
+                <pom.cluster.notice_index>notice</pom.cluster.notice_index>
                 <pom.cluster.type.notice>notice</pom.cluster.type.notice>
+                <pom.cluster.deal_supplier_project_index>deal_supplier_project</pom.cluster.deal_supplier_project_index>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
-
                 <!--项目直通车-->
                 <pom.cluster.express_index>longdaoyun_express</pom.cluster.express_index>
+                <pom.cluster.project_express_index>project_express</pom.cluster.project_express_index>
                 <pom.cluster.type.project_express>project_express</pom.cluster.type.project_express>
+                <pom.cluster.supplier_express_index>supplier_express</pom.cluster.supplier_express_index>
                 <pom.cluster.type.supplier_express>supplier_express</pom.cluster.type.supplier_express>
+                <pom.cluster.project_express_traffic_statistic_index>project_express_traffic_statistic
+                </pom.cluster.project_express_traffic_statistic_index>
                 <pom.cluster.type.project_express_traffic_statistic>project_express_traffic_statistic
                 </pom.cluster.type.project_express_traffic_statistic>
+                <pom.cluster.project_express_supplier_recommend_record_index>project_express_supplier_recommend_record
+                </pom.cluster.project_express_supplier_recommend_record_index>
                 <pom.cluster.type.project_express_supplier_recommend_record>project_express_supplier_recommend_record
                 </pom.cluster.type.project_express_supplier_recommend_record>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
