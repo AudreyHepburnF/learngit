@@ -5,7 +5,6 @@ import cn.bidlink.job.common.utils.*;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -18,7 +17,7 @@ import java.util.*;
  */
 @Service
 @JobHander(value = "syncPurchaseDataJobHandler")
-public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandler implements InitializingBean {
+public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandler /*implements InitializingBean*/ {
 
     private Integer SYNC_WAY_CREATE = 1;
     private Integer SYNC_WAY_UPDATE = 2;
@@ -242,8 +241,8 @@ public class SyncPurchaseDataJobHandler extends AbstractSyncPurchaseDataJobHandl
         result.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE);
     }
 
-    @Override
+    /*@Override
     public void afterPropertiesSet() throws Exception {
         execute();
-    }
+    }*/
 }
