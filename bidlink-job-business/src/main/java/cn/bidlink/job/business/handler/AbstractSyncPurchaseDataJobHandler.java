@@ -104,7 +104,7 @@ public abstract class AbstractSyncPurchaseDataJobHandler extends JobHandler {
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> purchase : purchases) {
                 bulkRequest.add(elasticClient.getTransportClient()
-                        .prepareUpdate(elasticClient.getProperties().getProperty("cluster.index"),
+                        .prepareUpdate(elasticClient.getProperties().getProperty("cluster.purchase_index"),
                                 elasticClient.getProperties().getProperty("cluster.type.purchase"),
                                 String.valueOf(purchase.get(ID)))
                         .setDocAsUpsert(true)

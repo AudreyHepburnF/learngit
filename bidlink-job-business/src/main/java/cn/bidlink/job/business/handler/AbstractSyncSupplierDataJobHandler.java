@@ -141,7 +141,7 @@ public abstract class AbstractSyncSupplierDataJobHandler extends JobHandler {
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> result : resultsToUpdate) {
                 bulkRequest.add(elasticClient.getTransportClient()
-                        .prepareUpdate(elasticClient.getProperties().getProperty("cluster.index"),
+                        .prepareUpdate(elasticClient.getProperties().getProperty("cluster.supplier_index"),
                                 elasticClient.getProperties().getProperty("cluster.type.supplier"),
                                 String.valueOf(result.get(ID)))
                         .setDocAsUpsert(true)
@@ -161,7 +161,7 @@ public abstract class AbstractSyncSupplierDataJobHandler extends JobHandler {
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> result : resultsToUpdate) {
                 bulkRequest.add(elasticClient.getTransportClient()
-                        .prepareUpdate(elasticClient.getProperties().getProperty("cluster.index"),
+                        .prepareUpdate(elasticClient.getProperties().getProperty("cluster.supplier_index"),
                                 elasticClient.getProperties().getProperty("cluster.type.supplier"),
                                 String.valueOf(result.get(ID)))
                         .setDoc(JSON.toJSONString(result, new ValueFilter() {
