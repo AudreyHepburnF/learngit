@@ -2,11 +2,8 @@ package cn.bidlink.job.business.handler;
 
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.ValueFilter;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -164,16 +161,7 @@ public abstract class AbstractSyncSupplierDataJobHandler extends JobHandler {
                         .prepareUpdate(elasticClient.getProperties().getProperty("cluster.supplier_index"),
                                 elasticClient.getProperties().getProperty("cluster.type.supplier"),
                                 String.valueOf(result.get(ID)))
-                        .setDoc(JSON.toJSONString(result, new ValueFilter() {
-                            @Override
-                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof java.util.Date) {
-                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                } else {
-                                    return propertyValue;
-                                }
-                            }
-                        })));
+                        .setDoc(SyncTimeUtil.handlerDate(result)));
             }
 
             BulkResponse response = bulkRequest.execute().actionGet();
