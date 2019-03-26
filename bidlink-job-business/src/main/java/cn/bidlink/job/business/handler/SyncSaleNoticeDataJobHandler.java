@@ -6,7 +6,6 @@ import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -21,7 +20,7 @@ import java.util.Map;
  */
 @Service
 @JobHander(value = "syncSaleNoticeDataJobHandler")
-public class SyncSaleNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandler implements InitializingBean {
+public class SyncSaleNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandler /*implements InitializingBean*/ {
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
@@ -237,8 +236,8 @@ public class SyncSaleNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandl
         result.put(PROJECT_TYPE, SALE_NOTICE_TYPE);
     }
 
-    @Override
+    /*@Override
     public void afterPropertiesSet() throws Exception {
         execute();
-    }
+    }*/
 }
