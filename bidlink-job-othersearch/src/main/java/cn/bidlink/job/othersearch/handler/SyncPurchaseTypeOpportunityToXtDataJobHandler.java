@@ -53,7 +53,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
      */
     private void syncOpportunityData() {
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
-                "cluster.index",
+                "cluster.supplier_opportunity_index",
                 "cluster.type.supplier_opportunity",
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery("projectType", PURCHASE_PROJECT_TYPE))
@@ -65,7 +65,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
         logger.info("采购项目商机同步时间,lastSyncTime：" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n"
                 + ",syncTime:" + new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
         syncPurchaseProjectDataService(lastSyncTime);
-        fixExpiredAutoStopTypePurchaseProjectDataService(lastSyncTime);
+//        fixExpiredAutoStopTypePurchaseProjectDataService(lastSyncTime);
     }
 
     /**
@@ -83,7 +83,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                 .must(QueryBuilders.termQuery(BID_STOP_TYPE, AUTO_STOP_TYPE));
 
         int batchSize = 100;
-        SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+        SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.supplier_opportunity_index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(queryBuilder)
                 .setScroll(new TimeValue(60000))
@@ -262,8 +262,8 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
     }
 
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+/*    @Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }*/
 }
