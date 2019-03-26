@@ -6,6 +6,7 @@ import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -20,7 +21,7 @@ import java.util.Map;
  */
 @Service
 @JobHander(value = "syncSaleNoticeDataJobHandler")
-public class SyncSaleNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandler /*implements InitializingBean*/ {
+public class SyncSaleNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandler implements InitializingBean {
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
@@ -135,7 +136,7 @@ public class SyncSaleNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandl
                 "\tLEFT JOIN vendue_project_ext vpe ON anr.project_id = vpe.id \n" +
                 "\tAND anr.company_id = vpe.company_id \n" +
                 "WHERE\n" +
-                "\tvpe.result_open_range = 1 \n" +
+                "\tvpe.result_open_range in (1,2) \n" +
                 "\tAND anr.create_time > ?";
         String querySql = "SELECT\n" +
                 "\tanr.id,\n" +
@@ -167,7 +168,7 @@ public class SyncSaleNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandl
                 "\tLEFT JOIN vendue_project_file apf ON apf.project_id = apc.id \n" +
                 "\tAND apf.company_id = apc.company_id \n" +
                 "WHERE\n" +
-                "\tapc.result_open_range = 1 \n" +
+                "\tapc.result_open_range in (1,2) \n" +
                 "\tAND anr.create_time > ? \n" +
                 "\tLIMIT ?,?;";
         doSyncNoticeService(vendueDataSource, countSql, querySql, Collections.singletonList(lastSyncTime), RESULT_NOTICE);
@@ -181,7 +182,7 @@ public class SyncSaleNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandl
                 "\tLEFT JOIN vendue_project_ext apc ON anr.project_id = apc.id \n" +
                 "\tAND anr.company_id = apc.company_id \n" +
                 "WHERE\n" +
-                "\tapc.result_open_range = 1 \n" +
+                "\tapc.result_open_range in (1,2) \n" +
                 "\tAND anr.update_time > ?";
         String querySql = "SELECT\n" +
                 "\tanr.id,\n" +
@@ -212,7 +213,7 @@ public class SyncSaleNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandl
                 "\tLEFT JOIN vendue_project_file apf ON apf.project_id = apc.id \n" +
                 "\tAND apf.company_id = apc.company_id \n" +
                 "WHERE\n" +
-                "\tapc.result_open_range = 1 \n" +
+                "\tapc.result_open_range in (1,2) \n" +
                 "\tAND anr.update_time > ? \n" +
                 "\tLIMIT ?,?;";
         doSyncNoticeService(vendueDataSource, countSql, querySql, Collections.singletonList(lastSyncTime), RESULT_NOTICE);
@@ -236,8 +237,8 @@ public class SyncSaleNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandl
         result.put(PROJECT_TYPE, SALE_NOTICE_TYPE);
     }
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }
 }
