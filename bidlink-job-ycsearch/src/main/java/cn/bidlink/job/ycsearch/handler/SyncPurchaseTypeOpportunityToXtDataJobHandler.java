@@ -260,7 +260,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
             }
         } else if (bidStopType == MANUAL_STOP_TYPE) {
             // 未截标就是商机
-            if ((bidTrueStopTime == null || bidTrueStopTime.after(new Date()) || Objects.equals(bidTrueStopTime, bidStopTime)) && projectStatus == OPEN_BID) {
+            if ((bidTrueStopTime == null || bidTrueStopTime.after(currentDate) || Objects.equals(bidTrueStopTime, bidStopTime)) && projectStatus == OPEN_BID) {
                 result.put(STATUS, VALID_OPPORTUNITY_STATUS);
                 resultToExecute.add(appendIdToResult(result));
             } else {
