@@ -249,6 +249,8 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
         int bidStopType = (int) result.get(BID_STOP_TYPE);
         Timestamp bidStopTime = (Timestamp) result.get(BID_STOP_TIME);
         Timestamp bidTrueStopTime = (Timestamp) result.get(BID_TRUE_STOP_TIME);
+        logger.info("判断悦采采购项目商机,bidStopType:{}, bidStopTime:{}, bidTrueStopTime:{}, currentDate:{}, projectStatus:{}", bidStopType, SyncTimeUtil.toDateString(bidStopTime),
+                bidTrueStopTime == null ? null : SyncTimeUtil.toDateString(bidTrueStopTime), SyncTimeUtil.toDateString(currentDate), projectStatus);
         if (bidStopType == AUTO_STOP_TYPE) {
             // 判断时间未过期就是商机
             if (bidStopTime != null && bidStopTime.after(currentDate) && projectStatus == OPEN_BID) {
