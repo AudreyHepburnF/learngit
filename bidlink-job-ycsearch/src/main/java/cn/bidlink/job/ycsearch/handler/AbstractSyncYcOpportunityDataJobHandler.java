@@ -362,10 +362,10 @@ public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler
                         .prepareIndex(elasticClient.getProperties().getProperty("cluster.supplier_opportunity_index"),
                                 elasticClient.getProperties().getProperty("cluster.type.supplier_opportunity"),
                                 String.valueOf(result.get(ID)))
-                        .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
                         .setSource(SyncTimeUtil.handlerDate(result)));
             }
 
+            bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
             BulkResponse response = bulkRequest.execute().actionGet();
             if (response.hasFailures()) {
                 logger.error(response.buildFailureMessage());
