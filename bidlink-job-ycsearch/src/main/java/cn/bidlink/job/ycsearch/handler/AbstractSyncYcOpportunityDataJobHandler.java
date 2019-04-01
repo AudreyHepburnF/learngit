@@ -4,6 +4,7 @@ import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.AreaUtil;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
+import com.alibaba.fastjson.JSON;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.slf4j.Logger;
@@ -353,10 +354,7 @@ public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler
     protected abstract void parseOpportunity(Timestamp currentDate, List<Map<String, Object>> resultToExecute, Map<String, Object> result);
 
     protected void batchExecute(List<Map<String, Object>> resultsToUpdate) {
-        System.out.println("size : " + resultsToUpdate.size());
-        for (Map<String, Object> map : resultsToUpdate) {
-            System.out.println(map);
-        }
+        logger.info("插入数据的结果:{}", JSON.toJSONString(resultsToUpdate));
         if (!CollectionUtils.isEmpty(resultsToUpdate)) {
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> result : resultsToUpdate) {
