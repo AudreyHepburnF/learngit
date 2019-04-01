@@ -6,6 +6,7 @@ import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.support.WriteRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -361,6 +362,7 @@ public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler
                         .prepareIndex(elasticClient.getProperties().getProperty("cluster.supplier_opportunity_index"),
                                 elasticClient.getProperties().getProperty("cluster.type.supplier_opportunity"),
                                 String.valueOf(result.get(ID)))
+                        .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
                         .setSource(SyncTimeUtil.handlerDate(result)));
             }
 
