@@ -12,7 +12,6 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -31,7 +30,7 @@ import static cn.bidlink.job.common.utils.AreaUtil.queryAreaInfo;
  */
 @JobHander(value = "syncPurchaseTypeOpportunityToXtDataJobHandler")
 @Service
-public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOpportunityDataJobHandler implements InitializingBean {
+public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncYcOpportunityDataJobHandler /*implements InitializingBean*/ {
     // 自动截标
     private int AUTO_STOP_TYPE   = 2;
     // 手动截标
@@ -251,8 +250,8 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
         Timestamp bidStopTime = (Timestamp) result.get(BID_STOP_TIME);
         Timestamp bidTrueStopTime = (Timestamp) result.get(BID_TRUE_STOP_TIME);
         String projectName = String.valueOf(result.get("projectName").toString());
-        logger.info("1.开始判断悦采采购项目商机projectName:{},bidStopType:{}, bidStopTime:{}, bidTrueStopTime:{}, currentDate:{}, projectStatus:{}", projectName, bidStopType, SyncTimeUtil.toDateString(bidStopTime),
-                bidTrueStopTime == null ? null : SyncTimeUtil.toDateString(bidTrueStopTime), SyncTimeUtil.toDateString(currentDate), projectStatus);
+//        logger.info("1.开始判断悦采采购项目商机projectName:{},bidStopType:{}, bidStopTime:{}, bidTrueStopTime:{}, currentDate:{}, projectStatus:{}", projectName, bidStopType, SyncTimeUtil.toDateString(bidStopTime),
+//                bidTrueStopTime == null ? null : SyncTimeUtil.toDateString(bidTrueStopTime), SyncTimeUtil.toDateString(currentDate), projectStatus);
         if (bidStopType == AUTO_STOP_TYPE) {
             // 判断时间未过期就是商机
             if (bidStopTime != null && bidStopTime.after(currentDate) && projectStatus == OPEN_BID) {
@@ -274,7 +273,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
         } else {
             // no-op
         }
-        logger.info("2.结束商机判断,projectName:{},status:{}", projectName, result.get(STATUS));
+//        logger.info("2.结束商机判断,projectName:{},status:{}", projectName, result.get(STATUS));
     }
 
 
@@ -301,8 +300,8 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
     }
 
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        execute();
-    }
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+//        execute();
+//    }
 }

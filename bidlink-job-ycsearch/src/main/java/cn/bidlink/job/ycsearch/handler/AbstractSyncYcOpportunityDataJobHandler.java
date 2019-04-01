@@ -361,11 +361,10 @@ public abstract class AbstractSyncYcOpportunityDataJobHandler extends JobHandler
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> result : resultsToUpdate) {
                 bulkRequest.add(elasticClient.getTransportClient()
-                        .prepareUpdate(elasticClient.getProperties().getProperty("cluster.supplier_opportunity_index"),
+                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.supplier_opportunity_index"),
                                 elasticClient.getProperties().getProperty("cluster.type.supplier_opportunity"),
                                 String.valueOf(result.get(ID)))
-                        .setDocAsUpsert(true)
-                        .setDoc(SyncTimeUtil.handlerDate(result)));
+                        .setSource(SyncTimeUtil.handlerDate(result)));
             }
 
             BulkResponse response = bulkRequest.execute().actionGet();
