@@ -285,10 +285,11 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
             if (Objects.equals(operationType, INSERT_OPERATION)) {
                 for (Map<String, Object> result : resultsToUpdate) {
                     bulkRequest.add(elasticClient.getTransportClient()
-                            .prepareIndex(elasticClient.getProperties().getProperty("cluster.opportunity_index"),
+                            .prepareUpdate(elasticClient.getProperties().getProperty("cluster.opportunity_index"),
                                     elasticClient.getProperties().getProperty("cluster.type.supplier_opportunity"),
                                     String.valueOf(result.get(ID)))
-                            .setSource(SyncTimeUtil.handlerDate(result)));
+                            .setDocAsUpsert(true)
+                            .setDoc(SyncTimeUtil.handlerDate(result)));
                 }
             } else if (Objects.equals(operationType, UPDATE_OPERATION)) {
                 for (Map<String, Object> result : resultsToUpdate) {
