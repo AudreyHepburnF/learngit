@@ -46,7 +46,7 @@ public class SyncAuctionTypeOpportunityToXtDataJobHandler extends AbstractSyncYc
     }
 
     private void syncAuctionProjectData() {
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.supplier_opportunity",
+        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.supplier_opportunity_index", "cluster.type.supplier_opportunity",
                 QueryBuilders.boolQuery().must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
                         .must(QueryBuilders.termQuery(PROJECT_TYPE, AUCTION_PROJECT_TYPE)));
         Timestamp lastSyncStartTime = new Timestamp(new DateTime(new DateTime().getYear() - 1, 1, 1, 0, 0, 0).getMillis());
@@ -56,14 +56,14 @@ public class SyncAuctionTypeOpportunityToXtDataJobHandler extends AbstractSyncYc
         logger.info("开始同步悦采竞价项目lastSyncTime:" + SyncTimeUtil.toDateString(lastSyncTime) + ",\n" + "syncTime:" + SyncTimeUtil.toDateString(SyncTimeUtil.getCurrentDate()));
         syncAuctionProjectDataService(lastSyncTime);
         // 修复竞价商机自动截止问题
-        fixExpiredYcAuctionTypeOpportunityData();
+//        fixExpiredYcAuctionTypeOpportunityData();
     }
 
     private void fixExpiredYcAuctionTypeOpportunityData() {
         logger.info("2.开始修复竞价项目自动截止商机状态");
         Properties properties = elasticClient.getProperties();
         int batchSize = 100;
-        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+        SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.supplier_opportunity_index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
@@ -76,7 +76,7 @@ public class SyncAuctionTypeOpportunityToXtDataJobHandler extends AbstractSyncYc
             SearchHits hits = response.getHits();
             ArrayList<Long> projectIds = new ArrayList<>();
             for (SearchHit hit : hits.getHits()) {
-                Map<String, Object> source = hit.getSource();
+                Map<String, Object> source = hit.getSourceAsMap();
                 projectIds.add(Long.valueOf(source.get(PROJECT_ID).toString()));
             }
             doFixExpiredYcAuctionTypeOpportunityService(projectIds);

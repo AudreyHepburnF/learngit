@@ -37,14 +37,14 @@ public class SyncOtherPurchaseTypeOpportunityDataJobHandler extends AbstractSync
     }
 
     private void syncOtherPurchaseOpportunityData() {
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.supplier_opportunity",
+        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.opportunity_index", "cluster.type.supplier_opportunity",
                 QueryBuilders.boolQuery().must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.OTHER_SOURCE))
                         .must(QueryBuilders.termQuery(PROJECT_TYPE, PURCHASE_PROJECT_TYPE)));
 //        Timestamp lastSyncTime = SyncTimeUtil.GMT_TIME;
         logger.info("同步第三方平台采购商机lastSyncTime:" + SyncTimeUtil.toDateString(lastSyncTime) + "\n" + ",syncTime:" + SyncTimeUtil.currentDateToString());
         syncOtherPurchaseOpportunityDataService(lastSyncTime);
         // 修复采购商机时间截止
-        fixExpiredOtherPurchaseTypeOpportunityDataService();
+//        fixExpiredOtherPurchaseTypeOpportunityDataService();
     }
 
     private void fixExpiredOtherPurchaseTypeOpportunityDataService() {
@@ -52,7 +52,7 @@ public class SyncOtherPurchaseTypeOpportunityDataJobHandler extends AbstractSync
         Properties properties = elasticClient.getProperties();
         int batchSize = 100;
         String currentDate = SyncTimeUtil.currentDateToString();
-        SearchResponse scrollResponse = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+        SearchResponse scrollResponse = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.opportunity_index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.OTHER_SOURCE))
@@ -67,7 +67,7 @@ public class SyncOtherPurchaseTypeOpportunityDataJobHandler extends AbstractSync
             SearchHit[] hits = scrollResponse.getHits().getHits();
             List<Long> projectIds = new ArrayList<>();
             for (SearchHit hit : hits) {
-                projectIds.add(Long.valueOf(hit.getSource().get(PROJECT_ID).toString()));
+                projectIds.add(Long.valueOf(hit.getSourceAsMap().get(PROJECT_ID).toString()));
             }
             doFixExpiredOtherPurchaseTypeOpportunityDataService(projectIds, SyncTimeUtil.getCurrentDate());
             scrollResponse = elasticClient.getTransportClient().prepareSearchScroll(scrollResponse.getScrollId())
@@ -215,6 +215,7 @@ public class SyncOtherPurchaseTypeOpportunityDataJobHandler extends AbstractSync
         // 移除属性
         result.remove(REAL_QUOTE_STOP_TIME);
         result.put(PROJECT_TYPE, PURCHASE_PROJECT_TYPE);
+        result.remove(PROVINCE);
         result.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.OTHER_SOURCE);
     }
 

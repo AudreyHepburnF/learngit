@@ -44,7 +44,7 @@ public class SyncSaleTypeOpportunityDataJobHandler extends AbstractSyncOpportuni
 
     private void syncOpportunityData() {
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
-                "cluster.index",
+                "cluster.opportunity_index",
                 "cluster.type.supplier_opportunity",
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery(PROJECT_TYPE, SALE_PROJECT_TYPE))
@@ -53,7 +53,7 @@ public class SyncSaleTypeOpportunityDataJobHandler extends AbstractSyncOpportuni
                 SyncTimeUtil.currentDateToString());
         syncSaleProjectDataService(lastSyncTime);
 //         修复商机状态
-        fixExpiredSaleTypeOpportunityData();
+//        fixExpiredSaleTypeOpportunityData();
     }
 
     /**
@@ -67,7 +67,7 @@ public class SyncSaleTypeOpportunityDataJobHandler extends AbstractSyncOpportuni
                 .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE))
                 .must(QueryBuilders.rangeQuery(SyncTimeUtil.SYNC_TIME).lte(currentTime));
         int batchSize = 100;
-        SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+        SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.opportunity_index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setSize(batchSize)
                 .setScroll(new TimeValue(60000))
@@ -77,7 +77,7 @@ public class SyncSaleTypeOpportunityDataJobHandler extends AbstractSyncOpportuni
             SearchHits hits = scrollResp.getHits();
             List<Long> projectIds = new ArrayList<>();
             for (SearchHit hit : hits) {
-                Long projectId = Long.valueOf(hit.getSource().get(PROJECT_ID).toString());
+                Long projectId = Long.valueOf(hit.getSourceAsMap().get(PROJECT_ID).toString());
                 projectIds.add(projectId);
             }
             this.doFixExpiredSaleTypeOpportunityData(projectIds, SyncTimeUtil.getCurrentDate());

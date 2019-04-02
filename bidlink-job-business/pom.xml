@@ -151,17 +151,23 @@
                 <!--供应商诚信等级空间-->
                 <pom.supplier.enterpriseSpaceDetailFormat>http://{0}.testspace.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}</pom.supplier.enterpriseSpaceDetailFormat>
                 <!--es配置-->
-                <pom.cluster.host>100.100.0.122:9300</pom.cluster.host>
+                <pom.cluster.host>100.100.0.122:9301</pom.cluster.host>
                 <pom.cluster.name>elasticsearch</pom.cluster.name>
-                <pom.cluster.index>longdaoyun_test</pom.cluster.index>
+                <pom.cluster.opportunity_index>supplier_opportunity</pom.cluster.opportunity_index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
+                <pom.cluster.supplier_product_index>supplier_product</pom.cluster.supplier_product_index>
                 <pom.cluster.type.supplier_product>supplier_product</pom.cluster.type.supplier_product>
+                <pom.cluster.supplier_index>supplier</pom.cluster.supplier_index>
                 <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
+                <pom.cluster.enterprise_space_product_index>enterprise_space_product</pom.cluster.enterprise_space_product_index>
                 <pom.cluster.type.enterprise_space_product>enterprise_space_product</pom.cluster.type.enterprise_space_product>
+                <pom.cluster.purchase_index>purchase</pom.cluster.purchase_index>
                 <pom.cluster.type.purchase>purchase</pom.cluster.type.purchase>
+                <pom.cluster.notice_index>notice</pom.cluster.notice_index>
                 <pom.cluster.type.notice>notice</pom.cluster.type.notice>
-                <pom.cluster.type.project>project</pom.cluster.type.project>
+                <pom.cluster.deal_supplier_index>deal_supplier</pom.cluster.deal_supplier_index>
                 <pom.cluster.type.deal_supplier>deal_supplier</pom.cluster.type.deal_supplier>
+                <pom.cluster.deal_supplier_project_index>deal_supplier_project</pom.cluster.deal_supplier_project_index>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
@@ -225,17 +231,23 @@
                 <!--供应商诚信等级空间-->
                 <pom.supplier.enterpriseSpaceDetailFormat>http://{0}.testspace.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}</pom.supplier.enterpriseSpaceDetailFormat>
                 <!--es配置-->
-                <pom.cluster.host>100.100.0.122:9300</pom.cluster.host>
+                <pom.cluster.host>100.100.0.122:9301</pom.cluster.host>
                 <pom.cluster.name>elasticsearch</pom.cluster.name>
-                <pom.cluster.index>longdaoyun_test</pom.cluster.index>
+                <pom.cluster.opportunity_index>supplier_opportunity</pom.cluster.opportunity_index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
+                <pom.cluster.supplier_product_index>supplier_product</pom.cluster.supplier_product_index>
                 <pom.cluster.type.supplier_product>supplier_product</pom.cluster.type.supplier_product>
+                <pom.cluster.supplier_index>supplier</pom.cluster.supplier_index>
                 <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
+                <pom.cluster.enterprise_space_product_index>enterprise_space_product</pom.cluster.enterprise_space_product_index>
                 <pom.cluster.type.enterprise_space_product>enterprise_space_product</pom.cluster.type.enterprise_space_product>
+                <pom.cluster.purchase_index>purchase</pom.cluster.purchase_index>
                 <pom.cluster.type.purchase>purchase</pom.cluster.type.purchase>
+                <pom.cluster.notice_index>notice</pom.cluster.notice_index>
                 <pom.cluster.type.notice>notice</pom.cluster.type.notice>
-                <pom.cluster.type.project>project</pom.cluster.type.project>
+                <pom.cluster.deal_supplier_index>deal_supplier</pom.cluster.deal_supplier_index>
                 <pom.cluster.type.deal_supplier>deal_supplier</pom.cluster.type.deal_supplier>
+                <pom.cluster.deal_supplier_project_index>deal_supplier_project</pom.cluster.deal_supplier_project_index>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
@@ -303,19 +315,24 @@
                 <!--供应商诚信等级空间-->
                 <pom.supplier.enterpriseSpaceDetailFormat>http://{0}.space.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}</pom.supplier.enterpriseSpaceDetailFormat>
                 <!--es配置-->
-                <pom.cluster.host>es-cloud-01.internal.cg-xt.com:9300,es-cloud-02.internal.cg-xt.com:9300,es-cloud-03.internal.cg-xt.com:9300</pom.cluster.host>
-                <pom.cluster.name>dc</pom.cluster.name>
-                <pom.cluster.index>ixietong_opportunity</pom.cluster.index>
+                <pom.cluster.host>172.16.1.51:9301,172.16.1.51:9302,172.16.1.51:9303</pom.cluster.host>
+                <pom.cluster.name>es-cloud</pom.cluster.name>
+                <pom.cluster.opportunity_index>supplier_opportunity</pom.cluster.opportunity_index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
+                <pom.cluster.supplier_product_index>supplier_product</pom.cluster.supplier_product_index>
                 <pom.cluster.type.supplier_product>supplier_product</pom.cluster.type.supplier_product>
+                <pom.cluster.supplier_index>supplier</pom.cluster.supplier_index>
                 <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
+                <pom.cluster.enterprise_space_product_index>enterprise_space_product</pom.cluster.enterprise_space_product_index>
                 <pom.cluster.type.enterprise_space_product>enterprise_space_product</pom.cluster.type.enterprise_space_product>
+                <pom.cluster.purchase_index>purchase</pom.cluster.purchase_index>
                 <pom.cluster.type.purchase>purchase</pom.cluster.type.purchase>
+                <pom.cluster.notice_index>notice</pom.cluster.notice_index>
                 <pom.cluster.type.notice>notice</pom.cluster.type.notice>
-                <pom.cluster.type.project>project</pom.cluster.type.project>
+                <pom.cluster.deal_supplier_index>deal_supplier</pom.cluster.deal_supplier_index>
                 <pom.cluster.type.deal_supplier>deal_supplier</pom.cluster.type.deal_supplier>
+                <pom.cluster.deal_supplier_project_index>deal_supplier_project</pom.cluster.deal_supplier_project_index>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
-
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>

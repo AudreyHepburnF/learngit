@@ -33,7 +33,7 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
     }
 
     private void syncBidNoticeData() {
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.notice",
+        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.notice_index", "cluster.type.notice",
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery(PROJECT_TYPE, BID_NOTICE_TYPE))
                         .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE)));
@@ -183,6 +183,7 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
                 "\tsub_project_id AS subProjectId,\n" +
                 "\tgain_file_type AS gainFileType,\n" +
                 "\tfile_gain_address AS fileGainAddress, \n" +
+                "\tmajor_argument_suggestion AS majorArgumentSuggestion, \n" +
                 "\tcreate_time AS createTime \n" +
                 "FROM\n" +
                 "\tbid_notice_history \n" +
@@ -237,6 +238,7 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
                 "\tnotice_publish_time AS noticePublishTime,\n" +
                 "\tsub_project_id AS subProjectId,\n" +
                 "\tgain_file_type AS gainFileType,\n" +
+                "\tmajor_argument_suggestion AS majorArgumentSuggestion, \n" +
                 "\tfile_gain_address AS fileGainAddress, \n" +
                 "\tcreate_time AS createTime \n" +
                 "FROM\n" +
@@ -258,8 +260,8 @@ public class SyncBidNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandle
         result.put(PROJECT_TYPE, BID_NOTICE_TYPE);
     }
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+    /*@Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }*/
 }

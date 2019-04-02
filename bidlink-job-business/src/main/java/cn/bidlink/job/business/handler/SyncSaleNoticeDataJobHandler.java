@@ -32,7 +32,7 @@ public class SyncSaleNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandl
     }
 
     private void syncSaleNoticeData() {
-        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.notice",
+        Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.notice_index", "cluster.type.notice",
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE))
                         .must(QueryBuilders.termQuery(PROJECT_TYPE, SALE_NOTICE_TYPE)));
@@ -135,7 +135,7 @@ public class SyncSaleNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandl
                 "\tLEFT JOIN vendue_project_ext vpe ON anr.project_id = vpe.id \n" +
                 "\tAND anr.company_id = vpe.company_id \n" +
                 "WHERE\n" +
-                "\tvpe.result_open_range = 1 \n" +
+                "\tvpe.result_open_range in (1,2) \n" +
                 "\tAND anr.create_time > ?";
         String querySql = "SELECT\n" +
                 "\tanr.id,\n" +
@@ -167,7 +167,7 @@ public class SyncSaleNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandl
                 "\tLEFT JOIN vendue_project_file apf ON apf.project_id = apc.id \n" +
                 "\tAND apf.company_id = apc.company_id \n" +
                 "WHERE\n" +
-                "\tapc.result_open_range = 1 \n" +
+                "\tapc.result_open_range in (1,2) \n" +
                 "\tAND anr.create_time > ? \n" +
                 "\tLIMIT ?,?;";
         doSyncNoticeService(vendueDataSource, countSql, querySql, Collections.singletonList(lastSyncTime), RESULT_NOTICE);
@@ -181,7 +181,7 @@ public class SyncSaleNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandl
                 "\tLEFT JOIN vendue_project_ext apc ON anr.project_id = apc.id \n" +
                 "\tAND anr.company_id = apc.company_id \n" +
                 "WHERE\n" +
-                "\tapc.result_open_range = 1 \n" +
+                "\tapc.result_open_range in (1,2) \n" +
                 "\tAND anr.update_time > ?";
         String querySql = "SELECT\n" +
                 "\tanr.id,\n" +
@@ -212,7 +212,7 @@ public class SyncSaleNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandl
                 "\tLEFT JOIN vendue_project_file apf ON apf.project_id = apc.id \n" +
                 "\tAND apf.company_id = apc.company_id \n" +
                 "WHERE\n" +
-                "\tapc.result_open_range = 1 \n" +
+                "\tapc.result_open_range in (1,2) \n" +
                 "\tAND anr.update_time > ? \n" +
                 "\tLIMIT ?,?;";
         doSyncNoticeService(vendueDataSource, countSql, querySql, Collections.singletonList(lastSyncTime), RESULT_NOTICE);
@@ -236,8 +236,8 @@ public class SyncSaleNoticeDataJobHandler extends AbstractSyncNoticeDataJobHandl
         result.put(PROJECT_TYPE, SALE_NOTICE_TYPE);
     }
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+    /*@Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }*/
 }

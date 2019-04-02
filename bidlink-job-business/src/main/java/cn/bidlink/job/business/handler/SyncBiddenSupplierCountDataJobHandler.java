@@ -4,8 +4,6 @@ import cn.bidlink.job.common.constant.BusinessConstant;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -15,7 +13,6 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,7 +96,7 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
                 .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE));  // 新平台
 
         Properties properties = elasticClient.getProperties();
-        SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+        SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.opportunity_index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(queryBuilder)
                 .setScroll(new TimeValue(60000))
@@ -108,7 +105,7 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
                 .get();
         int i = 0;
         do {
-            SearchHit[] searchHits = scrollResp.getHits().hits();
+            SearchHit[] searchHits = scrollResp.getHits().getHits();
             // 采购项目
             List<Map<String, Object>> purchaseProjectSource = new ArrayList<>();
             Set<Pair> purchaseProjectPairs = new HashSet<>();
@@ -126,7 +123,7 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
             Set<Pair> saleProjectPairs = new HashSet<>();
 
             for (SearchHit searchHit : searchHits) {
-                Map<String, Object> source = searchHit.getSource();
+                Map<String, Object> source = searchHit.getSourceAsMap();
                 Integer projectType = (Integer) source.get(PROJECT_TYPE);
                 if (projectType != null) {
                     if (projectType == PURCHASE_PROJECT_TYPE) {
@@ -360,19 +357,10 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> result : resultsToUpdate) {
                 bulkRequest.add(elasticClient.getTransportClient()
-                        .prepareUpdate(elasticClient.getProperties().getProperty("cluster.index"),
+                        .prepareUpdate(elasticClient.getProperties().getProperty("cluster.opportunity_index"),
                                 elasticClient.getProperties().getProperty("cluster.type.supplier_opportunity"),
                                 String.valueOf(result.get(ID)))
-                        .setDoc(JSON.toJSONString(result, new ValueFilter() {
-                            @Override
-                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof java.util.Date) {
-                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                } else {
-                                    return propertyValue;
-                                }
-                            }
-                        })));
+                        .setDoc(SyncTimeUtil.handlerDate(result)));
             }
 
             BulkResponse response = bulkRequest.execute().actionGet();
@@ -411,8 +399,8 @@ public class SyncBiddenSupplierCountDataJobHandler extends JobHandler /*implemen
         }
     }
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+    /*@Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }*/
 }

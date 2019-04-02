@@ -47,7 +47,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
      */
     private void syncOpportunityData() {
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient,
-                "cluster.index",
+                "cluster.opportunity_index",
                 "cluster.type.supplier_opportunity",
                 QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery(PROJECT_TYPE, BIDDING_PROJECT_TYPE))
@@ -56,7 +56,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
 //        Timestamp lastSyncTime = new Timestamp(SyncTimeUtil.toStringDate("2019-01-18 14:50:00").getTime());
         syncBiddingProjectDataService(lastSyncTime);
         // 修复招标项目 截止时间到后,商机状态
-        fixExpiredBiddingProjectDataService();
+//        fixExpiredBiddingProjectDataService();
     }
 
     /**
@@ -71,7 +71,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
                 .must(QueryBuilders.rangeQuery(SyncTimeUtil.SYNC_TIME).lte(currentDate));
         int batchSize = 100;
         Properties properties = elasticClient.getProperties();
-        SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+        SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.opportunity_index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(queryBuilder)
                 .setScroll(new TimeValue(60000))
@@ -82,7 +82,7 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
             SearchHit[] hits = scrollResp.getHits().getHits();
             List<Long> projectIds = new ArrayList<>();
             for (SearchHit hit : hits) {
-                projectIds.add(Long.valueOf(hit.getSource().get("projectId").toString()));
+                projectIds.add(Long.valueOf(hit.getSourceAsMap().get("projectId").toString()));
             }
             doFixExpiredBiddingProjectDataService(projectIds);
             scrollResp = elasticClient.getTransportClient().prepareSearchScroll(scrollResp.getScrollId())
@@ -165,8 +165,105 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
         syncJGCompetitiveNegotiationsProjectDataService(lastSyncTime);
         // 5.竞争性磋商
         syncJGCompetitiveConsultationProjectDataService(lastSyncTime);
+        // 6.单一性来源
+        syncJGSingleSourceProjectDataService(lastSyncTime);
+        // 7.询价
+        syncJGEnquiryProjectDataService(lastSyncTime);
 
+    }
 
+    private void syncJGEnquiryProjectDataService(Timestamp lastSyncTime) {
+        String countUpdatedSql = "SELECT\n"
+                + "   count(1)\n"
+                + "FROM\n"
+                + "   bid_sub_project\n"
+                + "WHERE\n"
+                + "   is_bid_open = 1 AND negotiation_node > 1 AND approve_status = 2 and project_type = 6 AND update_time > ?";
+        String queryUpdatedSql = "SELECT\n" +
+                "\tproject.*,\n" +
+                "\tbpi.id AS directoryId,\n" +
+                "\tbpi.`name` AS directoryName \n" +
+                "FROM\n" +
+                "\t(\n" +
+                "SELECT\n" +
+                "\tbsp.id AS projectId,\n" +
+                "\tbsp.project_code AS projectCode,\n" +
+                "\tbsp.project_name AS projectName,\n" +
+                "\tbsp.project_status AS projectStatus,\n" +
+                "\tbsp.company_id AS purchaseId,\n" +
+                "\tbsp.company_name AS purchaseName,\n" +
+                "\tbsp.create_time AS createTime,\n" +
+                "\tbsp.negotiation_node as node,\n" +
+                "\t62 as bidProjectType,\n" +
+                "\tbsp.bid_open_time AS bidOpenTime,\n" +
+                "\tbsp.bid_endtime AS quoteStopTime,\n" +
+                "\tbsp.sys_id AS sourceId,\n" +
+                "\tbsp.update_time AS updateTime,\n" +
+                "\tbp.province,\n" +
+                "\tbp.zone_str AS areaStr, \n" +
+                "\tbp.bid_type AS bidType, \n" +
+                "\tbp.industry_name AS industryStr \n" +
+                "FROM\n" +
+                "\tbid_sub_project bsp\n" +
+                "\tLEFT JOIN bid_project bp ON bsp.project_id = bp.id \n" +
+                "\tAND bsp.company_id = bp.company_id \n" +
+                "WHERE\n" +
+                "\tis_bid_open = 1 \n" +
+                "\tAND negotiation_node > 1 \n" +
+                "\tAND bsp.approve_status = 2\n" +
+                "\tAND bsp.project_type = 6\n" +
+                "\tAND bsp.update_time > ? and bsp.bid_endtime is not null\n" +
+                "\tLIMIT ?,? \n" +
+                "\t) project\n" +
+                "\tLEFT JOIN bid_project_item bpi ON project.projectId = bpi.sub_project_id";
+        doSyncProjectDataService(tenderDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList(((Object) lastSyncTime)), INSERT_OPERATION);
+    }
+
+    private void syncJGSingleSourceProjectDataService(Timestamp lastSyncTime) {
+        String countUpdatedSql = "SELECT\n"
+                + "   count(1)\n"
+                + "FROM\n"
+                + "   bid_sub_project\n"
+                + "WHERE\n"
+                + "   is_bid_open = 1 AND negotiation_node > 1 AND approve_status = 2 and project_type = 5 AND update_time > ?";
+        String queryUpdatedSql = "SELECT\n" +
+                "\tproject.*,\n" +
+                "\tbpi.id AS directoryId,\n" +
+                "\tbpi.`name` AS directoryName \n" +
+                "FROM\n" +
+                "\t(\n" +
+                "SELECT\n" +
+                "\tbsp.id AS projectId,\n" +
+                "\tbsp.project_code AS projectCode,\n" +
+                "\tbsp.project_name AS projectName,\n" +
+                "\tbsp.project_status AS projectStatus,\n" +
+                "\tbsp.company_id AS purchaseId,\n" +
+                "\tbsp.company_name AS purchaseName,\n" +
+                "\tbsp.create_time AS createTime,\n" +
+                "\tbsp.negotiation_node as node,\n" +
+                "\t52 as bidProjectType,\n" +
+                "\tbsp.bid_open_time AS bidOpenTime,\n" +
+                "\tbsp.bid_endtime AS quoteStopTime,\n" +
+                "\tbsp.sys_id AS sourceId,\n" +
+                "\tbsp.update_time AS updateTime,\n" +
+                "\tbp.province,\n" +
+                "\tbp.zone_str AS areaStr, \n" +
+                "\tbp.bid_type AS bidType, \n" +
+                "\tbp.industry_name AS industryStr \n" +
+                "FROM\n" +
+                "\tbid_sub_project bsp\n" +
+                "\tLEFT JOIN bid_project bp ON bsp.project_id = bp.id \n" +
+                "\tAND bsp.company_id = bp.company_id \n" +
+                "WHERE\n" +
+                "\tis_bid_open = 1 \n" +
+                "\tAND negotiation_node > 1 \n" +
+                "\tAND bsp.approve_status = 2\n" +
+                "\tAND bsp.project_type = 5\n" +
+                "\tAND bsp.update_time > ? and bsp.bid_endtime is not null\n" +
+                "\tLIMIT ?,? \n" +
+                "\t) project\n" +
+                "\tLEFT JOIN bid_project_item bpi ON project.projectId = bpi.sub_project_id";
+        doSyncProjectDataService(tenderDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList(((Object) lastSyncTime)), INSERT_OPERATION);
     }
 
     private void syncJGCompetitiveConsultationProjectDataService(Timestamp lastSyncTime) {
@@ -465,6 +562,8 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
         result.put(PROJECT_TYPE, BIDDING_PROJECT_TYPE);
         // 公开类型，默认为1
         result.put(OPEN_RANGE_TYPE, 1);
+        // 移除编码
+        result.remove(PROVINCE);
         //添加平台来源
         result.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE);
     }
@@ -490,8 +589,8 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
     }
 
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+    /*@Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }*/
 }

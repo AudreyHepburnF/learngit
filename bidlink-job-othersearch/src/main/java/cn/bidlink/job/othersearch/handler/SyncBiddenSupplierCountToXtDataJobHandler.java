@@ -4,8 +4,6 @@ import cn.bidlink.job.common.constant.BusinessConstant;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -15,7 +13,6 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +70,7 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
                 .must(QueryBuilders.termQuery(PROJECT_TYPE, PURCHASE_PROJECT_TYPE));  // 私有云采购项目
 
         Properties properties = elasticClient.getProperties();
-        SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.index"))
+        SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.supplier_opportunity_index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(queryBuilder)
                 .setScroll(new TimeValue(60000))
@@ -82,16 +79,16 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
                 .get();
         int i = 0;
         do {
-            SearchHit[] searchHits = scrollResp.getHits().hits();
+            SearchHit[] searchHits = scrollResp.getHits().getHits();
             // 采购项目
             List<Map<String, Object>> purchaseProjectSource = new ArrayList<>();
             Set<Pair> purchaseProjectPairs = new HashSet<>();
             for (SearchHit searchHit : searchHits) {
-                Integer projectType = (Integer) searchHit.getSource().get("projectType");
+                Integer projectType = (Integer) searchHit.getSourceAsMap().get("projectType");
                 if (projectType != null) {
-                    purchaseProjectSource.add(searchHit.getSource());
-                    Long projectId = Long.valueOf(String.valueOf(searchHit.getSource().get(PROJECT_ID)));
-                    Long companyId = Long.valueOf(String.valueOf(searchHit.getSource().get(PURCHASE_ID)));
+                    purchaseProjectSource.add(searchHit.getSourceAsMap());
+                    Long projectId = Long.valueOf(String.valueOf(searchHit.getSourceAsMap().get(PROJECT_ID)));
+                    Long companyId = Long.valueOf(String.valueOf(searchHit.getSourceAsMap().get(PURCHASE_ID)));
                     purchaseProjectPairs.add(new Pair(companyId, projectId));
                 }
 
@@ -175,19 +172,10 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> result : resultsToUpdate) {
                 bulkRequest.add(elasticClient.getTransportClient()
-                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
+                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.supplier_opportunity_index"),
                                 elasticClient.getProperties().getProperty("cluster.type.supplier_opportunity"),
                                 String.valueOf(result.get(ID)))
-                        .setSource(JSON.toJSONString(result, new ValueFilter() {
-                            @Override
-                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof Date) {
-                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                } else {
-                                    return propertyValue;
-                                }
-                            }
-                        })));
+                        .setSource(SyncTimeUtil.handlerDate(result)));
             }
 
             BulkResponse response = bulkRequest.execute().actionGet();

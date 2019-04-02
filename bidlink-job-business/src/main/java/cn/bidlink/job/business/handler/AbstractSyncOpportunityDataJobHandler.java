@@ -4,11 +4,8 @@ import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.RegionUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.ValueFilter;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -288,36 +285,19 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
             if (Objects.equals(operationType, INSERT_OPERATION)) {
                 for (Map<String, Object> result : resultsToUpdate) {
                     bulkRequest.add(elasticClient.getTransportClient()
-                            .prepareIndex(elasticClient.getProperties().getProperty("cluster.index"),
+                            .prepareUpdate(elasticClient.getProperties().getProperty("cluster.opportunity_index"),
                                     elasticClient.getProperties().getProperty("cluster.type.supplier_opportunity"),
                                     String.valueOf(result.get(ID)))
-                            .setSource(JSON.toJSONString(result, new ValueFilter() {
-                                @Override
-                                public Object process(Object object, String propertyName, Object propertyValue) {
-                                    if (propertyValue instanceof java.util.Date) {
-                                        return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                    } else {
-                                        return propertyValue;
-                                    }
-                                }
-                            })));
+                            .setDocAsUpsert(true)
+                            .setDoc(SyncTimeUtil.handlerDate(result)));
                 }
             } else if (Objects.equals(operationType, UPDATE_OPERATION)) {
                 for (Map<String, Object> result : resultsToUpdate) {
                     bulkRequest.add(elasticClient.getTransportClient()
-                            .prepareUpdate(elasticClient.getProperties().getProperty("cluster.index"),
+                            .prepareUpdate(elasticClient.getProperties().getProperty("cluster.opportunity_index"),
                                     elasticClient.getProperties().getProperty("cluster.type.supplier_opportunity"),
                                     String.valueOf(result.get(ID)))
-                            .setDoc(JSON.toJSONString(result, new ValueFilter() {
-                                @Override
-                                public Object process(Object object, String propertyName, Object propertyValue) {
-                                    if (propertyValue instanceof java.util.Date) {
-                                        return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                    } else {
-                                        return propertyValue;
-                                    }
-                                }
-                            })));
+                            .setDoc(SyncTimeUtil.handlerDate(result)));
                 }
             }
             BulkResponse response = bulkRequest.execute().actionGet();
@@ -327,5 +307,6 @@ public abstract class AbstractSyncOpportunityDataJobHandler extends JobHandler {
         }
 
     }
+
 }
 

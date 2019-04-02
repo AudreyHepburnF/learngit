@@ -1,53 +1,46 @@
-// 方式1：直接在head界面操作，yc_v1/supplier_product/_mapping POST
-// 方式2：curl -XPOST http://dcsearch.api.yuecai.com/yc_v1/supplier_product/_mapping -d'
+// 方式1：直接在head界面操作，supplier_product/supplier_product/_mapping PUT
 {
-  "supplier_product": {
-    "properties": {
-      "companyLogo": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "core": {
-        "type": "integer"
-      },
-      "createTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "directoryName": {
-        "type": "string",
-        "analyzer": "ik"
-      },
-      "directoryNameNotAnalyzed": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "id": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "supplierDirectoryRel": {
-        "type": "integer"
-      },
-      "supplierId": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "supplierName": {
-        "type": "string",
-        "analyzer": "ik"
-      },
-      "syncTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "updateTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-      },
-      "platformSource": {
-        "type": "integer"
-      }
+  "properties": {
+    "companyLogo": {
+      "type": "text"
+    },
+    "core": {
+      "type": "integer"
+    },
+    "createTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "directoryName": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "directoryNameNotAnalyzed": {
+      "type": "text"
+    },
+    "id": {
+      "type": "text"
+    },
+    "supplierDirectoryRel": {
+      "type": "integer"
+    },
+    "supplierId": {
+      "type": "text"
+    },
+    "supplierName": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "syncTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "updateTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "platformSource": {
+      "type": "integer"
     }
   }
 }

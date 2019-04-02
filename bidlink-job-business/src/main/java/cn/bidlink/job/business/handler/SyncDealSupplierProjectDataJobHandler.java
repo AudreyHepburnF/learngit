@@ -5,8 +5,6 @@ import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.ValueFilter;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -31,7 +29,7 @@ import java.util.Map;
 
 @Service
 @JobHander("syncDealSupplierProjectDataJobHandler")
-public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
+public class SyncDealSupplierProjectDataJobHandler extends JobHandler /*implements InitializingBean*/{
 
     private Logger logger = LoggerFactory.getLogger(SyncDealSupplierProjectDataJobHandler.class);
     @Autowired
@@ -49,16 +47,16 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
     @Qualifier("auctionDataSource")
     private DataSource auctionDataSource;
 
-    private String  ID                    = "id";
-    private String  COMPANY_ID            = "companyId";
-    private String  SUPPLIER_ID            = "supplierId";
-    private String  PROJECT_ID            = "projectId";
-    private String  DEAL_TOTAL_PRICE      = "dealTotalPrice";
+    private String  ID                      = "id";
+    private String  COMPANY_ID              = "companyId";
+    private String  SUPPLIER_ID             = "supplierId";
+    private String  PROJECT_ID              = "projectId";
+    private String  DEAL_TOTAL_PRICE        = "dealTotalPrice";
     private String  DOUBLE_DEAL_TOTAL_PRICE = "doubleDealTotalPrice";
-    private String  PROJECT_TYPE          = "projectType";
-    private Integer AUCTION_PROJECT_TYPE = 3;
-    private Integer PURCHASE_PROJECT_TYPE = 2;
-    private Integer BID_PROJECT_TYPE      = 1;
+    private String  PROJECT_TYPE            = "projectType";
+    private Integer AUCTION_PROJECT_TYPE    = 3;
+    private Integer PURCHASE_PROJECT_TYPE   = 2;
+    private Integer BID_PROJECT_TYPE        = 1;
 
 
     @Override
@@ -213,19 +211,10 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
             BulkRequestBuilder bulkRequestBuilder = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> projectInfo : mapList) {
                 bulkRequestBuilder.add(elasticClient.getTransportClient().prepareIndex(
-                        elasticClient.getProperties().getProperty("cluster.index"),
+                        elasticClient.getProperties().getProperty("cluster.deal_supplier_project"),
                         elasticClient.getProperties().getProperty("cluster.type.deal_supplier_project"),
                         String.valueOf(projectInfo.get(ID)))
-                        .setSource(JSON.toJSONString(projectInfo, new ValueFilter() {
-                            @Override
-                            public Object process(Object object, String propertyName, Object propertyValue) {
-                                if (propertyValue instanceof java.util.Date) {
-                                    return new DateTime(propertyValue).toString(SyncTimeUtil.DATE_TIME_PATTERN);
-                                } else {
-                                    return propertyValue;
-                                }
-                            }
-                        }))
+                        .setSource(SyncTimeUtil.handlerDate(projectInfo))
                 );
             }
             BulkResponse response = bulkRequestBuilder.execute().actionGet();
@@ -242,32 +231,36 @@ public class SyncDealSupplierProjectDataJobHandler extends JobHandler {
             map.put(SUPPLIER_ID, String.valueOf(map.get(SUPPLIER_ID)));
             map.put(PROJECT_ID, String.valueOf(map.get(PROJECT_ID)));
             BigDecimal bigDecimal = (BigDecimal) map.get(DEAL_TOTAL_PRICE);
-            map.put(DEAL_TOTAL_PRICE, bigDecimal == null ? "0" : bigDecimal.setScale(2,BigDecimal.ROUND_HALF_UP).toPlainString());
-            map.put(DOUBLE_DEAL_TOTAL_PRICE, bigDecimal == null ? 0 : bigDecimal.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue());
+            map.put(DEAL_TOTAL_PRICE, bigDecimal == null ? "0" : bigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP).toPlainString());
+            map.put(DOUBLE_DEAL_TOTAL_PRICE, bigDecimal == null ? 0 : bigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
             map.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
             map.put(PROJECT_TYPE, projectType);
             //添加平台来源
-            map.put(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.IXIETONG_SOURCE);
+            map.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE);
         }
     }
 
     private String generateSupplierProjectId(Map<String, Object> result) {
         Long supplierId = (Long) result.get(SUPPLIER_ID);
-        Long projectId = (Long)(result.get(PROJECT_ID));
+        Long projectId = (Long) (result.get(PROJECT_ID));
         if (supplierId == null) {
             throw new RuntimeException("供应商项目ID生成失败，原因：供应商ID为null!");
         }
-        if (projectId==null) {
+        if (projectId == null) {
             throw new RuntimeException("供应商项目ID生成失败，原因：projectId为null!");
         }
-        return DigestUtils.md5DigestAsHex((supplierId + "_" + projectId+"_"+BusinessConstant.IXIETONG_SOURCE).getBytes());
+        return DigestUtils.md5DigestAsHex((supplierId + "_" + projectId + "_" + BusinessConstant.IXIETONG_SOURCE).getBytes());
     }
 
-    private Timestamp getLastSyncTime(Integer projectType){
+    private Timestamp getLastSyncTime(Integer projectType) {
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-        queryBuilder.must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY,BusinessConstant.IXIETONG_SOURCE))
-                .must(QueryBuilders.termQuery(PROJECT_TYPE,projectType));
-        return ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.index", "cluster.type.deal_supplier_project", queryBuilder);
+        queryBuilder.must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.IXIETONG_SOURCE))
+                .must(QueryBuilders.termQuery(PROJECT_TYPE, projectType));
+        return ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.deal_supplier_project", "cluster.type.deal_supplier_project", queryBuilder);
     }
 
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+//        execute();
+//    }
 }

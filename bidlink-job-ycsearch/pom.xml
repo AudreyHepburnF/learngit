@@ -100,7 +100,7 @@
             <id>dev</id>
             <properties>
                 <pom.application.name>bidlink-job-ycsearch</pom.application.name>
-                <pom.xxl.job.admin.addresses>http://testxxl-dashboard:8080/xxl-job</pom.xxl.job.admin.addresses>
+                <pom.xxl.job.admin.addresses>http://127.0.0.1:8080/xxl-job</pom.xxl.job.admin.addresses>
                 <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
                 <pom.log.rootLogger>CONSOLE</pom.log.rootLogger>
                 <pom.log.level>debug</pom.log.level>
@@ -141,20 +141,30 @@
                     http://{0}.testspace.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}
                 </pom.supplier.enterpriseSpaceDetailFormat>
                 <!--es配置 -->
-                <pom.cluster.host>100.100.0.122:9300</pom.cluster.host>
+                <pom.cluster.host>100.100.0.122:9301</pom.cluster.host>
                 <pom.cluster.name>elasticsearch</pom.cluster.name>
-                <pom.cluster.index>longdaoyun_test</pom.cluster.index>
+                <pom.cluster.supplier_index>supplier</pom.cluster.supplier_index>
                 <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
+                <pom.cluster.recruit_index>recruit</pom.cluster.recruit_index>
                 <pom.cluster.type.recruit>recruit</pom.cluster.type.recruit>
+                <pom.cluster.supplier_opportunity_index>supplier_opportunity</pom.cluster.supplier_opportunity_index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
+                <pom.cluster.notice_index>notice</pom.cluster.notice_index>
                 <pom.cluster.type.notice>notice</pom.cluster.type.notice>
+                <pom.cluster.deal_supplier_project_index>deal_supplier_project</pom.cluster.deal_supplier_project_index>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
                 <!--项目直通车-->
                 <pom.cluster.express_index>longdaoyun_express</pom.cluster.express_index>
+                <pom.cluster.project_express_index>project_express</pom.cluster.project_express_index>
                 <pom.cluster.type.project_express>project_express</pom.cluster.type.project_express>
+                <pom.cluster.supplier_express_index>supplier_express</pom.cluster.supplier_express_index>
                 <pom.cluster.type.supplier_express>supplier_express</pom.cluster.type.supplier_express>
+                <pom.cluster.project_express_traffic_statistic_index>project_express_traffic_statistic
+                </pom.cluster.project_express_traffic_statistic_index>
                 <pom.cluster.type.project_express_traffic_statistic>project_express_traffic_statistic
                 </pom.cluster.type.project_express_traffic_statistic>
+                <pom.cluster.project_express_supplier_recommend_record_index>project_express_supplier_recommend_record
+                </pom.cluster.project_express_supplier_recommend_record_index>
                 <pom.cluster.type.project_express_supplier_recommend_record>project_express_supplier_recommend_record
                 </pom.cluster.type.project_express_supplier_recommend_record>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
@@ -209,21 +219,30 @@
                     http://{0}.testspace.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}
                 </pom.supplier.enterpriseSpaceDetailFormat>
                 <!--es配置 -->
-                <pom.cluster.host>100.100.0.122:9300</pom.cluster.host>
+                <pom.cluster.host>100.100.0.122:9301</pom.cluster.host>
                 <pom.cluster.name>elasticsearch</pom.cluster.name>
-                <pom.cluster.index>longdaoyun_test</pom.cluster.index>
+                <pom.cluster.supplier_index>supplier</pom.cluster.supplier_index>
                 <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
+                <pom.cluster.recruit_index>recruit</pom.cluster.recruit_index>
                 <pom.cluster.type.recruit>recruit</pom.cluster.type.recruit>
+                <pom.cluster.supplier_opportunity_index>supplier_opportunity</pom.cluster.supplier_opportunity_index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
+                <pom.cluster.notice_index>notice</pom.cluster.notice_index>
                 <pom.cluster.type.notice>notice</pom.cluster.type.notice>
+                <pom.cluster.deal_supplier_project_index>deal_supplier_project</pom.cluster.deal_supplier_project_index>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
-
                 <!--项目直通车-->
                 <pom.cluster.express_index>longdaoyun_express</pom.cluster.express_index>
+                <pom.cluster.project_express_index>project_express</pom.cluster.project_express_index>
                 <pom.cluster.type.project_express>project_express</pom.cluster.type.project_express>
+                <pom.cluster.supplier_express_index>supplier_express</pom.cluster.supplier_express_index>
                 <pom.cluster.type.supplier_express>supplier_express</pom.cluster.type.supplier_express>
+                <pom.cluster.project_express_traffic_statistic_index>project_express_traffic_statistic
+                </pom.cluster.project_express_traffic_statistic_index>
                 <pom.cluster.type.project_express_traffic_statistic>project_express_traffic_statistic
                 </pom.cluster.type.project_express_traffic_statistic>
+                <pom.cluster.project_express_supplier_recommend_record_index>project_express_supplier_recommend_record
+                </pom.cluster.project_express_supplier_recommend_record_index>
                 <pom.cluster.type.project_express_supplier_recommend_record>project_express_supplier_recommend_record
                 </pom.cluster.type.project_express_supplier_recommend_record>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
@@ -278,22 +297,31 @@
                     http://{0}.space.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}
                 </pom.supplier.enterpriseSpaceDetailFormat>
                 <!--es配置 TODO 待修改es地址-->
-                <pom.cluster.host>
-                    es-cloud-01.internal.cg-xt.com:9300,es-cloud-02.internal.cg-xt.com:9300,es-cloud-03.internal.cg-xt.com:9300
-                </pom.cluster.host>
-                <pom.cluster.name>dc</pom.cluster.name>
-                <pom.cluster.index>ixietong_opportunity</pom.cluster.index>
+                <pom.cluster.host>172.16.1.51:9301,172.16.1.51:9302,172.16.1.51:9303</pom.cluster.host>
+                <!--es配置 -->
+                <pom.cluster.name>es-cloud</pom.cluster.name>
+                <pom.cluster.supplier_index>supplier</pom.cluster.supplier_index>
                 <pom.cluster.type.supplier>supplier</pom.cluster.type.supplier>
+                <pom.cluster.recruit_index>recruit</pom.cluster.recruit_index>
                 <pom.cluster.type.recruit>recruit</pom.cluster.type.recruit>
+                <pom.cluster.supplier_opportunity_index>supplier_opportunity</pom.cluster.supplier_opportunity_index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
+                <pom.cluster.notice_index>notice</pom.cluster.notice_index>
                 <pom.cluster.type.notice>notice</pom.cluster.type.notice>
+                <pom.cluster.deal_supplier_project_index>deal_supplier_project</pom.cluster.deal_supplier_project_index>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
                 <!--项目直通车-->
                 <pom.cluster.express_index>longdaoyun_express</pom.cluster.express_index>
+                <pom.cluster.project_express_index>project_express</pom.cluster.project_express_index>
                 <pom.cluster.type.project_express>project_express</pom.cluster.type.project_express>
+                <pom.cluster.supplier_express_index>supplier_express</pom.cluster.supplier_express_index>
                 <pom.cluster.type.supplier_express>supplier_express</pom.cluster.type.supplier_express>
+                <pom.cluster.project_express_traffic_statistic_index>project_express_traffic_statistic
+                </pom.cluster.project_express_traffic_statistic_index>
                 <pom.cluster.type.project_express_traffic_statistic>project_express_traffic_statistic
                 </pom.cluster.type.project_express_traffic_statistic>
+                <pom.cluster.project_express_supplier_recommend_record_index>project_express_supplier_recommend_record
+                </pom.cluster.project_express_supplier_recommend_record_index>
                 <pom.cluster.type.project_express_supplier_recommend_record>project_express_supplier_recommend_record
                 </pom.cluster.type.project_express_supplier_recommend_record>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
