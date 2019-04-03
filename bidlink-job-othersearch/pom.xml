@@ -184,9 +184,9 @@
                 <pom.center.db.username>dashuju</pom.center.db.username>
                 <pom.center.db.password>ixietong!@#$</pom.center.db.password>
                 <!--es配置-->
-                <pom.cluster.host>192.168.4.88:9300,192.168.4.60:9300</pom.cluster.host>
-                <pom.cluster.name>dc</pom.cluster.name>
-                <pom.cluster.index>ixietong_opportunity</pom.cluster.index>
+                <pom.cluster.host>172.16.1.51:9301,172.16.1.51:9302,172.16.1.51:9303</pom.cluster.host>
+                <pom.cluster.name>elasticsearch</pom.cluster.name>
+                <pom.cluster.supplier_opportunity_index>supplier_opportunity</pom.cluster.supplier_opportunity_index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>

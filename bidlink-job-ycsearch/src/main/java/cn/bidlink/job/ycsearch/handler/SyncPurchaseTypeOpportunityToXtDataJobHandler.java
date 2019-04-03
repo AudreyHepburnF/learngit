@@ -249,6 +249,9 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
         int bidStopType = (int) result.get(BID_STOP_TYPE);
         Timestamp bidStopTime = (Timestamp) result.get(BID_STOP_TIME);
         Timestamp bidTrueStopTime = (Timestamp) result.get(BID_TRUE_STOP_TIME);
+        String projectName = String.valueOf(result.get("projectName").toString());
+        logger.info("1.开始判断悦采采购项目商机projectName:{},bidStopType:{}, bidStopTime:{}, bidTrueStopTime:{}, currentDate:{}, projectStatus:{}", projectName, bidStopType, SyncTimeUtil.toDateString(bidStopTime),
+                bidTrueStopTime == null ? null : SyncTimeUtil.toDateString(bidTrueStopTime), SyncTimeUtil.toDateString(currentDate), projectStatus);
         if (bidStopType == AUTO_STOP_TYPE) {
             // 判断时间未过期就是商机
             if (bidStopTime != null && bidStopTime.after(currentDate) && projectStatus == OPEN_BID) {
@@ -260,7 +263,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
             }
         } else if (bidStopType == MANUAL_STOP_TYPE) {
             // 未截标就是商机
-            if ((bidTrueStopTime == null || bidTrueStopTime.after(new Date()) || Objects.equals(bidTrueStopTime, bidStopTime)) && projectStatus == OPEN_BID) {
+            if ((bidTrueStopTime == null || bidTrueStopTime.after(currentDate) || Objects.equals(bidTrueStopTime, bidStopTime)) && projectStatus == OPEN_BID) {
                 result.put(STATUS, VALID_OPPORTUNITY_STATUS);
                 resultToExecute.add(appendIdToResult(result));
             } else {
@@ -270,6 +273,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
         } else {
             // no-op
         }
+        logger.info("2.结束商机判断,projectName:{},status:{}", projectName, result.get(STATUS));
     }
 
 
@@ -296,8 +300,8 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
     }
 
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        execute();
-//    }
+    /*@Override
+    public void afterPropertiesSet() throws Exception {
+        execute();
+    }*/
 }
