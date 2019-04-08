@@ -67,15 +67,17 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
     private void syncBiddenSupplierCountData() {
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
                 .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.SIYOUYUN_SOURCE))
+                .must(QueryBuilders.termQuery("status", 1))
                 .must(QueryBuilders.termQuery(PROJECT_TYPE, PURCHASE_PROJECT_TYPE));  // 私有云采购项目
 
         Properties properties = elasticClient.getProperties();
+        int batchInsert = 100;
         SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.supplier_opportunity_index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(queryBuilder)
                 .setScroll(new TimeValue(60000))
                 .setFetchSource(new String[]{PROJECT_ID, PURCHASE_ID,PROJECT_TYPE}, null)
-                .setSize(pageSize)
+                .setSize(batchInsert)
                 .get();
         int i = 0;
         do {
