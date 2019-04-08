@@ -76,7 +76,7 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(queryBuilder)
                 .setScroll(new TimeValue(60000))
-                .setFetchSource(new String[]{PROJECT_ID, PURCHASE_ID,PROJECT_TYPE}, null)
+                .setFetchSource(new String[]{ID,PROJECT_ID, PURCHASE_ID,PROJECT_TYPE}, null)
                 .setSize(batchInsert)
                 .get();
         int i = 0;
