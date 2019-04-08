@@ -138,6 +138,7 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
      * @param sources
      */
     private void syncData(DataSource dataSource, List<Map<String, Object>> sources, String querySql) {
+        logger.info("查询对应项目的已报价供应商统计的sql={}",querySql);
         Map<Pair, Integer> biddenSupplierCountMap = DBUtil.query(dataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Pair, Integer>>() {
             @Override
             public Map<Pair, Integer> execute(ResultSet resultSet) throws SQLException {
