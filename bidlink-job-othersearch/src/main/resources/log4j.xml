@@ -24,7 +24,7 @@
         <level value="${pom.log.level}"/>
         <appender-ref ref="${pom.log.rootLogger}"/>
     </logger>
-    <logger name="cn.bidlink.job.business" additivity="false">
+    <logger name="cn.bidlink.job.othersearch" additivity="false">
         <level value="${pom.log.level}"/>
         <appender-ref ref="${pom.log.rootLogger}"/>
     </logger>
