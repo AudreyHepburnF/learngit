@@ -174,10 +174,10 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
             BulkRequestBuilder bulkRequest = elasticClient.getTransportClient().prepareBulk();
             for (Map<String, Object> result : resultsToUpdate) {
                 bulkRequest.add(elasticClient.getTransportClient()
-                        .prepareIndex(elasticClient.getProperties().getProperty("cluster.supplier_opportunity_index"),
+                        .prepareUpdate(elasticClient.getProperties().getProperty("cluster.supplier_opportunity_index"),
                                 elasticClient.getProperties().getProperty("cluster.type.supplier_opportunity"),
                                 String.valueOf(result.get(ID)))
-                        .setSource(SyncTimeUtil.handlerDate(result)));
+                        .setDoc(SyncTimeUtil.handlerDate(result)));
             }
 
             BulkResponse response = bulkRequest.execute().actionGet();
