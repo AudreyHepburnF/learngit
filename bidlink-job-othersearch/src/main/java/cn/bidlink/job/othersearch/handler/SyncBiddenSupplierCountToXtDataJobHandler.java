@@ -93,15 +93,14 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
                     Long companyId = Long.valueOf(String.valueOf(searchHit.getSourceAsMap().get(PURCHASE_ID)));
                     purchaseProjectPairs.add(new Pair(companyId, projectId));
                 }
-
-                if (purchaseProjectPairs.size() > 0) {
-                    syncData(siyouyunDataSource, purchaseProjectSource, getPurchaseProjectCountSql(purchaseProjectPairs));
-                }
-
-                scrollResp = elasticClient.getTransportClient().prepareSearchScroll(scrollResp.getScrollId())
-                        .setScroll(new TimeValue(60000))
-                        .execute().actionGet();
             }
+            if (purchaseProjectPairs.size() > 0) {
+                syncData(siyouyunDataSource, purchaseProjectSource, getPurchaseProjectCountSql(purchaseProjectPairs));
+            }
+
+            scrollResp = elasticClient.getTransportClient().prepareSearchScroll(scrollResp.getScrollId())
+                    .setScroll(new TimeValue(60000))
+                    .execute().actionGet();
         } while (scrollResp.getHits().getHits().length != 0);
     }
 
@@ -138,7 +137,7 @@ public class SyncBiddenSupplierCountToXtDataJobHandler extends JobHandler /*impl
      * @param sources
      */
     private void syncData(DataSource dataSource, List<Map<String, Object>> sources, String querySql) {
-        logger.info("查询对应项目的已报价供应商统计的sql={}",querySql);
+//        logger.info("查询对应项目的已报价供应商统计的sql={}",querySql);
         Map<Pair, Integer> biddenSupplierCountMap = DBUtil.query(dataSource, querySql, null, new DBUtil.ResultSetCallback<Map<Pair, Integer>>() {
             @Override
             public Map<Pair, Integer> execute(ResultSet resultSet) throws SQLException {
