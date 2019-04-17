@@ -120,7 +120,7 @@
                 <!--私有云数据源 -->
                 <pom.siyouyun.db.url>jdbc:mysql://10.0.0.242:3306/junzheng?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.siyouyun.db.url>
                 <pom.siyouyun.db.username>tianyuan</pom.siyouyun.db.username>
-                <pom.siyouyun.db.password> s7GaCUG5</pom.siyouyun.db.password>
+                <pom.siyouyun.db.password>s7GaCUG5</pom.siyouyun.db.password>
                 <!--中心库数据源-->
                 <pom.center.db.url>jdbc:mysql://10.0.0.84:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.center.db.url>
                 <pom.center.db.username>dashuju</pom.center.db.username>
@@ -148,7 +148,7 @@
                 <!--私有云数据源 -->
                 <pom.siyouyun.db.url>jdbc:mysql://10.0.0.242:3306/junzheng?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.siyouyun.db.url>
                 <pom.siyouyun.db.username>tianyuan</pom.siyouyun.db.username>
-                <pom.siyouyun.db.password> s7GaCUG5</pom.siyouyun.db.password>
+                <pom.siyouyun.db.password>s7GaCUG5</pom.siyouyun.db.password>
                 <!--中心库数据源-->
                 <pom.center.db.url>jdbc:mysql://192.168.1.213:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.center.db.url>
                 <pom.center.db.username>dashuju</pom.center.db.username>
@@ -178,14 +178,14 @@
                 <!--私有云数据源 -->
                 <pom.siyouyun.db.url>jdbc:mysql://10.0.0.242:3306/junzheng?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.siyouyun.db.url>
                 <pom.siyouyun.db.username>tianyuan</pom.siyouyun.db.username>
-                <pom.siyouyun.db.password> s7GaCUG5</pom.siyouyun.db.password>
+                <pom.siyouyun.db.password>s7GaCUG5</pom.siyouyun.db.password>
                 <!--中心库数据源-->
                 <pom.center.db.url>jdbc:mysql://192.168.1.213:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.center.db.url>
                 <pom.center.db.username>dashuju</pom.center.db.username>
                 <pom.center.db.password>ixietong!@#$</pom.center.db.password>
                 <!--es配置-->
                 <pom.cluster.host>172.16.1.51:9301,172.16.1.51:9302,172.16.1.51:9303</pom.cluster.host>
-                <pom.cluster.name>elasticsearch</pom.cluster.name>
+                <pom.cluster.name>es-cloud</pom.cluster.name>
                 <pom.cluster.supplier_opportunity_index>supplier_opportunity</pom.cluster.supplier_opportunity_index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
