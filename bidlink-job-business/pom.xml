@@ -311,7 +311,7 @@
                 <pom.supplier.enterpriseSpaceFormat>http://{0}.space2.bidlink.cn/company-space/</pom.supplier.enterpriseSpaceFormat>
                 <!--供应商诚信等级空间-->
                 <pom.supplier.enterpriseSpaceDetailFormat>http://{0}.demospace.yuecai.com/display/home/findEnterpriseSpaceDetailedInformation.htm?loginName={1}</pom.supplier.enterpriseSpaceDetailFormat>
-                <pom.cluster.host>10.0.1.77:9301</pom.cluster.host>
+                <pom.cluster.host>10.0.1.77:9300</pom.cluster.host>
                 <pom.cluster.name>elasticsearch</pom.cluster.name>
                 <pom.cluster.opportunity_index>supplier_opportunity</pom.cluster.opportunity_index>
                 <pom.cluster.type.supplier_opportunity>supplier_opportunity</pom.cluster.type.supplier_opportunity>
