@@ -95,8 +95,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\tON r.ID = rf.RECRUIT_ID \n" +
                 "WHERE\n" +
                 "\tr.DEL_FLAG = 1 and r.create_time > ?\n" +
-                "GROUP BY\n" +
-                "\tr.ID limit ?,?";
+                "\t limit ?,?";
         doSncRecruitDataService(recruitDataSource, insertCountSql, insertQuerySql, Collections.singletonList(lastSyncTime));
 
         String updateCountSql = "SELECT\n" +
@@ -131,8 +130,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\tON r.ID = rf.RECRUIT_ID \n" +
                 "WHERE\n" +
                 "\tr.DEL_FLAG = 1 and r.update_time > ?\n" +
-                "GROUP BY\n" +
-                "\tr.ID limit ?,?";
+                "\t limit ?,?";
         doSncRecruitDataService(recruitDataSource, updateCountSql, updateQuerySql, Collections.singletonList(lastSyncTime));
     }
 
