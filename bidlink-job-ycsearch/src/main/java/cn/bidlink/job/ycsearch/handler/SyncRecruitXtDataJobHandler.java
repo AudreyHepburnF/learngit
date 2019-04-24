@@ -87,12 +87,10 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\tr.endless,\n" +
                 "\tr.CREATE_TIME AS createTime,\n" +
                 "\tr.UPDATE_TIME AS updateTime,\n" +
-                "\trf.FILE_NAME AS fileName,\n" +
-                "\trf.FILE_PATH AS md5 \n" +
+                "\t(select FILE_NAME from recruit_files rf where rf.RECRUIT_ID=r.id ORDER BY rf.create_time DESC LIMIT 0,1) AS fileName,\n" +
+                "\t(select FILE_PATH from recruit_files rf where rf.RECRUIT_ID=r.id ORDER BY rf.create_time DESC LIMIT 0,1) AS md5 \n" +
                 "FROM\n" +
                 "\t`recruit` r\n" +
-                "\tLEFT JOIN (select * from (SELECT FILE_NAME,FILE_PATH,RECRUIT_ID,row_number() over (PARTITION BY RECRUIT_ID ORDER BY create_time DESC) AS rownum FROM `recruit_files`) t WHERE t.rownum = 1) rf \n" +
-                "\tON r.ID = rf.RECRUIT_ID \n" +
                 "WHERE\n" +
                 "\tr.DEL_FLAG = 1 and r.create_time > ?\n" +
                 "\t limit ?,?";
@@ -122,12 +120,10 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\tr.endless,\n" +
                 "\tr.CREATE_TIME AS createTime,\n" +
                 "\tr.UPDATE_TIME AS updateTime,\n" +
-                "\trf.FILE_NAME AS fileName,\n" +
-                "\trf.FILE_PATH AS md5 \n" +
+                "\t(select FILE_NAME from recruit_files rf where rf.RECRUIT_ID=r.id ORDER BY rf.create_time DESC LIMIT 0,1) AS fileName,\n" +
+                "\t(select FILE_PATH from recruit_files rf where rf.RECRUIT_ID=r.id ORDER BY rf.create_time DESC LIMIT 0,1) AS md5 \n" +
                 "FROM\n" +
                 "\t`recruit` r\n" +
-                "\tLEFT JOIN (select * from (SELECT FILE_NAME,FILE_PATH,RECRUIT_ID,row_number() over (PARTITION BY RECRUIT_ID ORDER BY create_time DESC) AS rownum FROM `recruit_files`) t WHERE t.rownum = 1) rf \n" +
-                "\tON r.ID = rf.RECRUIT_ID \n" +
                 "WHERE\n" +
                 "\tr.DEL_FLAG = 1 and r.update_time > ?\n" +
                 "\t limit ?,?";
