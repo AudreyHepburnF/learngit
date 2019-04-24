@@ -91,7 +91,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\trf.FILE_PATH AS md5 \n" +
                 "FROM\n" +
                 "\t`recruit` r\n" +
-                "\tLEFT JOIN (select * from (SELECT FILE_NAME,FILE_PATH,RECRUIT_ID,row_number() over (PARTITION BY RECRUIT_ID ORDER BY create_time DESC) AS rownum FROM recruit_files) t WHERE t.rownum = 1) rf \n" +
+                "\tLEFT JOIN (select * from (SELECT FILE_NAME,FILE_PATH,RECRUIT_ID,row_number() over (PARTITION BY RECRUIT_ID ORDER BY create_time DESC) AS rownum FROM `recruit_files`) t WHERE t.rownum = 1) rf \n" +
                 "\tON r.ID = rf.RECRUIT_ID \n" +
                 "WHERE\n" +
                 "\tr.DEL_FLAG = 1 and r.create_time > ?\n" +
@@ -126,7 +126,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\trf.FILE_PATH AS md5 \n" +
                 "FROM\n" +
                 "\t`recruit` r\n" +
-                "\tLEFT JOIN (select * from (SELECT FILE_NAME,FILE_PATH,RECRUIT_ID,row_number() over (PARTITION BY RECRUIT_ID ORDER BY create_time DESC) AS rownum FROM recruit_files) t WHERE t.rownum = 1) rf \n" +
+                "\tLEFT JOIN (select * from (SELECT FILE_NAME,FILE_PATH,RECRUIT_ID,row_number() over (PARTITION BY RECRUIT_ID ORDER BY create_time DESC) AS rownum FROM `recruit_files`) t WHERE t.rownum = 1) rf \n" +
                 "\tON r.ID = rf.RECRUIT_ID \n" +
                 "WHERE\n" +
                 "\tr.DEL_FLAG = 1 and r.update_time > ?\n" +
