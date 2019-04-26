@@ -83,7 +83,7 @@ public class SyncNoticeToXtDataJobHandler extends AbstractSyncYcNoticeDataJobHan
     private void syncYcPurchaseNoticeService(Timestamp lastSyncTime) {
         logger.info("1.开始同步悦采采购公告数据");
         String countSql = "SELECT\n" +
-                "\ts.count( 1 ) \n" +
+                "\tcount( 1 ) \n" +
                 "FROM\n" +
                 "\t`sync_bulletin` s \n" +
                 "LEFT JOIN bmpfjz_project_ext e ON s.originprojectid = e.id\n" +
