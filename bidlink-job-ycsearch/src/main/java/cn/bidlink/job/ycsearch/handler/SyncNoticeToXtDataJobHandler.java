@@ -90,7 +90,7 @@ public class SyncNoticeToXtDataJobHandler extends AbstractSyncYcNoticeDataJobHan
                 "WHERE\n" +
                 "\ts.openrangetype = 1\n " +
                 "AND s.purchasemodel =8 \n" +
-                "AND (s.infotype <> '2903' OR (s.infotype='2903' and e.purchase_result_show_type=1)) \n" +
+                "AND ((s.infotype <> '2903' and e.bid_result_show_type=1) OR (s.infotype='2903' and e.purchase_result_show_type=1)) \n" +
                 "AND s.update_time > ?";
         String querySql = "SELECT\n" +
                 "\ts.id,\n" +
@@ -121,7 +121,7 @@ public class SyncNoticeToXtDataJobHandler extends AbstractSyncYcNoticeDataJobHan
                 "WHERE\n" +
                 "\ts.openrangetype = 1\n" +
                 "AND s.purchasemodel = 8\n" +
-                "AND (s.infotype <> '2903' OR (s.infotype='2903' and e.purchase_result_show_type=1)) \n" +
+                "AND ((s.infotype <> '2903' and e.bid_result_show_type=1) OR (s.infotype='2903' and e.purchase_result_show_type=1)) \n" +
                 "AND s.update_time > ?\n" +
                 "LIMIT ?,?";
         doSyncNoticeService(ycDataSource, countSql, querySql, Collections.singletonList(lastSyncTime));
