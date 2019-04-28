@@ -362,7 +362,7 @@
                 <pom.auction.db.url>jdbc:mariadb://web-mariadb.internal.cg-xt.com:3311/auction?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.auction.db.url>
                 <pom.auction.db.username>auction</pom.auction.db.username>
                 <pom.auction.db.password>auction!@#$4321</pom.auction.db.password>
-                <!--协同平台拍卖数据源 TODO 待修改-->
+                <!--协同平台拍卖数据源-->
                 <pom.vendue.db.url>jdbc:mariadb://tender-mariadb.internal.cg-xt.com:3307/vendue?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.vendue.db.url>
                 <pom.vendue.db.username>vendue</pom.vendue.db.username>
                 <pom.vendue.db.password>vendue!@#$4321</pom.vendue.db.password>

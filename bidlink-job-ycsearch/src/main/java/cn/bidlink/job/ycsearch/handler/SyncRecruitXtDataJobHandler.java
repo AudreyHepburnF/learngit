@@ -87,15 +87,13 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\tr.endless,\n" +
                 "\tr.CREATE_TIME AS createTime,\n" +
                 "\tr.UPDATE_TIME AS updateTime,\n" +
-                "\trf.FILE_NAME AS fileName,\n" +
-                "\trf.FILE_PATH AS md5 \n" +
+                "\t(select FILE_NAME from recruit_files rf where rf.RECRUIT_ID=r.id ORDER BY rf.create_time DESC LIMIT 0,1) AS fileName,\n" +
+                "\t(select FILE_PATH from recruit_files rf where rf.RECRUIT_ID=r.id ORDER BY rf.create_time DESC LIMIT 0,1) AS md5 \n" +
                 "FROM\n" +
                 "\t`recruit` r\n" +
-                "\tLEFT JOIN recruit_files rf ON r.ID = rf.RECRUIT_ID \n" +
                 "WHERE\n" +
                 "\tr.DEL_FLAG = 1 and r.create_time > ?\n" +
-                "GROUP BY\n" +
-                "\tr.ID limit ?,?";
+                "\t limit ?,?";
         doSncRecruitDataService(recruitDataSource, insertCountSql, insertQuerySql, Collections.singletonList(lastSyncTime));
 
         String updateCountSql = "SELECT\n" +
@@ -122,15 +120,13 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\tr.endless,\n" +
                 "\tr.CREATE_TIME AS createTime,\n" +
                 "\tr.UPDATE_TIME AS updateTime,\n" +
-                "\trf.FILE_NAME AS fileName,\n" +
-                "\trf.FILE_PATH AS md5 \n" +
+                "\t(select FILE_NAME from recruit_files rf where rf.RECRUIT_ID=r.id ORDER BY rf.create_time DESC LIMIT 0,1) AS fileName,\n" +
+                "\t(select FILE_PATH from recruit_files rf where rf.RECRUIT_ID=r.id ORDER BY rf.create_time DESC LIMIT 0,1) AS md5 \n" +
                 "FROM\n" +
                 "\t`recruit` r\n" +
-                "\tLEFT JOIN recruit_files rf ON r.ID = rf.RECRUIT_ID \n" +
                 "WHERE\n" +
                 "\tr.DEL_FLAG = 1 and r.update_time > ?\n" +
-                "GROUP BY\n" +
-                "\tr.ID limit ?,?";
+                "\t limit ?,?";
         doSncRecruitDataService(recruitDataSource, updateCountSql, updateQuerySql, Collections.singletonList(lastSyncTime));
     }
 
