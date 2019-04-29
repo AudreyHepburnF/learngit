@@ -117,6 +117,7 @@
 				<configuration>
 					<descriptor>${project.basedir}/src/main/assembly/assembly.xml</descriptor>
 					<encoding>UTF-8</encoding>
+					<appendAssemblyId>false</appendAssemblyId>
 				</configuration>
 				<executions>
 					<execution>
