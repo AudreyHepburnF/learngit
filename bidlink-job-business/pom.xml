@@ -101,7 +101,7 @@
             </activation>
             <properties>
                 <pom.application.name>xxl-jobnode</pom.application.name>
-                <pom.xxl.job.admin.addresses>http://127.0.0.1:8080/xxl-job</pom.xxl.job.admin.addresses>
+                <pom.xxl.job.admin.addresses>http://100.100.0.132:8080/xxl-job</pom.xxl.job.admin.addresses>
                 <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
                 <pom.log.rootLogger>CONSOLE</pom.log.rootLogger>
                 <pom.log.level>debug</pom.log.level>
@@ -300,7 +300,7 @@
                 <pom.pro.db.username>dashuju</pom.pro.db.username>
                 <pom.pro.db.password>ixietong!@#$</pom.pro.db.password>
                 <!--悦采数据源-->
-                <pom.yuecai.db.url>jdbc:mariadb://10.0.2.47:3305/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yuecai.db.url>
+                <pom.yuecai.db.url>jdbc:mariadb://192.168.2.219:3305/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yuecai.db.url>
                 <pom.yuecai.db.username>develop</pom.yuecai.db.username>
                 <pom.yuecai.db.password>123123</pom.yuecai.db.password>
                 <!--crm数据源 TODO 没有dev和test环境-->
