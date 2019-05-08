@@ -87,6 +87,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\tr.endless,\n" +
                 "\tr.CREATE_TIME AS createTime,\n" +
                 "\tr.UPDATE_TIME AS updateTime,\n" +
+                "\tr.IF_APPROVE AS ifApprove,\n" +
                 "\t(select FILE_NAME from recruit_files rf where rf.RECRUIT_ID=r.id ORDER BY rf.create_time DESC LIMIT 0,1) AS fileName,\n" +
                 "\t(select FILE_PATH from recruit_files rf where rf.RECRUIT_ID=r.id ORDER BY rf.create_time DESC LIMIT 0,1) AS md5 \n" +
                 "FROM\n" +
@@ -120,6 +121,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\tr.endless,\n" +
                 "\tr.CREATE_TIME AS createTime,\n" +
                 "\tr.UPDATE_TIME AS updateTime,\n" +
+                "\tr.IF_APPROVE AS ifApprove,\n" +
                 "\t(select FILE_NAME from recruit_files rf where rf.RECRUIT_ID=r.id ORDER BY rf.create_time DESC LIMIT 0,1) AS fileName,\n" +
                 "\t(select FILE_PATH from recruit_files rf where rf.RECRUIT_ID=r.id ORDER BY rf.create_time DESC LIMIT 0,1) AS md5 \n" +
                 "FROM\n" +

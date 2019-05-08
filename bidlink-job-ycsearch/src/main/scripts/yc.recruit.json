@@ -57,6 +57,9 @@
     },
     "qualificationName": {
       "type": "keyword"
+    },
+    "ifApprove":{
+      "type":"integer"
     }
   }
 }
