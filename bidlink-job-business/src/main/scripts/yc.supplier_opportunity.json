@@ -134,6 +134,9 @@
     },
     "endless": {
       "type": "integer"
+    },
+    "ifApprove":{
+      "type":"integer"
     }
   }
 }
