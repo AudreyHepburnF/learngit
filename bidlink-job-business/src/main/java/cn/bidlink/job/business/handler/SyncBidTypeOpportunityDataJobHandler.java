@@ -155,9 +155,10 @@ public class SyncBidTypeOpportunityDataJobHandler extends AbstractSyncOpportunit
         // 采购商版本
         syncCGBiddingProjectDataService(lastSyncTime);
         // 机构版招标项目
-        // 1.公开无资格预审
+        // 1.不要资格预审
         syncJGBiddingOpenNoPrequalificationProjectDataService(lastSyncTime);
-        // 2.公开有资格预审,只同步资格预审的项目
+        // 机构版招标项目
+        // 1.需要资格预审
         syncJGBiddingOpenPrequalificationProjectDataService(lastSyncTime);
         // 3.邀请招标
         syncJGBiddingInviteProjectDataService(lastSyncTime);

@@ -1,3 +1,4 @@
+//不用了
 // 方式1：创建索引http://localhost:9200/yc_test/  POST
 // 方式2：curl -XPOST 'http://localhost:9200/yc_test/' -d
 {

@@ -1,5 +1,4 @@
-// 方式1：直接在head界面操作，yc_v1/supplier/_mapping POST
-// 方式2：curl -XPOST http://dcsearch.api.yuecai.com/yc_v1/supplier/_mapping -d'
+// 方式1：直接在head界面操作，supplier_express/supplier_express/_mapping POST
 {
   "supplier_express": {
     "properties": {

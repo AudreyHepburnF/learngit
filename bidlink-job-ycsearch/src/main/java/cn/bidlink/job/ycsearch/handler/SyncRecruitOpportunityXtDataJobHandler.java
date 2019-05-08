@@ -162,6 +162,7 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
                 "\tstatus,\n" +
                 "\tendless,\n" +
                 "\tDEL_FLAG AS isShow,\n" +
+                "\tIF_APPROVE AS ifApprove,\n" +
                 "\tCREATE_TIME AS createTime,\n" +
                 "\tUPDATE_TIME AS updateTime \n" +
                 "FROM\n" +

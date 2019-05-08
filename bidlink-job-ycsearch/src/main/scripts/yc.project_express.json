@@ -1,5 +1,4 @@
-// 方式1：直接在head界面操作，yc_test/purchase/_mapping POST
-// 方式2：curl -XPOST http://dcsearch.api.yuecai.com/yc_test/purchase/_mapping -d'
+// 方式1：直接在head界面操作，project_express/project_express/_mapping POST
 {
   "project_express": {
     "properties": {
