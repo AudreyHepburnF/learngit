@@ -16,16 +16,16 @@
       "analyzer": "ik_max_word"
     },
     "directoryNameNotAnalyzed": {
-      "type": "text"
+      "type": "keyword"
     },
     "id": {
-      "type": "text"
+      "type": "keyword"
     },
     "supplierDirectoryRel": {
       "type": "integer"
     },
     "supplierId": {
-      "type": "text"
+      "type": "keyword"
     },
     "supplierName": {
       "type": "text",
