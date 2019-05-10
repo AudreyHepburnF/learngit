@@ -126,7 +126,8 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
                     "\tendless,\n" +
                     "\tDEL_FLAG AS isShow,\n" +
                     "\tCREATE_TIME AS createTime,\n" +
-                    "\tUPDATE_TIME AS updateTime \n" +
+                    "\tUPDATE_TIME AS updateTime, \n" +
+                    "\tPLATFORM_SOURCE AS platformSource \n" +
                     "FROM\n" +
                     "\t`recruit` \n" +
                     "WHERE\n" +
@@ -163,7 +164,8 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
                 "\tDEL_FLAG AS isShow,\n" +
                 "\tIF_APPROVE AS ifApprove,\n" +
                 "\tCREATE_TIME AS createTime,\n" +
-                "\tUPDATE_TIME AS updateTime \n" +
+                "\tUPDATE_TIME AS updateTime, \n" +
+                "\tPLATFORM_SOURCE AS platformSource \n" +
                 "FROM\n" +
                 "\t`recruit` \n" +
                 "WHERE\n" +
@@ -195,7 +197,8 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
 //                "\tendless,\n" +
 //                "\tDEL_FLAG AS isShow,\n" +
 //                "\tCREATE_TIME AS createTime,\n" +
-//                "\tUPDATE_TIME AS updateTime \n" +
+//                "\tUPDATE_TIME AS updateTime, \n" +
+//                "\PLATFORM_SOURCE AS platformSource \n" +
 //                "FROM\n" +
 //                "\t`recruit` \n" +
 //                "WHERE\n" +
@@ -297,7 +300,7 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
         map.put(PURCHASE_NAME_NOT_ANALYZED, map.get(PURCHASE_NAME));
         map.put(PROJECT_TYPE, RECRUIT_PROJECT_TYPE);
         map.put(PURCHASE_ID, String.valueOf(map.get(PURCHASE_ID)));
-//        隆道云和老悦采用的同一个数据库
+//        隆道云和老悦采用的同一个数据库 主表有该字段
 //        map.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE);
         map.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
     }

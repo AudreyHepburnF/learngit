@@ -88,7 +88,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\tr.IF_APPROVE AS ifApprove,\n" +
                 "\trf.FILE_NAME AS fileName,\n" +
                 "\trf.FILE_PATH AS md5,\n" +
-                "\tIFNULL(rf.PLATFORM_SOURCE,2) AS platformSource\n" +
+                "\tIFNULL(r.PLATFORM_SOURCE,2) AS platformSource\n" +
                 "FROM\n" +
                 "\t`recruit` r\n" +
                 "LEFT JOIN `recruit_files` rf ON (rf.RECRUIT_ID=r.ID AND rf.DEL_FLAG=1)\n" +
@@ -124,7 +124,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\tr.IF_APPROVE AS ifApprove,\n" +
                 "\trf.FILE_NAME AS fileName,\n" +
                 "\trf.FILE_PATH AS md5,\n" +
-                "\tIFNULL(rf.PLATFORM_SOURCE,2) AS platformSource\n" +
+                "\tIFNULL(r.PLATFORM_SOURCE,2) AS platformSource\n" +
                 "FROM\n" +
                 "\t`recruit` r\n" +
                 "LEFT JOIN `recruit_files` rf ON (rf.RECRUIT_ID=r.ID AND rf.DEL_FLAG=1)\n" +
@@ -157,7 +157,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
     private void refresh(Map<String, Object> map) {
         map.put(PURCHASE_ID, String.valueOf(map.get(PURCHASE_ID)));
         map.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
-        //招募用的同一张表取里面的字段 PLATFORM_SOURCE
+        //招募用的同一张表取里面的字段 主表有该字段
 //        map.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE);
 
     }
