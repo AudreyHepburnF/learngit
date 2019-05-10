@@ -1,6 +1,5 @@
 package cn.bidlink.job.ycsearch.handler;
 
-import cn.bidlink.job.common.constant.BusinessConstant;
 import cn.bidlink.job.common.es.ElasticClient;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
@@ -9,7 +8,6 @@ import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +54,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
 
     private void syncRecruitData() {
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.recruit_index", "cluster.type.recruit",
-                QueryBuilders.boolQuery().must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE)));
+               null);
 //        Timestamp lastSyncTime = new Timestamp(0);
         logger.info("1.1 同步招募信息lastSyncTime:" + SyncTimeUtil.toDateString(lastSyncTime) + "\n" + ",syncTime:" + SyncTimeUtil.currentDateToString());
         syncRecruitDataService(lastSyncTime);
@@ -88,10 +86,12 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\tr.CREATE_TIME AS createTime,\n" +
                 "\tr.UPDATE_TIME AS updateTime,\n" +
                 "\tr.IF_APPROVE AS ifApprove,\n" +
-                "\t(select FILE_NAME from recruit_files rf where rf.RECRUIT_ID=r.id ORDER BY rf.create_time DESC LIMIT 0,1) AS fileName,\n" +
-                "\t(select FILE_PATH from recruit_files rf where rf.RECRUIT_ID=r.id ORDER BY rf.create_time DESC LIMIT 0,1) AS md5 \n" +
+                "\trf.FILE_NAME AS fileName,\n" +
+                "\trf.FILE_PATH AS md5,\n" +
+                "\tIFNULL(rf.PLATFORM_SOURCE,2) AS platformSource\n" +
                 "FROM\n" +
                 "\t`recruit` r\n" +
+                "LEFT JOIN `recruit_files` rf ON (rf.RECRUIT_ID=r.ID AND rf.DEL_FLAG=1)\n" +
                 "WHERE\n" +
                 "\tr.DEL_FLAG = 1 and r.create_time > ?\n" +
                 "\t limit ?,?";
@@ -122,10 +122,12 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\tr.CREATE_TIME AS createTime,\n" +
                 "\tr.UPDATE_TIME AS updateTime,\n" +
                 "\tr.IF_APPROVE AS ifApprove,\n" +
-                "\t(select FILE_NAME from recruit_files rf where rf.RECRUIT_ID=r.id ORDER BY rf.create_time DESC LIMIT 0,1) AS fileName,\n" +
-                "\t(select FILE_PATH from recruit_files rf where rf.RECRUIT_ID=r.id ORDER BY rf.create_time DESC LIMIT 0,1) AS md5 \n" +
+                "\trf.FILE_NAME AS fileName,\n" +
+                "\trf.FILE_PATH AS md5,\n" +
+                "\tIFNULL(rf.PLATFORM_SOURCE,2) AS platformSource\n" +
                 "FROM\n" +
                 "\t`recruit` r\n" +
+                "LEFT JOIN `recruit_files` rf ON (rf.RECRUIT_ID=r.ID AND rf.DEL_FLAG=1)\n" +
                 "WHERE\n" +
                 "\tr.DEL_FLAG = 1 and r.update_time > ?\n" +
                 "\t limit ?,?";
@@ -155,7 +157,8 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
     private void refresh(Map<String, Object> map) {
         map.put(PURCHASE_ID, String.valueOf(map.get(PURCHASE_ID)));
         map.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
-        map.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE);
+        //招募用的同一张表取里面的字段 PLATFORM_SOURCE
+//        map.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE);
 
     }
 

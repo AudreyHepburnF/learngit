@@ -1,6 +1,5 @@
 package cn.bidlink.job.ycsearch.handler;
 
-import cn.bidlink.job.common.constant.BusinessConstant;
 import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
@@ -64,8 +63,7 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
 
     private void syncRecruitData() {
         Timestamp lastSyncTime = ElasticClientUtil.getMaxTimestamp(elasticClient, "cluster.supplier_opportunity_index", "cluster.type.supplier_opportunity",
-                QueryBuilders.boolQuery().must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
-                        .must(QueryBuilders.termQuery(PROJECT_TYPE, RECRUIT_PROJECT_TYPE)));
+                QueryBuilders.boolQuery().must(QueryBuilders.termQuery(PROJECT_TYPE, RECRUIT_PROJECT_TYPE)));
         logger.info("1.1 同步招募信息lastSyncTime:" + SyncTimeUtil.toDateString(lastSyncTime) + "\n" + ",syncTime:" + SyncTimeUtil.currentDateToString());
         this.syncRecruitDataService(lastSyncTime);
         // 修复有限期招募商机的数据
@@ -78,7 +76,8 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
         SearchResponse response = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.supplier_opportunity_index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
                 .setQuery(QueryBuilders.boolQuery()
-                        .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
+                        //招募在同一个表里面
+//                        .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
                         .must(QueryBuilders.termQuery(PROJECT_TYPE, RECRUIT_PROJECT_TYPE))
                         .must(QueryBuilders.termQuery(ENDLESS, LIMIT))
                         .must(QueryBuilders.rangeQuery(QUOTE_STOP_TIME).lte(SyncTimeUtil.currentDateToString()))
@@ -298,7 +297,8 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
         map.put(PURCHASE_NAME_NOT_ANALYZED, map.get(PURCHASE_NAME));
         map.put(PROJECT_TYPE, RECRUIT_PROJECT_TYPE);
         map.put(PURCHASE_ID, String.valueOf(map.get(PURCHASE_ID)));
-        map.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE);
+//        隆道云和老悦采用的同一个数据库
+//        map.put(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE);
         map.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
     }
 
