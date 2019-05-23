@@ -52,8 +52,11 @@ public class SyncSupplierProjectDataJobHandler extends AbstractSyncSupplierDataJ
             Set<String> supplierIds = new HashSet<>();
             List<Map<String, Object>> resultFromEs = new ArrayList<>();
             for (SearchHit searchHit : searchHits) {
-                supplierIds.add(searchHit.getId());
-                resultFromEs.add(searchHit.getSourceAsMap());
+                //不知道id为什么会有_query 临时解决 要不然sql会报错
+                if(!"_query".equals(searchHit.getId())){
+                    supplierIds.add(searchHit.getId());
+                    resultFromEs.add(searchHit.getSourceAsMap());
+                }
             }
 
             String supplierIdToString = StringUtils.collectionToCommaDelimitedString(supplierIds);
