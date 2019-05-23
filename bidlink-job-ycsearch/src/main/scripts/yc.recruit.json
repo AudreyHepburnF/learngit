@@ -60,6 +60,9 @@
     },
     "ifApprove":{
       "type":"integer"
+    },
+    "ifRestriction":{
+      "type":"integer"
     }
   }
 }
