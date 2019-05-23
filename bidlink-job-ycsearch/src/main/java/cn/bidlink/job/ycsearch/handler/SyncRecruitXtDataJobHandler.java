@@ -87,6 +87,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\tr.UPDATE_TIME AS updateTime,\n" +
                 "\tr.IF_APPROVE AS ifApprove,\n" +
                 "\tr.IF_RESTRICTION AS ifRestriction,\n" +
+                "\tr.PART_CATEGORY_NAME AS partCategoryName,\n" +
                 "\trf.FILE_NAME AS fileName,\n" +
                 "\trf.FILE_PATH AS md5,\n" +
                 "\tIFNULL(r.PLATFORM_SOURCE,2) AS platformSource\n" +
@@ -124,6 +125,7 @@ public class SyncRecruitXtDataJobHandler extends JobHandler /*implements Initial
                 "\tr.UPDATE_TIME AS updateTime,\n" +
                 "\tr.IF_APPROVE AS ifApprove,\n" +
                 "\tr.IF_RESTRICTION AS ifRestriction,\n" +
+                "\tr.PART_CATEGORY_NAME AS partCategoryName,\n" +
                 "\trf.FILE_NAME AS fileName,\n" +
                 "\trf.FILE_PATH AS md5,\n" +
                 "\tIFNULL(r.PLATFORM_SOURCE,2) AS platformSource\n" +
