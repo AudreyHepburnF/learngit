@@ -62,7 +62,7 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
                 "\tt.TYPE in (12,13) and (t.is_test = 0 or t.is_test is null and t.name not like \"%必联%\" and t.name not like \"%测试%\")\n" +
-                "\tAND t.CREATE_TIME > ?\n";
+                "\tAND t.CREATE_TIME >= ?\n";
         String createQuerySql = "SELECT\n" +
                 "\tt.NAME,\n" +
                 "\tt.COUNTRY,\n" +
@@ -99,9 +99,9 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
                 "\tt.TYPE in (12,13) and (t.is_test = 0 or t.is_test is null and t.name not like \"%必联%\" and t.name not like \"%测试%\")\n" +
-                "\tAND t.CREATE_TIME > ?\n" +
+                "\tAND t.CREATE_TIME >= ?\n" +
                 "ORDER BY\n" +
-                "\tt.CREATE_TIME ASC  limit ?,?";
+                "\tt.CREATE_TIME ASC,t.ID limit ?,?";
         this.doSyncSupplierDataToCrmService(uniregDataSource, createCountSql, createQuerySql, Collections.singletonList(lastSyncTime));
 
         String updateCountSql = "SELECT\n" +
@@ -111,7 +111,7 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
                 "\tt.TYPE in (12,13) and (t.is_test = 0 or t.is_test is null and t.name not like \"%必联%\" and t.name not like \"%测试%\")\n" +
-                "\tAND t.UPDATE_TIME > ?\n";
+                "\tAND t.UPDATE_TIME >= ?\n";
         String updateQuerySql = "SELECT\n" +
                 "\tt.NAME,\n" +
                 "\tt.COUNTRY,\n" +
@@ -148,9 +148,9 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
                 "\tt.TYPE in (12,13) and (t.is_test = 0 or t.is_test is null and t.name not like \"%必联%\" and t.name not like \"%测试%\")\n" +
-                "\tAND t.UPDATE_TIME > ?\n" +
+                "\tAND t.UPDATE_TIME >= ?\n" +
                 "ORDER BY\n" +
-                "\tt.CREATE_TIME ASC  limit ?,?";
+                "\tt.CREATE_TIME ASC,t.ID limit ?,?";
         this.doSyncSupplierDataToCrmService(uniregDataSource, updateCountSql, updateQuerySql, Collections.singletonList(lastSyncTime));
 
         String updateUserCountSql = "SELECT\n" +
@@ -160,7 +160,7 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
                 "\tt.TYPE in (12,13) and (t.is_test = 0 or t.is_test is null and t.name not like \"%必联%\" and t.name not like \"%测试%\")\n" +
-                "\tAND u.UPDATE_TIME > ?\n";
+                "\tAND u.UPDATE_TIME >= ?\n";
         String updateUserQuerySql = "SELECT\n" +
                 "\tt.NAME,\n" +
                 "\tt.COUNTRY,\n" +
@@ -197,9 +197,9 @@ public class SyncSupplierDataToCrmJobHandler extends JobHandler /*implements Ini
                 "\tLEFT JOIN t_reg_user u ON u.COMPANY_ID = t.id \n" +
                 "WHERE\n" +
                 "\tt.TYPE in (12,13) and (t.is_test = 0 or t.is_test is null and t.name not like \"%必联%\" and t.name not like \"%测试%\")\n" +
-                "\tAND u.UPDATE_TIME > ?\n" +
+                "\tAND u.UPDATE_TIME >= ?\n" +
                 "ORDER BY\n" +
-                "\tt.CREATE_TIME ASC  limit ?,?";
+                "\tt.CREATE_TIME ASC,t.ID limit ?,?";
         this.doSyncSupplierDataToCrmService(uniregDataSource, updateUserCountSql, updateUserQuerySql, Collections.singletonList(lastSyncTime));
     }
 
