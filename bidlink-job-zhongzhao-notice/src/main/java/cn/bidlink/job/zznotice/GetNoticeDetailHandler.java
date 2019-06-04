@@ -1,3 +1,5 @@
+package cn.bidlink.job.zznotice;
+
 import cn.bidlink.ctpsp.cloud.service.ZzNoticeService;
 import cn.bidlink.ctpsp.dal.entity.ZzNotice;
 import com.xxl.job.core.biz.model.ReturnT;
