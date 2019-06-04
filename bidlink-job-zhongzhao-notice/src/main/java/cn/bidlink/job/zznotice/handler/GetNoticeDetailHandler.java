@@ -1,4 +1,4 @@
-package cn.bidlink.job.zznotice;
+package cn.bidlink.job.zznotice.handler;
 
 import cn.bidlink.ctpsp.cloud.service.ZzNoticeService;
 import cn.bidlink.ctpsp.dal.entity.ZzNotice;
