@@ -20,6 +20,13 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>dubbo</artifactId>
+            <version>${dubbo.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.bidlink.ctpsp</groupId>
+            <artifactId>ctpsp-cloud-impl</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
