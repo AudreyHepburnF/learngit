@@ -110,7 +110,7 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <pom.application.name>xxl-job-zhongzhao-notice</pom.application.name>
+                <pom.application.name>zhongzhao-notice</pom.application.name>
                 <pom.xxl.job.admin.addresses>http://100.100.0.132:8080/xxl-job</pom.xxl.job.admin.addresses>
                 <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
                 <pom.log.rootLogger>CONSOLE</pom.log.rootLogger>
@@ -190,7 +190,7 @@
         <profile>
             <id>test</id>
             <properties>
-                <pom.application.name>xxl-job-zhongzhao-notice</pom.application.name>
+                <pom.application.name>zhongzhao-notice</pom.application.name>
                 <pom.xxl.job.admin.addresses>http://testxxl-dashboard:8080/xxl-job</pom.xxl.job.admin.addresses>
                 <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
                 <pom.log.rootLogger>FILE</pom.log.rootLogger>
@@ -271,7 +271,7 @@
         <profile>
             <id>performance</id>
             <properties>
-                <pom.application.name>xxl-job-zhongzhao-notice</pom.application.name>
+                <pom.application.name>zhongzhao-notice</pom.application.name>
                 <pom.xxl.job.admin.addresses>http://10.0.2.158:8080/xxl-job</pom.xxl.job.admin.addresses>
                 <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
                 <pom.log.rootLogger>FILE</pom.log.rootLogger>
@@ -350,7 +350,7 @@
         <profile>
             <id>product</id>
             <properties>
-                <pom.application.name>xxl-job-zhongzhao-notice</pom.application.name>
+                <pom.application.name>zhongzhao-notice</pom.application.name>
                 <pom.xxl.job.admin.addresses>http://xxl-dashboard.internal.cg-xt.com:8080/xxl-job</pom.xxl.job.admin.addresses>
                 <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
                 <pom.log.rootLogger>FILE</pom.log.rootLogger>
