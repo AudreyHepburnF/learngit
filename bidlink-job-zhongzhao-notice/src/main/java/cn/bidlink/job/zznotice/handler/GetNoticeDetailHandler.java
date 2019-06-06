@@ -1,7 +1,10 @@
+package cn.bidlink.job.zznotice.handler;
+
 import cn.bidlink.ctpsp.cloud.service.ZzNoticeService;
 import cn.bidlink.ctpsp.dal.entity.ZzNotice;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.IJobHandler;
+import com.xxl.job.core.handler.annotation.JobHander;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,16 +13,17 @@ import java.util.List;
 /**
  * Created by Administrator on 2019/6/4.
  */
+@JobHander("getNoticeDetailHandler")
 @Service
 public class GetNoticeDetailHandler extends IJobHandler {
-    @Autowired
-    private ZzNoticeService zzNoticeService;
+//    @Autowired
+//    private ZzNoticeService zzNoticeService;
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
-        List<ZzNotice> list = zzNoticeService.getUnReadNotice();
-
-        System.out.println(list);
+//        List<ZzNotice> list = zzNoticeService.getUnReadNotice();
+//
+//        System.out.println(list);
 
         ReturnT<String> stringReturnT = new ReturnT<>();
         stringReturnT.setMsg("123123haha");

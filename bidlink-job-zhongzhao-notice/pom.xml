@@ -17,27 +17,135 @@
             <artifactId>bidlink-job-common</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>dubbo</artifactId>
-            <version>${dubbo.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>cn.bidlink.ctpsp</groupId>
-            <artifactId>ctpsp-cloud-impl</artifactId>
+            <artifactId>ctpsp-cloud-service</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
-            <groupId>org.apache.zookeeper</groupId>
-            <artifactId>zookeeper</artifactId>
-            <version>3.4.6</version>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>1.7.4</version>
         </dependency>
         <dependency>
-            <groupId>com.github.sgroschupf</groupId>
-            <artifactId>zkclient</artifactId>
-            <version>0.1</version>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.7.4</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <finalName>${pom.application.name}</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources/es</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>*.jks</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>*.xml</include>
+                    <include>*.properties</include>
+                </includes>
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <excludes>
+                        <exclude>*.xml</exclude>
+                        <exclude>*.properties</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <descriptor>${project.basedir}/src/main/assembly/assembly.xml</descriptor>
+                    <encoding>UTF-8</encoding>
+                    <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <pom.application.name>zhongzhao-notice</pom.application.name>
+                <pom.xxl.job.admin.addresses>http://100.100.0.132:8080/xxl-job</pom.xxl.job.admin.addresses>
+                <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
+                <pom.log.rootLogger>CONSOLE</pom.log.rootLogger>
+                <pom.log.level>debug</pom.log.level>
+                <pom.log.dir>logs</pom.log.dir>
+            </properties>
+        </profile>
+        <profile>
+            <id>test</id>
+            <properties>
+                <pom.application.name>zhongzhao-notice</pom.application.name>
+                <pom.xxl.job.admin.addresses>http://testxxl-dashboard:8080/xxl-job</pom.xxl.job.admin.addresses>
+                <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
+                <pom.log.rootLogger>FILE</pom.log.rootLogger>
+                <pom.log.level>info</pom.log.level>
+                <pom.log.dir>logs</pom.log.dir>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>performance</id>
+            <properties>
+                <pom.application.name>zhongzhao-notice</pom.application.name>
+                <pom.xxl.job.admin.addresses>http://10.0.2.158:8080/xxl-job</pom.xxl.job.admin.addresses>
+                <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
+                <pom.log.rootLogger>FILE</pom.log.rootLogger>
+                <pom.log.level>info</pom.log.level>
+                <pom.log.dir>logs</pom.log.dir>
+            </properties>
+        </profile>
+        <profile>
+            <id>product</id>
+            <properties>
+                <pom.application.name>zhongzhao-notice</pom.application.name>
+                <pom.xxl.job.admin.addresses>http://xxl-dashboard.internal.cg-xt.com:8080/xxl-job</pom.xxl.job.admin.addresses>
+                <pom.xxl.job.executor.logpath>logs/jobhandler/</pom.xxl.job.executor.logpath>
+                <pom.log.rootLogger>FILE</pom.log.rootLogger>
+                <pom.log.level>INFO</pom.log.level>
+                <pom.log.dir>logs</pom.log.dir>
+            </properties>
+        </profile>
+    </profiles>
 </project>
