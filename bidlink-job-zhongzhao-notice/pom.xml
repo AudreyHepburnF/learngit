@@ -34,6 +34,18 @@
             <artifactId>aspectjweaver</artifactId>
             <version>1.7.4</version>
         </dependency>
+        <dependency>
+            <groupId>net.sf.json-lib</groupId>
+            <artifactId>json-lib</artifactId>
+            <version>2.4</version>
+            <classifier>jdk15</classifier>
+            <exclusions>
+                <exclusion>
+                    <artifactId>commons-logging</artifactId>
+                    <groupId>commons-logging</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
 
     <build>
@@ -111,6 +123,9 @@
                 <pom.log.rootLogger>CONSOLE</pom.log.rootLogger>
                 <pom.log.level>debug</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
+                <!-- 同步配置  -->
+                <pom.notice.message.new.ip>http://100.100.0.75</pom.notice.message.new.ip>
+                <pom.notice.message.new.port>8047</pom.notice.message.new.port>
             </properties>
         </profile>
         <profile>
