@@ -32,6 +32,7 @@ public class GetNoticeDetailHandler extends IJobHandler {
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
+        logger.info("测试信息");
         CloseableHttpClient client = null;
         CloseableHttpResponse response = null;
         String ip="";
