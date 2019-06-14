@@ -259,7 +259,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                 + "JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id\n"
                 + "WHERE\n"
                 + "   bpe.bid_result_show_type = 1\n"
-                + "AND bp.update_time > ?\n"
+                + "AND bp.update_time >= ?\n"
                 + "AND bp.project_status >= 5 ";
         String queryUpdatedSql = "SELECT b.*, bpi.id AS directoryId, bpi.`name` AS directoryName FROM (SELECT\n"
                 + "   bp.comp_id AS purchaseId,\n"
@@ -290,7 +290,7 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
                 + "JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id\n"
                 + "WHERE\n"
                 + "   bpe.bid_result_show_type = 1\n"
-                + "AND bp.update_time > ?\n"
+                + "AND bp.update_time >= ?\n"
                 + "AND bp.project_status >= 5\n"
                 + "LIMIT ?,\n"
                 + " ?) b JOIN bmpfjz_project_item bpi ON b.projectId = bpi.project_id order by bpi.id";
