@@ -2,15 +2,18 @@ package cn.bidlink.job.ycsearch.handler;
 
 import cn.bidlink.job.common.constant.BusinessConstant;
 import cn.bidlink.job.common.utils.AreaUtil;
+import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.ElasticClientUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -73,7 +76,86 @@ public class SyncPurchaseTypeOpportunityToXtDataJobHandler extends AbstractSyncY
         logger.info("采购项目商机同步时间,lastSyncTime：" + new DateTime(lastSyncTime).toString(SyncTimeUtil.DATE_TIME_PATTERN) + "\n"
                 + ",syncTime:" + new DateTime(SyncTimeUtil.getCurrentDate()).toString(SyncTimeUtil.DATE_TIME_PATTERN));
         syncPurchaseProjectDataService(lastSyncTime);
+        fixRebuildProject(lastSyncTime);
 //        fixExpiredAutoStopTypePurchaseProjectDataService(lastSyncTime);
+    }
+
+    //处理重建项目商机还展示的问题
+    private void fixRebuildProject(Timestamp lastSyncTime){
+        String countSql="SELECT\n" +
+                "\tcount(1)\n" +
+                "FROM\n" +
+                "\tbmpfjz_project bp\n" +
+                "JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id\n" +
+                "WHERE\n" +
+                "\tbp.rebuild_time >=?\n" +
+                "AND bp.is_rebuild_project = 1\n" +
+                "AND (bp.project_status < 5 OR (bp.project_status >= 5 AND bpe.bid_result_show_type != 1))";
+        String querySql="SELECT\n" +
+                " bp.id AS projectId\n"+
+                "FROM\n" +
+                "\tbmpfjz_project bp\n" +
+                "JOIN bmpfjz_project_ext bpe ON bp.id = bpe.id\n" +
+                "WHERE bp.rebuild_time>=?\n" +
+                "AND bp.is_rebuild_project=1\n" +
+                "AND (bp.project_status<5 OR (bp.project_status>=5 and bpe.bid_result_show_type!=1))\n" +
+                "LIMIT ?,?";
+        doFixRebuildProject(countSql,querySql,lastSyncTime);
+    }
+
+    private void doFixRebuildProject(String countSql,String querySql, Timestamp lastSyncTime) {
+        List<Object> param=new ArrayList<>();
+        param.add(lastSyncTime);
+        long count = DBUtil.count(ycDataSource, countSql, param);
+        logger.info("查询重建项目countSql : {}, params : {}，共{}条", countSql, param, count);
+        if(count>0){
+            for (long i = 0; i < count; i+=1000) {
+                param=new ArrayList<>();
+                param.add(lastSyncTime);
+                param.add(i);
+                param.add(1000);
+                List<String> idList = DBUtil.query(ycDataSource, querySql, param, resultSet -> {
+                    List<String> stringList = new ArrayList<>();
+                    while (resultSet.next()) {
+                        stringList.add(resultSet.getString(1));
+                    }
+                    return stringList;
+                });
+                doFixEsRebuildProject(idList);
+            }
+        }
+
+    }
+
+    private void doFixEsRebuildProject(List<String> idList){
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+                .must(QueryBuilders.termQuery("projectType", PURCHASE_PROJECT_TYPE))
+                .must(QueryBuilders.termQuery(BusinessConstant.PLATFORM_SOURCE_KEY, BusinessConstant.YUECAI_SOURCE))
+                .must(QueryBuilders.termsQuery(PROJECT_ID, idList));
+        Properties properties = elasticClient.getProperties();
+        SearchRequestBuilder searchRequestBuilder = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.supplier_opportunity_index"))
+                .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
+                .setQuery(queryBuilder)
+                .setFetchSource(false)
+                .setSize(1000);
+        SearchResponse searchResponse = searchRequestBuilder.get();
+        SearchHits searchHits = searchResponse.getHits();
+        long totalHits = searchHits.getTotalHits();
+        if(totalHits>0){
+            SearchHit[] hits = searchHits.getHits();
+            List<Map<String,Object>> list=new ArrayList<>();
+            for (SearchHit hit:hits){
+                Map<String,Object> map=new HashMap<>();
+                map.put(ID,hit.getId());
+                map.put(IS_SHOW,HIDDEN);
+                map.put(STATUS,INVALID_OPPORTUNITY_STATUS);
+                map.put(SyncTimeUtil.SYNC_TIME, SyncTimeUtil.getCurrentDate());
+                list.add(map);
+            }
+//            System.out.println(JSON.toJSONString(list));
+            batchExecute(list);
+        }
+
     }
 
     /**

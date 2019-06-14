@@ -66,6 +66,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
     private String  UPDATE_TIME           = "updateTime";
     private Integer PURCHASE_PROJECT_TYPE = 2;
     private Integer CANAL_STATUS          = 10;
+    private Integer ONLY_COOPERATE_JOIN   = 3;
 
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
@@ -105,6 +106,7 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                 // TODO 待采购商机数据添加bidStopType字段
                 Integer bidStopType = Integer.valueOf(resultFromEs.get("bidStopType").toString());
                 Object bidStopTime = resultFromEs.get("quoteStopTime");
+                Integer openRangeType=resultFromEs.get("openRangeType")==null?null:Integer.valueOf(resultFromEs.get("openRangeType").toString());
                 //撤项消息
                 if (CANAL_STATUS.equals(projectStatus)) {
                     logger.info("处理撤项商机数据:{}", resultFromEs);
@@ -194,6 +196,10 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                      * 拉黑的供应商
                      */
                     List<Long> blackSupplierIds = getBlackSupplierIds(supplierIds, purchaserId);
+                    List<Long> cooperateSupplierIds=new ArrayList<>();
+                    if(ONLY_COOPERATE_JOIN.equals(openRangeType)){
+                        cooperateSupplierIds=getCooperateSupplierIds(supplierIds,purchaserId);
+                    }
                     Date now = new Date();
 
                     List<Map<String, Object>> recommendRecords = new ArrayList<Map<String, Object>>();
@@ -203,6 +209,10 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
                         for (Map<String, Object> map : recommendSupplierOrders) {
                             if (blackSupplierIds.contains(Long.valueOf(map.get("supplierId").toString()))) {
                                 logger.info("供应商：[" + map.get("supplierName") + "] 已经被" + purchaserName + "拉黑");
+                                continue;
+                            }
+                            if(ONLY_COOPERATE_JOIN.equals(openRangeType) && !cooperateSupplierIds.contains(Long.valueOf(map.get("supplierId").toString()))){
+                                logger.info("供应商：[" + map.get("supplierName") + "] 不是" + purchaserName + "的合作供应商");
                                 continue;
                             }
                             Set<String> products = supplierMatchedProductMap.get(map.get("supplierId").toString() + "_" + map.get("orderCode").toString());
@@ -350,6 +360,42 @@ public class SyncRecommendProjectDataJobHandler extends JobHandler /*implements 
             return Collections.emptyList();
         }
     }
+
+    /**
+     * 查询采购商合作的供应商名单
+     *
+     * @param supplierIds
+     * @param purchaserId
+     * @return
+     */
+    private List<Long> getCooperateSupplierIds(Set<Long> supplierIds, Long purchaserId) {
+        if (!CollectionUtils.isEmpty(supplierIds)) {
+            String querySqlTemplate = "SELECT DISTINCT\n" +
+                    "\tsupplier_id \n" +
+                    "FROM\n" +
+                    "\tbsm_company_supplier \n" +
+                    "WHERE\n" +
+                    "\tcompany_id = ? \n" +
+                    "\tAND supplier_status = 1  \n" +
+                    "\tAND supplier_id IN (%s)";
+            String querySql = String.format(querySqlTemplate, StringUtils.collectionToCommaDelimitedString(supplierIds));
+            logger.info("查询匹配商机订单中合作供应商,querySql:{},params:{}", querySql, purchaserId);
+            return DBUtil.query(ycDataSource, querySql, Collections.singletonList(purchaserId), new DBUtil.ResultSetCallback<List<Long>>() {
+                @Override
+                public List<Long> execute(ResultSet resultSet) throws SQLException {
+                    ArrayList<Long> supplierIds = new ArrayList<>();
+                    while (resultSet.next()) {
+                        long supplierId = resultSet.getLong(1);
+                        supplierIds.add(supplierId);
+                    }
+                    return supplierIds;
+                }
+            });
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
 
     private void insertBatchToEs(Collection<Map<String, Object>> mapList, String index, String type) {
         if (!CollectionUtils.isEmpty(mapList)) {
