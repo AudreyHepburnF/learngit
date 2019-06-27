@@ -6,6 +6,8 @@ import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.springframework.beans.BeanUtils;
@@ -48,8 +50,12 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
         logger.info("同步采购商项目和交易额统计开始");
         Properties properties = elasticClient.getProperties();
         int pageSizeToUse = 2 * pageSize;
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        //黑名单不同步测试企业数据
+        boolQuery.mustNot(QueryBuilders.termsQuery("id","11113174479"));
         SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.purchase_index"))
                 .setTypes(properties.getProperty("cluster.type.purchase"))
+                .setQuery(boolQuery)
                 .setScroll(new TimeValue(60000))
                 .setSize(pageSizeToUse)
                 .get();
