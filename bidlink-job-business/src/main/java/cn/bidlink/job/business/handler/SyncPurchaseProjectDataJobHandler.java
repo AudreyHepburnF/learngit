@@ -4,6 +4,7 @@ import cn.bidlink.job.common.utils.DBUtil;
 import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.JobHander;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -11,6 +12,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -32,6 +34,9 @@ import java.util.stream.Collectors;
 @JobHander(value = "syncPurchaseProjectDataJobHandler")
 public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJobHandler /*implements InitializingBean*/ {
 
+    @Value("${purchase.black.list}")
+    private String purchaseBlackList;
+
     @Override
     public ReturnT<String> execute(String... strings) throws Exception {
         SyncTimeUtil.setCurrentDate();
@@ -50,13 +55,16 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
         logger.info("同步采购商项目和交易额统计开始");
         Properties properties = elasticClient.getProperties();
         int pageSizeToUse = 2 * pageSize;
-        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        SearchRequestBuilder requestBuilder = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.purchase_index"))
+                .setTypes(properties.getProperty("cluster.type.purchase"));
         //黑名单不同步测试企业数据
-        boolQuery.mustNot(QueryBuilders.termsQuery("id","11113174479"));
-        SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.purchase_index"))
-                .setTypes(properties.getProperty("cluster.type.purchase"))
-                .setQuery(boolQuery)
-                .setScroll(new TimeValue(60000))
+        if(!StringUtils.isEmpty(purchaseBlackList) && !StringUtils.isEmpty(purchaseBlackList.trim())){
+            BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+            String[] split = purchaseBlackList.trim().split(",");
+            boolQuery.mustNot(QueryBuilders.termsQuery("id",split));
+            requestBuilder.setQuery(boolQuery);
+        }
+        SearchResponse scrollResp = requestBuilder.setScroll(new TimeValue(60000))
                 .setSize(pageSizeToUse)
                 .get();
 
@@ -560,7 +568,7 @@ public class SyncPurchaseProjectDataJobHandler extends AbstractSyncPurchaseDataJ
         }
     }
 
-    /*@Override
+   /* @Override
     public void afterPropertiesSet() throws Exception {
         execute();
     }*/
