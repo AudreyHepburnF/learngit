@@ -142,7 +142,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
                     + "   AND ppc.project_open_range = 1 AND pp.id in (%s) AND pp.quote_stop_time < ?\n"
                     + "   LIMIT ?,?\n"
                     + "   ) s\n"
-                    + "LEFT JOIN purchase_project_item ppi ON s.projectId = ppi.project_id\n"
+                    + "LEFT JOIN purchase_project_item ppi ON (s.projectId = ppi.project_id AND ppi.executed=1)\n"
                     + "AND s.purchaseId = ppi.company_id";
 
             String countSql = String.format(countTemplateSql, StringUtils.collectionToCommaDelimitedString(projectIds));
@@ -205,7 +205,7 @@ public class SyncPurchaseTypeOpportunityDataJobHandler extends AbstractSyncOppor
                 + "   AND ppc.project_open_range = 1 AND pp.update_time > ?\n"
                 + "   LIMIT ?,?\n"
                 + "   ) s\n"
-                + "LEFT JOIN purchase_project_item ppi ON s.projectId = ppi.project_id\n"
+                + "LEFT JOIN purchase_project_item ppi ON (s.projectId = ppi.project_id AND ppi.executed=1)\n"
                 + "AND s.purchaseId = ppi.company_id";
         doSyncProjectDataService(purchaseDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList((Object) lastSyncTime), INSERT_OPERATION);
     }
