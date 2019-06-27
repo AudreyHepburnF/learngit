@@ -169,6 +169,7 @@
                 <pom.cluster.type.deal_supplier>deal_supplier</pom.cluster.type.deal_supplier>
                 <pom.cluster.deal_supplier_project_index>deal_supplier_project</pom.cluster.deal_supplier_project_index>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
+                <pom.purchase.black.list></pom.purchase.black.list>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
@@ -249,6 +250,7 @@
                 <pom.cluster.type.deal_supplier>deal_supplier</pom.cluster.type.deal_supplier>
                 <pom.cluster.deal_supplier_project_index>deal_supplier_project</pom.cluster.deal_supplier_project_index>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
+                <pom.purchase.black.list></pom.purchase.black.list>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
@@ -329,6 +331,7 @@
                 <pom.cluster.type.deal_supplier>deal_supplier</pom.cluster.type.deal_supplier>
                 <pom.cluster.deal_supplier_project_index>deal_supplier_project</pom.cluster.deal_supplier_project_index>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
+                <pom.purchase.black.list></pom.purchase.black.list>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
@@ -413,6 +416,7 @@
                 <pom.cluster.type.deal_supplier>deal_supplier</pom.cluster.type.deal_supplier>
                 <pom.cluster.deal_supplier_project_index>deal_supplier_project</pom.cluster.deal_supplier_project_index>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
+                <pom.purchase.black.list>11113174479</pom.purchase.black.list>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
                 <pom.path.conf></pom.path.conf>
                 <pom.searchguard.ssl.transport.keystore_filepath></pom.searchguard.ssl.transport.keystore_filepath>
