@@ -179,7 +179,7 @@ public class SyncAuctionTypeOpportunityDataJobHandler extends AbstractSyncOpport
                 "                     LIMIT ?,?\n" +
                 "                    ) s\n" +
                 "                 LEFT JOIN auction_project_item api ON s.projectId = api.project_id\n" +
-                "                 AND s.purchaseId = api.company_id;";
+                "                 AND s.purchaseId = api.company_id AND api.opt_type!=4;";
         doSyncProjectDataService(auctionDataSource, countUpdatedSql, queryUpdatedSql, Collections.singletonList((Object) lastSyncTime), INSERT_OPERATION);
     }
 
