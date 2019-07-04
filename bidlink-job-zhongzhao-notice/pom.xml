@@ -173,7 +173,7 @@
                 <pom.log.level>INFO</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
                 <!-- 同步配置  -->
-                <pom.notice.message.new.ip>http://100.100.0.75</pom.notice.message.new.ip>
+                <pom.notice.message.new.ip>http://192.168.4.111</pom.notice.message.new.ip>
                 <pom.notice.message.new.port>8047</pom.notice.message.new.port>
             </properties>
         </profile>
