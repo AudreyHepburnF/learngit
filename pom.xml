@@ -17,6 +17,7 @@
         <module>bidlink-job-report</module>
         <module>bidlink-job-ycsearch</module>
         <module>bidlink-job-othersearch</module>
+        <module>bidlink-job-zhongzhao-notice</module>
     </modules>
 
     <properties>
