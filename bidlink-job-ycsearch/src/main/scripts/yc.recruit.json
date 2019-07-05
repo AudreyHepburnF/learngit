@@ -69,7 +69,7 @@
     },
     "partCategoryName":{
       "type":"text",
-      "index":"no"
+      "index":"false"
     }
   }
 }
