@@ -272,7 +272,8 @@ public class SyncRecruitOpportunityXtDataJobHandler extends AbstractSyncYcOpport
         Object status = map.get(STATUS);
         // 项目状态
         if (!Objects.isNull(status) && Objects.equals(status, UNDERWAY)) {
-            if (Objects.equals(map.get(ENDLESS), LIMIT) && ((Date) map.get(QUOTE_STOP_TIME)).after(new Date())) {
+            //招募的截止时间 按照截止日期的24点计算
+            if (Objects.equals(map.get(ENDLESS), LIMIT) && SyncTimeUtil.getTomorrow((Date) map.get(QUOTE_STOP_TIME)).after(new Date())) {
                 map.put(STATUS, VALID_OPPORTUNITY_STATUS);
             } else if (Objects.equals(map.get(ENDLESS), UN_LIMIT)) {
                 map.put(STATUS, VALID_OPPORTUNITY_STATUS);

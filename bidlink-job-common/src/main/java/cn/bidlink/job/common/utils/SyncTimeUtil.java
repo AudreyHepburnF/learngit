@@ -7,6 +7,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
@@ -74,6 +75,18 @@ public class SyncTimeUtil {
                 .minusMillis(dateTime.getMillisOfSecond());
         return zeroTime.toDate();
     }
+
+    /**
+     * 获取明天
+     * @return
+     */
+    public static Date getTomorrow(Date date){
+        Calendar cal=Calendar.getInstance();
+        cal.setTime(date);//当天开始时间
+        cal.add(Calendar.DAY_OF_MONTH, 1);//当天月份天数加1
+        return cal.getTime();
+    }
+
 
     public static Long getZeroTimeLongValue() {
         DateTime dateTime = new DateTime();

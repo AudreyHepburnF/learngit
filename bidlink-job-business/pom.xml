@@ -169,6 +169,7 @@
                 <pom.cluster.type.deal_supplier>deal_supplier</pom.cluster.type.deal_supplier>
                 <pom.cluster.deal_supplier_project_index>deal_supplier_project</pom.cluster.deal_supplier_project_index>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
+                <pom.purchase.black.list></pom.purchase.black.list>
                 <pom.cluster.materials_index>materials</pom.cluster.materials_index>
                 <pom.cluster.type.materials>materials</pom.cluster.type.materials>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
@@ -251,6 +252,7 @@
                 <pom.cluster.type.deal_supplier>deal_supplier</pom.cluster.type.deal_supplier>
                 <pom.cluster.deal_supplier_project_index>deal_supplier_project</pom.cluster.deal_supplier_project_index>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
+                <pom.purchase.black.list></pom.purchase.black.list>
                 <pom.cluster.materials_index>materials</pom.cluster.materials_index>
                 <pom.cluster.type.materials>materials</pom.cluster.type.materials>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
@@ -333,6 +335,7 @@
                 <pom.cluster.type.deal_supplier>deal_supplier</pom.cluster.type.deal_supplier>
                 <pom.cluster.deal_supplier_project_index>deal_supplier_project</pom.cluster.deal_supplier_project_index>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
+                <pom.purchase.black.list></pom.purchase.black.list>
                 <pom.cluster.materials_index>materials</pom.cluster.materials_index>
                 <pom.cluster.type.materials>materials</pom.cluster.type.materials>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
@@ -419,6 +422,7 @@
                 <pom.cluster.type.deal_supplier>deal_supplier</pom.cluster.type.deal_supplier>
                 <pom.cluster.deal_supplier_project_index>deal_supplier_project</pom.cluster.deal_supplier_project_index>
                 <pom.cluster.type.deal_supplier_project>deal_supplier_project</pom.cluster.type.deal_supplier_project>
+                <pom.purchase.black.list>11113174479,11113174401</pom.purchase.black.list>
                 <pom.cluster.materials_index>materials</pom.cluster.materials_index>
                 <pom.cluster.type.materials>materials</pom.cluster.type.materials>
                 <pom.searchguard.enable>false</pom.searchguard.enable>
