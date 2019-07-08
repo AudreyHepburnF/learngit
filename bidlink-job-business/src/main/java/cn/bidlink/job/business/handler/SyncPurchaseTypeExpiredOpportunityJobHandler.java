@@ -6,6 +6,7 @@ import cn.bidlink.job.common.utils.SyncTimeUtil;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.handler.annotation.JobHander;
+import com.xxl.job.core.log.XxlJobLogger;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.search.SearchResponse;
@@ -93,6 +94,7 @@ public class SyncPurchaseTypeExpiredOpportunityJobHandler extends IJobHandler /*
                                hit.getId())
                         .setDoc(hashMap));
             }
+            XxlJobLogger.log("修复采购项目商机的条数为{}",hits.totalHits);
             logger.info("修复采购项目商机的条数为{}",hits.totalHits);
             if(hits.totalHits>0){
                 BulkResponse response = bulkRequest.execute().actionGet();
