@@ -94,7 +94,7 @@ public class SyncPurchaseTypeExpiredOpportunityJobHandler extends IJobHandler /*
                                hit.getId())
                         .setDoc(hashMap));
             }
-            XxlJobLogger.log("修复采购项目商机的条数为{}",hits.totalHits);
+            XxlJobLogger.log("修复采购项目商机的条数为{0}",hits.totalHits);
             logger.info("修复采购项目商机的条数为{}",hits.totalHits);
             if(hits.totalHits>0){
                 BulkResponse response = bulkRequest.execute().actionGet();
