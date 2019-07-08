@@ -73,7 +73,6 @@ public class SyncPurchaseTypeExpiredOpportunityJobHandler extends IJobHandler /*
                 .must(boolQuery)
                 .must(QueryBuilders.termQuery(STATUS,VALID_OPPORTUNITY_STATUS))
                 .must(QueryBuilders.rangeQuery(QUOTE_STOP_TIME).lte(currentTime));
-        System.out.println(boolQueryBuilder);
         int batchSize = 1000;
         SearchResponse scrollResp = elasticClient.getTransportClient().prepareSearch(properties.getProperty("cluster.opportunity_index"))
                 .setTypes(properties.getProperty("cluster.type.supplier_opportunity"))
@@ -94,6 +93,7 @@ public class SyncPurchaseTypeExpiredOpportunityJobHandler extends IJobHandler /*
                                hit.getId())
                         .setDoc(hashMap));
             }
+            logger.info("修复采购项目商机的条数为{}",hits.totalHits);
             if(hits.totalHits>0){
                 BulkResponse response = bulkRequest.execute().actionGet();
                 if (response.hasFailures()) {
