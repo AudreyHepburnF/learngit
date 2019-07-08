@@ -1,0 +1,95 @@
+// 方式1：直接在head界面操作，materials/materials/_mapping PUT
+//第一次上线时，手动设置update_time
+{
+  "properties": {
+    "id": {
+      "type": "keyword"
+    },
+    "companyId": {
+      "type": "long"
+    },
+    "catalogId": {
+      "type": "long"
+    },
+    "catalogNamePath": {
+      "type": "keyword"
+    },
+    "catalogIdPath": {
+      "type": "keyword"
+    },
+    "code": {
+      "type": "keyword"
+    },
+    "name": {
+      "type": "text",
+      "analyzer": "ik_max_word"
+    },
+    "nameNotAnalyzed": {
+      "type": "keyword"
+    },
+    "spec": {
+      "type": "keyword"
+    },
+    "abandon": {
+      "type": "integer"
+    },
+    "pcode": {
+      "type": "keyword"
+    },
+    "productor": {
+      "type": "keyword"
+    },
+    "unitName": {
+      "type": "keyword"
+    },
+    "producingAddress": {
+      "type": "keyword"
+    },
+    "brand": {
+      "type": "keyword"
+    },
+    "purpose": {
+      "type": "keyword"
+    },
+    "marketPrice": {
+      "type": "keyword"
+    },
+    "speciality": {
+      "type": "keyword"
+    },
+    "source": {
+      "type": "integer"
+    },
+    "techParameters": {
+      "type": "keyword"
+    },
+    "demo": {
+      "type": "keyword"
+    },
+    "unitPrecision": {
+      "type": "integer"
+    },
+    "pricePrecision": {
+      "type": "integer"
+    },
+    "imgCode": {
+      "type": "keyword"
+    },
+    "orgIdArr": {
+      "type": "long"
+    },
+    "syncTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "updateTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "createTime": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    }
+
+  }
+}

@@ -68,8 +68,7 @@
       "type":"integer"
     },
     "partCategoryName":{
-      "type":"text",
-      "index":"no"
+      "type":"keyword"
     }
   }
 }
