@@ -360,7 +360,7 @@
                 <pom.console.db.username>dashuju</pom.console.db.username>
                 <pom.console.db.password>ixietong!@#$</pom.console.db.password>
                 <!--悦采pro_test recruit数据源 -->
-                <pom.recruit.db.url>jdbc:mariadb://web-mariadb.internal.cg-xt.com:3306/recruit?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.recruit.db.url>
+                <pom.recruit.db.url>jdbc:mariadb://web-mariadb.internal.cg-xt.com:3311/recruit?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.recruit.db.url>
                 <pom.recruit.db.username>recruit</pom.recruit.db.username>
                 <pom.recruit.db.password>recruit@4321</pom.recruit.db.password>
                 <!--供应商企业空间-->
