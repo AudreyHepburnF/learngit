@@ -263,27 +263,27 @@
                 <pom.log.level>info</pom.log.level>
                 <pom.log.dir>logs</pom.log.dir>
                 <!--悦采数据源-->
-                <pom.yuecai.db.url>jdbc:mariadb://192.168.2.219:3305/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yuecai.db.url>
+                <pom.yuecai.db.url>jdbc:mariadb://192.168.2.3:3305/yuecai?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.yuecai.db.url>
                 <pom.yuecai.db.username>develop</pom.yuecai.db.username>
                 <pom.yuecai.db.password>123123</pom.yuecai.db.password>
                 <!--协同平台中心库数据源-->
-                <pom.unireg.db.url>jdbc:mariadb://10.0.2.47:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
+                <pom.unireg.db.url>jdbc:mariadb://192.168.2.3:3306/unireg?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.unireg.db.url>
                 <pom.unireg.db.username>dashuju</pom.unireg.db.username>
                 <pom.unireg.db.password>ixietong!@#$</pom.unireg.db.password>
                 <!--pro_test数据源-->
-                <pom.pro.db.url>jdbc:mariadb://10.0.2.47:3306/pro_test?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
+                <pom.pro.db.url>jdbc:mariadb://192.168.2.3:3306/pro_test?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pro.db.url>
                 <pom.pro.db.username>dashuju</pom.pro.db.username>
                 <pom.pro.db.password>ixietong!@#$</pom.pro.db.password>
                 <!--悦采pro_test recruit数据源-->
-                <pom.recruit.db.url>jdbc:mariadb://192.168.2.219:3305/pro_test?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.recruit.db.url>
+                <pom.recruit.db.url>jdbc:mariadb://192.168.2.3:3305/pro_test?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.recruit.db.url>
                 <pom.recruit.db.username>develop</pom.recruit.db.username>
                 <pom.recruit.db.password>123123</pom.recruit.db.password>
                 <!--pageview数据源-->
-                <pom.pageview.db.url>jdbc:mariadb://10.0.2.47:3306/pageview?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pageview.db.url>
+                <pom.pageview.db.url>jdbc:mariadb://192.168.2.3:3306/pageview?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.pageview.db.url>
                 <pom.pageview.db.username>dashuju</pom.pageview.db.username>
                 <pom.pageview.db.password>ixietong!@#$</pom.pageview.db.password>
                 <!--console数据源-->
-                <pom.console.db.url>jdbc:mariadb://10.0.2.47:3305/console?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.console.db.url>
+                <pom.console.db.url>jdbc:mariadb://192.168.2.3:3305/console?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</pom.console.db.url>
                 <pom.console.db.username>dashuju</pom.console.db.username>
                 <pom.console.db.password>ixietong!@#$</pom.console.db.password>
                 <!--供应商企业空间-->
